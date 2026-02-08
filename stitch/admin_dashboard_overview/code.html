@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RT/RW Admin Dashboard</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#136dec",
+                "background-light": "#f6f7f8",
+                "background-dark": "#101822",
+              },
+              fontFamily: {
+                "display": ["Inter", "sans-serif"]
+              },
+              borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
+<div class="p-6 flex items-center gap-3">
+<div class="bg-primary rounded-lg p-2 text-white">
+<span class="material-symbols-outlined block">apartment</span>
+</div>
+<div>
+<h1 class="text-slate-900 dark:text-white font-bold text-lg leading-tight">RT/RW Admin</h1>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Housing Management</p>
+</div>
+</div>
+<nav class="flex-1 px-4 py-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary font-medium" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-sm">Residents</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-sm">Payments</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-sm">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">manage_accounts</span>
+<span class="text-sm">User Management</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm">Settings</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+<span class="text-sm">New Payment</span>
+</button>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<!-- Header -->
+<header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-8 flex items-center justify-between shrink-0">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-bold text-slate-800 dark:text-white">Admin Dashboard Overview</h2>
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary w-64 dark:text-white" placeholder="Search residents or IDs..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+</button>
+<div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-800">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-semibold text-slate-800 dark:text-white">Admin User</p>
+<p class="text-xs text-slate-500">Super Admin</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="User profile avatar circle" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAkU9lFmiSfGwLVbJ27bb15oK5pLYdZFyZXwDn_r60Qss1GSiKnmC2RFPZPLasP2Q0Th-Q54zArDMNrwZ4Okw2TdXnAZIqj4F3fol9XgpCYxjCoKzrygVpdk7ifVkymChhB53xbvBNVwvLKMJz3LG-a9kWf4fGn5lILAhcFRENYtFeF73j-eUjeA28toQN0IJHcfH-iTS6yTwR65imRY6Y537c_HFwa0VG272rizOx4TuCJbCgowhAu_2cgUONMqiAmqNF2kacPE1zn')"></div>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto p-8 bg-background-light dark:bg-background-dark">
+<!-- Metric Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-start justify-between">
+<div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Collection (Oct)</p>
+<h3 class="text-2xl font-bold mt-1 text-slate-900 dark:text-white">Rp 45.200.000</h3>
+<p class="text-xs font-semibold text-emerald-600 mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                                    +12.5% from last month
+                                </p>
+</div>
+<div class="bg-primary/10 p-3 rounded-lg text-primary">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-start justify-between">
+<div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Pending Approvals</p>
+<h3 class="text-2xl font-bold mt-1 text-slate-900 dark:text-white">12</h3>
+<p class="text-xs text-amber-500 mt-2 font-medium italic">Requires attention</p>
+</div>
+<div class="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-lg text-amber-600">
+<span class="material-symbols-outlined">pending_actions</span>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-start justify-between">
+<div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Participation Rate</p>
+<h3 class="text-2xl font-bold mt-1 text-slate-900 dark:text-white">88%</h3>
+<div class="w-32 bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+<div class="bg-primary h-full" style="width: 88%"></div>
+</div>
+</div>
+<div class="bg-emerald-100 dark:bg-emerald-900/30 p-3 rounded-lg text-emerald-600">
+<span class="material-symbols-outlined">how_to_reg</span>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+<!-- Pending Approvals Table -->
+<div class="xl:col-span-2 space-y-4">
+<div class="flex items-center justify-between">
+<h4 class="text-lg font-bold text-slate-800 dark:text-white">Pending Approvals</h4>
+<button class="text-sm text-primary font-semibold hover:underline">View All</button>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+<table class="w-full text-left border-collapse">
+<thead class="bg-slate-50 dark:bg-slate-800/50">
+<tr>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Resident</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">House No.</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Amount</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Receipt</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">BS</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-300">Budi Santoso</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-medium">A-12</td>
+<td class="px-6 py-4 text-sm font-bold text-slate-800 dark:text-slate-200">Rp 150.000</td>
+<td class="px-6 py-4">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+                                                View
+                                            </button>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center gap-2">
+<button class="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20" title="Approve">
+<span class="material-symbols-outlined">check_circle</span>
+</button>
+<button class="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" title="Reject">
+<span class="material-symbols-outlined">cancel</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 font-bold text-xs">SA</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-300">Siti Aminah</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-medium">B-05</td>
+<td class="px-6 py-4 text-sm font-bold text-slate-800 dark:text-slate-200">Rp 150.000</td>
+<td class="px-6 py-4">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+                                                View
+                                            </button>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center gap-2">
+<button class="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+<span class="material-symbols-outlined">check_circle</span>
+</button>
+<button class="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">
+<span class="material-symbols-outlined">cancel</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">AW</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-300">Andi Wijaya</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-medium">C-21</td>
+<td class="px-6 py-4 text-sm font-bold text-slate-800 dark:text-slate-200">Rp 150.000</td>
+<td class="px-6 py-4">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+                                                View
+                                            </button>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center gap-2">
+<button class="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+<span class="material-symbols-outlined">check_circle</span>
+</button>
+<button class="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">
+<span class="material-symbols-outlined">cancel</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Recent Activity Feed -->
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<h4 class="text-lg font-bold text-slate-800 dark:text-white">Recent Activity</h4>
+<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-slate-600">more_horiz</span>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+<ul class="space-y-6">
+<li class="relative pl-8 before:absolute before:left-[11px] before:top-[28px] before:bottom-[-24px] before:w-px before:bg-slate-200 dark:before:bg-slate-800 last:before:hidden">
+<div class="absolute left-0 top-0 w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined text-[14px]">done_all</span>
+</div>
+<div class="flex flex-col">
+<p class="text-sm font-medium text-slate-800 dark:text-slate-200">Payment approved for House D-04</p>
+<p class="text-xs text-slate-500 mt-1">15 minutes ago • by System</p>
+</div>
+</li>
+<li class="relative pl-8 before:absolute before:left-[11px] before:top-[28px] before:bottom-[-24px] before:w-px before:bg-slate-200 dark:before:bg-slate-800 last:before:hidden">
+<div class="absolute left-0 top-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[14px]">person_add</span>
+</div>
+<div class="flex flex-col">
+<p class="text-sm font-medium text-slate-800 dark:text-slate-200">New resident registered: John Doe</p>
+<p class="text-xs text-slate-500 mt-1">2 hours ago • by Admin</p>
+</div>
+</li>
+<li class="relative pl-8 before:absolute before:left-[11px] before:top-[28px] before:bottom-[-24px] before:w-px before:bg-slate-200 dark:before:bg-slate-800 last:before:hidden">
+<div class="absolute left-0 top-0 w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600">
+<span class="material-symbols-outlined text-[14px]">description</span>
+</div>
+<div class="flex flex-col">
+<p class="text-sm font-medium text-slate-800 dark:text-slate-200">Monthly report generated (Sept)</p>
+<p class="text-xs text-slate-500 mt-1">Yesterday • by Super Admin</p>
+</div>
+</li>
+<li class="relative pl-8">
+<div class="absolute left-0 top-0 w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined text-[14px]">settings</span>
+</div>
+<div class="flex flex-col">
+<p class="text-sm font-medium text-slate-800 dark:text-slate-200">Security patch applied</p>
+<p class="text-xs text-slate-500 mt-1">2 days ago • by Tech Support</p>
+</div>
+</li>
+</ul>
+<button class="w-full mt-6 py-2 text-sm font-bold text-slate-500 hover:text-primary transition-colors border border-dashed border-slate-200 dark:border-slate-800 rounded-lg">
+                                View History Log
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

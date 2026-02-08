@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Treasurer Payment Approvals - RT/RW Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark h-screen flex flex-col shrink-0">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800">
+<h1 class="text-primary font-black text-xl tracking-tight">RT/RW Admin</h1>
+<p class="text-xs text-slate-500 font-medium uppercase tracking-wider mt-1">Treasurer Dashboard</p>
+</div>
+<nav class="flex-1 p-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">check_box</span>
+<span class="text-sm font-semibold">Payment Approvals</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-sm font-medium">Resident List</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="text-sm font-medium">Financial Reports</span>
+</a>
+<div class="pt-4 pb-2">
+<p class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Management</p>
+</div>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 px-2 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">account_circle</span>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="text-sm font-bold truncate">Iwan Setiawan</p>
+<p class="text-xs text-slate-500 truncate">RT 04 Treasurer</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-screen overflow-y-auto">
+<!-- Header Section -->
+<header class="bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 p-6 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-10">
+<div>
+<h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Payment Approvals</h2>
+<p class="text-slate-500 text-sm mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">info</span>
+                    15 pending resident payment submissions requiring verification
+                </p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-[20px]">file_download</span>
+                    Export CSV
+                </button>
+<button class="flex items-center gap-2 px-5 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 transition-all shadow-md shadow-primary/20">
+<span class="material-symbols-outlined text-[20px]">done_all</span>
+                    Batch Approve
+                </button>
+</div>
+</header>
+<!-- Filters and Table -->
+<section class="p-6">
+<!-- Search and Filter Bar -->
+<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+<div class="flex flex-1 min-w-[300px] max-w-md bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 items-center px-4 py-2 focus-within:ring-2 focus-within:ring-primary/30 transition-shadow">
+<span class="material-symbols-outlined text-slate-400">search</span>
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-0 placeholder:text-slate-400" placeholder="Search resident name or block..." type="text"/>
+</div>
+<div class="flex items-center gap-3 overflow-x-auto pb-1">
+<button class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-400">
+<span class="font-medium">Block:</span> All
+                        <span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-400">
+<span class="font-medium">Month:</span> March
+                        <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-400">
+<span class="font-medium">Status:</span> Pending
+                        <span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Table Card -->
+<div class="bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 uppercase text-[11px] font-bold tracking-widest border-b border-slate-200 dark:border-slate-800">
+<tr>
+<th class="p-4 w-10">
+<input class="rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary" type="checkbox"/>
+</th>
+<th class="p-4">Resident</th>
+<th class="p-4">Block/Unit</th>
+<th class="p-4">Months Covered</th>
+<th class="p-4">Amount</th>
+<th class="p-4">Proof</th>
+<th class="p-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+<td class="p-4">
+<input class="rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary" type="checkbox"/>
+</td>
+<td class="p-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-slate-900 dark:text-white">Budi Santoso</span>
+<span class="text-xs text-slate-500">Submitted 2h ago</span>
+</div>
+</td>
+<td class="p-4 text-sm font-medium text-slate-600 dark:text-slate-400">C1 / 12</td>
+<td class="p-4">
+<span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold">Jan - Mar 2024</span>
+</td>
+<td class="p-4 text-sm font-bold text-slate-900 dark:text-white">IDR 300,000</td>
+<td class="p-4">
+<div class="w-12 h-12 rounded-lg bg-slate-200 dark:bg-slate-700 overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all shadow-inner" data-alt="Close up of a paper receipt for payment verification" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA5ZN-af12iXSpC7fNCNCOw5trB6ODwoebPn_NvELN2Qj2FtPVluE7_xb9abQd1QXpSUnCcYI-GAmnYAKTQLJJ99mUn6vOR7jnR6slT13NuUMtfj88q55NBNu9AE6KYLyKY1SgnagisrnBQJ2zEakG0DtrcFEkuM6JBpa2mDPjI9uT51MmS4wT1-tMTfdJt2eMZkrjuVb9UHgQjjmj8a0tQu6_U-HA9CgMgw9ASGBP5vLk7KpoUN6c0hzJuZsNjfO_5s4FpGCMT5V77'); background-size: cover; background-position: center;"></div>
+</td>
+<td class="p-4 text-right">
+<button class="px-4 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg text-xs font-bold transition-all">Verify Details</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+<td class="p-4">
+<input class="rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary" type="checkbox"/>
+</td>
+<td class="p-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-slate-900 dark:text-white">Siti Aminah</span>
+<span class="text-xs text-slate-500">Submitted 5h ago</span>
+</div>
+</td>
+<td class="p-4 text-sm font-medium text-slate-600 dark:text-slate-400">A2 / 05</td>
+<td class="p-4">
+<span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold">Mar 2024</span>
+</td>
+<td class="p-4 text-sm font-bold text-slate-900 dark:text-white">IDR 100,000</td>
+<td class="p-4">
+<div class="w-12 h-12 rounded-lg bg-slate-200 dark:bg-slate-700 overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all shadow-inner" data-alt="Mobile banking payment confirmation screenshot" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBqmTbesYu-Cvwo3c-SvjWtLPU6u7tNC8N5EI7cgzwE74ArCcE9uBzcpX9MfY-IFepLMYkOBhah-6bUk8ZL4qw-iCnxFBlvh1J9drToAXghJsrAaQZ-Ity88RJ8P49A3dtGaF9EGiwS2WEZIvSaSDaSvICdy1tgbzxNRN3nGzdP1DvCESByD3JD7kQinMRFHR4LU2-st-dLDjPFRSczDJ9Vzxbwxsgs-3grQn5MnRmHbo27kz7L1MVTljVvubsvTa70-sTRKb6rs3-l'); background-size: cover; background-position: center;"></div>
+</td>
+<td class="p-4 text-right">
+<button class="px-4 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg text-xs font-bold transition-all">Verify Details</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+<td class="p-4">
+<input class="rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary" type="checkbox"/>
+</td>
+<td class="p-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-slate-900 dark:text-white">Agus Setiawan</span>
+<span class="text-xs text-slate-500">Submitted yesterday</span>
+</div>
+</td>
+<td class="p-4 text-sm font-medium text-slate-600 dark:text-slate-400">B5 / 08</td>
+<td class="p-4">
+<span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold">Feb - Mar 2024</span>
+</td>
+<td class="p-4 text-sm font-bold text-slate-900 dark:text-white">IDR 200,000</td>
+<td class="p-4">
+<div class="w-12 h-12 rounded-lg bg-slate-200 dark:bg-slate-700 overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all shadow-inner" data-alt="Bank transfer slip on a dark background" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAYl5WozZ6kD9yRBI30KDWavDmbqe75SCRBzgW2zwBmsCCSZqnJYlfBFYTn32_ENTwzga7ofnglLE13ivi3gtvOvGEr0vxCAVuU154rO34D6ruMqnnjOHT0vzdvd1kSVdOj3Zhq5BXzS8ZeMjAkjeGhIoNP12ttYw6VkHdBfq1AYpu_Vp1oN1bTCYEU6b6YflJcyou9g2kV-AfFXGtO5bTTn8haEU8KsLHnLjOrjR6I-sqf-m6om9_tKNmwDsXbmg9HJk9bfFs6UtbQ'); background-size: cover; background-position: center;"></div>
+</td>
+<td class="p-4 text-right">
+<button class="px-4 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg text-xs font-bold transition-all">Verify Details</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+<td class="p-4">
+<input class="rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary" type="checkbox"/>
+</td>
+<td class="p-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-slate-900 dark:text-white">Dewi Lestari</span>
+<span class="text-xs text-slate-500">Submitted yesterday</span>
+</div>
+</td>
+<td class="p-4 text-sm font-medium text-slate-600 dark:text-slate-400">D3 / 01</td>
+<td class="p-4">
+<span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold">Mar 2024</span>
+</td>
+<td class="p-4 text-sm font-bold text-slate-900 dark:text-white">IDR 100,000</td>
+<td class="p-4">
+<div class="w-12 h-12 rounded-lg bg-slate-200 dark:bg-slate-700 overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all shadow-inner" data-alt="Clean paper bill showing paid stamp" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCabRrBvffcBWNzSkxKcCIMAjzKHGoC5p1zRHPAIpCEvZ6VUzhLcVbqtmnDm_g0aEi6gx6O6OFgzzg1yD6UWymGbjKKfGCItPw18F6QP1B9euAKTACf5rtjDsPUhZJEq71G-08u2HUt9qIAXQGPM-WI9N-5wtTOndZ4icY3vtw2AQGXQbSk7ZurQQSYR7G8CDc02_Em9XfOhQliCCoJKlBORUKHKwPztaYGEKUdlyLZULFMS2nj2yh9-zYysG285V_gTT8ZaR89Zlf4'); background-size: cover; background-position: center;"></div>
+</td>
+<td class="p-4 text-right">
+<button class="px-4 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg text-xs font-bold transition-all">Verify Details</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Showing 1-4 of 15 pending</p>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded border border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>
+<button class="w-8 h-8 rounded border border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Detailed Approval Modal Overlay -->
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+<div class="bg-white dark:bg-background-dark w-full max-w-5xl h-[85vh] rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden border border-slate-200 dark:border-slate-800">
+<!-- Left: Image Viewer -->
+<div class="flex-1 bg-slate-100 dark:bg-slate-900 relative flex items-center justify-center group overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Full view of the paper receipt for verification" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA3IAYGBJ-3i6Krr4z7PXQAmnGQFG11w9XgsQ1Etu2GQPbDa9qmpuhs1NwcsNdHygwAHrq3KYLYogGkZ08DBb2UkPslrDtFXHdAiK-KdG5G2RaG_kBhWaRfyyNpFcziVF9al3dbexhbjYxs1Uhd9QmtktGTz69JbIIdkF-p6hnPDVJfdOdvIoGE9F3S48kt_Hy7QVD3il0dDH7mpyNCn-obtJr04lDrNww6KprG33AnV9D3elFN6VuNLGKylsDM_Hz4Z_tprcxtRpph');"></div>
+<!-- Image Controls -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur px-4 py-2 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 transition-opacity opacity-100 md:opacity-0 md:group-hover:opacity-100">
+<button class="p-1 hover:text-primary transition-colors"><span class="material-symbols-outlined">zoom_in</span></button>
+<button class="p-1 hover:text-primary transition-colors"><span class="material-symbols-outlined">zoom_out</span></button>
+<div class="w-px h-4 bg-slate-300 dark:bg-slate-600"></div>
+<button class="p-1 hover:text-primary transition-colors"><span class="material-symbols-outlined">rotate_right</span></button>
+<button class="p-1 hover:text-primary transition-colors"><span class="material-symbols-outlined">fullscreen</span></button>
+</div>
+<div class="absolute top-6 left-6">
+<span class="bg-primary/90 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">Payment Proof</span>
+</div>
+</div>
+<!-- Right: Details & Actions -->
+<div class="w-full md:w-[400px] bg-white dark:bg-background-dark flex flex-col border-l border-slate-200 dark:border-slate-800">
+<div class="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+<h3 class="font-black text-lg tracking-tight">Review Submission</h3>
+<button class="text-slate-400 hover:text-slate-600 transition-colors"><span class="material-symbols-outlined">close</span></button>
+</div>
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<div>
+<label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Resident Details</label>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div>
+<p class="text-base font-bold text-slate-900 dark:text-white leading-tight">Budi Santoso</p>
+<p class="text-sm text-slate-500">Block C1 / 12</p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Total Amount</label>
+<p class="text-lg font-black text-primary">IDR 300,000</p>
+</div>
+<div>
+<label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Submission Date</label>
+<p class="text-sm font-bold text-slate-700 dark:text-slate-200">24 March 2024</p>
+</div>
+</div>
+<div>
+<label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Months Covered</label>
+<div class="flex flex-wrap gap-2 mt-1">
+<span class="px-2.5 py-1 bg-primary/10 text-primary border border-primary/20 rounded text-xs font-bold uppercase tracking-tight">January</span>
+<span class="px-2.5 py-1 bg-primary/10 text-primary border border-primary/20 rounded text-xs font-bold uppercase tracking-tight">February</span>
+<span class="px-2.5 py-1 bg-primary/10 text-primary border border-primary/20 rounded text-xs font-bold uppercase tracking-tight">March</span>
+</div>
+</div>
+<div class="pt-4 border-t border-slate-100 dark:border-slate-800">
+<label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Rejection Reason (Optional)</label>
+<textarea class="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-primary focus:border-primary placeholder:text-slate-400" placeholder="If rejecting, please explain why (e.g., Image blurry, wrong amount)..." rows="3"></textarea>
+</div>
+</div>
+<div class="p-6 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-3 bg-slate-50/50 dark:bg-slate-900/30">
+<button class="px-4 py-3 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/50 text-red-600 font-bold rounded-xl text-sm hover:bg-red-50 dark:hover:bg-red-900/20 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">block</span>
+                        Reject
+                    </button>
+<button class="px-4 py-3 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+                        Approve
+                    </button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

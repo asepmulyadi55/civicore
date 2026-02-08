@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Management | ResidentFee Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased transition-colors duration-200">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark px-6 md:px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z" fill="currentColor" fill-rule="evenodd"></path>
+<path clip-rule="evenodd" d="M24 8.18819L33.4123 11.574L24 15.2071L14.5877 11.574L24 8.18819ZM9 15.8487L21 20.4805V37.6263L9 32.9945V15.8487ZM27 37.6263V20.4805L39 15.8487V32.9945L27 37.6263ZM25.354 2.29885C24.4788 1.98402 23.5212 1.98402 22.646 2.29885L4.98454 8.65208C3.7939 9.08038 3 10.2097 3 11.475V34.3663C3 36.0196 4.01719 37.5026 5.55962 38.098L22.9197 44.7987C23.6149 45.0671 24.3851 45.0671 25.0803 44.7987L42.4404 38.098C43.9828 37.5026 45 36.0196 45 34.3663V11.475C45 10.2097 44.2061 9.08038 43.0155 8.65208L25.354 2.29885Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight">ResidentFee Admin</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<nav class="hidden md:flex items-center gap-9">
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Dashboard</a>
+<a class="text-primary text-sm font-bold leading-normal border-b-2 border-primary py-1" href="#">Users</a>
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Fees</a>
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Reports</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-slate-500 hover:text-primary cursor-pointer">notifications</button>
+<div class="bg-primary/10 rounded-full p-1">
+<img alt="Admin user profile picture" class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAwIebohgGHrgll_eZNiPxeGlo3qUJwZGyP5v9Asfhs5qE8ri-jQAVfcyhPJrE85Bc2me0LKugouqkAJK0LcdMoeO5WqTk1paA0Za2wQJLWri27kDk3VFKS29oqX2zc5YOxcipTSiLpmjdxhjk7yykagY13VlWCjLjZWSI-jRnNvbL53oaZs3WQ-huZkhOS-mSk8bfPnARl_eK6_9qIObwMcC2aflEG5LxgpAN57lIzRr9g1tbdwZ7tDBe9bOu3arm9enuwF_m1w67"/>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 px-4 md:px-20 lg:px-40 py-10">
+<div class="max-w-[1200px] mx-auto space-y-8">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex flex-col gap-1">
+<h1 class="text-slate-900 dark:text-white text-3xl font-black leading-tight tracking-tight">User Management</h1>
+<p class="text-slate-500 dark:text-slate-400 text-base font-normal">Monitor all residents and manage system administrative roles.</p>
+</div>
+<button class="flex items-center justify-center gap-2 rounded-lg bg-primary hover:bg-primary/90 text-white px-6 h-12 transition-all shadow-lg shadow-primary/20 font-bold text-sm">
+<span class="material-symbols-outlined text-lg">person_add</span>
+<span>Add New User</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+<div class="md:col-span-8 lg:col-span-9">
+<div class="relative flex items-center h-12 w-full">
+<span class="material-symbols-outlined absolute left-4 text-slate-400">search</span>
+<input class="flex w-full rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 pl-12 pr-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary text-base placeholder:text-slate-400 transition-all shadow-sm" placeholder="Search by name, block, or email..." type="text"/>
+</div>
+</div>
+<div class="md:col-span-4 lg:col-span-3">
+<select class="w-full h-12 rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 focus:ring-primary focus:border-primary shadow-sm">
+<option value="">All Roles</option>
+<option value="admin">Admin</option>
+<option value="treasurer">Treasurer</option>
+<option value="coordinator">Coordinator</option>
+<option value="resident">Resident</option>
+</select>
+</div>
+</div>
+<div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<th class="px-6 py-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">User Details</th>
+<th class="px-6 py-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">Role</th>
+<th class="px-6 py-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">Block / Unit</th>
+<th class="px-6 py-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-right text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="User John Doe" class="size-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHwHBbcZuvAHRsxeTwVZz6bF2mC5Mz8tesqDzgAXe5uIkyZw_mZ_Ve9dP1DzOiU_O3-0qDQNQJU0HhmPmMJvvdphsRC1gYdl9-S4uRytNVvR-kxMN7iXRSYe4HIw1sR7wdnibVy2z5ac9T4qG7_3SlM6vt4NzbTxOAIWY7tllIUEcv4uKuN_9jJUoJndSritgAXW7bWHj-WOgFloPUc_QUlazeC8w5wZ286DCppAybXaHcr8_kC3eikcCjyAulFE3pSi6G1T0C8mCJ"/>
+<div class="flex flex-col">
+<span class="font-bold text-slate-900 dark:text-white">John Doe</span>
+<span class="text-xs text-slate-500">john.doe@example.com</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">Admin</span>
+</td>
+<td class="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm">Block A - 402</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+                                                Active
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="p-1.5 text-slate-400 hover:text-primary transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-red-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="User Jane Smith" class="size-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuyZrafTCwX3OrqVpVTz1Jpx37-toyV_T1GGmTbmWh5TIxdmrd946xmxahlqRr4kVmNMl1dhY7KFboJs-CEEZ-ughhTLGSCCixlxuSYvrcoN3wWwjneTXwHahecbJSaWwF_NjtFGAbzcRPbqn9WVqjRulnwnXeZjdliMx0FrJRQoRQAG5CHL7tZogbgN0Czf-oIkumXJeUBknfP-fPkocwseCNZRud8tjQ1nKXoscpH9qrjhRPls1uBDlxlWuRIuGXhMkCdrcMFgmw"/>
+<div class="flex flex-col">
+<span class="font-bold text-slate-900 dark:text-white">Jane Smith</span>
+<span class="text-xs text-slate-500">jane.smith@residence.com</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-900/30 px-2.5 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">Treasurer</span>
+</td>
+<td class="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm">Block B - 105</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+                                                Active
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="p-1.5 text-slate-400 hover:text-primary transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-red-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-bold text-slate-900 dark:text-white">Robert Brown</span>
+<span class="text-xs text-slate-500">robert.b@provider.net</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-bold text-slate-600 dark:text-slate-400">Resident</span>
+</td>
+<td class="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm">Block A - 210</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 text-slate-400 text-sm font-medium">
+<span class="size-2 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                                                Inactive
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="p-1.5 text-slate-400 hover:text-primary transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-red-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-bold text-slate-900 dark:text-white">Alice Johnson</span>
+<span class="text-xs text-slate-500">alice.j@domain.com</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-indigo-100 dark:bg-indigo-900/30 px-2.5 py-0.5 text-xs font-bold text-indigo-600 dark:text-indigo-400">Coordinator</span>
+</td>
+<td class="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm">Block C - 301</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+                                                Active
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="p-1.5 text-slate-400 hover:text-primary transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-red-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<p class="text-sm text-slate-500 dark:text-slate-400">Showing <span class="font-semibold text-slate-700 dark:text-slate-200">1-4</span> of <span class="font-semibold text-slate-700 dark:text-slate-200">24</span> users</p>
+<div class="flex gap-2">
+<button class="flex items-center justify-center p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-400 disabled:opacity-50 hover:bg-white dark:hover:bg-slate-800 transition-colors" disabled="">
+<span class="material-symbols-outlined text-xl">chevron_left</span>
+</button>
+<button class="flex items-center justify-center p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="mt-auto px-10 py-8 border-t border-slate-200 dark:border-slate-800 text-center">
+<div class="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="text-xs text-slate-400 dark:text-slate-600 font-medium">© 2024 ResidentFee Admin Portal. Professional Housing Management Suite.</p>
+<div class="flex gap-6">
+<a class="text-xs text-slate-400 hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-xs text-slate-400 hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-xs text-slate-400 hover:text-primary transition-colors" href="#">Support</a>
+</div>
+</div>
+</footer>
+</div>
+</div>
+
+</body></html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Management &amp; Registration | ResidentFee Admin</title>
+<!-- Tailwind CSS with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased transition-colors duration-200">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- TopNavBar Component -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark px-6 md:px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z" fill="currentColor" fill-rule="evenodd"></path>
+<path clip-rule="evenodd" d="M24 8.18819L33.4123 11.574L24 15.2071L14.5877 11.574L24 8.18819ZM9 15.8487L21 20.4805V37.6263L9 32.9945V15.8487ZM27 37.6263V20.4805L39 15.8487V32.9945L27 37.6263ZM25.354 2.29885C24.4788 1.98402 23.5212 1.98402 22.646 2.29885L4.98454 8.65208C3.7939 9.08038 3 10.2097 3 11.475V34.3663C3 36.0196 4.01719 37.5026 5.55962 38.098L22.9197 44.7987C23.6149 45.0671 24.3851 45.0671 25.0803 44.7987L42.4404 38.098C43.9828 37.5026 45 36.0196 45 34.3663V11.475C45 10.2097 44.2061 9.08038 43.0155 8.65208L25.354 2.29885Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight">ResidentFee Admin</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<nav class="hidden md:flex items-center gap-9">
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Dashboard</a>
+<a class="text-primary text-sm font-bold leading-normal border-b-2 border-primary py-1" href="#">Users</a>
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Fees</a>
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Reports</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-slate-500 hover:text-primary cursor-pointer">notifications</button>
+<div class="bg-primary/10 rounded-full p-1">
+<img class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8" data-alt="Admin user profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAwIebohgGHrgll_eZNiPxeGlo3qUJwZGyP5v9Asfhs5qE8ri-jQAVfcyhPJrE85Bc2me0LKugouqkAJK0LcdMoeO5WqTk1paA0Za2wQJLWri27kDk3VFKS29oqX2zc5YOxcipTSiLpmjdxhjk7yykagY13VlWCjLjZWSI-jRnNvbL53oaZs3WQ-huZkhOS-mSk8bfPnARl_eK6_9qIObwMcC2aflEG5LxgpAN57lIzRr9g1tbdwZ7tDBe9bOu3arm9enuwF_m1w67"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 px-4 md:px-20 lg:px-40 py-8">
+<div class="max-w-[1200px] mx-auto space-y-8">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="flex flex-col gap-1">
+<h1 class="text-slate-900 dark:text-white text-3xl font-black leading-tight tracking-tight">User Management</h1>
+<p class="text-slate-500 dark:text-slate-400 text-base font-normal">Manage residents and administrative access controls.</p>
+</div>
+<a class="flex items-center justify-center gap-2 rounded-lg bg-primary hover:bg-primary/90 text-white px-5 h-11 transition-all shadow-md shadow-primary/20 font-bold text-sm" href="#registration-form">
+<span class="material-symbols-outlined text-lg">person_add</span>
+<span>Add New User</span>
+</a>
+</div>
+<!-- Filter & Search Bar -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+<div class="md:col-span-8 lg:col-span-9">
+<div class="relative flex items-center h-12 w-full">
+<span class="material-symbols-outlined absolute left-4 text-slate-400">search</span>
+<input class="flex w-full rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 pl-12 pr-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary text-base placeholder:text-slate-400 transition-all" placeholder="Search by name, block, or email..." type="text"/>
+</div>
+</div>
+<div class="md:col-span-4 lg:col-span-3">
+<select class="w-full h-12 rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 focus:ring-primary focus:border-primary">
+<option value="">Filter by Role</option>
+<option value="admin">Admin</option>
+<option value="treasurer">Treasurer</option>
+<option value="coordinator">Coordinator</option>
+<option value="resident">Resident</option>
+</select>
+</div>
+</div>
+<!-- User Table -->
+<div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<th class="px-6 py-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">User Details</th>
+<th class="px-6 py-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">Role</th>
+<th class="px-6 py-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">Block</th>
+<th class="px-6 py-4 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-right text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- User Row 1 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img class="size-10 rounded-full object-cover" data-alt="User John Doe avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHwHBbcZuvAHRsxeTwVZz6bF2mC5Mz8tesqDzgAXe5uIkyZw_mZ_Ve9dP1DzOiU_O3-0qDQNQJU0HhmPmMJvvdphsRC1gYdl9-S4uRytNVvR-kxMN7iXRSYe4HIw1sR7wdnibVy2z5ac9T4qG7_3SlM6vt4NzbTxOAIWY7tllIUEcv4uKuN_9jJUoJndSritgAXW7bWHj-WOgFloPUc_QUlazeC8w5wZ286DCppAybXaHcr8_kC3eikcCjyAulFE3pSi6G1T0C8mCJ"/>
+<div class="flex flex-col">
+<span class="font-bold text-slate-900 dark:text-white">John Doe</span>
+<span class="text-xs text-slate-500">john.doe@example.com</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">Admin</span>
+</td>
+<td class="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm">Block A - 402</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+                                                Active
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors material-symbols-outlined">more_vert</button>
+</td>
+</tr>
+<!-- User Row 2 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img class="size-10 rounded-full object-cover" data-alt="User Jane Smith avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuyZrafTCwX3OrqVpVTz1Jpx37-toyV_T1GGmTbmWh5TIxdmrd946xmxahlqRr4kVmNMl1dhY7KFboJs-CEEZ-ughhTLGSCCixlxuSYvrcoN3wWwjneTXwHahecbJSaWwF_NjtFGAbzcRPbqn9WVqjRulnwnXeZjdliMx0FrJRQoRQAG5CHL7tZogbgN0Czf-oIkumXJeUBknfP-fPkocwseCNZRud8tjQ1nKXoscpH9qrjhRPls1uBDlxlWuRIuGXhMkCdrcMFgmw"/>
+<div class="flex flex-col">
+<span class="font-bold text-slate-900 dark:text-white">Jane Smith</span>
+<span class="text-xs text-slate-500">jane.smith@residence.com</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-900/30 px-2.5 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">Treasurer</span>
+</td>
+<td class="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm">Block B - 105</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+                                                Active
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors material-symbols-outlined">more_vert</button>
+</td>
+</tr>
+<!-- User Row 3 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-bold text-slate-900 dark:text-white">Robert Brown</span>
+<span class="text-xs text-slate-500">robert.b@provider.net</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-bold text-slate-600 dark:text-slate-400">Resident</span>
+</td>
+<td class="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm">Block A - 210</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 text-slate-400 text-sm font-medium">
+<span class="size-2 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                                                Inactive
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors material-symbols-outlined">more_vert</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<p class="text-xs text-slate-500">Showing 1-3 of 24 users</p>
+<div class="flex gap-2">
+<button class="p-1 rounded border border-slate-200 dark:border-slate-700 text-slate-400 disabled:opacity-50">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="p-1 rounded border border-slate-200 dark:border-slate-700 text-slate-400">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Registration Form Section -->
+<div class="scroll-mt-24 space-y-6" id="registration-form">
+<div class="border-t border-slate-200 dark:border-slate-800 pt-10">
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white">Register New System User</h2>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Fill in the information below to create a new access account.</p>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-sm">
+<form action="#" class="space-y-8">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+<!-- Photo Upload Area -->
+<div class="lg:col-span-1">
+<label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-4">Profile Photo</label>
+<div class="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-8 bg-slate-50 dark:bg-slate-800/50 hover:border-primary/50 transition-colors cursor-pointer group">
+<div class="size-24 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-400 mb-4 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-4xl">add_a_photo</span>
+</div>
+<p class="text-xs text-center text-slate-500 leading-relaxed font-medium">
+<span class="text-primary">Click to upload</span> or drag and drop<br/>
+                                                PNG, JPG up to 5MB
+                                            </p>
+</div>
+</div>
+<!-- Form Fields -->
+<div class="lg:col-span-2 space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-1.5">
+<label class="text-sm font-bold text-slate-700 dark:text-slate-300">Full Name</label>
+<input class="w-full h-11 rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:ring-primary focus:border-primary text-sm" placeholder="e.g. Michael Jordan" type="text"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-sm font-bold text-slate-700 dark:text-slate-300">Email Address</label>
+<input class="w-full h-11 rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:ring-primary focus:border-primary text-sm" placeholder="name@email.com" type="email"/>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-1.5">
+<label class="text-sm font-bold text-slate-700 dark:text-slate-300">Temporary Password</label>
+<div class="relative">
+<input class="w-full h-11 rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:ring-primary focus:border-primary text-sm" placeholder="••••••••" type="password"/>
+<button class="absolute right-3 top-2.5 text-slate-400 material-symbols-outlined text-lg" type="button">visibility</button>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="text-sm font-bold text-slate-700 dark:text-slate-300">System Role</label>
+<select class="w-full h-11 rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:ring-primary focus:border-primary text-sm">
+<option value="resident">Resident</option>
+<option value="coordinator">Coordinator</option>
+<option value="treasurer">Treasurer</option>
+<option value="admin">Admin</option>
+</select>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-1.5">
+<label class="text-sm font-bold text-slate-700 dark:text-slate-300">Block / Unit</label>
+<input class="w-full h-11 rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:ring-primary focus:border-primary text-sm" placeholder="e.g. Block C - 301" type="text"/>
+</div>
+<div class="space-y-1.5 flex flex-col justify-end">
+<div class="flex items-center gap-2 h-11">
+<input class="rounded text-primary focus:ring-primary h-5 w-5 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950" id="notify" type="checkbox"/>
+<label class="text-sm text-slate-600 dark:text-slate-400" for="notify">Send welcome email to user</label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-end gap-4 border-t border-slate-100 dark:border-slate-800 pt-6">
+<button class="px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" type="button">
+                                        Cancel
+                                    </button>
+<button class="px-8 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-lg shadow-primary/20 transition-all" type="submit">
+                                        Save &amp; Register User
+                                    </button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="mt-auto px-10 py-6 border-t border-slate-200 dark:border-slate-800 text-center">
+<p class="text-xs text-slate-400 dark:text-slate-600">© 2024 ResidentFee Admin Portal. Professional Housing Management Suite.</p>
+</footer>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Resident Payment History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .fill-icon { font-variation-settings: 'FILL' 1; }
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#dbe0e6] dark:border-slate-800 bg-white dark:bg-background-dark px-10 py-3">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined">apartment</span>
+</div>
+<h2 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">RT/RW Admin Portal</h2>
+</div>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<nav class="flex items-center gap-9">
+<a class="text-[#617289] dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-primary text-sm font-bold border-b-2 border-primary pb-1" href="#">Payments</a>
+<a class="text-[#617289] dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Residents</a>
+<a class="text-[#617289] dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Reports</a>
+</nav>
+<div class="flex items-center gap-4 border-l border-[#dbe0e6] dark:border-slate-800 pl-8">
+<div class="flex flex-col items-end">
+<p class="text-sm font-bold">Admin User</p>
+<p class="text-xs text-[#617289]">Cluster Manager</p>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-[#dbe0e6]" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBao8KoHPcq5CmDTNc-oczalD6KWeg8f9MLFjXqpq8i-o7NjeL4q6BW03cBuB-rYOTK4bn2caowksbS6zGH8sdqMkwjoCmaMaVmgqkO9Gy_xGG8AGilrIbKIpoKT9HyjI73uQcIdW60ujcptxkNb2JhkrsAGeglX62QPevkd3AbucUio49ykeBPyyOCVVqcuQC1A95Vz_NBzTs20YSRaihbGD0SFPH660t31srpLqlfwC10r6SGp2yjKkfvG0CKKUY_W10cl-JpmhvT");'></div>
+</div>
+</div>
+</header>
+<main class="flex-1 flex flex-col items-center py-8">
+<div class="layout-content-container flex flex-col max-w-[1100px] w-full px-10 gap-8">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-slate-900 p-6 rounded-xl border border-[#dbe0e6] dark:border-slate-800 shadow-sm gap-6">
+<div class="flex items-center gap-5">
+<div class="size-20 rounded-full bg-primary/10 flex items-center justify-center border-2 border-primary/20 overflow-hidden">
+<img alt="John Doe" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUmTo4_ObDh8YXcwVlYIPsd-gMv4ZsMoIwF7jUgsftVCeRQ8VVx6tBmlWtEPEX3Ooijd0nn8UGQupu1hhtWhHe560u0292IHEHh8EsbbgWO36YLUm61K1gYCr5hd8EFsSyNZxFVJa2yQwm2HWFrgZYObx_NmpNWueyW7gf-5hKH1_-JqOR-_SXmPHxNvt4yyOijD4ojofMfQEfsNQkc2QJcV4sfDoUrNXv2uZTBScnf-Jf2xAYZST0oJGCmjCQtRjeuOmtn3zBvoRa"/>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h1 class="text-2xl font-black tracking-tight text-[#111418] dark:text-white">John Doe</h1>
+<span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Active</span>
+</div>
+<p class="text-[#617289] dark:text-slate-400 text-sm font-medium">House Block A-12 • Resident ID: #RT00452</p>
+<div class="flex gap-4 mt-2">
+<span class="flex items-center gap-1 text-xs text-[#617289]"><span class="material-symbols-outlined text-sm">calendar_today</span> Joined Jan 2023</span>
+<span class="flex items-center gap-1 text-xs text-[#617289]"><span class="material-symbols-outlined text-sm">home</span> Permanent Resident</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1 items-start md:items-end">
+<p class="text-xs font-bold text-[#617289] uppercase tracking-widest">Monthly Fee</p>
+<p class="text-3xl font-black text-primary">$50.00</p>
+<button class="mt-2 flex items-center gap-2 text-sm font-bold text-primary hover:bg-primary/10 px-3 py-1 rounded transition-colors">
+<span class="material-symbols-outlined text-lg">download</span>
+                            Download Full History
+                        </button>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-[#dbe0e6] dark:border-slate-800 overflow-hidden">
+<div class="px-6 py-4 border-b border-[#dbe0e6] dark:border-slate-800 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">calendar_view_month</span>
+<h3 class="text-lg font-bold text-[#111418] dark:text-white">2024 Payment Roadmap</h3>
+</div>
+<div class="flex items-center gap-2">
+<select class="form-select bg-[#f0f2f4] dark:bg-slate-800 border-none rounded-lg text-sm font-bold focus:ring-primary py-1.5 pl-3 pr-8">
+<option>2024</option>
+<option>2023</option>
+</select>
+</div>
+</div>
+<div class="p-6">
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+<div class="flex flex-col items-center gap-3 p-4 rounded-xl border border-primary/20 bg-primary/5">
+<p class="text-xs font-bold text-[#617289] dark:text-slate-400">JAN</p>
+<span class="material-symbols-outlined text-primary fill-icon text-3xl">check_circle</span>
+<p class="text-[10px] font-black text-primary uppercase">Paid</p>
+</div>
+<div class="flex flex-col items-center gap-3 p-4 rounded-xl border border-primary/20 bg-primary/5">
+<p class="text-xs font-bold text-[#617289] dark:text-slate-400">FEB</p>
+<span class="material-symbols-outlined text-primary fill-icon text-3xl">check_circle</span>
+<p class="text-[10px] font-black text-primary uppercase">Paid</p>
+</div>
+<div class="flex flex-col items-center gap-3 p-4 rounded-xl border border-primary/20 bg-primary/5">
+<p class="text-xs font-bold text-[#617289] dark:text-slate-400">MAR</p>
+<span class="material-symbols-outlined text-primary fill-icon text-3xl">check_circle</span>
+<p class="text-[10px] font-black text-primary uppercase">Paid</p>
+</div>
+<div class="flex flex-col items-center gap-3 p-4 rounded-xl border border-primary/20 bg-primary/5">
+<p class="text-xs font-bold text-[#617289] dark:text-slate-400">APR</p>
+<span class="material-symbols-outlined text-primary fill-icon text-3xl">check_circle</span>
+<p class="text-[10px] font-black text-primary uppercase">Paid</p>
+</div>
+<div class="flex flex-col items-center gap-3 p-4 rounded-xl border border-primary/20 bg-primary/5">
+<p class="text-xs font-bold text-[#617289] dark:text-slate-400">MAY</p>
+<span class="material-symbols-outlined text-primary fill-icon text-3xl">check_circle</span>
+<p class="text-[10px] font-black text-primary uppercase">Paid</p>
+</div>
+<div class="flex flex-col items-center gap-3 p-4 rounded-xl border border-primary/20 bg-primary/5">
+<p class="text-xs font-bold text-[#617289] dark:text-slate-400">JUN</p>
+<span class="material-symbols-outlined text-primary fill-icon text-3xl">check_circle</span>
+<p class="text-[10px] font-black text-primary uppercase">Paid</p>
+</div>
+<div class="flex flex-col items-center gap-3 p-4 rounded-xl border border-orange-200 bg-orange-50 dark:bg-orange-900/10">
+<p class="text-xs font-bold text-[#617289] dark:text-slate-400">JUL</p>
+<span class="material-symbols-outlined text-orange-500 text-3xl">pending</span>
+<p class="text-[10px] font-black text-orange-500 uppercase">Pending</p>
+</div>
+<div class="flex flex-col items-center gap-3 p-4 rounded-xl border border-red-200 bg-red-50 dark:bg-red-900/10">
+<p class="text-xs font-bold text-[#617289] dark:text-slate-400">AUG</p>
+<span class="material-symbols-outlined text-red-500 text-3xl">error</span>
+<p class="text-[10px] font-black text-red-500 uppercase">Overdue</p>
+</div>
+<div class="flex flex-col items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
+<p class="text-xs font-bold text-[#617289] dark:text-slate-400">SEP</p>
+<span class="material-symbols-outlined text-slate-300 text-3xl">schedule</span>
+<p class="text-[10px] font-black text-slate-400 uppercase">Upcoming</p>
+</div>
+<div class="flex flex-col items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
+<p class="text-xs font-bold text-[#617289] dark:text-slate-400">OCT</p>
+<span class="material-symbols-outlined text-slate-300 text-3xl">schedule</span>
+<p class="text-[10px] font-black text-slate-400 uppercase">Upcoming</p>
+</div>
+<div class="flex flex-col items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
+<p class="text-xs font-bold text-[#617289] dark:text-slate-400">NOV</p>
+<span class="material-symbols-outlined text-slate-300 text-3xl">schedule</span>
+<p class="text-[10px] font-black text-slate-400 uppercase">Upcoming</p>
+</div>
+<div class="flex flex-col items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
+<p class="text-xs font-bold text-[#617289] dark:text-slate-400">DEC</p>
+<span class="material-symbols-outlined text-slate-300 text-3xl">schedule</span>
+<p class="text-[10px] font-black text-slate-400 uppercase">Upcoming</p>
+</div>
+</div>
+<div class="flex flex-wrap gap-6 mt-6 pt-6 border-t border-[#dbe0e6] dark:border-slate-800">
+<div class="flex items-center gap-2">
+<span class="size-3 bg-primary rounded-full"></span>
+<span class="text-xs font-medium text-[#617289]">Paid</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="size-3 bg-orange-500 rounded-full"></span>
+<span class="text-xs font-medium text-[#617289]">Payment Review</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="size-3 bg-red-500 rounded-full"></span>
+<span class="text-xs font-medium text-[#617289]">Missed Payment</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="size-3 bg-slate-300 rounded-full"></span>
+<span class="text-xs font-medium text-[#617289]">Not Yet Billing</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex justify-between items-end">
+<div class="flex flex-col">
+<h3 class="text-xl font-bold text-[#111418] dark:text-white">Transaction History</h3>
+<p class="text-[#617289] dark:text-slate-400 text-sm">Detailed logs of all processed payments</p>
+</div>
+<div class="flex gap-2">
+<div class="flex items-center gap-2 bg-white dark:bg-slate-900 border border-[#dbe0e6] dark:border-slate-800 rounded-lg px-3 py-2 shadow-sm">
+<span class="material-symbols-outlined text-[#617289] text-lg">search</span>
+<input class="border-none bg-transparent p-0 text-sm focus:ring-0 placeholder:text-[#617289]" placeholder="Search logs..." type="text"/>
+</div>
+<button class="bg-[#f0f2f4] dark:bg-slate-800 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-[#dbe0e6] dark:border-slate-800 overflow-hidden shadow-sm">
+<table class="w-full text-left border-collapse">
+<thead class="bg-[#f0f2f4]/50 dark:bg-slate-800/50">
+<tr>
+<th class="px-6 py-4 text-xs font-black text-[#617289] dark:text-slate-400 uppercase tracking-wider">Date</th>
+<th class="px-6 py-4 text-xs font-black text-[#617289] dark:text-slate-400 uppercase tracking-wider">Period</th>
+<th class="px-6 py-4 text-xs font-black text-[#617289] dark:text-slate-400 uppercase tracking-wider">Transaction ID</th>
+<th class="px-6 py-4 text-xs font-black text-[#617289] dark:text-slate-400 uppercase tracking-wider">Amount</th>
+<th class="px-6 py-4 text-xs font-black text-[#617289] dark:text-slate-400 uppercase tracking-wider">Method</th>
+<th class="px-6 py-4 text-xs font-black text-[#617289] dark:text-slate-400 uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-xs font-black text-[#617289] dark:text-slate-400 uppercase tracking-wider text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#dbe0e6] dark:divide-slate-800">
+<tr class="hover:bg-[#f8fafc] dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 text-sm font-medium">Jun 02, 2024</td>
+<td class="px-6 py-4 text-sm font-bold">June 2024</td>
+<td class="px-6 py-4 text-sm font-mono text-[#617289]">#TXN-882910</td>
+<td class="px-6 py-4 text-sm font-bold text-primary">$50.00</td>
+<td class="px-6 py-4 text-sm">Virtual Account</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">COMPLETED</span>
+</td>
+<td class="px-6 py-4 text-right flex items-center justify-end gap-2">
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#dbe0e6] dark:border-slate-700 text-xs font-bold text-[#111418] dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" onclick="document.getElementById('editModal').classList.remove('hidden')">
+<span class="material-symbols-outlined text-base">edit</span> Edit
+                                    </button>
+<button class="text-[#617289] hover:text-primary"><span class="material-symbols-outlined text-lg">receipt_long</span></button>
+</td>
+</tr>
+<tr class="hover:bg-[#f8fafc] dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 text-sm font-medium">May 05, 2024</td>
+<td class="px-6 py-4 text-sm font-bold">May 2024</td>
+<td class="px-6 py-4 text-sm font-mono text-[#617289]">#TXN-881002</td>
+<td class="px-6 py-4 text-sm font-bold text-primary">$50.00</td>
+<td class="px-6 py-4 text-sm">Transfer Bank</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">COMPLETED</span>
+</td>
+<td class="px-6 py-4 text-right flex items-center justify-end gap-2">
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#dbe0e6] dark:border-slate-700 text-xs font-bold text-[#111418] dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" onclick="document.getElementById('editModal').classList.remove('hidden')">
+<span class="material-symbols-outlined text-base">edit</span> Edit
+                                    </button>
+<button class="text-[#617289] hover:text-primary"><span class="material-symbols-outlined text-lg">receipt_long</span></button>
+</td>
+</tr>
+<tr class="hover:bg-[#f8fafc] dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 text-sm font-medium">Apr 04, 2024</td>
+<td class="px-6 py-4 text-sm font-bold">April 2024</td>
+<td class="px-6 py-4 text-sm font-mono text-[#617289]">#TXN-879011</td>
+<td class="px-6 py-4 text-sm font-bold text-primary">$50.00</td>
+<td class="px-6 py-4 text-sm">Auto-debit</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">COMPLETED</span>
+</td>
+<td class="px-6 py-4 text-right flex items-center justify-end gap-2">
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#dbe0e6] dark:border-slate-700 text-xs font-bold text-[#111418] dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" onclick="document.getElementById('editModal').classList.remove('hidden')">
+<span class="material-symbols-outlined text-base">edit</span> Edit
+                                    </button>
+<button class="text-[#617289] hover:text-primary"><span class="material-symbols-outlined text-lg">receipt_long</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="px-6 py-4 bg-[#f0f2f4]/30 dark:bg-slate-800/30 border-t border-[#dbe0e6] dark:border-slate-800 flex items-center justify-between">
+<p class="text-xs text-[#617289] dark:text-slate-400">Showing 3 of 18 records</p>
+<div class="flex gap-1">
+<button class="size-8 flex items-center justify-center rounded border border-[#dbe0e6] dark:border-slate-700 text-[#617289] disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded bg-primary text-white text-xs font-bold">1</button>
+<button class="size-8 flex items-center justify-center rounded border border-[#dbe0e6] dark:border-slate-700 text-[#617289] text-xs font-bold hover:bg-slate-100">2</button>
+<button class="size-8 flex items-center justify-center rounded border border-[#dbe0e6] dark:border-slate-700 text-[#617289] text-xs font-bold hover:bg-slate-100">3</button>
+<button class="size-8 flex items-center justify-center rounded border border-[#dbe0e6] dark:border-slate-700 text-[#617289] hover:bg-slate-100">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-center p-8 border-t border-[#dbe0e6] dark:border-slate-800">
+<div class="flex items-center gap-4 text-sm text-[#617289]">
+<span class="material-symbols-outlined text-primary">verified</span>
+<span>This information is provided for transparency. Contact RT/RW treasurer for disputes.</span>
+<a class="text-primary font-bold underline" href="#">Report a Problem</a>
+</div>
+</div>
+</div>
+</main>
+<footer class="bg-white dark:bg-background-dark py-6 border-t border-[#dbe0e6] dark:border-slate-800">
+<div class="max-w-[1100px] mx-auto px-10 flex justify-between items-center">
+<p class="text-xs text-[#617289]">© 2024 RT/RW Management System. All records are digitally signed.</p>
+<div class="flex gap-4">
+<span class="text-xs text-[#617289] hover:text-primary cursor-pointer">Privacy Policy</span>
+<span class="text-xs text-[#617289] hover:text-primary cursor-pointer">Support Center</span>
+</div>
+</div>
+</footer>
+</div>
+</div>
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" id="editModal">
+<div class="modal-overlay absolute inset-0" onclick="document.getElementById('editModal').classList.add('hidden')"></div>
+<div class="relative bg-white dark:bg-[#1a212c] w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+<div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+<div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white">Edit Transaction Details</h3>
+<p class="text-sm text-slate-500 mt-1">Update payment information for #TXN-882910</p>
+</div>
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400" onclick="document.getElementById('editModal').classList.add('hidden')">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="px-8 py-6 overflow-y-auto max-h-[70vh]">
+<form class="space-y-6">
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Resident Name</label>
+<input class="w-full bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-500 cursor-not-allowed px-4 py-2.5" readonly="" type="text" value="John Doe"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Block / House Number</label>
+<input class="w-full bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium focus:ring-primary focus:border-primary px-4 py-2.5" type="text" value="Block A-12"/>
+</div>
+</div>
+<div class="space-y-3">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Payment Coverage (Select Months)</label>
+<div class="grid grid-cols-4 gap-2">
+<label class="relative flex items-center justify-center border border-slate-200 dark:border-slate-700 rounded-lg p-2 cursor-pointer hover:bg-primary/5 transition-colors group has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input checked="" class="hidden" type="checkbox"/>
+<span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-has-[:checked]:text-primary">JAN</span>
+</label>
+<label class="relative flex items-center justify-center border border-slate-200 dark:border-slate-700 rounded-lg p-2 cursor-pointer hover:bg-primary/5 transition-colors group has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="hidden" type="checkbox"/>
+<span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-has-[:checked]:text-primary">FEB</span>
+</label>
+<label class="relative flex items-center justify-center border border-slate-200 dark:border-slate-700 rounded-lg p-2 cursor-pointer hover:bg-primary/5 transition-colors group has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="hidden" type="checkbox"/>
+<span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-has-[:checked]:text-primary">MAR</span>
+</label>
+<label class="relative flex items-center justify-center border border-slate-200 dark:border-slate-700 rounded-lg p-2 cursor-pointer hover:bg-primary/5 transition-colors group has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="hidden" type="checkbox"/>
+<span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-has-[:checked]:text-primary">APR</span>
+</label>
+<label class="relative flex items-center justify-center border border-slate-200 dark:border-slate-700 rounded-lg p-2 cursor-pointer hover:bg-primary/5 transition-colors group has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="hidden" type="checkbox"/>
+<span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-has-[:checked]:text-primary">MAY</span>
+</label>
+<label class="relative flex items-center justify-center border border-primary bg-primary/5 rounded-lg p-2 cursor-pointer group">
+<input checked="" class="hidden" type="checkbox"/>
+<span class="text-xs font-bold text-primary">JUN</span>
+</label>
+<label class="relative flex items-center justify-center border border-slate-200 dark:border-slate-700 rounded-lg p-2 cursor-pointer hover:bg-primary/5 transition-colors group has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="hidden" type="checkbox"/>
+<span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-has-[:checked]:text-primary">JUL</span>
+</label>
+<label class="relative flex items-center justify-center border border-slate-200 dark:border-slate-700 rounded-lg p-2 cursor-pointer hover:bg-primary/5 transition-colors group has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="hidden" type="checkbox"/>
+<span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-has-[:checked]:text-primary">AUG</span>
+</label>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Amount Paid</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">$</span>
+<input class="w-full bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold focus:ring-primary focus:border-primary pl-8 pr-4 py-2.5" type="number" value="50.00"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Payment Date</label>
+<input class="w-full bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium focus:ring-primary focus:border-primary px-4 py-2.5" type="date" value="2024-06-02"/>
+</div>
+</div>
+<div class="space-y-3">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Replace Proof of Payment</label>
+<div class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center hover:border-primary transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-4xl text-slate-300 group-hover:text-primary mb-2">cloud_upload</span>
+<p class="text-sm font-medium text-slate-600 dark:text-slate-400">Click to upload or drag and drop</p>
+<p class="text-xs text-slate-400 mt-1">PNG, JPG, PDF up to 5MB</p>
+<input class="hidden" type="file"/>
+</div>
+<div class="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-primary">image</span>
+<span class="text-xs font-medium flex-1 truncate">current_payment_receipt_882910.jpg</span>
+<span class="text-[10px] font-bold text-slate-400 uppercase">Current</span>
+</div>
+</div>
+<div class="flex gap-3 p-4 bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/30 rounded-lg">
+<span class="material-symbols-outlined text-orange-500 text-xl">info</span>
+<p class="text-xs text-orange-700 dark:text-orange-300 leading-relaxed">
+<strong>Note:</strong> Editing transaction details will reset the status to "Pending Review". This payment will require manual re-approval by an Admin or Coordinator.
+                    </p>
+</div>
+</form>
+</div>
+<div class="px-8 py-6 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
+<button class="px-6 py-2.5 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors" onclick="document.getElementById('editModal').classList.add('hidden')">
+                Cancel
+            </button>
+<button class="px-8 py-2.5 rounded-lg bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all">
+                Save Changes
+            </button>
+</div>
+</div>
+</div>
+
+</body></html>

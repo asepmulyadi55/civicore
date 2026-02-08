@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Yearly Block Financial Report - RT/RW Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .sticky-col { position: sticky; left: 0; z-index: 10; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-gray-100 min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="no-print sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-solid border-gray-200 dark:border-gray-800 px-4 md:px-10 py-3 flex items-center justify-between whitespace-nowrap">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-primary rounded-lg text-white">
+<span class="material-symbols-outlined block text-2xl">grid_view</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-tight">RT/RW Admin</h2>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Dashboard</a>
+<a class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Residents</a>
+<a class="text-primary text-sm font-bold border-b-2 border-primary py-1" href="#">Reports</a>
+<a class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4 items-center">
+<div class="hidden lg:flex flex-col min-w-40 max-w-64">
+<div class="flex w-full items-stretch rounded-lg h-9 bg-gray-100 dark:bg-gray-800">
+<div class="flex items-center justify-center pl-3 text-gray-500">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="w-full bg-transparent border-none focus:ring-0 text-sm placeholder:text-gray-500 px-3" placeholder="Search report..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-3 border-l border-gray-200 dark:border-gray-800 pl-4 ml-2">
+<div class="text-right hidden sm:block">
+<p class="text-xs font-bold">Admin Unit 01</p>
+<p class="text-[10px] text-gray-500 uppercase tracking-wider">Superuser</p>
+</div>
+<div class="size-9 rounded-full bg-primary/20 flex items-center justify-center border-2 border-primary/30 overflow-hidden">
+<img alt="Admin Profile" class="w-full h-full object-cover" data-alt="Headshot of a male administrative officer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQcrHiy5RnbU5okii2VjB_jEqMb5pTLz3bqoqF5uz1vDj2qLjtyDpnIWtA1tksnJF0puSETvToDyRgx4NIa1UENt3mXpWnVhjT6AYPNwSHQZiNwGjloiG3e6czy3x-osK6r7fVGp0KF45meYPf7LQRUhQ5ZtUtPn65nnrrM2Gao4uv2Suw0YI8M6UBod_Vdyt9AWtjo-FxOqdplbK0bDvP8VsoaGqPQmpF_iGqB9-qBN7cQauxPKFpfI3pTwpUUj6C_tUB8hoHY5Q2"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto px-4 py-6 md:px-10">
+<!-- Breadcrumbs -->
+<nav class="no-print flex items-center gap-2 mb-4 text-sm font-medium text-gray-500 dark:text-gray-400">
+<a class="hover:text-primary" href="#">Reports</a>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-gray-900 dark:text-gray-100">Yearly Block Management</span>
+</nav>
+<!-- Page Title & Actions -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+<div>
+<h1 class="text-3xl font-black text-[#111418] dark:text-white leading-tight">Yearly Financial Report</h1>
+<p class="text-gray-500 dark:text-gray-400 mt-1">Consolidated monthly fee audit for Residential Block A • Fiscal Year 2023</p>
+</div>
+<div class="flex items-center gap-3 no-print">
+<button class="flex items-center gap-2 px-4 h-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined text-lg">download</span>
+<span>Export</span>
+</button>
+<button class="flex items-center gap-2 px-4 h-10 bg-primary text-white rounded-lg text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all" onclick="window.print()">
+<span class="material-symbols-outlined text-lg">print</span>
+<span>Print Report</span>
+</button>
+</div>
+</div>
+<!-- Filter Bar -->
+<div class="no-print bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 flex flex-wrap gap-4 items-center mb-6">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+<span class="text-xs font-bold text-gray-400 uppercase">Block:</span>
+<select class="bg-transparent border-none focus:ring-0 text-sm font-bold p-0 pr-8">
+<option>Block A</option>
+<option>Block B</option>
+<option>Block C</option>
+<option>Block D</option>
+</select>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+<span class="text-xs font-bold text-gray-400 uppercase">Year:</span>
+<select class="bg-transparent border-none focus:ring-0 text-sm font-bold p-0 pr-8">
+<option>2023</option>
+<option>2024</option>
+<option>2022</option>
+</select>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+<span class="text-xs font-bold text-gray-400 uppercase">Fee Type:</span>
+<select class="bg-transparent border-none focus:ring-0 text-sm font-bold p-0 pr-8">
+<option>Monthly Security &amp; Waste</option>
+<option>Infrastructure Fund</option>
+<option>Emergency Fund</option>
+</select>
+</div>
+<div class="h-8 w-px bg-gray-200 dark:bg-gray-700 mx-2 hidden md:block"></div>
+<div class="flex gap-4 items-center">
+<div class="flex items-center gap-1.5">
+<span class="size-3 rounded-full bg-green-500"></span>
+<span class="text-xs font-medium">Paid</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="size-3 rounded-full bg-red-500"></span>
+<span class="text-xs font-medium">Unpaid</span>
+</div>
+</div>
+</div>
+<!-- Summary Statistics -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<div class="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+<p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Residents</p>
+<div class="flex items-baseline gap-2">
+<h3 class="text-2xl font-black">48</h3>
+<span class="text-xs font-medium text-gray-400">Households</span>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+<p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Collected (YTD)</p>
+<div class="flex items-baseline gap-2">
+<h3 class="text-2xl font-black text-green-600 dark:text-green-500">$17,280</h3>
+<span class="text-xs font-medium text-green-500">85% Paid</span>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm border-l-4 border-l-red-500">
+<p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Arrears</p>
+<div class="flex items-baseline gap-2">
+<h3 class="text-2xl font-black text-red-600">$2,400</h3>
+<span class="text-xs font-medium text-red-500">15% Outstanding</span>
+</div>
+</div>
+<div class="bg-primary p-5 rounded-xl shadow-lg shadow-primary/20">
+<p class="text-xs font-bold text-white/70 uppercase tracking-wider mb-1">Report Period</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-white text-xl">calendar_today</span>
+<h3 class="text-xl font-bold text-white">Jan - Dec 2023</h3>
+</div>
+</div>
+</div>
+<!-- High-Density Data Table Card -->
+<div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse table-fixed min-w-[1200px]">
+<thead>
+<tr class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+<th class="sticky-col bg-gray-50 dark:bg-gray-800/50 w-48 p-4 text-xs font-bold uppercase text-gray-500 tracking-wider">House / Resident</th>
+<th class="p-3 text-center text-xs font-bold uppercase text-gray-500 tracking-wider w-20 border-l border-gray-200 dark:border-gray-700">Jan</th>
+<th class="p-3 text-center text-xs font-bold uppercase text-gray-500 tracking-wider w-20 border-l border-gray-200 dark:border-gray-700">Feb</th>
+<th class="p-3 text-center text-xs font-bold uppercase text-gray-500 tracking-wider w-20 border-l border-gray-200 dark:border-gray-700">Mar</th>
+<th class="p-3 text-center text-xs font-bold uppercase text-gray-500 tracking-wider w-20 border-l border-gray-200 dark:border-gray-700">Apr</th>
+<th class="p-3 text-center text-xs font-bold uppercase text-gray-500 tracking-wider w-20 border-l border-gray-200 dark:border-gray-700">May</th>
+<th class="p-3 text-center text-xs font-bold uppercase text-gray-500 tracking-wider w-20 border-l border-gray-200 dark:border-gray-700">Jun</th>
+<th class="p-3 text-center text-xs font-bold uppercase text-gray-500 tracking-wider w-20 border-l border-gray-200 dark:border-gray-700">Jul</th>
+<th class="p-3 text-center text-xs font-bold uppercase text-gray-500 tracking-wider w-20 border-l border-gray-200 dark:border-gray-700">Aug</th>
+<th class="p-3 text-center text-xs font-bold uppercase text-gray-500 tracking-wider w-20 border-l border-gray-200 dark:border-gray-700">Sep</th>
+<th class="p-3 text-center text-xs font-bold uppercase text-gray-500 tracking-wider w-20 border-l border-gray-200 dark:border-gray-700">Oct</th>
+<th class="p-3 text-center text-xs font-bold uppercase text-gray-500 tracking-wider w-20 border-l border-gray-200 dark:border-gray-700">Nov</th>
+<th class="p-3 text-center text-xs font-bold uppercase text-gray-500 tracking-wider w-20 border-l border-gray-200 dark:border-gray-700">Dec</th>
+<th class="p-3 text-right text-xs font-bold uppercase text-primary tracking-wider w-24 border-l border-gray-200 dark:border-gray-700 bg-primary/5">Annual</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+<!-- Row 1 -->
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
+<td class="sticky-col bg-white dark:bg-gray-900 p-4 border-r border-gray-100 dark:border-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-800">
+<div class="flex flex-col">
+<span class="text-xs font-bold text-primary mb-0.5">A-01</span>
+<span class="text-sm font-semibold truncate">Jonathan Higgins</span>
+</div>
+</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">05/01</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">03/02</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">08/03</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">04/04</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">06/05</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">12/06</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">02/07</td>
+<td class="p-3 text-center text-[11px] font-bold bg-red-50 dark:bg-red-900/20 text-red-600 border-l border-gray-100 dark:border-gray-800">DUE</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">10/09</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">05/10</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">04/11</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">02/12</td>
+<td class="p-4 text-right text-xs font-black border-l border-gray-100 dark:border-gray-800 bg-primary/5">$330.00</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
+<td class="sticky-col bg-white dark:bg-gray-900 p-4 border-r border-gray-100 dark:border-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-800">
+<div class="flex flex-col">
+<span class="text-xs font-bold text-primary mb-0.5">A-02</span>
+<span class="text-sm font-semibold truncate">Sarah Jenkins</span>
+</div>
+</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">02/01</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">01/02</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">05/03</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">03/04</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">05/05</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">07/06</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">09/07</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">10/08</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">08/09</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">05/10</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">01/11</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">04/12</td>
+<td class="p-4 text-right text-xs font-black border-l border-gray-100 dark:border-gray-800 bg-primary/5">$360.00</td>
+</tr>
+<!-- Row 3 (All Unpaid Example) -->
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
+<td class="sticky-col bg-white dark:bg-gray-900 p-4 border-r border-gray-100 dark:border-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-800">
+<div class="flex flex-col">
+<span class="text-xs font-bold text-primary mb-0.5">A-03</span>
+<span class="text-sm font-semibold truncate">Marcus Webb</span>
+</div>
+</td>
+<td class="p-3 text-center text-[11px] font-bold bg-red-50 dark:bg-red-900/20 text-red-600 border-l border-gray-100 dark:border-gray-800">DUE</td>
+<td class="p-3 text-center text-[11px] font-bold bg-red-50 dark:bg-red-900/20 text-red-600 border-l border-gray-100 dark:border-gray-800">DUE</td>
+<td class="p-3 text-center text-[11px] font-bold bg-red-50 dark:bg-red-900/20 text-red-600 border-l border-gray-100 dark:border-gray-800">DUE</td>
+<td class="p-3 text-center text-[11px] font-bold bg-red-50 dark:bg-red-900/20 text-red-600 border-l border-gray-100 dark:border-gray-800">DUE</td>
+<td class="p-3 text-center text-[11px] font-bold bg-red-50 dark:bg-red-900/20 text-red-600 border-l border-gray-100 dark:border-gray-800">DUE</td>
+<td class="p-3 text-center text-[11px] font-bold bg-red-50 dark:bg-red-900/20 text-red-600 border-l border-gray-100 dark:border-gray-800">DUE</td>
+<td class="p-3 text-center text-[11px] font-bold bg-red-50 dark:bg-red-900/20 text-red-600 border-l border-gray-100 dark:border-gray-800">DUE</td>
+<td class="p-3 text-center text-[11px] font-bold bg-red-50 dark:bg-red-900/20 text-red-600 border-l border-gray-100 dark:border-gray-800">DUE</td>
+<td class="p-3 text-center text-[11px] font-bold bg-red-50 dark:bg-red-900/20 text-red-600 border-l border-gray-100 dark:border-gray-800">DUE</td>
+<td class="p-3 text-center text-[11px] font-bold bg-red-50 dark:bg-red-900/20 text-red-600 border-l border-gray-100 dark:border-gray-800">DUE</td>
+<td class="p-3 text-center text-[11px] font-bold bg-red-50 dark:bg-red-900/20 text-red-600 border-l border-gray-100 dark:border-gray-800">DUE</td>
+<td class="p-3 text-center text-[11px] font-bold bg-red-50 dark:bg-red-900/20 text-red-600 border-l border-gray-100 dark:border-gray-800">DUE</td>
+<td class="p-4 text-right text-xs font-black border-l border-gray-100 dark:border-gray-800 bg-red-500/10 text-red-600">$0.00</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
+<td class="sticky-col bg-white dark:bg-gray-900 p-4 border-r border-gray-100 dark:border-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-800">
+<div class="flex flex-col">
+<span class="text-xs font-bold text-primary mb-0.5">A-04</span>
+<span class="text-sm font-semibold truncate">Emily Rose</span>
+</div>
+</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">12/01</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">09/02</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">04/03</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">07/04</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">03/05</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">05/06</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">08/07</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">11/08</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">09/09</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">12/10</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">07/11</td>
+<td class="p-3 text-center text-[11px] font-medium text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800">05/12</td>
+<td class="p-4 text-right text-xs font-black border-l border-gray-100 dark:border-gray-800 bg-primary/5">$360.00</td>
+</tr>
+</tbody>
+<tfoot>
+<tr class="bg-gray-100 dark:bg-gray-800/80 font-bold">
+<td class="sticky-col bg-gray-100 dark:bg-gray-800/80 p-4 border-r border-gray-200 dark:border-gray-700 text-xs uppercase tracking-widest">Monthly Totals</td>
+<td class="p-3 text-center text-[11px] border-l border-gray-200 dark:border-gray-700">$1.2k</td>
+<td class="p-3 text-center text-[11px] border-l border-gray-200 dark:border-gray-700">$1.1k</td>
+<td class="p-3 text-center text-[11px] border-l border-gray-200 dark:border-gray-700">$1.4k</td>
+<td class="p-3 text-center text-[11px] border-l border-gray-200 dark:border-gray-700">$1.3k</td>
+<td class="p-3 text-center text-[11px] border-l border-gray-200 dark:border-gray-700">$1.2k</td>
+<td class="p-3 text-center text-[11px] border-l border-gray-200 dark:border-gray-700">$1.5k</td>
+<td class="p-3 text-center text-[11px] border-l border-gray-200 dark:border-gray-700">$1.4k</td>
+<td class="p-3 text-center text-[11px] border-l border-gray-200 dark:border-gray-700 text-red-500">$980</td>
+<td class="p-3 text-center text-[11px] border-l border-gray-200 dark:border-gray-700">$1.2k</td>
+<td class="p-3 text-center text-[11px] border-l border-gray-200 dark:border-gray-700">$1.4k</td>
+<td class="p-3 text-center text-[11px] border-l border-gray-200 dark:border-gray-700">$1.2k</td>
+<td class="p-3 text-center text-[11px] border-l border-gray-200 dark:border-gray-700">$1.3k</td>
+<td class="p-4 text-right text-xs font-black border-l border-gray-200 dark:border-gray-700 bg-primary/10">$15.1k</td>
+</tr>
+</tfoot>
+</table>
+</div>
+<div class="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center text-sm no-print">
+<p class="text-gray-500 font-medium">Showing 4 of 48 residents in Block A</p>
+<div class="flex items-center gap-2">
+<button class="p-1 hover:bg-gray-200 dark:hover:bg-gray-800 rounded disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined block">chevron_left</span>
+</button>
+<span class="text-xs font-bold px-2">Page 1 of 12</span>
+<button class="p-1 hover:bg-gray-200 dark:hover:bg-gray-800 rounded">
+<span class="material-symbols-outlined block">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Meeting Summary Section (Visible in Print) -->
+<div class="mt-12 hidden print-only">
+<h2 class="text-xl font-bold border-b pb-2 mb-4">Meeting Notes / Signature</h2>
+<div class="grid grid-cols-2 gap-20">
+<div class="h-40 border-b border-dashed border-gray-400 flex items-end pb-2">
+<p class="text-sm font-bold">RT Chairman Signature</p>
+</div>
+<div class="h-40 border-b border-dashed border-gray-400 flex items-end pb-2">
+<p class="text-sm font-bold">RW Treasurer Signature</p>
+</div>
+</div>
+<p class="mt-8 text-xs text-gray-500 text-center italic">Generated via RT/RW Admin Dashboard on October 15, 2023</p>
+</div>
+</main>
+<!-- Footer for web view -->
+<footer class="no-print mt-12 py-8 border-t border-gray-200 dark:border-gray-800 text-center">
+<div class="flex items-center justify-center gap-2 text-gray-400 text-sm mb-4">
+<span class="material-symbols-outlined text-lg">verified_user</span>
+<span>Secure Management System v2.4.0</span>
+</div>
+<p class="text-xs text-gray-400">© 2023 RT/RW Management Services. All Rights Reserved.</p>
+</footer>
+</body></html>

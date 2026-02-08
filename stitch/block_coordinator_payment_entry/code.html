@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Block Coordinator Payment Entry</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-3 md:px-10 lg:px-40">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8 flex items-center justify-center bg-primary rounded-lg text-white">
+<span class="material-symbols-outlined">domain</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">RT/RW Admin</h2>
+</div>
+<nav class="hidden md:flex items-center gap-9">
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">Dashboard</a>
+<a class="text-primary text-sm font-bold leading-normal" href="#">Residents</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">Payments</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">Reports</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4 md:gap-8 items-center">
+<label class="hidden sm:flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full border border-slate-200 dark:border-slate-700">
+<div class="text-slate-500 flex bg-slate-100 dark:bg-slate-800 items-center justify-center pl-4 rounded-l-lg">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 border-none bg-slate-100 dark:bg-slate-800 focus:ring-0 placeholder:text-slate-500 px-4 rounded-r-lg pl-2 text-sm font-normal" placeholder="Quick search..." value=""/>
+</div>
+</label>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="User profile picture of the block coordinator" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCXcB2ObYb15N-GIuvBkFdKRLOBaxWU98ouQnXeUTMHp2Gswa-ckonl7ivfFuZJ3PlgN5EPyENLg4VOof6EXlcZn6syWWkJdmLTCx9OcH5rBolpHvaggZ-V35notzF_t5fYwHD1G_13zmohXVca7u9aDI00kjziAk7pqV2l4_wt-z72XPXx2qq-H2oiQTVPzDhVe0kgwPcQ9U3Ma0eG11KeLD_m6vski6dpjgB3X5HQ7_5LplDklC3M6TfO8DENvl8LEVPaG9WshNX2");'></div>
+</div>
+</header>
+<main class="flex-1 px-6 md:px-10 lg:px-40 py-8">
+<!-- Breadcrumbs & Header -->
+<div class="flex flex-col gap-1 mb-8">
+<div class="flex items-center gap-2 text-slate-500 text-sm font-medium">
+<a class="hover:text-primary" href="#">Dashboard</a>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<a class="hover:text-primary" href="#">Block A</a>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-slate-900 dark:text-white">Payment Entry</span>
+</div>
+<div class="flex flex-wrap justify-between items-end gap-4 mt-4">
+<div>
+<h1 class="text-slate-900 dark:text-white text-3xl font-black leading-tight tracking-tight">Block Coordinator Payment Entry</h1>
+<p class="text-slate-600 dark:text-slate-400 text-base mt-1">Recording and managing monthly community fees for residents of Block A.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-lg">history</span>
+                                View History
+                            </button>
+</div>
+</div>
+</div>
+<!-- Stats Summary -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Collected (Nov)</p>
+<span class="material-symbols-outlined text-emerald-500">payments</span>
+</div>
+<p class="text-slate-900 dark:text-white text-3xl font-bold tracking-tight">Rp 4.500.000</p>
+<div class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-950/30 px-2 py-1 rounded w-fit">
+<span class="material-symbols-outlined text-xs">trending_up</span> +12% vs last month
+                        </div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Outstanding Fees</p>
+<span class="material-symbols-outlined text-rose-500">account_balance_wallet</span>
+</div>
+<p class="text-slate-900 dark:text-white text-3xl font-bold tracking-tight">Rp 1.200.000</p>
+<div class="flex items-center gap-1 text-rose-600 dark:text-rose-400 text-xs font-bold bg-rose-50 dark:bg-rose-950/30 px-2 py-1 rounded w-fit">
+<span class="material-symbols-outlined text-xs">priority_high</span> 8 Households unpaid
+                        </div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Pending Verifications</p>
+<span class="material-symbols-outlined text-amber-500">verified_user</span>
+</div>
+<p class="text-slate-900 dark:text-white text-3xl font-bold tracking-tight">5</p>
+<div class="flex items-center gap-1 text-slate-500 text-xs font-bold bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded w-fit">
+                            Needs attention soon
+                        </div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Left: New Payment Form -->
+<div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">add_circle</span>
+                                New Payment Entry
+                            </h3>
+</div>
+<form class="p-6 flex flex-col gap-6">
+<!-- Resident Selector -->
+<div class="flex flex-col gap-2">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Select Resident</label>
+<div class="relative">
+<select class="form-select w-full rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-primary focus:border-primary">
+<option value="">Choose a resident...</option>
+<option value="1">Block A-12: Budi Santoso</option>
+<option value="2">Block A-15: Siti Aminah</option>
+<option value="3">Block A-04: Joko Widodo</option>
+<option value="4">Block A-22: Ratna Sari</option>
+</select>
+</div>
+</div>
+<!-- Multi-Month Grid -->
+<div class="flex flex-col gap-3">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Select Payment Months (2024)</label>
+<div class="grid grid-cols-4 gap-2">
+<button class="py-2 px-1 text-xs font-bold border rounded-lg transition-all border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 cursor-default flex flex-col items-center" type="button">
+                                        Jan <span class="material-symbols-outlined text-[14px]">check_circle</span>
+</button>
+<button class="py-2 px-1 text-xs font-bold border rounded-lg transition-all border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 cursor-default flex flex-col items-center" type="button">
+                                        Feb <span class="material-symbols-outlined text-[14px]">check_circle</span>
+</button>
+<button class="py-2 px-1 text-xs font-bold border rounded-lg transition-all border-primary bg-primary/10 text-primary flex flex-col items-center" type="button">
+                                        Mar <span class="material-symbols-outlined text-[14px]">radio_button_checked</span>
+</button>
+<button class="py-2 px-1 text-xs font-bold border rounded-lg transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary flex flex-col items-center" type="button">
+                                        Apr <span class="material-symbols-outlined text-[14px]">radio_button_unchecked</span>
+</button>
+<button class="py-2 px-1 text-xs font-bold border rounded-lg transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary flex flex-col items-center" type="button">
+                                        May <span class="material-symbols-outlined text-[14px]">radio_button_unchecked</span>
+</button>
+<button class="py-2 px-1 text-xs font-bold border rounded-lg transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary flex flex-col items-center" type="button">
+                                        Jun <span class="material-symbols-outlined text-[14px]">radio_button_unchecked</span>
+</button>
+<button class="py-2 px-1 text-xs font-bold border rounded-lg transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary flex flex-col items-center" type="button">
+                                        Jul <span class="material-symbols-outlined text-[14px]">radio_button_unchecked</span>
+</button>
+<button class="py-2 px-1 text-xs font-bold border rounded-lg transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary flex flex-col items-center" type="button">
+                                        Aug <span class="material-symbols-outlined text-[14px]">radio_button_unchecked</span>
+</button>
+<button class="py-2 px-1 text-xs font-bold border rounded-lg transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary flex flex-col items-center" type="button">
+                                        Sep <span class="material-symbols-outlined text-[14px]">radio_button_unchecked</span>
+</button>
+<button class="py-2 px-1 text-xs font-bold border rounded-lg transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary flex flex-col items-center" type="button">
+                                        Oct <span class="material-symbols-outlined text-[14px]">radio_button_unchecked</span>
+</button>
+<button class="py-2 px-1 text-xs font-bold border rounded-lg transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary flex flex-col items-center" type="button">
+                                        Nov <span class="material-symbols-outlined text-[14px]">radio_button_unchecked</span>
+</button>
+<button class="py-2 px-1 text-xs font-bold border rounded-lg transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary flex flex-col items-center" type="button">
+                                        Dec <span class="material-symbols-outlined text-[14px]">radio_button_unchecked</span>
+</button>
+</div>
+<p class="text-[10px] text-slate-400">Green items are already paid. Selected: 1 Month.</p>
+</div>
+<!-- Amount -->
+<div class="flex flex-col gap-2">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Total Amount</label>
+<div class="flex rounded-lg shadow-sm">
+<span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-500 text-sm font-bold">
+                                        Rp
+                                    </span>
+<input class="form-input flex-1 min-w-0 rounded-none rounded-r-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-primary focus:border-primary text-base font-bold" placeholder="0" type="number" value="150000"/>
+</div>
+</div>
+<!-- File Upload -->
+<div class="flex flex-col gap-2">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Proof of Payment</label>
+<div class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-8 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-4xl text-slate-300 group-hover:text-primary transition-colors">upload_file</span>
+<div class="text-center">
+<p class="text-sm text-slate-600 dark:text-slate-400 font-medium">Click to upload or drag and drop</p>
+<p class="text-xs text-slate-400">PNG, JPG or PDF (max. 2MB)</p>
+</div>
+</div>
+</div>
+<div class="flex gap-4 mt-2">
+<button class="flex-1 bg-primary text-white py-3 rounded-lg font-bold text-sm hover:bg-primary/90 transition-all shadow-md flex items-center justify-center gap-2" type="submit">
+<span class="material-symbols-outlined text-lg">save</span>
+                                    Submit Payment
+                                </button>
+<button class="px-6 py-3 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-400 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800" type="reset">
+                                    Reset
+                                </button>
+</div>
+</form>
+</div>
+<!-- Right: Resident Summary Table -->
+<div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">groups</span>
+                                Block A Residents
+                            </h3>
+<button class="text-primary text-sm font-bold flex items-center gap-1 hover:underline">
+<span class="material-symbols-outlined text-base">filter_list</span>
+                                Filter
+                            </button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+<tr>
+<th class="px-6 py-4">House ID</th>
+<th class="px-6 py-4">Name</th>
+<th class="px-6 py-4">Nov Payment</th>
+<th class="px-6 py-4 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<td class="px-6 py-4 font-bold text-slate-900 dark:text-white">A-01</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-400">AM</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-300">Andi Maulana</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+<span class="size-1.5 rounded-full bg-emerald-500"></span>
+                                                Paid
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<td class="px-6 py-4 font-bold text-slate-900 dark:text-white">A-04</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-400">JW</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-300">Joko Widodo</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400">
+<span class="size-1.5 rounded-full bg-rose-500"></span>
+                                                Unpaid
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 hover:text-primary transition-colors text-primary font-bold text-xs uppercase underline">Input</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<td class="px-6 py-4 font-bold text-slate-900 dark:text-white">A-12</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-400">BS</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-300">Budi Santoso</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
+<span class="size-1.5 rounded-full bg-amber-500"></span>
+                                                Pending
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">receipt_long</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<td class="px-6 py-4 font-bold text-slate-900 dark:text-white">A-15</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-400">SA</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-300">Siti Aminah</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+<span class="size-1.5 rounded-full bg-emerald-500"></span>
+                                                Paid
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<td class="px-6 py-4 font-bold text-slate-900 dark:text-white">A-20</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-400">RH</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-300">Rudi Hartono</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400">
+<span class="size-1.5 rounded-full bg-rose-500"></span>
+                                                Unpaid
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 hover:text-primary transition-colors text-primary font-bold text-xs uppercase underline">Input</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<td class="px-6 py-4 font-bold text-slate-900 dark:text-white">A-22</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-400">RS</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-300">Ratna Sari</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+<span class="size-1.5 rounded-full bg-emerald-500"></span>
+                                                Paid
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-6 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between">
+<p class="text-xs text-slate-500">Showing 6 of 24 residents in Block A</p>
+<div class="flex gap-2">
+<button class="px-3 py-1 text-xs font-bold border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-800 hover:bg-slate-100">Prev</button>
+<button class="px-3 py-1 text-xs font-bold border border-primary rounded bg-primary text-white">1</button>
+<button class="px-3 py-1 text-xs font-bold border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-800 hover:bg-slate-100">2</button>
+<button class="px-3 py-1 text-xs font-bold border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-800 hover:bg-slate-100">Next</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>
