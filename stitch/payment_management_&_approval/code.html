@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CiviCore | Payment Management &amp; Approval</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 min-h-screen flex">
+<aside class="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hidden lg:flex flex-col">
+<div class="p-6">
+<div class="flex items-center gap-2 text-primary font-bold text-2xl tracking-tight">
+<span class="material-icons-outlined">apartment</span>
+<span>CiviCore</span>
+</div>
+</div>
+<nav class="flex-1 px-4 py-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-icons-outlined">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary rounded-lg transition-colors" href="#">
+<span class="material-icons-outlined">payments</span>
+<span class="font-medium">Payments</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-icons-outlined">people</span>
+<span class="font-medium">Residents</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-icons-outlined">apartment</span>
+<span class="font-medium">Units &amp; Blocks</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-icons-outlined">analytics</span>
+<span class="font-medium">Reports</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 px-3 py-2">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">AD</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-semibold truncate">Admin User</p>
+<p class="text-xs text-slate-500 truncate">admin@civicore.com</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-screen overflow-hidden">
+<header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between px-8 shrink-0">
+<div>
+<h1 class="text-xl font-bold">Payment Management</h1>
+<nav class="flex text-xs text-slate-500 gap-2">
+<span>Admin</span>
+<span>/</span>
+<span class="text-primary font-medium">Payments</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors relative">
+<span class="material-icons-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
+</button>
+<button class="bg-primary text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 hover:bg-primary/90 transition-shadow shadow-sm">
+<span class="material-icons-outlined text-sm">add</span>
+<span>Add Payment</span>
+</button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8 space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between">
+<span class="text-slate-500 font-medium">Total Pending</span>
+<div class="p-2 bg-amber-100 text-amber-600 rounded-lg">
+<span class="material-icons-outlined">pending_actions</span>
+</div>
+</div>
+<div class="mt-4">
+<h3 class="text-2xl font-bold">$4,250.00</h3>
+<p class="text-xs text-slate-400 mt-1">12 payments awaiting review</p>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between">
+<span class="text-slate-500 font-medium">Collected (Month)</span>
+<div class="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
+<span class="material-icons-outlined">payments</span>
+</div>
+</div>
+<div class="mt-4">
+<h3 class="text-2xl font-bold">$28,490.00</h3>
+<p class="text-xs text-emerald-500 mt-1">↑ 12% vs last month</p>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between">
+<span class="text-slate-500 font-medium">Unpaid Dues</span>
+<div class="p-2 bg-rose-100 text-rose-600 rounded-lg">
+<span class="material-icons-outlined">warning</span>
+</div>
+</div>
+<div class="mt-4">
+<h3 class="text-2xl font-bold">$1,120.00</h3>
+<p class="text-xs text-slate-400 mt-1">4 overdue households</p>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-4 items-center">
+<div class="relative flex-1 w-full">
+<span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-primary/50 text-sm" placeholder="Search resident or invoice..." type="text"/>
+</div>
+<div class="flex gap-3 w-full md:w-auto">
+<select class="bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm py-2 px-4 focus:ring-2 focus:ring-primary/50 pr-8">
+<option>All Blocks</option>
+<option>Block A</option>
+<option>Block B</option>
+<option>Block C</option>
+</select>
+<select class="bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm py-2 px-4 focus:ring-2 focus:ring-primary/50 pr-8">
+<option>All Status</option>
+<option>Approved</option>
+<option>Pending</option>
+<option>Unpaid</option>
+</select>
+<button class="p-2 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<span class="material-icons-outlined">filter_list</span>
+</button>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Resident Name</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Block</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Months Covered</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Amount</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">JD</div>
+<div>
+<p class="font-semibold text-sm">John Doe</p>
+<p class="text-xs text-slate-500">Unit A-402</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium">Block A</td>
+<td class="px-6 py-4">
+<div class="flex flex-wrap gap-1">
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-[10px] font-bold">JAN</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-[10px] font-bold">FEB</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-[10px] font-bold">MAR</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-bold">$450.00</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold uppercase tracking-wide">Pending</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-primary/80 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-primary/20 rounded-lg hover:bg-primary/5 transition-all">Review</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="Portrait of Sarah Jenkins" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDN5CJNEC4MgtaRkNw8mP8OlUIsD5XRG4s7MP2DEHMw2l688CjtN3c_3PhnTKC4gfFyG8H5ETllzcg0LhQ7rmcc8cWTa1vv7VJYE8zaPHYOkIGUzAMA9z8xr9lwmvW2_LnQqG_t9n5lcW8-XwLfDJVW9B-AWUDnCU5D-xQG7AvQir8MoNcBIuQ8DfkAtIJFrmkFiaptXI_0AZSqe0u72nOyB8J2juISTQOjdLq8tlUzlrLd3-NZ29bRn-ua_0G-Xe0op6EFDi4p_xQ"/>
+<div>
+<p class="font-semibold text-sm">Sarah Jenkins</p>
+<p class="text-xs text-slate-500">Unit B-105</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium">Block B</td>
+<td class="px-6 py-4 text-xs font-medium text-slate-600 dark:text-slate-400">January 2024</td>
+<td class="px-6 py-4 text-sm font-bold">$150.00</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-xs font-bold uppercase tracking-wide">Approved</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 transition-colors">
+<span class="material-icons-outlined text-lg">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 font-bold">MW</div>
+<div>
+<p class="font-semibold text-sm">Michael Wong</p>
+<p class="text-xs text-slate-500">Unit C-012</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium">Block C</td>
+<td class="px-6 py-4 text-xs font-medium text-slate-600 dark:text-slate-400">February 2024</td>
+<td class="px-6 py-4 text-sm font-bold">$150.00</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full text-xs font-bold uppercase tracking-wide">Unpaid</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:underline text-xs font-bold uppercase tracking-widest">Send Reminder</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="Portrait of David Smith" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWv47aZIWsMaYjZVZvByfUzCw7DxsuWLv5juvWlJgyNYhGdV5GThQkD4-Ncj-rNy6PTb0OiA89a5JcosuqcuC4fHXnSoTFJkQHFvc7gdOYjdvBhysGn9rLXnji3uupEZjdKjs0HuHH-UpsZO19PBmpjlxLk4KxGEqB9gWTXAZBIV1VFLLiFX1KrmGKO3WuywbYYYSTSrarhQy2M7AJGPOoGqAOT015PgLaan6DDEiFupSJLvQMnN0faV052y1wDCqvcj3A1Uw0El8"/>
+<div>
+<p class="font-semibold text-sm">David Smith</p>
+<p class="text-xs text-slate-500">Unit A-112</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium">Block A</td>
+<td class="px-6 py-4 text-xs font-medium text-slate-600 dark:text-slate-400">Dec 23 - Jan 24</td>
+<td class="px-6 py-4 text-sm font-bold">$300.00</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold uppercase tracking-wide">Pending</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-primary/80 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-primary/20 rounded-lg hover:bg-primary/5 transition-all">Review</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<p class="text-sm text-slate-500">Showing 1 to 4 of 24 payments</p>
+<div class="flex gap-2">
+<button class="p-2 border border-slate-200 dark:border-slate-800 rounded hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50" disabled="">
+<span class="material-icons-outlined text-sm leading-none">chevron_left</span>
+</button>
+<button class="p-2 border border-slate-200 dark:border-slate-800 rounded bg-primary text-white">1</button>
+<button class="p-2 border border-slate-200 dark:border-slate-800 rounded hover:bg-slate-50 dark:hover:bg-slate-800">2</button>
+<button class="p-2 border border-slate-200 dark:border-slate-800 rounded hover:bg-slate-50 dark:hover:bg-slate-800">3</button>
+<button class="p-2 border border-slate-200 dark:border-slate-800 rounded hover:bg-slate-50 dark:hover:bg-slate-800">
+<span class="material-icons-outlined text-sm leading-none">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+<div class="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]">
+<div class="w-full md:w-1/2 bg-slate-100 dark:bg-slate-950 p-6 flex flex-col items-center justify-center relative group">
+<div class="absolute top-4 left-4 z-10">
+<span class="px-3 py-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur rounded-full text-xs font-bold shadow-sm">PROOF OF PAYMENT</span>
+</div>
+<div class="w-full h-full min-h-[300px] flex items-center justify-center relative overflow-hidden rounded-xl border-4 border-white dark:border-slate-900 shadow-lg">
+<img class="w-full h-full object-contain" data-alt="Screenshot of a mobile bank transfer receipt" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUCIC6ZC289vNthO8GMuB7FzIe0GLF_bs4Vz6SrWyrBzeCG3xLNMtYqaYfy2sVU2Q60I4kLURJh_X2VRTmYdK08w3lBlNFOPTjAXtRum4DygxOE8JhlM2xadP3feBI7GSmu8pu9cV-hhlgLtv_7wl2gbpt5OGUosXArchBMt4ZyN-_bHnt7uhqXhPjOokNvAikfTAGQU0v_0yAIumvwuBQjVfw18BVU-rHjO7uD6prsGF_qr_QgaytQFpJvtftAiDMPbsehST-zhA"/>
+<div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white text-slate-900 p-2 rounded-full shadow-lg flex items-center gap-2 font-bold text-xs uppercase">
+<span class="material-icons-outlined">zoom_in</span>
+                            View Fullscreen
+                        </button>
+</div>
+</div>
+<p class="text-[10px] text-slate-500 mt-4 text-center">Reference: TXN-9842105 • Uploaded 2 hours ago</p>
+</div>
+<div class="w-full md:w-1/2 p-8 flex flex-col">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h2 class="text-xl font-bold">Review Payment</h2>
+<p class="text-sm text-slate-500">Verify details before approving</p>
+</div>
+<button class="text-slate-400 hover:text-slate-600 p-1">
+<span class="material-icons-outlined">close</span>
+</button>
+</div>
+<div class="space-y-4 mb-8">
+<div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
+<span class="text-slate-500 text-sm">Resident</span>
+<span class="font-semibold text-sm">John Doe (A-402)</span>
+</div>
+<div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
+<span class="text-slate-500 text-sm">Amount</span>
+<span class="font-bold text-sm text-primary">$450.00</span>
+</div>
+<div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
+<span class="text-slate-500 text-sm">Method</span>
+<span class="font-semibold text-sm flex items-center gap-1">
+<span class="material-icons-outlined text-sm">account_balance</span>
+                            Bank Transfer
+                        </span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-slate-500 text-sm">Date Sent</span>
+<span class="font-semibold text-sm">Oct 24, 2023 • 14:30</span>
+</div>
+</div>
+<div class="flex-1">
+<label class="block text-sm font-semibold mb-2">Rejection Reason (if applicable)</label>
+<textarea class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary min-h-[100px] resize-none" placeholder="Example: Image is blurry, amount doesn't match..."></textarea>
+</div>
+<div class="grid grid-cols-2 gap-4 mt-8">
+<button class="py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 font-bold text-sm hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 dark:hover:bg-rose-950/20 transition-all uppercase tracking-wide">
+                        Reject
+                    </button>
+<button class="py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 shadow-lg shadow-primary/30 transition-all uppercase tracking-wide">
+                        Approve
+                    </button>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>
