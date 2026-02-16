@@ -60,7 +60,22 @@
                         <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Access the community management
                             system</p>
                     </div>
-                    <form action="#" class="space-y-5" method="POST">
+
+                    @if (session('success'))
+                        <div
+                            class="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/30 rounded-lg">
+                            <p class="text-sm text-green-700 dark:text-green-400">{{ session('success') }}</p>
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div
+                            class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 rounded-lg">
+                            <p class="text-sm text-red-700 dark:text-red-400">{{ $errors->first() }}</p>
+                        </div>
+                    @endif
+
+                    <form action="/login" class="space-y-5" method="POST" novalidate>
                         @csrf
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5"
@@ -72,10 +87,13 @@
                                     <span class="material-icons text-slate-400 text-sm">alternate_email</span>
                                 </span>
                                 <input
-                                    class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none"
+                                    class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('username') border-red-500 dark:border-red-500 @enderror"
                                     id="username" name="username" placeholder="admin@civicore.com" type="text"
-                                    value="{{ old('username') }}" required />
+                                    value="{{ old('username') }}" />
                             </div>
+                            @error('username')
+                                <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div>
                             <div class="flex justify-between items-center mb-1.5">
@@ -93,14 +111,17 @@
                                     <span class="material-icons text-slate-400 text-sm">lock_outline</span>
                                 </span>
                                 <input
-                                    class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none"
-                                    id="password" name="password" placeholder="••••••••" type="password" required />
+                                    class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('password') border-red-500 dark:border-red-500 @enderror"
+                                    id="password" name="password" placeholder="••••••••" type="password" />
                                 <button
                                     class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                                     type="button" onclick="togglePassword()">
                                     <span class="material-icons text-sm" id="toggleIcon">visibility</span>
                                 </button>
                             </div>
+                            @error('password')
+                                <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div class="flex items-center">
                             <input
@@ -136,7 +157,8 @@
                     class="p-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 text-center">
                     <p class="text-sm text-slate-600 dark:text-slate-400">
                         Don't have an account?
-                        <a class="text-primary font-bold hover:underline" href="#">Register a new account</a>
+                        <a class="text-primary font-bold hover:underline" href="{{ url('/register') }}">Register a new
+                            account</a>
                     </p>
                 </div>
             </div>
