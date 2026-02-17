@@ -61,6 +61,20 @@
                         </p>
                     </div>
 
+                    @if (session('success'))
+                        <div
+                            class="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/30 rounded-lg">
+                            <p class="text-sm text-green-700 dark:text-green-400">{{ session('success') }}</p>
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div
+                            class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 rounded-lg">
+                            <p class="text-sm text-red-700 dark:text-red-400">{{ session('error') }}</p>
+                        </div>
+                    @endif
+
                     <form action="/register" class="space-y-4" method="POST" novalidate>
                         @csrf
                         <div>
@@ -154,13 +168,12 @@
                                 continue with</span>
                         </div>
                     </div>
-                    <button
-                        class="w-full flex items-center justify-center space-x-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 py-3 px-4 rounded-lg transition-all duration-200 group"
-                        type="button">
+                    <a href="{{ route('auth.google.register') }}"
+                        class="w-full flex items-center justify-center space-x-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 py-3 px-4 rounded-lg transition-all duration-200 group">
                         <img alt="Google" class="w-5 h-5"
                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9G5NNslA1PH78AwWG_MxCoc1WVSST8Bais319cLNapq9nkxCbWmgQ4-6QCWbj--gmK2tUjTWbFf5CF6A7QbP7o9ZbmMaKUvCH2dZM7vNSlkCa7e8btXobYpGXIANxR6DWgIDjteV-4xAh31PWNtW3ysVi4HwlYkVewEsEvrofiomAT6BB0lErMx1Cd2xJpnDKuSbm3xKskHPpRzbh8tgG__hNfFKTfiBH-I39QaBGG4_pdm4UlsVmuCpMGSH2X51hQqUziWw_DgM" />
                         <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Sign up with Google</span>
-                    </button>
+                    </a>
                     <div
                         class="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 rounded-lg">
                         <div class="flex space-x-3">

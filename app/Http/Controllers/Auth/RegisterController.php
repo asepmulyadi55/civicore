@@ -29,11 +29,20 @@ class RegisterController extends Controller
             'username' => ['required', 'string', 'max:255', 'unique:users'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8'],
+        ], [
+            'fullname.required' => 'Please enter your full name.',
+            'username.required' => 'Please choose a username.',
+            'username.unique' => 'This username is already taken. Please choose another.',
+            'email.required' => 'Please enter your email address.',
+            'email.email' => 'Please enter a valid email address.',
+            'email.unique' => 'This email is already registered. Please login instead.',
+            'password.required' => 'Please enter a password.',
+            'password.min' => 'Password must be at least 8 characters.',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()
-                ->withErrors($validator)
+                ->with('error', $validator->errors()->first())
                 ->withInput();
         }
 

@@ -26,11 +26,14 @@ class LoginController extends Controller
         $validator = Validator::make($request->all(), [
             'username' => ['required', 'string'],
             'password' => ['required', 'string'],
+        ], [
+            'username.required' => 'Please enter your username or email.',
+            'password.required' => 'Please enter your password.',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()
-                ->withErrors($validator)
+                ->with('error', $validator->errors()->first())
                 ->withInput($request->only('username', 'remember'));
         }
 
@@ -53,18 +56,14 @@ class LoginController extends Controller
             // Check if user is active
             if (!Auth::user()->is_active) {
                 Auth::logout();
-                return redirect()->back()->withErrors([
-                    'username' => 'Your account is pending admin approval.',
-                ])->withInput($request->only('username', 'remember'));
+                return redirect()->back()->with('error', 'Your account is pending admin approval.');
             }
 
             return redirect()->intended('/dashboard')->with('success', 'Welcome back!');
         }
 
         // Authentication failed
-        return redirect()->back()->withErrors([
-            'username' => 'The provided credentials do not match our records.',
-        ])->withInput($request->only('username', 'remember'));
+        return redirect()->back()->with('error', 'Invalid username or password. Please try again.');
     }
 
     /**
