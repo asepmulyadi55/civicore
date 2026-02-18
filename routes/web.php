@@ -18,7 +18,7 @@ Route::get('/auth/google/login', [SocialAuthController::class, 'redirectToGoogle
 Route::get('/auth/google/register', [SocialAuthController::class, 'redirectToGoogleRegister'])->name('auth.google.register');
 Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
 
-// Dashboard (placeholder - will be created later)
+// Dashboard
 Route::get('/dashboard', function () {
-    return 'Welcome to CiviCore Dashboard!';
+    return view('dashboard');
 })->middleware('auth')->name('dashboard');

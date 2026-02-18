@@ -1,55 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>CiviCore Admin Dashboard</title>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap"
-    rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-    rel="stylesheet" />
-  <script id="tailwind-config">
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "primary": "#137fec",
-            "background-light": "#f6f7f8",
-            "background-dark": "#101922",
-          },
-          fontFamily: {
-            "display": ["Manrope"]
-          },
-          borderRadius: {
-            "DEFAULT": "0.25rem",
-            "lg": "0.5rem",
-            "xl": "0.75rem",
-            "full": "9999px"
-          },
-        },
-      },
-    }
-  </script>
-</head>
-
-<body
+<x-layouts.app title="Dashboard"
   class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 antialiased min-h-screen">
+
+  {{-- Mobile menu overlay --}}
+  <div class="fixed inset-0 bg-black/50 z-40 lg:hidden hidden" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  {{-- Sidebar --}}
   <aside
-    class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 hidden lg:flex flex-col z-50">
+    class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-50 -translate-x-full lg:translate-x-0 transition-transform duration-300"
+    id="sidebar">
     <div class="p-6 flex items-center space-x-3">
       <div class="bg-primary p-2 rounded-lg">
         <span class="material-icons text-white">apartment</span>
       </div>
       <span class="text-xl font-extrabold tracking-tight text-primary">CiviCore</span>
     </div>
+
     <nav class="flex-1 px-4 space-y-1 mt-4">
       <a class="flex items-center space-x-3 px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-semibold group transition-all"
-        href="#">
+        href="{{ route('dashboard') }}">
         <span class="material-icons text-[20px]">dashboard</span>
         <span>Dashboard</span>
       </a>
@@ -89,25 +57,42 @@
         <span>Settings</span>
       </a>
     </nav>
+
+    {{-- User profile + logout --}}
     <div class="p-4 border-t border-slate-200 dark:border-slate-800">
       <div class="flex items-center space-x-3 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-        <img alt="Admin" class="w-10 h-10 rounded-lg object-cover" data-alt="Admin user profile portrait"
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDV5gU6_VcruWXqpLdCMeFmVFSuuxFsp8MAiDTzaAwEBKZBEAKj4lw1yTNu9lHb8lhqsvkJ0wwvsigfVJqvsGp0E-OdotR2MMxJQC9-7rgEBshv34cKRYBopp7lUxJmM61kapBopbIU22Ib7mqteUXndfeTvMpDUy_DVbQSzHs9jx7Zn3btM6S1CaTEeGHB6CPNLy7dMnpHVsjCbG85eqMP28WtVw7hic3JNcYr5pNCZSyKgWKPAeVq3iJSCJd_taQzpTRlX66phI" />
-        <div class="flex-1 overflow-hidden">
-          <p class="text-sm font-bold truncate">Julian Thorne</p>
-          <p class="text-xs text-slate-500 truncate">Senior Admin</p>
+        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <span class="material-icons text-primary">person</span>
         </div>
-        <button class="text-slate-400 hover:text-primary transition-colors">
-          <span class="material-icons text-sm">logout</span>
-        </button>
+        <div class="flex-1 overflow-hidden">
+          <p class="text-sm font-bold truncate">{{ Auth::user()->name }}</p>
+          <p class="text-xs text-slate-500 truncate">{{ Auth::user()->email }}</p>
+        </div>
+        <form action="{{ route('logout') }}" method="POST">
+          @csrf
+          <button type="submit" class="text-slate-400 hover:text-primary transition-colors" title="Logout">
+            <span class="material-icons text-sm">logout</span>
+          </button>
+        </form>
       </div>
     </div>
   </aside>
+
+  {{-- Main content --}}
   <main class="lg:ml-64 p-4 lg:p-8 space-y-8">
+
+    {{-- Header --}}
     <header class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white">Dashboard Overview</h1>
-        <p class="text-slate-500 text-sm">Welcome back to CiviCore, here's what's happening today.</p>
+      <div class="flex items-center space-x-4">
+        <button
+          class="lg:hidden p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg"
+          onclick="toggleSidebar()">
+          <span class="material-icons text-slate-500">menu</span>
+        </button>
+        <div>
+          <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white">Dashboard Overview</h1>
+          <p class="text-slate-500 text-sm">Welcome back, {{ Auth::user()->name }}! Here's what's happening today.</p>
+        </div>
       </div>
       <div class="flex items-center space-x-4">
         <div class="relative flex-1 md:w-64">
@@ -122,8 +107,24 @@
           <span
             class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
         </button>
+        <button
+          class="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-primary/50 transition-all"
+          onclick="document.documentElement.classList.toggle('dark')" title="Toggle dark mode">
+          <span class="material-icons text-slate-500">dark_mode</span>
+        </button>
       </div>
     </header>
+
+    {{-- Flash messages --}}
+    @if (session('success'))
+      <div
+        class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/30 rounded-xl flex items-center space-x-3">
+        <span class="material-icons text-green-500">check_circle</span>
+        <p class="text-sm text-green-700 dark:text-green-400">{{ session('success') }}</p>
+      </div>
+    @endif
+
+    {{-- Stats cards --}}
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div class="flex justify-between items-start mb-4">
@@ -139,6 +140,7 @@
         <h3 class="text-slate-500 text-sm font-medium">Total Collections</h3>
         <p class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">$42,500.00</p>
       </div>
+
       <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div class="flex justify-between items-start mb-4">
           <div class="p-3 bg-amber-100 dark:bg-amber-500/10 rounded-lg">
@@ -148,6 +150,7 @@
         <h3 class="text-slate-500 text-sm font-medium">Pending Approvals</h3>
         <p class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">24</p>
       </div>
+
       <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div class="flex justify-between items-start mb-4">
           <div class="p-3 bg-rose-100 dark:bg-rose-500/10 rounded-lg">
@@ -161,6 +164,7 @@
         <h3 class="text-slate-500 text-sm font-medium">Unpaid Residents</h3>
         <p class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">12</p>
       </div>
+
       <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div class="flex justify-between items-start mb-4">
           <div class="p-3 bg-indigo-100 dark:bg-indigo-500/10 rounded-lg">
@@ -171,7 +175,11 @@
         <p class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">1,248</p>
       </div>
     </section>
+
+    {{-- Main grid: Activity table + Quick actions --}}
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+
+      {{-- Recent Activity table --}}
       <div
         class="xl:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
         <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
@@ -193,10 +201,8 @@
               <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                 <td class="px-6 py-4">
                   <div class="flex items-center space-x-3">
-                    <div
-                      class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
-                      <img alt="Resident" class="w-full h-full object-cover" data-alt="Portrait of a resident man"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTZxTeV--hecM_d0DGhCg9nZFbWMqtUGO6UTXjvjRsa5QfWISsXxjrEeHM4XZICCp4KnE3uhWPcwrkw0zsv3xVP4kW-JDfx_VaPuoE811FC1gTlrg7RBZHC6B_TDtV_YJxUUvv5y2mvGbpvyHR73vYfyGOYkKor1CsLig9j4ip-3VcMkm5rHQyxPl1NOXwFmKeE4Kvl_n7I89N5eTY9m-bP7MiCCbiyfR7vyH-3--B_7PbzCPLrT19BLqoMCsuZcnWW3f7nHt_G6I" />
+                    <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span class="material-icons text-primary text-sm">person</span>
                     </div>
                     <span class="text-sm font-semibold">Mark Spencer</span>
                   </div>
@@ -212,10 +218,8 @@
               <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                 <td class="px-6 py-4">
                   <div class="flex items-center space-x-3">
-                    <div
-                      class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
-                      <img alt="Resident" class="w-full h-full object-cover" data-alt="Portrait of a resident woman"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCn8gZkLqLVdb_q7leXwB2r1F-SIYgu13T74j21Mbya9ZtWsBUQGfR5NNGhnEyx_eXKN5_lbuGGtAcEal3w0LJv2fRz4hLm5Yaze0u9kRXH38wFPV445H3urd-6TqFhPSTsbX5i6xMdqM1IjYvNQEeUInQBmluefBOlFAvaRKvCIJiaWnevK6g5b5NXC4EAcjpozu0d0uLelhh580qjDf6sCRIeCNUCeDqrnIf2YHEtquKWm0pRMF4AV3Qu9bLlzSuCeeab4uvFdAU" />
+                    <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span class="material-icons text-primary text-sm">person</span>
                     </div>
                     <span class="text-sm font-semibold">Sarah Jenkins</span>
                   </div>
@@ -231,10 +235,8 @@
               <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                 <td class="px-6 py-4">
                   <div class="flex items-center space-x-3">
-                    <div
-                      class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
-                      <img alt="Resident" class="w-full h-full object-cover" data-alt="Portrait of a male resident"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeDK3fjmeZTDL2I76dRlrMgn6ZgOAthqp9pRNaayAOEL5MuwS_fm6q7kewd1GOu1NmLVsqHaPL-jP4UGJWaDI-0JbdnTmTMY8uJWshRAxVg-vHYliXrlo1bpxobmwbeTt8UMq7je5BlI7BAOc0R5uRPSFdmoLFqPTyBVyU1y8yl4ZA-WM6n6OsAfwgH-H6aVuGiCHZmRvK7sgZfsgjeETiPvfJ_sWvU31kbIsu0tIbqkiNDBKuozedf55ofHO00PsiqzsFKslCxXM" />
+                    <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span class="material-icons text-primary text-sm">person</span>
                     </div>
                     <span class="text-sm font-semibold">David Chen</span>
                   </div>
@@ -250,10 +252,8 @@
               <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                 <td class="px-6 py-4">
                   <div class="flex items-center space-x-3">
-                    <div
-                      class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
-                      <img alt="Resident" class="w-full h-full object-cover" data-alt="Portrait of a female resident"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9vWZZa0xDzlAgDcpTwYUjvT6_obTJ8ekr47RGChionphj_u3qvJBoz33nrAAGC_siuprhPDWsGpSp95f2gVESLU_MQzMzEIFdNNsQgHKCx8LTZZa4bS1SyvXMdKjI5mmjtBQ8bUg0Tpl5ksp_crKJJjarSgKnDqxifPgwezZnktTqDO2kEajhTud_9e4-Jy5sNlx35wYLVxZL3rjtMytV2pUZyhbrCKdLxmqpGA9DRMPBBi2foemTw1ELVLDk4EN85SNHP0SbG6k" />
+                    <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span class="material-icons text-primary text-sm">person</span>
                     </div>
                     <span class="text-sm font-semibold">Elena Rodriguez</span>
                   </div>
@@ -270,6 +270,8 @@
           </table>
         </div>
       </div>
+
+      {{-- Quick Actions + Community Status --}}
       <div
         class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-6">
         <h2 class="text-lg font-bold text-slate-900 dark:text-white">Quick Actions</h2>
@@ -298,20 +300,22 @@
             <span class="text-xs font-bold">Generate Report</span>
           </button>
         </div>
+
         <hr class="border-slate-100 dark:border-slate-800" />
+
         <div class="space-y-4">
-          <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">CiviCore Community Status</h3>
+          <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Community Status</h3>
           <div class="space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-sm font-medium">Block A (Full)</span>
               <div class="w-32 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div class="bg-primary h-full w-[100%]"></div>
+                <div class="bg-primary h-full w-full"></div>
               </div>
             </div>
             <div class="flex items-center justify-between">
               <span class="text-sm font-medium">Block B</span>
               <div class="w-32 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div class="bg-primary h-full w-[75%]"></div>
+                <div class="bg-primary h-full w-3/4"></div>
               </div>
             </div>
             <div class="flex items-center justify-between">
@@ -322,19 +326,28 @@
             </div>
           </div>
         </div>
+
         <div class="p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-lg">
           <div class="flex items-center space-x-2 text-amber-700 dark:text-amber-400 mb-2">
             <span class="material-icons text-sm">sticky_note_2</span>
-            <span class="text-xs font-bold uppercase tracking-wider">CiviCore Admin Memo</span>
+            <span class="text-xs font-bold uppercase tracking-wider">Admin Memo</span>
           </div>
           <p class="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
             Upcoming maintenance for the Block A elevator scheduled for Oct 28. Notify all residents by tomorrow noon.
           </p>
         </div>
       </div>
+
     </div>
   </main>
 
-</body>
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      sidebar.classList.toggle('-translate-x-full');
+      overlay.classList.toggle('hidden');
+    }
+  </script>
 
-</html>
+</x-layouts.app>

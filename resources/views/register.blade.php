@@ -1,48 +1,6 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<x-layouts.app title="Register Account"
+  class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col transition-colors duration-200">
 
-<head>
-  <meta charset="utf-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>CiviCore | Registration Form</title>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-    rel="stylesheet" />
-  <script id="tailwind-config">
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "primary": "#137fec",
-            "background-light": "#f6f7f8",
-            "background-dark": "#101922",
-          },
-          fontFamily: {
-            "display": ["Manrope"]
-          },
-          borderRadius: {
-            "DEFAULT": "0.25rem",
-            "lg": "0.5rem",
-            "xl": "0.75rem",
-            "full": "9999px"
-          },
-        },
-      },
-    }
-  </script>
-  <style>
-    body {
-      font-family: 'Manrope', sans-serif;
-    }
-  </style>
-</head>
-
-<body
-  class="bg-background-light dark:bg-background-dark font-display min-h-screen flex flex-col transition-colors duration-200">
   <main class="flex-grow flex items-center justify-center px-4 py-12">
     <div class="w-full max-w-lg">
       <div class="text-center mb-8">
@@ -57,8 +15,7 @@
         <div class="p-8">
           <div class="mb-6">
             <h2 class="text-xl font-bold text-slate-800 dark:text-white">Register Account</h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Join the community management system
-            </p>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Join the community management system</p>
           </div>
 
           @if (session('success'))
@@ -156,8 +113,8 @@
               <div class="w-full border-t border-slate-200 dark:border-slate-800"></div>
             </div>
             <div class="relative flex justify-center text-xs uppercase">
-              <span class="bg-white dark:bg-slate-900 px-4 text-slate-500 font-semibold tracking-wider">Or
-                continue with</span>
+              <span class="bg-white dark:bg-slate-900 px-4 text-slate-500 font-semibold tracking-wider">Or continue
+                with</span>
             </div>
           </div>
           <a href="{{ route('auth.google.register') }}"
@@ -193,6 +150,7 @@
       </div>
     </div>
   </main>
+
   <div class="fixed bottom-6 right-6">
     <button
       class="p-3 rounded-full bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-primary transition-all duration-200"
@@ -205,7 +163,6 @@
     function togglePassword() {
       const passwordField = document.getElementById('password');
       const toggleIcon = document.getElementById('toggleIcon');
-
       if (passwordField.type === 'password') {
         passwordField.type = 'text';
         toggleIcon.textContent = 'visibility_off';
@@ -215,6 +172,5 @@
       }
     }
   </script>
-</body>
 
-</html>
+</x-layouts.app>
