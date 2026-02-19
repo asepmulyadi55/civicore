@@ -22,3 +22,8 @@ Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleC
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware('auth')->name('dashboard');
+
+// User Management
+Route::get('/users', function () {
+    return view('users');
+})->middleware('auth')->name('users.index');

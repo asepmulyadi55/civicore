@@ -1,82 +1,9 @@
 <x-layouts.app title="Dashboard"
   class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 antialiased min-h-screen">
 
-  {{-- Mobile menu overlay --}}
-  <div class="fixed inset-0 bg-black/50 z-40 lg:hidden hidden" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+  {{-- Sidebar (edit links in components/nav/sidebar.blade.php) --}}
+  <x-nav.sidebar active="dashboard" />
 
-  {{-- Sidebar --}}
-  <aside
-    class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-50 -translate-x-full lg:translate-x-0 transition-transform duration-300"
-    id="sidebar">
-    <div class="p-6 flex items-center space-x-3">
-      <div class="bg-primary p-2 rounded-lg">
-        <span class="material-icons text-white">apartment</span>
-      </div>
-      <span class="text-xl font-extrabold tracking-tight text-primary">CiviCore</span>
-    </div>
-
-    <nav class="flex-1 px-4 space-y-1 mt-4">
-      <a class="flex items-center space-x-3 px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-semibold group transition-all"
-        href="{{ route('dashboard') }}">
-        <span class="material-icons text-[20px]">dashboard</span>
-        <span>Dashboard</span>
-      </a>
-      <a class="flex items-center space-x-3 px-3 py-2.5 text-slate-500 hover:text-primary hover:bg-primary/5 rounded-lg transition-all group"
-        href="#">
-        <span class="material-icons text-[20px]">payments</span>
-        <span>Payments</span>
-      </a>
-      <a class="flex items-center space-x-3 px-3 py-2.5 text-slate-500 hover:text-primary hover:bg-primary/5 rounded-lg transition-all group"
-        href="#">
-        <span class="material-icons text-[20px]">people</span>
-        <span>Residents</span>
-      </a>
-      <a class="flex items-center space-x-3 px-3 py-2.5 text-slate-500 hover:text-primary hover:bg-primary/5 rounded-lg transition-all group"
-        href="#">
-        <span class="material-icons text-[20px]">domain</span>
-        <span>Blocks</span>
-      </a>
-      <a class="flex items-center space-x-3 px-3 py-2.5 text-slate-500 hover:text-primary hover:bg-primary/5 rounded-lg transition-all group"
-        href="#">
-        <span class="material-icons text-[20px]">manage_accounts</span>
-        <span>User Management</span>
-      </a>
-      <a class="flex items-center space-x-3 px-3 py-2.5 text-slate-500 hover:text-primary hover:bg-primary/5 rounded-lg transition-all group"
-        href="#">
-        <span class="material-icons text-[20px]">bar_chart</span>
-        <span>Reports</span>
-      </a>
-      <a class="flex items-center space-x-3 px-3 py-2.5 text-slate-500 hover:text-primary hover:bg-primary/5 rounded-lg transition-all group"
-        href="#">
-        <span class="material-icons text-[20px]">event</span>
-        <span>Events</span>
-      </a>
-      <a class="flex items-center space-x-3 px-3 py-2.5 text-slate-500 hover:text-primary hover:bg-primary/5 rounded-lg transition-all group"
-        href="#">
-        <span class="material-icons text-[20px]">settings</span>
-        <span>Settings</span>
-      </a>
-    </nav>
-
-    {{-- User profile + logout --}}
-    <div class="p-4 border-t border-slate-200 dark:border-slate-800">
-      <div class="flex items-center space-x-3 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <span class="material-icons text-primary">person</span>
-        </div>
-        <div class="flex-1 overflow-hidden">
-          <p class="text-sm font-bold truncate">{{ Auth::user()->name }}</p>
-          <p class="text-xs text-slate-500 truncate">{{ Auth::user()->email }}</p>
-        </div>
-        <form action="{{ route('logout') }}" method="POST">
-          @csrf
-          <button type="submit" class="text-slate-400 hover:text-primary transition-colors" title="Logout">
-            <span class="material-icons text-sm">logout</span>
-          </button>
-        </form>
-      </div>
-    </div>
-  </aside>
 
   {{-- Main content --}}
   <main class="lg:ml-64 p-4 lg:p-8 space-y-8">
