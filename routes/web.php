@@ -27,3 +27,13 @@ Route::get('/dashboard', function () {
 Route::get('/users', function () {
     return view('users');
 })->middleware('auth')->name('users.index');
+
+// Payment Management
+Route::get('/payments', function () {
+    return view('payments');
+})->middleware('auth')->name('payments.index');
+
+// Reports
+Route::get('/reports', function () {
+    return view('reports');
+})->middleware('auth')->name('reports.index');
