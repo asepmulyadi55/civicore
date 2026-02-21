@@ -36,7 +36,7 @@ class LoginTest extends TestCase
 
     $this->assertAuthenticated();
     $response->assertRedirect('/dashboard');
-    $response->assertSessionHas('success', 'Welcome back!');
+    $response->assertSessionHas('success', fn($v) => str_starts_with($v, 'Welcome back,'));
   }
 
   /** @test */

@@ -2,24 +2,58 @@
 
 namespace Database\Seeders;
 
+use App\Models\Block;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 
 class UserSeeder extends Seeder
 {
-  /**
-   * Run the database seeds.
-   */
   public function run(): void
   {
-    User::create([
-      'name' => 'Admin User',
+    $adminRole = Role::where('name', 'admin')->first();
+    $treasurerRole = Role::where('name', 'treasurer')->first();
+    $coordinatorRole = Role::where('name', 'block_coordinator')->first();
+    $residentRole = Role::where('name', 'resident')->first();
+
+    $blockA = Block::where('name', 'Block A')->first();
+
+    // Admin
+    User::firstOrCreate(['email' => 'admin@civicore.test'], [
+      'name' => 'Super Admin',
       'username' => 'admin',
-      'email' => 'admin@civicore.com',
-      'password' => Hash::make('admin123'),
+      'password' => Hash::make('password'),
       'is_active' => true,
-      'email_verified_at' => now(),
+      'role_id' => $adminRole?->id,
+    ]);
+
+    // Treasurer
+    User::firstOrCreate(['email' => 'treasurer@civicore.test'], [
+      'name' => 'Budi Santoso',
+      'username' => 'treasurer',
+      'password' => Hash::make('password'),
+      'is_active' => true,
+      'role_id' => $treasurerRole?->id,
+    ]);
+
+    // Block Coordinator (assigned to Block A)
+    User::firstOrCreate(['email' => 'coordinator@civicore.test'], [
+      'name' => 'Dewi Rahayu',
+      'username' => 'coordinator',
+      'password' => Hash::make('password'),
+      'is_active' => true,
+      'role_id' => $coordinatorRole?->id,
+      'block_id' => $blockA?->id,
+    ]);
+
+    // Resident
+    User::firstOrCreate(['email' => 'resident@civicore.test'], [
+      'name' => 'Julian Rivera',
+      'username' => 'resident',
+      'password' => Hash::make('password'),
+      'is_active' => true,
+      'role_id' => $residentRole?->id,
     ]);
   }
 }

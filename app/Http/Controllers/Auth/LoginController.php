@@ -59,7 +59,11 @@ class LoginController extends Controller
         return redirect()->back()->with('error', 'Your account is pending admin approval.');
       }
 
-      return redirect()->intended('/dashboard')->with('success', 'Welcome back!');
+      // Role-based redirect
+      $user = Auth::user();
+      $redirectTo = $user->isResident() ? '/my-overview' : '/dashboard';
+
+      return redirect()->intended($redirectTo)->with('success', 'Welcome back, ' . $user->name . '!');
     }
 
     // Authentication failed
