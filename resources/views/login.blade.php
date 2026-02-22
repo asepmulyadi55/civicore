@@ -52,16 +52,14 @@
                   id="username" name="username" placeholder="admin@civicore.com" type="text"
                   value="{{ old('username') }}" />
               </div>
-              @error('username')
-                <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-              @enderror
             </div>
             <div>
               <div class="flex justify-between items-center mb-1.5">
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300" for="password">
                   Password
                 </label>
-                <a class="text-xs font-bold text-primary hover:text-primary/80 transition-colors" href="#">
+                <a class="text-xs font-bold text-primary hover:text-primary/80 transition-colors"
+                  href="{{ route('password.request') }}">
                   Forgot Password?
                 </a>
               </div>
@@ -78,9 +76,6 @@
                   <span class="material-icons text-sm" id="toggleIcon">visibility</span>
                 </button>
               </div>
-              @error('password')
-                <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-              @enderror
             </div>
             <div class="flex items-center">
               <input
@@ -131,7 +126,7 @@
   <div class="fixed bottom-6 right-6">
     <button
       class="p-3 rounded-full bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-primary transition-all duration-200"
-      onclick="document.documentElement.classList.toggle('dark')">
+      onclick="toggleDark()">
       <span class="material-icons">dark_mode</span>
     </button>
   </div>

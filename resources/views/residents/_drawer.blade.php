@@ -22,7 +22,7 @@
   <div class="flex-1 overflow-y-auto p-6">
 
     {{-- ADD FORM --}}
-    <form id="form-add-resident" method="POST" action="{{ route('residents.store') }}" class="space-y-5">
+    <form id="form-add-resident" method="POST" action="{{ route('residents.store') }}" class="space-y-5" novalidate>
       @csrf
 
       <div>
@@ -30,13 +30,19 @@
           Full Name <span class="text-red-500">*</span>
         </label>
         <input type="text" name="fullname" value="{{ old('fullname') }}" placeholder="e.g. Ahmad Fauzi"
-          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all dark:text-slate-100" />
+          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all dark:text-slate-100 @error('fullname') border-red-500 dark:border-red-500 @enderror" />
+        @error('fullname')
+          <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+        @enderror
       </div>
 
       <div>
         <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Phone Number</label>
         <input type="tel" name="phone" value="{{ old('phone') }}" placeholder="e.g. 081234567890"
-          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all dark:text-slate-100" />
+          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all dark:text-slate-100 @error('phone') border-red-500 dark:border-red-500 @enderror" />
+        @error('phone')
+          <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+        @enderror
       </div>
 
       <div class="h-px bg-slate-100 dark:bg-slate-800"></div>
@@ -47,7 +53,7 @@
             Block <span class="text-red-500">*</span>
           </label>
           <select name="block_id"
-            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 dark:text-slate-100">
+            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 dark:text-slate-100 @error('block_id') border-red-500 dark:border-red-500 @enderror">
             <option value="">Select block</option>
             @foreach ($blocks as $block)
               <option value="{{ $block->id }}" {{ old('block_id') == $block->id ? 'selected' : '' }}>
@@ -55,13 +61,19 @@
               </option>
             @endforeach
           </select>
+          @error('block_id')
+            <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+          @enderror
         </div>
         <div>
           <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
             Unit No. <span class="text-red-500">*</span>
           </label>
           <input type="text" name="unit_number" value="{{ old('unit_number') }}" placeholder="e.g. A-101"
-            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all dark:text-slate-100" />
+            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all dark:text-slate-100 @error('unit_number') border-red-500 dark:border-red-500 @enderror" />
+          @error('unit_number')
+            <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+          @enderror
         </div>
       </div>
 
@@ -74,14 +86,20 @@
           </label>
           <input type="number" name="monthly_fee" value="{{ old('monthly_fee') }}" placeholder="500000" min="0"
             step="1000"
-            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all dark:text-slate-100" />
+            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all dark:text-slate-100 @error('monthly_fee') border-red-500 dark:border-red-500 @enderror" />
+          @error('monthly_fee')
+            <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+          @enderror
         </div>
         <div>
           <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
             Fee Start Month <span class="text-red-500">*</span>
           </label>
           <input type="month" name="fee_start" value="{{ old('fee_start', now()->format('Y-m')) }}"
-            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all dark:text-slate-100" />
+            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all dark:text-slate-100 @error('fee_start') border-red-500 dark:border-red-500 @enderror" />
+          @error('fee_start')
+            <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+          @enderror
         </div>
       </div>
 

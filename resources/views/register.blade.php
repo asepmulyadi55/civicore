@@ -25,11 +25,7 @@
             </div>
           @endif
 
-          @if (session('error'))
-            <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 rounded-lg">
-              <p class="text-sm text-red-700 dark:text-red-400">{{ session('error') }}</p>
-            </div>
-          @endif
+
 
           <form action="/register" class="space-y-4" method="POST" novalidate>
             @csrf
@@ -154,7 +150,7 @@
   <div class="fixed bottom-6 right-6">
     <button
       class="p-3 rounded-full bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-primary transition-all duration-200"
-      onclick="document.documentElement.classList.toggle('dark')">
+      onclick="toggleDark()">
       <span class="material-icons">dark_mode</span>
     </button>
   </div>

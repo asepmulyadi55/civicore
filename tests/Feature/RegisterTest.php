@@ -32,12 +32,11 @@ class RegisterTest extends TestCase
     $response->assertRedirect('/');
     $response->assertSessionHas('success', 'Registration successful! Please wait for admin approval before logging in.');
 
-    // Check user was created
     $this->assertDatabaseHas('users', [
       'name' => 'John Doe',
       'username' => 'johndoe',
       'email' => 'john@example.com',
-      'is_active' => false, // Should be inactive by default
+      'is_active' => false,
     ]);
   }
 
@@ -52,7 +51,6 @@ class RegisterTest extends TestCase
     ]);
 
     $user = User::where('email', 'john@example.com')->first();
-
     $this->assertEquals(0, $user->is_active);
   }
 
@@ -66,7 +64,7 @@ class RegisterTest extends TestCase
       'password' => 'password123',
     ]);
 
-    $response->assertSessionHas('error', 'Please enter your full name.');
+    $response->assertSessionHasErrors(['fullname']);
     $this->assertDatabaseCount('users', 0);
   }
 
@@ -80,26 +78,24 @@ class RegisterTest extends TestCase
       'password' => 'password123',
     ]);
 
-    $response->assertSessionHas('error', 'Please choose a username.');
+    $response->assertSessionHasErrors(['username']);
     $this->assertDatabaseCount('users', 0);
   }
 
   /** @test */
   public function registration_validates_unique_username()
   {
-    User::factory()->create([
-      'username' => 'johndoe',
-    ]);
+    User::factory()->create(['username' => 'johndoe']);
 
     $response = $this->post('/register', [
       'fullname' => 'John Doe',
-      'username' => 'johndoe', // Duplicate
+      'username' => 'johndoe',
       'email' => 'john@example.com',
       'password' => 'password123',
     ]);
 
-    $response->assertSessionHas('error', 'This username is already taken. Please choose another.');
-    $this->assertDatabaseCount('users', 1); // Only the first user
+    $response->assertSessionHasErrors(['username']);
+    $this->assertDatabaseCount('users', 1);
   }
 
   /** @test */
@@ -112,7 +108,7 @@ class RegisterTest extends TestCase
       'password' => 'password123',
     ]);
 
-    $response->assertSessionHas('error', 'Please enter your email address.');
+    $response->assertSessionHasErrors(['email']);
     $this->assertDatabaseCount('users', 0);
   }
 
@@ -126,26 +122,24 @@ class RegisterTest extends TestCase
       'password' => 'password123',
     ]);
 
-    $response->assertSessionHas('error', 'Please enter a valid email address.');
+    $response->assertSessionHasErrors(['email']);
     $this->assertDatabaseCount('users', 0);
   }
 
   /** @test */
   public function registration_validates_unique_email()
   {
-    User::factory()->create([
-      'email' => 'john@example.com',
-    ]);
+    User::factory()->create(['email' => 'john@example.com']);
 
     $response = $this->post('/register', [
       'fullname' => 'John Doe',
       'username' => 'johndoe',
-      'email' => 'john@example.com', // Duplicate
+      'email' => 'john@example.com',
       'password' => 'password123',
     ]);
 
-    $response->assertSessionHas('error', 'This email is already registered. Please login instead.');
-    $this->assertDatabaseCount('users', 1); // Only the first user
+    $response->assertSessionHasErrors(['email']);
+    $this->assertDatabaseCount('users', 1);
   }
 
   /** @test */
@@ -155,10 +149,10 @@ class RegisterTest extends TestCase
       'fullname' => 'John Doe',
       'username' => 'johndoe',
       'email' => 'john@example.com',
-      'password' => '1234', // Too short
+      'password' => '1234',
     ]);
 
-    $response->assertSessionHas('error', 'Password must be at least 8 characters.');
+    $response->assertSessionHasErrors(['password']);
     $this->assertDatabaseCount('users', 0);
   }
 
@@ -174,7 +168,6 @@ class RegisterTest extends TestCase
 
     $user = User::where('email', 'john@example.com')->first();
 
-    // Password should be hashed, not plain text
     $this->assertNotEquals('password123', $user->password);
     $this->assertTrue(\Hash::check('password123', $user->password));
   }

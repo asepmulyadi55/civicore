@@ -12,7 +12,7 @@
   <div class="flex items-center gap-3">
     {{-- Dark mode toggle --}}
     <button class="p-2 rounded-lg text-slate-500 hover:text-primary hover:bg-primary/5 transition-colors"
-      onclick="document.documentElement.classList.toggle('dark')" title="Toggle dark mode">
+      onclick="toggleDark()" title="Toggle dark mode">
       <span class="material-icons text-xl">dark_mode</span>
     </button>
 

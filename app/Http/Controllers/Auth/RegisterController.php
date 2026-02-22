@@ -42,7 +42,7 @@ class RegisterController extends Controller
 
     if ($validator->fails()) {
       return redirect()->back()
-        ->with('error', $validator->errors()->first())
+        ->withErrors($validator)
         ->withInput();
     }
 

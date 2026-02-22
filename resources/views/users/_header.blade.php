@@ -30,7 +30,7 @@
     </button>
     <button
       class="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-primary/50 transition-all"
-      onclick="document.documentElement.classList.toggle('dark')" title="Toggle dark mode">
+      onclick="toggleDark()" title="Toggle dark mode">
       <span class="material-icons text-slate-500 text-[20px]">dark_mode</span>
     </button>
   </div>

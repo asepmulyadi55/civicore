@@ -119,15 +119,18 @@
     <div class="flex-1 overflow-y-auto p-6">
 
       {{-- ADD FORM --}}
-      <form id="form-add-block" method="POST" action="{{ route('blocks.store') }}" class="space-y-5">
+      <form id="form-add-block" method="POST" action="{{ route('blocks.store') }}" class="space-y-5" novalidate>
         @csrf
+
         <div>
           <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Block Name <span
               class="text-rose-500">*</span></label>
           <input type="text" name="name" value="{{ old('name') }}" required
-            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary"
+            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary @error('name') border-red-500 dark:border-red-500 @enderror"
             placeholder="e.g. Block A, Tower B" />
-          @error('name')<p class="text-rose-500 text-xs mt-1">{{ $message }}</p>@enderror
+          @error('name')
+            <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+          @enderror
         </div>
         <div>
           <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Description <span
@@ -143,13 +146,16 @@
       </form>
 
       {{-- EDIT FORM --}}
-      <form id="form-edit-block" method="POST" action="" class="space-y-5 hidden">
+      <form id="form-edit-block" method="POST" action="" class="space-y-5 hidden" novalidate>
         @csrf @method('PUT')
         <div>
           <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Block Name <span
               class="text-rose-500">*</span></label>
           <input id="edit-block-name" type="text" name="name" required
-            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary" />
+            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary @error('name') border-red-500 dark:border-red-500 @enderror" />
+          @error('name')
+            <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+          @enderror
         </div>
         <div>
           <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Description</label>

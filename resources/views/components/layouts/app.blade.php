@@ -6,6 +6,16 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>CiviCore | {{ $title ?? 'Dashboard' }}</title>
 
+  {{-- Dark mode: restore saved preference BEFORE paint to avoid flash of wrong theme --}}
+  <script>
+    (function () {
+      var saved = localStorage.getItem('theme');
+      if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
+
   {{-- Tailwind CDN --}}
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
@@ -52,6 +62,14 @@
 
 <body {{ $attributes->merge(['class' => 'font-display antialiased']) }}>
   {{ $slot }}
+
+  {{-- Global dark mode toggle — saves preference in localStorage so it persists across navigations --}}
+  <script>
+    function toggleDark() {
+      var isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+  </script>
 </body>
 
 </html>

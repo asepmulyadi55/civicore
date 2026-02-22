@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\PaymentController;
@@ -22,6 +24,12 @@ Route::post('/register', [RegisterController::class, 'register']);
 Route::get('/auth/google/login', [SocialAuthController::class, 'redirectToGoogleLogin'])->name('auth.google.login');
 Route::get('/auth/google/register', [SocialAuthController::class, 'redirectToGoogleRegister'])->name('auth.google.register');
 Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
+
+// Forgot / Reset Password
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 // ── Auth-protected pages ──────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
@@ -54,4 +62,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/users', function () {
         return view('users');
     })->name('users.index');
+
+    // Coming Soon pages
+    Route::get('/events', function () {
+        return view('coming-soon', [
+            'feature' => 'Events',
+            'icon' => 'event',
+            'description' => 'Plan and manage community events, announcements, and schedules. This feature is currently under development.',
+        ]);
+    })->name('events.index');
+
+    Route::get('/settings', function () {
+        return view('coming-soon', [
+            'feature' => 'Settings',
+            'icon' => 'settings',
+            'description' => 'Manage application-wide settings, currency, billing cycles, and more. This feature is currently under development.',
+        ]);
+    })->name('settings.index');
 });
