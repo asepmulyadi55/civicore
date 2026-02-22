@@ -11,6 +11,8 @@ use App\Http\Controllers\BlockController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\MyOverviewController;
+use App\Http\Controllers\UserController;
+
 
 // ── Auth ──────────────────────────────────────────────────────────────────
 Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
@@ -36,7 +38,29 @@ Route::middleware('auth')->group(function () {
 
     // Admin dashboard
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        $currency = \App\Models\Setting::get('currency_symbol', 'Rp');
+        $totalCollected = \App\Models\PaymentRecord::where('status', 'approved')
+            ->whereYear('payment_month', now()->year)
+            ->whereMonth('payment_month', now()->month)
+            ->sum('amount');
+        $pendingCount = \App\Models\PaymentRecord::where('status', 'pending')->count();
+        $unpaidCount = \App\Models\Resident::where('is_active', true)
+            ->whereDoesntHave(
+                'paymentRecords',
+                fn($q) =>
+                $q->where('status', 'approved')
+                    ->whereYear('payment_month', now()->year)
+                    ->whereMonth('payment_month', now()->month)
+            )->count();
+        $activeResidents = \App\Models\Resident::where('is_active', true)->count();
+
+        return view('dashboard', compact(
+            'currency',
+            'totalCollected',
+            'pendingCount',
+            'unpaidCount',
+            'activeResidents'
+        ));
     })->name('dashboard');
 
     // Resident personal overview
@@ -58,10 +82,11 @@ Route::middleware('auth')->group(function () {
     // Reports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
-    // User Management (stub for now)
-    Route::get('/users', function () {
-        return view('users');
-    })->name('users.index');
+    // User Management
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::patch('/users/{user}/approve', [UserController::class, 'approve'])->name('users.approve');
+    Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
     // Coming Soon pages
     Route::get('/events', function () {

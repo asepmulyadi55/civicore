@@ -3,27 +3,27 @@
   class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-6">
   <h2 class="text-lg font-bold text-slate-900 dark:text-white">Quick Actions</h2>
   <div class="grid grid-cols-2 gap-4">
-    <button
+    <a href="{{ route('residents.index') }}"
       class="flex flex-col items-center justify-center p-4 bg-primary text-white rounded-xl hover:bg-blue-600 transition-colors space-y-2 text-center group">
       <span class="material-icons text-2xl group-hover:scale-110 transition-transform">person_add</span>
-      <span class="text-xs font-bold">Register Resident</span>
-    </button>
-    <button
+      <span class="text-xs font-bold">Add Resident</span>
+    </a>
+    <a href="{{ route('payments.index') }}"
       class="flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors space-y-2 text-center group">
       <span class="material-icons text-2xl text-primary group-hover:scale-110 transition-transform">receipt_long</span>
-      <span class="text-xs font-bold">New Payment</span>
-    </button>
-    <button
-      class="flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors space-y-2 text-center group">
-      <span class="material-icons text-2xl text-primary group-hover:scale-110 transition-transform">campaign</span>
-      <span class="text-xs font-bold">Broadcast</span>
-    </button>
-    <button
+      <span class="text-xs font-bold">Payments</span>
+    </a>
+    <a href="{{ route('reports.index') }}"
       class="flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors space-y-2 text-center group">
       <span
         class="material-icons text-2xl text-primary group-hover:scale-110 transition-transform">picture_as_pdf</span>
       <span class="text-xs font-bold">Generate Report</span>
-    </button>
+    </a>
+    <a href="{{ route('blocks.index') }}"
+      class="flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors space-y-2 text-center group">
+      <span class="material-icons text-2xl text-primary group-hover:scale-110 transition-transform">domain</span>
+      <span class="text-xs font-bold">Manage Blocks</span>
+    </a>
   </div>
 
   <hr class="border-slate-100 dark:border-slate-800" />

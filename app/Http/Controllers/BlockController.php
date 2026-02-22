@@ -50,14 +50,15 @@ class BlockController extends Controller
 
     public function destroy(Block $block)
     {
-        $residentCount = $block->residents()->where('is_active', true)->count();
+        $residentCount = $block->residents()->count();
         if ($residentCount > 0) {
             return redirect()->route('blocks.index')
-                ->with('error', "Cannot deactivate \"{$block->name}\" — it has {$residentCount} active resident(s).");
+                ->with('error', "Cannot delete \"{$block->name}\" — it has {$residentCount} resident(s) linked to it. Reassign or remove them first.");
         }
 
-        $block->update(['is_active' => false]);
+        $name = $block->name;
+        $block->delete();
 
-        return redirect()->route('blocks.index')->with('success', "\"{$block->name}\" has been deactivated.");
+        return redirect()->route('blocks.index')->with('success', "\"{$name}\" has been deleted.");
     }
 }

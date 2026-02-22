@@ -19,12 +19,12 @@ class UpdateResidentRequest extends FormRequest
         return [
             'fullname' => ['required', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:25'],
+            'email' => ['nullable', 'email', 'max:255', Rule::unique('residents', 'email')->ignore($residentId)],
             'block_id' => ['required', 'exists:blocks,id'],
             'unit_number' => [
                 'required',
                 'string',
                 'max:20',
-                // Unit must be unique per block, ignoring this resident
                 Rule::unique('residents')->where('block_id', $this->block_id)->ignore($residentId),
             ],
             'is_active' => ['boolean'],

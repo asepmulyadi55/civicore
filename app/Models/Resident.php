@@ -14,6 +14,7 @@ class Resident extends Model
         'unit_number',
         'fullname',
         'phone',
+        'email',
         'is_active',
     ];
 

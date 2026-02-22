@@ -63,6 +63,7 @@ class ResidentController extends Controller
                 'unit_number' => $request->unit_number,
                 'fullname' => $request->fullname,
                 'phone' => $request->phone,
+                'email' => $request->email,
                 'is_active' => true,
             ]);
 
@@ -82,7 +83,7 @@ class ResidentController extends Controller
 
     public function update(UpdateResidentRequest $request, Resident $resident)
     {
-        $resident->update($request->only(['fullname', 'phone', 'block_id', 'unit_number', 'is_active']));
+        $resident->update($request->only(['fullname', 'phone', 'email', 'block_id', 'unit_number', 'is_active']));
 
         return redirect()->route('residents.index')
             ->with('success', 'Resident updated successfully.');

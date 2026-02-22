@@ -66,7 +66,7 @@
           <td class="px-6 py-4">
             <span
               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                {{ $isBlockA ? 'bg-primary/10 text-primary' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' }}">
+                    {{ $isBlockA ? 'bg-primary/10 text-primary' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' }}">
               {{ $blockLabel }}
             </span>
           </td>
@@ -101,18 +101,25 @@
 
           {{-- Actions --}}
           <td class="px-6 py-4">
-            <div class="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div class="flex items-center justify-center gap-2">
               <button
-                onclick="openEditDrawer({{ $resident->id }}, {{ json_encode(['fullname' => $resident->fullname, 'phone' => $resident->phone, 'block_id' => $resident->block_id, 'unit_number' => $resident->unit_number, 'is_active' => $resident->is_active]) }})"
+                onclick="openEditDrawer({{ $resident->id }}, {{ json_encode(['fullname' => $resident->fullname, 'phone' => $resident->phone, 'email' => $resident->email, 'block_id' => $resident->block_id, 'unit_number' => $resident->unit_number, 'is_active' => $resident->is_active]) }})"
                 class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                 title="Edit resident">
                 <span class="material-icons text-lg">edit</span>
               </button>
-              <button onclick="openDeleteModal({{ $resident->id }}, '{{ addslashes($resident->fullname) }}')"
-                class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                title="{{ $resident->is_active ? 'Deactivate resident' : 'Already inactive' }}">
-                <span class="material-icons text-lg">person_off</span>
-              </button>
+              @if($resident->is_active)
+                <button onclick="openDeleteModal({{ $resident->id }}, '{{ addslashes($resident->fullname) }}')"
+                  class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  title="Deactivate resident">
+                  <span class="material-icons text-lg">person_off</span>
+                </button>
+              @else
+                <button disabled class="p-1.5 text-slate-200 dark:text-slate-700 rounded-lg cursor-not-allowed"
+                  title="Already inactive">
+                  <span class="material-icons text-lg">person_off</span>
+                </button>
+              @endif
             </div>
           </td>
         </tr>
@@ -153,7 +160,7 @@
 
       @foreach ($residents->getUrlRange(1, $residents->lastPage()) as $page => $url)
           <a href="{{ $url }}" class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-colors
-              {{ $page === $residents->currentPage()
+                      {{ $page === $residents->currentPage()
         ? 'bg-primary text-white'
         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800' }}">
             {{ $page }}

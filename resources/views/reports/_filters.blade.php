@@ -41,7 +41,7 @@
     <div class="flex items-end">
       <button
         class="w-full bg-primary/10 dark:bg-primary/20 text-primary hover:bg-primary/20 py-2.5 rounded-lg text-sm font-bold transition-colors">
-        Apply Filters
+        Search
       </button>
     </div>
   </div>

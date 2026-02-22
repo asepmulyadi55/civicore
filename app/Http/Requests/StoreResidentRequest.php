@@ -16,6 +16,7 @@ class StoreResidentRequest extends FormRequest
         return [
             'fullname' => ['required', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:25'],
+            'email' => ['nullable', 'email', 'max:255', 'unique:residents,email'],
             'block_id' => ['required', 'exists:blocks,id'],
             'unit_number' => ['required', 'string', 'max:20'],
             'monthly_fee' => ['required', 'numeric', 'min:0'],
