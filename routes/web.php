@@ -84,6 +84,7 @@ Route::middleware('auth')->group(function () {
 
     // User Management
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::patch('/users/{user}/approve', [UserController::class, 'approve'])->name('users.approve');
     Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');

@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Block;
 use App\Models\Resident;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -45,6 +46,44 @@ class UserController extends Controller
     return view('users', compact('users', 'roles'));
   }
 
+  /**
+   * Update a user's profile (name, username, email, role, optional password).
+   */
+  public function update(Request $request, User $user)
+  {
+    $validated = $request->validate([
+      'name' => ['required', 'string', 'max:100'],
+      'username' => [
+        'required',
+        'string',
+        'max:50',
+        Rule::unique('users', 'username')->ignore($user->id)
+      ],
+      'email' => [
+        'required',
+        'email',
+        'max:255',
+        Rule::unique('users', 'email')->ignore($user->id)
+      ],
+      'role_id' => ['nullable', 'exists:roles,id'],
+      'password' => ['nullable', 'string', 'min:8'],
+    ]);
+
+    $user->name = $validated['name'];
+    $user->username = $validated['username'];
+    $user->email = $validated['email'];
+    $user->role_id = $validated['role_id'] ?? null;
+
+    if (!empty($validated['password'])) {
+      $user->password = Hash::make($validated['password']);
+    }
+
+    $user->save();
+
+    return redirect()->route('users.index')
+      ->with('success', "\"{$user->name}\" has been updated successfully.");
+  }
+
   public function approve(User $user)
   {
     $user->update(['is_active' => true]);
@@ -62,7 +101,6 @@ class UserController extends Controller
 
   public function deactivate(User $user)
   {
-    // Cannot deactivate yourself
     if ($user->id === auth()->id()) {
       return redirect()->route('users.index')
         ->with('error', 'You cannot deactivate your own account.');
@@ -82,7 +120,7 @@ class UserController extends Controller
     }
 
     $name = $user->name;
-    // Unlink any residents
+    // Unlink any linked residents before deleting the user
     Resident::where('user_id', $user->id)->update(['user_id' => null]);
     $user->delete();
 
