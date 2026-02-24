@@ -14,11 +14,25 @@ class MyOverviewController extends Controller
     {
         $user = Auth::user();
 
-        // Find the resident record linked to this user (hasMany — take first)
-        $resident = $user->resident()->with(['block', 'feeHistories' => fn($q) => $q->orderByDesc('effective_from')])->first();
+        // Primary: find resident linked by user_id
+        $resident = $user->resident()
+            ->with(['block', 'feeHistories' => fn($q) => $q->orderByDesc('effective_from')])
+            ->first();
+
+        // Fallback: find by email (covers the case where resident was created
+        // after the user was already approved, so user_id was never set)
+        if (!$resident && $user->email) {
+            $resident = \App\Models\Resident::where('email', $user->email)
+                ->with(['block', 'feeHistories' => fn($q) => $q->orderByDesc('effective_from')])
+                ->first();
+
+            // Auto-repair the link so future lookups use the fast path
+            if ($resident) {
+                $resident->update(['user_id' => $user->id]);
+            }
+        }
 
         if (!$resident) {
-            // User is marked as resident role but has no resident record yet
             return view('my-overview', [
                 'resident' => null,
                 'currentFee' => 0,

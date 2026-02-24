@@ -8,6 +8,7 @@ use App\Models\Block;
 use App\Models\FeeHistory;
 use App\Models\Resident;
 use App\Models\Setting;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -75,6 +76,9 @@ class ResidentController extends Controller
                 'created_by' => Auth::id(),
                 'notes' => 'Initial fee assignment',
             ]);
+
+            // Auto-link to a matching user account by email
+            $this->linkUserToResident($resident);
         });
 
         return redirect()->route('residents.index')
@@ -85,16 +89,65 @@ class ResidentController extends Controller
     {
         $resident->update($request->only(['fullname', 'phone', 'email', 'block_id', 'unit_number', 'is_active']));
 
+        // Re-link in case email changed or was just filled in
+        $this->linkUserToResident($resident->fresh());
+
         return redirect()->route('residents.index')
             ->with('success', 'Resident updated successfully.');
     }
 
-    public function destroy(Resident $resident)
+    /**
+     * Soft-deactivate: marks inactive but preserves all payment history.
+     */
+    public function deactivate(Resident $resident)
     {
-        // Soft-deactivate instead of hard delete to preserve payment history
         $resident->update(['is_active' => false]);
 
         return redirect()->route('residents.index')
             ->with('success', "{$resident->fullname} has been deactivated.");
+    }
+
+    /**
+     * Hard delete: permanently removes resident and unlinks their user account.
+     */
+    public function destroy(Resident $resident)
+    {
+        $name = $resident->fullname;
+
+        // Unlink from user account so the user isn't orphaned
+        User::where('email', $resident->email)->update(['block_id' => null]);
+        Resident::where('id', $resident->id)->update(['user_id' => null]);
+
+        $resident->delete();
+
+        return redirect()->route('residents.index')
+            ->with('success', "{$name} has been permanently deleted.");
+    }
+
+    /**
+     * Link a resident record to a matching User account by email.
+     * Sets resident.user_id and syncs user.block_id.
+     */
+    private function linkUserToResident(Resident $resident): void
+    {
+        if (!$resident->email) {
+            return;
+        }
+
+        $user = User::where('email', $resident->email)->first();
+
+        if (!$user) {
+            return;
+        }
+
+        // Link the resident to the user
+        if ($resident->user_id !== $user->id) {
+            $resident->update(['user_id' => $user->id]);
+        }
+
+        // Sync the user's block_id from the resident's block
+        if ($resident->block_id && $user->block_id !== $resident->block_id) {
+            $user->update(['block_id' => $resident->block_id]);
+        }
     }
 }

@@ -69,6 +69,8 @@ Route::middleware('auth')->group(function () {
     // Residents CRUD
     Route::resource('residents', ResidentController::class)
         ->only(['index', 'store', 'update', 'destroy']);
+    Route::patch('/residents/{resident}/deactivate', [ResidentController::class, 'deactivate'])
+        ->name('residents.deactivate');
 
     // Blocks CRUD
     Route::resource('blocks', BlockController::class)
@@ -84,6 +86,7 @@ Route::middleware('auth')->group(function () {
 
     // User Management
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::patch('/users/{user}/approve', [UserController::class, 'approve'])->name('users.approve');
     Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');

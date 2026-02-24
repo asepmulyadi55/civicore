@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Role extends Model
 {
-    protected $fillable = ['name', 'label', 'description'];
+    protected $fillable = ['name', 'label', 'description', 'icon', 'bg_class', 'text_class'];
 
     public function users(): HasMany
     {

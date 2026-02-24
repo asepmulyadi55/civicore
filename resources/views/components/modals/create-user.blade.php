@@ -1,5 +1,9 @@
+@php
+  $roles = \App\Models\Role::orderBy('name')->get();
+  $blocks = \App\Models\Block::orderBy('name')->get();
+@endphp
 {{-- ============================================================
-Modal: Create User
+Modal: Create User — wired to POST /users with real DB blocks
 Trigger: openModal('modal-create')
 ============================================================ --}}
 <div id="modal-create"
@@ -11,7 +15,7 @@ Trigger: openModal('modal-create')
     {{-- Header --}}
     <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
       <div>
-        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Create New System User</h2>
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Create New User</h2>
         <p class="text-sm text-slate-500 mt-0.5">Add staff and community administrators</p>
       </div>
       <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
@@ -21,68 +25,125 @@ Trigger: openModal('modal-create')
     </div>
 
     {{-- Form --}}
-    <form class="p-8 space-y-6 max-h-[80vh] overflow-y-auto">
+    <form method="POST" action="{{ route('users.store') }}" class="p-8 space-y-5 max-h-[80vh] overflow-y-auto">
+      @csrf
 
-      <div class="grid grid-cols-2 gap-4">
-        <div class="space-y-1.5">
-          <label class="text-xs font-bold text-slate-500 uppercase">First Name</label>
-          <input
-            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-transparent focus:border-primary focus:ring-0 rounded-lg text-sm"
-            placeholder="e.g. John" type="text" />
+      {{-- Name --}}
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-500 uppercase">Full Name <span class="text-red-500">*</span></label>
+        <input name="name" type="text" value="{{ old('name') }}" required
+          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
+          placeholder="e.g. John Smith" />
+      </div>
+
+      {{-- Username --}}
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-500 uppercase">Username <span class="text-red-500">*</span></label>
+        <input name="username" type="text" value="{{ old('username') }}" required
+          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
+          placeholder="e.g. jsmith" />
+      </div>
+
+      {{-- Email --}}
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-500 uppercase">Email Address <span
+            class="text-red-500">*</span></label>
+        <input name="email" type="email" value="{{ old('email') }}" required
+          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
+          placeholder="john.smith@example.com" />
+      </div>
+
+      {{-- Password --}}
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-500 uppercase">Password <span class="text-red-500">*</span></label>
+        <div class="relative">
+          <input name="password" id="create-pw" type="password" required
+            class="w-full px-4 py-2.5 pr-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
+            placeholder="Min. 8 characters" />
+          <button type="button" onclick="togglePw('create-pw','create-pw-icon')"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+            <span id="create-pw-icon" class="material-icons text-lg">visibility_off</span>
+          </button>
         </div>
-        <div class="space-y-1.5">
-          <label class="text-xs font-bold text-slate-500 uppercase">Last Name</label>
-          <input
-            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-transparent focus:border-primary focus:ring-0 rounded-lg text-sm"
-            placeholder="e.g. Smith" type="text" />
+      </div>
+
+      {{-- Role Grid --}}
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-slate-500 uppercase">System Role</label>
+
+        <div class="grid grid-cols-2 gap-2">
+          {{-- No Role card --}}
+          <label class="cursor-pointer group col-span-2 sm:col-span-1">
+            <input class="peer sr-only" name="role_id" type="radio" value="" {{ old('role_id', '') === '' ? 'checked' : '' }} />
+            <div class="relative p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700
+              hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5
+              transition-all h-full flex items-center gap-3">
+              <div class="absolute top-2 right-2 opacity-0 peer-checked:opacity-100 text-primary transition-opacity">
+                <span class="material-icons text-sm">check_circle</span>
+              </div>
+              <div class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-400
+                flex items-center justify-center flex-shrink-0">
+                <span class="material-icons text-lg">block</span>
+              </div>
+              <div>
+                <div class="font-bold text-slate-900 dark:text-white text-xs">No Role</div>
+                <div class="text-[10px] text-slate-500 leading-snug">No system access</div>
+              </div>
+            </div>
+          </label>
+          @foreach($roles as $role)
+            <label class="cursor-pointer group">
+              <input class="peer sr-only" name="role_id" type="radio" value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'checked' : '' }} />
+              <div class="relative p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700
+                    hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5
+                    transition-all h-full flex items-center gap-3">
+                <div class="absolute top-2 right-2 opacity-0 peer-checked:opacity-100 text-primary transition-opacity">
+                  <span class="material-icons text-sm">check_circle</span>
+                </div>
+                <div class="w-9 h-9 rounded-lg {{ $role->bg_class }} {{ $role->text_class }}
+                      flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                  <span class="material-icons text-lg">{{ $role->icon }}</span>
+                </div>
+                <div>
+                  <div class="font-bold text-slate-900 dark:text-white text-xs">
+                    {{ $role->label }}
+                  </div>
+                </div>
+              </div>
+            </label>
+          @endforeach
         </div>
       </div>
 
-      <div class="space-y-1.5">
-        <label class="text-xs font-bold text-slate-500 uppercase">Username</label>
-        <input
-          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-transparent focus:border-primary focus:ring-0 rounded-lg text-sm"
-          placeholder="e.g. jsmith" type="text" />
-      </div>
-
-      <div class="space-y-1.5">
-        <label class="text-xs font-bold text-slate-500 uppercase">Email Address</label>
-        <input
-          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-transparent focus:border-primary focus:ring-0 rounded-lg text-sm"
-          placeholder="john.smith@example.com" type="email" />
-      </div>
-
-      <div class="space-y-1.5">
-        <label class="text-xs font-bold text-slate-500 uppercase">Password</label>
-        <input
-          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-transparent focus:border-primary focus:ring-0 rounded-lg text-sm"
-          placeholder="Min. 8 characters" type="password" />
-      </div>
-
-      {{-- Reusable role selector --}}
-      <div class="space-y-3">
-        <label class="text-xs font-bold text-slate-500 uppercase block">System Role</label>
-        <x-ui.role-selector name="create_role" selected="admin" />
-      </div>
-
-      {{-- Block assignment --}}
-      <div class="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-        <label class="text-xs font-bold text-slate-500 uppercase flex justify-between">
+      {{-- Block Assignment --}}
+      <div class="space-y-1.5 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <label class="text-xs font-bold text-slate-500 uppercase flex justify-between items-center">
           Block Assignment
           <span class="text-[10px] text-primary lowercase font-normal italic">*Required for coordinators</span>
         </label>
         <div class="relative">
           <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">domain</span>
-          <select
-            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-transparent focus:border-primary focus:ring-0 rounded-lg text-sm">
-            <option value="">Select a block or phase...</option>
-            <option>Block A - Pinecrest</option>
-            <option>Block B - Oakridge</option>
-            <option>Block C - Maple View</option>
-            <option>Block D - Riverfront</option>
-            <option>Phase 2 - Common Grounds</option>
+          <select name="block_id"
+            class="w-full appearance-none pl-10 pr-9 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white">
+            <option value="">— None —</option>
+            @foreach($blocks as $block)
+              <option value="{{ $block->id }}" {{ old('block_id') == $block->id ? 'selected' : '' }}>
+                {{ $block->name }}{{ $block->description ? ' — ' . $block->description : '' }}
+              </option>
+            @endforeach
           </select>
+          <span
+            class="material-icons absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
         </div>
+      </div>
+
+      {{-- Active toggle --}}
+      <div class="flex items-center gap-3 py-1">
+        <input type="checkbox" id="create-is-active" name="is_active" value="1"
+          class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary/20" checked />
+        <label for="create-is-active" class="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+          Activate immediately <span class="text-slate-400 font-normal text-xs">(unchecked = Pending Approval)</span>
+        </label>
       </div>
 
       {{-- Actions --}}
