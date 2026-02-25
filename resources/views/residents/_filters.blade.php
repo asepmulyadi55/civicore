@@ -10,26 +10,35 @@
   </div>
 
   {{-- Block filter --}}
-  <select name="block_id" onchange="this.form.submit()"
-    class="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
-    <option value="">All Blocks</option>
-    @foreach ($blocks as $block)
-      <option value="{{ $block->id }}" {{ request('block_id') == $block->id ? 'selected' : '' }}>
-        {{ $block->name }}
-      </option>
-    @endforeach
-  </select>
+  <div class="relative">
+    <select name="block_id"
+      class="appearance-none pl-4 pr-9 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+      <option value="">All Blocks</option>
+      @foreach ($blocks as $block)
+        <option value="{{ $block->id }}" {{ request('block_id') == $block->id ? 'selected' : '' }}>
+          {{ $block->name }}
+        </option>
+      @endforeach
+    </select>
+    <span
+      class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
+  </div>
 
   {{-- Status filter --}}
-  <select name="status" onchange="this.form.submit()"
-    class="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
-    <option value="">All Status</option>
-    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
-    <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-  </select>
+  <div class="relative">
+    <select name="status"
+      class="appearance-none pl-4 pr-9 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+      <option value="">All Status</option>
+      <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+      <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+    </select>
+    <span
+      class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
+  </div>
 
+  {{-- Search button --}}
   <button type="submit"
-    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+    class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-lg shadow-sm shadow-primary/20 transition-all">
     <span class="material-icons text-sm">search</span>
     Search
   </button>

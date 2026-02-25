@@ -78,6 +78,8 @@ Route::middleware('auth')->group(function () {
 
     // Payments (admin)
     Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+    Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
+    Route::patch('/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
     Route::patch('/payments/{payment}/approve', [PaymentController::class, 'approve'])->name('payments.approve');
     Route::patch('/payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
 

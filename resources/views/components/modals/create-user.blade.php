@@ -1,6 +1,5 @@
 @php
   $roles = \App\Models\Role::orderBy('name')->get();
-  $blocks = \App\Models\Block::orderBy('name')->get();
 @endphp
 {{-- ============================================================
 Modal: Create User — wired to POST /users with real DB blocks
@@ -25,46 +24,67 @@ Trigger: openModal('modal-create')
     </div>
 
     {{-- Form --}}
-    <form method="POST" action="{{ route('users.store') }}" class="p-8 space-y-5 max-h-[80vh] overflow-y-auto">
+    <form method="POST" action="{{ route('users.store') }}" class="p-8 pt-0 space-y-5 max-h-[80vh] overflow-y-auto"
+      novalidate>
       @csrf
 
       {{-- Name --}}
       <div class="space-y-1.5">
         <label class="text-xs font-bold text-slate-500 uppercase">Full Name <span class="text-red-500">*</span></label>
-        <input name="name" type="text" value="{{ old('name') }}" required
-          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
+        <input name="name" type="text" value="{{ old('name') }}"
+          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('name') border-red-500 @enderror"
           placeholder="e.g. John Smith" />
+        @error('name')
+          <p class="text-xs text-red-500 flex items-center gap-1 mt-1">
+            <span class="material-icons text-xs">error_outline</span> {{ $message }}
+          </p>
+        @enderror
       </div>
 
       {{-- Username --}}
       <div class="space-y-1.5">
         <label class="text-xs font-bold text-slate-500 uppercase">Username <span class="text-red-500">*</span></label>
-        <input name="username" type="text" value="{{ old('username') }}" required
-          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
+        <input name="username" type="text" value="{{ old('username') }}"
+          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('username') border-red-500 @enderror"
           placeholder="e.g. jsmith" />
+        @error('username')
+          <p class="text-xs text-red-500 flex items-center gap-1 mt-1">
+            <span class="material-icons text-xs">error_outline</span> {{ $message }}
+          </p>
+        @enderror
       </div>
 
       {{-- Email --}}
       <div class="space-y-1.5">
         <label class="text-xs font-bold text-slate-500 uppercase">Email Address <span
             class="text-red-500">*</span></label>
-        <input name="email" type="email" value="{{ old('email') }}" required
-          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
+        <input name="email" type="email" value="{{ old('email') }}"
+          class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('email') border-red-500 @enderror"
           placeholder="john.smith@example.com" />
+        @error('email')
+          <p class="text-xs text-red-500 flex items-center gap-1 mt-1">
+            <span class="material-icons text-xs">error_outline</span> {{ $message }}
+          </p>
+        @enderror
       </div>
 
       {{-- Password --}}
       <div class="space-y-1.5">
         <label class="text-xs font-bold text-slate-500 uppercase">Password <span class="text-red-500">*</span></label>
         <div class="relative">
-          <input name="password" id="create-pw" type="password" required
-            class="w-full px-4 py-2.5 pr-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
+          <input name="password" id="create-pw" type="password"
+            class="w-full px-4 py-2.5 pr-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('password') border-red-500 @enderror"
             placeholder="Min. 8 characters" />
           <button type="button" onclick="togglePw('create-pw','create-pw-icon')"
             class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
             <span id="create-pw-icon" class="material-icons text-lg">visibility_off</span>
           </button>
         </div>
+        @error('password')
+          <p class="text-xs text-red-500 flex items-center gap-1 mt-1">
+            <span class="material-icons text-xs">error_outline</span> {{ $message }}
+          </p>
+        @enderror
       </div>
 
       {{-- Role Grid --}}
@@ -95,13 +115,14 @@ Trigger: openModal('modal-create')
             <label class="cursor-pointer group">
               <input class="peer sr-only" name="role_id" type="radio" value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'checked' : '' }} />
               <div class="relative p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700
-                    hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5
-                    transition-all h-full flex items-center gap-3">
+                              hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5
+                              transition-all h-full flex items-center gap-3">
                 <div class="absolute top-2 right-2 opacity-0 peer-checked:opacity-100 text-primary transition-opacity">
                   <span class="material-icons text-sm">check_circle</span>
                 </div>
-                <div class="w-9 h-9 rounded-lg {{ $role->bg_class }} {{ $role->text_class }}
-                      flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <div
+                  class="w-9 h-9 rounded-lg {{ $role->bg_class }} {{ $role->text_class }}
+                                flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                   <span class="material-icons text-lg">{{ $role->icon }}</span>
                 </div>
                 <div>
@@ -112,28 +133,6 @@ Trigger: openModal('modal-create')
               </div>
             </label>
           @endforeach
-        </div>
-      </div>
-
-      {{-- Block Assignment --}}
-      <div class="space-y-1.5 pt-4 border-t border-slate-100 dark:border-slate-800">
-        <label class="text-xs font-bold text-slate-500 uppercase flex justify-between items-center">
-          Block Assignment
-          <span class="text-[10px] text-primary lowercase font-normal italic">*Required for coordinators</span>
-        </label>
-        <div class="relative">
-          <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">domain</span>
-          <select name="block_id"
-            class="w-full appearance-none pl-10 pr-9 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white">
-            <option value="">— None —</option>
-            @foreach($blocks as $block)
-              <option value="{{ $block->id }}" {{ old('block_id') == $block->id ? 'selected' : '' }}>
-                {{ $block->name }}{{ $block->description ? ' — ' . $block->description : '' }}
-              </option>
-            @endforeach
-          </select>
-          <span
-            class="material-icons absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
         </div>
       </div>
 

@@ -60,6 +60,14 @@ class PaymentController extends Controller
                     ->whereMonth('payment_month', now()->month)
             )->count();
 
+        // Build paid-months map for JS month grid: residentId → ['YYYY-MM', ...]
+        $paidMonthsByResident = PaymentRecord::whereIn('status', ['pending', 'approved'])
+            ->get(['resident_id', 'payment_month'])
+            ->groupBy('resident_id')
+            ->map(fn($rows) => $rows->map(
+                fn($r) => \Carbon\Carbon::parse($r->payment_month)->format('Y-m')
+            )->values()->all());
+
         return view('payments', compact(
             'payments',
             'blocks',
@@ -67,8 +75,108 @@ class PaymentController extends Controller
             'pendingCount',
             'pendingTotal',
             'collectedMonth',
-            'unpaidCount'
+            'unpaidCount',
+            'paidMonthsByResident'
         ));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'resident_id' => ['required', 'exists:residents,id'],
+            'months' => ['required', 'array', 'min:1'],
+            'months.*' => ['required', 'string', 'regex:/^\d{4}-\d{2}$/'],
+            'amount' => ['required', 'numeric', 'min:0'],
+            'payment_method_id' => ['nullable', 'exists:payment_methods,id'],
+            'status' => ['required', 'in:unpaid,pending,approved'],
+            'proof' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $proofPath = null;
+        if ($request->hasFile('proof')) {
+            $proofPath = $request->file('proof')->store('proofs', 'public');
+        }
+
+        $baseData = [
+            'resident_id' => $request->resident_id,
+            'amount' => $request->amount,
+            'payment_method_id' => $request->payment_method_id ?: null,
+            'status' => $request->status,
+            'notes' => $request->notes,
+            'proof_path' => $proofPath,
+            'submitted_by' => auth()->id(),
+        ];
+
+        if ($baseData['status'] === 'approved') {
+            $baseData['approved_by'] = auth()->id();
+            $baseData['approved_at'] = now();
+        }
+
+        $created = 0;
+        $skipped = 0;
+        foreach ($request->months as $monthStr) {
+            $paymentMonth = $monthStr . '-01';
+            $exists = PaymentRecord::where('resident_id', $request->resident_id)
+                ->where('payment_month', $paymentMonth)
+                ->exists();
+            if ($exists) {
+                $skipped++;
+                continue;
+            }
+            PaymentRecord::create(array_merge($baseData, ['payment_month' => $paymentMonth]));
+            $created++;
+        }
+
+        $msg = "Created {$created} payment record" . ($created !== 1 ? 's' : '') . '.';
+        if ($skipped)
+            $msg .= " {$skipped} skipped (already exist).";
+
+        return redirect()->route('payments.index')->with('success', $msg);
+    }
+
+    public function update(Request $request, PaymentRecord $payment)
+    {
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'min:0'],
+            'payment_month' => ['required', 'string'],
+            'payment_method_id' => ['nullable', 'exists:payment_methods,id'],
+            'status' => ['required', 'in:unpaid,pending,approved,rejected'],
+            'rejection_reason' => ['nullable', 'string', 'max:1000'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+            'proof' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
+        ]);
+
+        $data['payment_month'] = $data['payment_month'] . '-01';
+
+        // Proof replacement
+        if ($request->hasFile('proof')) {
+            // Delete old file
+            if ($payment->proof_path) {
+                \Storage::disk('public')->delete($payment->proof_path);
+            }
+            $data['proof_path'] = $request->file('proof')->store('proofs', 'public');
+        }
+        unset($data['proof']);
+
+        // Re-stamp approval if now approved
+        if ($data['status'] === 'approved' && $payment->status !== 'approved') {
+            $data['approved_by'] = auth()->id();
+            $data['approved_at'] = now();
+        } elseif ($data['status'] !== 'approved') {
+            $data['approved_by'] = null;
+            $data['approved_at'] = null;
+        }
+
+        // Clear rejection reason if status is not rejected
+        if ($data['status'] !== 'rejected') {
+            $data['rejection_reason'] = null;
+        }
+
+        $payment->update($data);
+
+        return redirect()->route('payments.index')
+            ->with('success', 'Payment updated successfully.');
     }
 
     public function approve(PaymentRecord $payment)

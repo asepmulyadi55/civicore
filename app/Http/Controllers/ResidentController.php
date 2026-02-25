@@ -87,10 +87,23 @@ class ResidentController extends Controller
 
     public function update(UpdateResidentRequest $request, Resident $resident)
     {
-        $resident->update($request->only(['fullname', 'phone', 'email', 'block_id', 'unit_number', 'is_active']));
+        DB::transaction(function () use ($request, $resident) {
+            $resident->update($request->only(['fullname', 'phone', 'email', 'block_id', 'unit_number', 'is_active']));
 
-        // Re-link in case email changed or was just filled in
-        $this->linkUserToResident($resident->fresh());
+            // Optional: create a new FeeHistory entry if a new fee is provided
+            if ($request->filled('new_monthly_fee')) {
+                FeeHistory::create([
+                    'resident_id' => $resident->id,
+                    'amount' => $request->new_monthly_fee,
+                    'effective_from' => Carbon::createFromFormat('Y-m', $request->new_fee_start ?? now()->format('Y-m'))->startOfMonth(),
+                    'created_by' => Auth::id(),
+                    'notes' => 'Fee updated via resident edit',
+                ]);
+            }
+
+            // Re-link in case email changed or was just filled in
+            $this->linkUserToResident($resident->fresh());
+        });
 
         return redirect()->route('residents.index')
             ->with('success', 'Resident updated successfully.');

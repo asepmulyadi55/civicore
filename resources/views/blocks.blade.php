@@ -4,6 +4,9 @@
 
   <x-nav.sidebar active="blocks" />
 
+  {{-- Block form modals --}}
+  <x-modals.block-form />
+
   <div class="lg:pl-64 min-h-screen bg-background-light dark:bg-background-dark flex flex-col">
 
     {{-- Header --}}
@@ -20,7 +23,7 @@
           Blocks</span>
       </div>
       <div class="flex items-center gap-3">
-        <button onclick="openBlockDrawer()"
+        <button onclick="openAddBlockModal()"
           class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-sm shadow-primary/20 text-sm">
           <span class="material-icons text-sm">add</span>
           <span class="hidden sm:inline">Add Block</span>
@@ -119,152 +122,53 @@
     </main>
   </div>
 
-  {{-- ── Add/Edit Drawer ─────────────────────────────────────────────── --}}
-  <div id="block-drawer-overlay" onclick="closeBlockDrawer()"
-    class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden"></div>
-
-  <aside id="block-drawer"
-    class="fixed right-0 top-0 h-full w-full max-w-md bg-white dark:bg-slate-900 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
-    <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-      <h3 id="block-drawer-title" class="text-xl font-bold">Add New Block</h3>
-      <button onclick="closeBlockDrawer()"
-        class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-        <span class="material-icons text-slate-400">close</span>
-      </button>
-    </div>
-
-    <div class="flex-1 overflow-y-auto p-6">
-
-      {{-- ADD FORM --}}
-      <form id="form-add-block" method="POST" action="{{ route('blocks.store') }}" class="space-y-5" novalidate>
-        @csrf
-
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Block Name <span
-              class="text-rose-500">*</span></label>
-          <input type="text" name="name" value="{{ old('name') }}" required
-            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary @error('name') border-red-500 dark:border-red-500 @enderror"
-            placeholder="e.g. Block A, Tower B" />
-          @error('name')
-            <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-          @enderror
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Description <span
-              class="text-slate-400 font-normal">(optional)</span></label>
-          <textarea name="description" rows="3"
-            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none"
-            placeholder="e.g. Terrace units on the east wing">{{ old('description') }}</textarea>
-        </div>
-        <button type="submit"
-          class="w-full py-2.5 rounded-lg text-sm font-bold text-white bg-primary hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
-          Save Block
-        </button>
-      </form>
-
-      {{-- EDIT FORM --}}
-      <form id="form-edit-block" method="POST" action="" class="space-y-5 hidden" novalidate>
-        @csrf @method('PUT')
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Block Name <span
-              class="text-rose-500">*</span></label>
-          <input id="edit-block-name" type="text" name="name" required
-            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary @error('name') border-red-500 dark:border-red-500 @enderror" />
-          @error('name')
-            <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-          @enderror
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Description</label>
-          <textarea id="edit-block-description" name="description" rows="3"
-            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none"></textarea>
-        </div>
-        <div class="flex items-center gap-3">
-          <input id="edit-block-active" type="checkbox" name="is_active" value="1" class="w-4 h-4 text-primary">
-          <label for="edit-block-active" class="text-sm font-medium text-slate-700 dark:text-slate-300">Active</label>
-        </div>
-        <button type="submit"
-          class="w-full py-2.5 rounded-lg text-sm font-bold text-white bg-primary hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
-          Update Block
-        </button>
-      </form>
-    </div>
-  </aside>
-
-  <script>
-    function openBlockDrawer() {
-      document.getElementById('block-drawer-title').textContent = 'Add New Block';
-      document.getElementById('form-add-block').classList.remove('hidden');
-      document.getElementById('form-edit-block').classList.add('hidden');
-      document.getElementById('block-drawer').classList.remove('translate-x-full');
-      document.getElementById('block-drawer-overlay').classList.remove('hidden');
-    }
-
-    function openEditBlockDrawer(id, name, description, isActive) {
-      document.getElementById('block-drawer-title').textContent = 'Edit Block';
-      document.getElementById('form-add-block').classList.add('hidden');
-      document.getElementById('form-edit-block').classList.remove('hidden');
-      document.getElementById('form-edit-block').action = '/blocks/' + id;
-      document.getElementById('edit-block-name').value = name;
-      document.getElementById('edit-block-description').value = description;
-      document.getElementById('edit-block-active').checked = isActive;
-      document.getElementById('block-drawer').classList.remove('translate-x-full');
-      document.getElementById('block-drawer-overlay').classList.remove('hidden');
-    }
-
-    function closeBlockDrawer() {
-      document.getElementById('block-drawer').classList.add('translate-x-full');
-      document.getElementById('block-drawer-overlay').classList.add('hidden');
-    }
-
-    // Auto-open drawer on validation error (add form)
-    @if($errors->any() && !old('_edit'))
-      window.addEventListener('DOMContentLoaded', () => openBlockDrawer());
-    @endif
-
-    // Delete modal
-    let deleteBlockId = null;
-    function openDeleteBlockModal(id, name) {
-      deleteBlockId = id;
-      document.getElementById('delete-block-name').textContent = name;
-      document.getElementById('delete-block-form').action = '/blocks/' + id;
-      document.getElementById('modal-delete-block').classList.remove('hidden');
-    }
-    function closeDeleteBlockModal() {
-      document.getElementById('modal-delete-block').classList.add('hidden');
-    }
-  </script>
-
   {{-- Delete Confirmation Modal --}}
   <div id="modal-delete-block"
     class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-sm p-6">
-      <div class="flex items-center gap-3 mb-4">
-        <div
-          class="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center flex-shrink-0">
-          <span class="material-icons text-rose-600 dark:text-rose-400">delete_outline</span>
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+      <div class="p-6 flex flex-col items-center text-center">
+        <div class="w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mb-4">
+          <span class="material-icons text-rose-600 dark:text-rose-400 text-2xl">delete_forever</span>
         </div>
-        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Delete Block</h3>
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">Delete Block?</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          <span class="font-semibold text-slate-700 dark:text-slate-200" id="delete-block-name"></span>
+          will be permanently removed. This cannot be undone.
+        </p>
       </div>
-      <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">
-        Are you sure you want to delete <span class="font-semibold text-slate-900 dark:text-white"
-          id="delete-block-name"></span>?
-        This action cannot be undone.
-      </p>
-      <div class="flex gap-3">
+      <div class="flex gap-3 px-6 pb-6">
         <button type="button" onclick="closeDeleteBlockModal()"
-          class="flex-1 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+          class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
           Cancel
         </button>
         <form id="delete-block-form" method="POST" action="" class="flex-1">
           @csrf @method('DELETE')
           <button type="submit"
-            class="w-full px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-sm font-bold text-white transition-all">
-            Delete
+            class="w-full px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-sm font-bold text-white transition-all">
+            Yes, Delete
           </button>
         </form>
       </div>
     </div>
   </div>
+
+  <script>
+    function openDeleteBlockModal(id, name) {
+      document.getElementById('delete-block-name').textContent = name;
+      document.getElementById('delete-block-form').action = '/blocks/' + id;
+      document.getElementById('modal-delete-block').classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+    function closeDeleteBlockModal() {
+      document.getElementById('modal-delete-block').classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+    document.getElementById('modal-delete-block').addEventListener('click', function (e) {
+      if (e.target === this) closeDeleteBlockModal();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeDeleteBlockModal();
+    });
+  </script>
 
 </x-layouts.app>

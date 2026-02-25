@@ -11,6 +11,13 @@
       Console</span>
   </div>
   <div class="flex items-center gap-3">
+    {{-- Record Payment --}}
+    <button onclick="openCreateModal()"
+      class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-sm shadow-primary/20 text-sm">
+      <span class="material-icons text-sm">add</span>
+      <span class="hidden sm:inline">Record Payment</span>
+    </button>
+    {{-- Dark mode --}}
     <button
       class="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-primary/50 transition-all"
       onclick="toggleDark()" title="Toggle dark mode">

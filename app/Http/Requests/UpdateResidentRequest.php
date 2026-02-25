@@ -28,6 +28,8 @@ class UpdateResidentRequest extends FormRequest
                 Rule::unique('residents')->where('block_id', $this->block_id)->ignore($residentId),
             ],
             'is_active' => ['boolean'],
+            'new_monthly_fee' => ['nullable', 'numeric', 'min:0'],
+            'new_fee_start' => ['nullable', 'date_format:Y-m'],
         ];
     }
 

@@ -71,7 +71,7 @@
                 </div>
                 <div>
                   <div class="font-bold text-slate-900 dark:text-white">{{ $user->name }}</div>
-                  <div class="text-xs text-slate-400">@{{ $user->username }}</div>
+                  <div class="text-xs text-slate-400">&#64;{{ $user->username }}</div>
                 </div>
               </div>
             </td>
@@ -111,13 +111,13 @@
 
                 {{-- Edit (always shown) --}}
                 <button onclick="openEditModal(
-                      {{ $user->id }},
-                      {{ json_encode($user->name) }},
-                      {{ json_encode($user->username) }},
-                      {{ json_encode($user->email) }},
-                      {{ $user->role_id ?? 'null' }},
-                      {{ $user->block_id ?? 'null' }}
-                    )" class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                        {{ $user->id }},
+                        {{ json_encode($user->name) }},
+                        {{ json_encode($user->username) }},
+                        {{ json_encode($user->email) }},
+                        {{ $user->role_id ?? 'null' }},
+                        {{ $user->block_id ?? 'null' }}
+                      )" class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                   title="Edit user">
                   <span class="material-icons text-lg">edit</span>
                 </button>
@@ -178,5 +178,3 @@
     {{ $users->links() }}
   </div>
 </div>
-
-

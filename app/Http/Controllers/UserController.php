@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Block;
 use App\Models\Resident;
 use App\Models\Role;
 use App\Models\User;
@@ -40,9 +39,11 @@ class UserController extends Controller
 
     $users = $query->paginate(20)->withQueryString();
     $roles = Role::orderBy('name')->get();
-    $blocks = Block::orderBy('name')->get();
+    $totalUsers = User::count();
+    $activeUsers = User::where('is_active', true)->count();
+    $pendingUsers = User::where('is_active', false)->whereNotNull('email')->count();
 
-    return view('users', compact('users', 'roles', 'blocks'));
+    return view('users', compact('users', 'roles', 'totalUsers', 'activeUsers', 'pendingUsers'));
   }
 
   /**
@@ -56,8 +57,18 @@ class UserController extends Controller
       'email' => ['required', 'email', 'max:255', 'unique:users,email'],
       'password' => ['required', 'string', 'min:8'],
       'role_id' => ['nullable', 'exists:roles,id'],
-      'block_id' => ['nullable', 'exists:blocks,id'],
       'is_active' => ['nullable', 'boolean'],
+    ], [
+      'name.required' => 'Please enter the user\'s full name.',
+      'name.max' => 'Full name must not exceed 100 characters.',
+      'username.required' => 'Please choose a username.',
+      'username.max' => 'Username must not exceed 50 characters.',
+      'username.unique' => 'This username is already taken. Please choose another.',
+      'email.required' => 'Please enter an email address.',
+      'email.email' => 'Please enter a valid email address (e.g. user@example.com).',
+      'email.unique' => 'This email is already registered to another user.',
+      'password.required' => 'Please set a password for this user.',
+      'password.min' => 'Password must be at least 8 characters long.',
     ]);
 
     $user = User::create([
@@ -66,7 +77,6 @@ class UserController extends Controller
       'email' => $validated['email'],
       'password' => Hash::make($validated['password']),
       'role_id' => $validated['role_id'] ?? null,
-      'block_id' => $validated['block_id'] ?? null,
       'is_active' => $request->boolean('is_active', true),
     ]);
 
@@ -88,28 +98,26 @@ class UserController extends Controller
   {
     $validated = $request->validate([
       'name' => ['required', 'string', 'max:100'],
-      'username' => [
-        'required',
-        'string',
-        'max:50',
-        Rule::unique('users', 'username')->ignore($user->id)
-      ],
-      'email' => [
-        'required',
-        'email',
-        'max:255',
-        Rule::unique('users', 'email')->ignore($user->id)
-      ],
+      'username' => ['required', 'string', 'max:50', Rule::unique('users', 'username')->ignore($user->id)],
+      'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
       'role_id' => ['nullable', 'exists:roles,id'],
-      'block_id' => ['nullable', 'exists:blocks,id'],
       'password' => ['nullable', 'string', 'min:8'],
+    ], [
+      'name.required' => 'Please enter the user\'s full name.',
+      'name.max' => 'Full name must not exceed 100 characters.',
+      'username.required' => 'Please choose a username.',
+      'username.max' => 'Username must not exceed 50 characters.',
+      'username.unique' => 'This username is already taken. Please choose another.',
+      'email.required' => 'Please enter an email address.',
+      'email.email' => 'Please enter a valid email address (e.g. user@example.com).',
+      'email.unique' => 'This email is already registered to another user.',
+      'password.min' => 'New password must be at least 8 characters long.',
     ]);
 
     $user->name = $validated['name'];
     $user->username = $validated['username'];
     $user->email = $validated['email'];
     $user->role_id = $validated['role_id'] ?? null;
-    $user->block_id = $validated['block_id'] ?? null;
 
     if (!empty($validated['password'])) {
       $user->password = Hash::make($validated['password']);

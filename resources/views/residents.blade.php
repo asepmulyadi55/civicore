@@ -12,7 +12,9 @@
     </div>
   </div>
 
-  @include('residents._drawer')
+  {{-- Resident form modals — in components/modals/ consistent with other sections --}}
+  <x-modals.resident-form :blocks="$blocks" :currency="$currency" />
+
 
   {{-- ── Resident Confirmation Modal (Deactivate / Delete) ────────── --}}
   <div id="resident-confirm-modal"

@@ -9,17 +9,7 @@
   </div>
 @endif
 
-@if ($errors->any())
-  <div
-    class="mb-4 flex items-start gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
-    <span class="material-icons text-base mt-0.5">error</span>
-    <ul class="space-y-0.5">
-      @foreach ($errors->all() as $error)
-        <li>{{ $error }}</li>
-      @endforeach
-    </ul>
-  </div>
-@endif
+
 
 <div
   class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
@@ -66,7 +56,7 @@
           <td class="px-6 py-4">
             <span
               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                      {{ $isBlockA ? 'bg-primary/10 text-primary' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' }}">
+                        {{ $isBlockA ? 'bg-primary/10 text-primary' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' }}">
               {{ $blockLabel }}
             </span>
           </td>
@@ -174,7 +164,7 @@
 
       @foreach ($residents->getUrlRange(1, $residents->lastPage()) as $page => $url)
           <a href="{{ $url }}" class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-colors
-                          {{ $page === $residents->currentPage()
+                              {{ $page === $residents->currentPage()
         ? 'bg-primary text-white'
         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800' }}">
             {{ $page }}

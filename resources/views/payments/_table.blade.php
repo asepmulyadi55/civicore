@@ -1,179 +1,121 @@
 {{-- Payments Table --}}
-<div
-  class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
   <div class="overflow-x-auto">
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Resident</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Block</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Month</th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Amount</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Method</th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
-
-        {{-- Approved --}}
-        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                JD</div>
-              <div>
-                <div class="font-bold text-slate-900 dark:text-white">Jane Doe</div>
-                <div class="text-xs text-slate-500">Block A - Unit 402</div>
+      <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+        @forelse($payments as $payment)
+          @php
+            $initials = collect(explode(' ', $payment->resident->fullname))->map(fn($w) => strtoupper($w[0]))->take(2)->implode('');
+          @endphp
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">{{ $initials }}</div>
+                <div>
+                  <p class="font-semibold text-sm">{{ $payment->resident->fullname }}</p>
+                  <p class="text-xs text-slate-500">Unit {{ $payment->resident->unit_number }}</p>
+                </div>
               </div>
-            </div>
-          </td>
-          <td class="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white">$450.00</td>
-          <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">Oct 12, 2023</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-              <span class="material-icons text-sm">account_balance</span> Bank Transfer
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <span
-              class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Approved
-            </span>
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button title="View Receipt" class="p-1.5 text-slate-400 hover:text-primary transition-colors">
-              <span class="material-icons text-xl">receipt_long</span>
-            </button>
-            <button title="Edit" class="p-1.5 text-slate-400 hover:text-primary transition-colors"
-              onclick="openPaymentModal('JD','Jane Doe','Block A - Unit 402', 50, [0,1,2])">
-              <span class="material-icons text-xl">edit</span>
-            </button>
-          </td>
-        </tr>
+            </td>
+            <td class="px-6 py-4 text-sm font-medium">{{ $payment->resident->block?->name ?? '—' }}</td>
+            <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+              {{ \Carbon\Carbon::parse($payment->payment_month)->format('F Y') }}
+            </td>
+            <td class="px-6 py-4 text-sm font-bold">{{ $currency }} {{ number_format($payment->amount) }}</td>
+            <td class="px-6 py-4">
+              @switch($payment->status)
+                @case('approved')
+                  <span class="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-xs font-bold uppercase">Approved</span>
+                  @break
+                @case('pending')
+                  <span class="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold uppercase">Pending</span>
+                  @break
+                @case('rejected')
+                  <span class="px-3 py-1 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full text-xs font-bold uppercase">Rejected</span>
+                  @break
+                @default
+                  <span class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full text-xs font-bold uppercase">Unpaid</span>
+              @endswitch
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center justify-end gap-1">
 
-        {{-- Pending → Verify opens modal --}}
-        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
-                RM</div>
-              <div>
-                <div class="font-bold text-slate-900 dark:text-white">Robert Miller</div>
-                <div class="text-xs text-slate-500">Block B - Unit 105</div>
+                {{-- View Proof --}}
+                @if($payment->proof_path)
+                  <button
+                    onclick="openProofModal('{{ asset('storage/' . $payment->proof_path) }}')"
+                    title="View payment proof"
+                    class="p-1.5 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
+                    <span class="material-icons text-lg">receipt_long</span>
+                  </button>
+                @else
+                  <span class="p-1.5 text-slate-200 dark:text-slate-700 cursor-not-allowed" title="No proof uploaded">
+                    <span class="material-icons text-lg">receipt_long</span>
+                  </span>
+                @endif
+
+                {{-- Edit button --}}
+                <button
+                  onclick="openEditModal(
+                    {{ $payment->id }},
+                    '{{ addslashes($payment->resident->fullname) }}',
+                    '{{ $payment->resident->unit_number }}',
+                    '{{ $payment->payment_month->format('Y-m') }}',
+                    {{ $payment->amount }},
+                    {{ $payment->payment_method_id ?? 'null' }},
+                    '{{ $payment->status }}',
+                    '{{ addslashes($payment->rejection_reason ?? '') }}',
+                    '{{ addslashes($payment->notes ?? '') }}',
+                    '{{ $payment->proof_path ? asset('storage/' . $payment->proof_path) : '' }}'
+                  )"
+                  title="Edit payment"
+                  class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                  <span class="material-icons text-lg">edit</span>
+                </button>
+
+                {{-- Review / status text --}}
+                @if($payment->status === 'pending')
+                  <button onclick="openReviewModal({{ $payment->id }}, '{{ addslashes($payment->resident->fullname) }}', '{{ $payment->resident->unit_number }}', '{{ $currency }} {{ number_format($payment->amount) }}', '{{ \Carbon\Carbon::parse($payment->payment_month)->format('F Y') }}')"
+                    class="text-primary hover:text-primary/80 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-primary/20 rounded-lg hover:bg-primary/5 transition-all">
+                    Review
+                  </button>
+                @elseif($payment->status === 'approved')
+                  <span class="text-xs text-slate-400">Approved {{ $payment->approved_at?->format('d M') }}</span>
+                @elseif($payment->status === 'rejected')
+                  <span class="text-xs text-rose-400" title="{{ $payment->rejection_reason }}">Rejected</span>
+                @endif
+
               </div>
-            </div>
-          </td>
-          <td class="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white">$1,200.00</td>
-          <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">Oct 14, 2023</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-              <span class="material-icons text-sm">payments</span> Cash
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <span
-              class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
-              <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>Pending
-            </span>
-          </td>
-          <td class="px-6 py-4 text-right">
-            <div class="flex justify-end gap-2">
-              <button onclick="openPaymentModal('RM','Robert Miller','Block B - Unit 105', 50, [0,1])"
-                class="bg-primary text-white text-[10px] px-3 py-1.5 rounded font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors flex items-center gap-1">
-                <span class="material-icons text-xs">verified</span>
-                Verify
-              </button>
-            </div>
-          </td>
-        </tr>
-
-        {{-- Unpaid --}}
-        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-3">
-              <div
-                class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold">
-                SW</div>
-              <div>
-                <div class="font-bold text-slate-900 dark:text-white">Sarah Wilson</div>
-                <div class="text-xs text-slate-500">Block C - Unit 002</div>
-              </div>
-            </div>
-          </td>
-          <td class="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white">$620.00</td>
-          <td class="px-6 py-4 text-sm text-slate-400">—</td>
-          <td class="px-6 py-4 text-sm text-slate-400 italic">N/A</td>
-          <td class="px-6 py-4">
-            <span
-              class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400">
-              <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Unpaid
-            </span>
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button title="Send Reminder" class="p-1.5 text-slate-400 hover:text-primary transition-colors">
-              <span class="material-icons text-xl">notification_add</span>
-            </button>
-            <button title="Record Payment" class="p-1.5 text-slate-400 hover:text-primary transition-colors"
-              onclick="openPaymentModal('SW','Sarah Wilson','Block C - Unit 002', 50, [])">
-              <span class="material-icons text-xl">edit</span>
-            </button>
-          </td>
-        </tr>
-
-        {{-- Approved --}}
-        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-3">
-              <div
-                class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
-                MK</div>
-              <div>
-                <div class="font-bold text-slate-900 dark:text-white">Mark Kendrick</div>
-                <div class="text-xs text-slate-500">Block B - Unit 201</div>
-              </div>
-            </div>
-          </td>
-          <td class="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white">$450.00</td>
-          <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">Oct 10, 2023</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-              <span class="material-icons text-sm">credit_card</span> Online Portal
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <span
-              class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Approved
-            </span>
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button title="View Receipt" class="p-1.5 text-slate-400 hover:text-primary transition-colors">
-              <span class="material-icons text-xl">receipt_long</span>
-            </button>
-            <button title="Edit" class="p-1.5 text-slate-400 hover:text-primary transition-colors"
-              onclick="openPaymentModal('MK','Mark Kendrick','Block B - Unit 201', 50, [0,1,2])">
-              <span class="material-icons text-xl">edit</span>
-            </button>
-          </td>
-        </tr>
-
+            </td>
+          </tr>
+        @empty
+          <tr>
+            <td colspan="6" class="px-6 py-16 text-center">
+              <span class="material-icons text-4xl text-slate-300 dark:text-slate-600 block mb-2">receipt_long</span>
+              <p class="text-slate-500 font-medium">No payments found</p>
+              <p class="text-slate-400 text-sm mt-1">Try adjusting your filters</p>
+            </td>
+          </tr>
+        @endforelse
       </tbody>
     </table>
   </div>
 
   {{-- Pagination --}}
-  <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-    <span class="text-sm text-slate-500">Showing 4 of 248 transactions</span>
-    <div class="flex gap-2">
-      <button
-        class="p-2 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50"
-        disabled>
-        <span class="material-icons">chevron_left</span>
-      </button>
-      <button
-        class="p-2 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800">
-        <span class="material-icons">chevron_right</span>
-      </button>
+  @if($payments->hasPages())
+    <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+      <p class="text-sm text-slate-500">Showing {{ $payments->firstItem() }}–{{ $payments->lastItem() }} of {{ $payments->total() }}</p>
+      {{ $payments->links() }}
     </div>
-  </div>
+  @endif
 </div>

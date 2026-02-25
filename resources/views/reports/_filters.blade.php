@@ -1,48 +1,63 @@
-{{-- Report Filters --}}
-<section
-  class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm no-print">
+{{-- Reports Filters --}}
+<form method="GET" action="{{ route('reports.index') }}"
+  class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 mb-6 shadow-sm">
   <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
+
+    {{-- Year --}}
     <div class="space-y-1.5">
-      <label class="text-xs font-bold text-slate-400 uppercase tracking-tight ml-1">Select Year</label>
+      <label class="text-xs font-bold text-slate-400 uppercase tracking-tight">Year</label>
       <div class="relative">
-        <select
-          class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary appearance-none px-4 py-2.5 text-slate-700 dark:text-slate-200">
-          <option>2024</option>
-          <option>2023</option>
-          <option>2022</option>
+        <select name="year" onchange="this.form.submit()"
+          class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none px-4 py-2.5 pr-9 text-slate-700 dark:text-slate-200 outline-none">
+          @foreach($years as $y)
+            <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>{{ $y }}</option>
+          @endforeach
         </select>
         <span
-          class="material-icons absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
+          class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
       </div>
     </div>
+
+    {{-- Block --}}
     <div class="space-y-1.5">
-      <label class="text-xs font-bold text-slate-400 uppercase tracking-tight ml-1">Select Block</label>
+      <label class="text-xs font-bold text-slate-400 uppercase tracking-tight">Block</label>
       <div class="relative">
-        <select
-          class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary appearance-none px-4 py-2.5 text-slate-700 dark:text-slate-200">
-          <option>Block A (Terrace)</option>
-          <option>Block B (Apartments)</option>
-          <option>Block C (Villas)</option>
-          <option>Block D (Commercial)</option>
+        <select name="block_id" onchange="this.form.submit()"
+          class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none px-4 py-2.5 pr-9 text-slate-700 dark:text-slate-200 outline-none">
+          <option value="">All Blocks</option>
+          @foreach($blocks as $block)
+            <option value="{{ $block->id }}" {{ $blockId == $block->id ? 'selected' : '' }}>{{ $block->name }}</option>
+          @endforeach
         </select>
         <span
-          class="material-icons absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
+          class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
       </div>
     </div>
-    <div class="md:col-span-2 lg:col-span-2 space-y-1.5">
-      <label class="text-xs font-bold text-slate-400 uppercase tracking-tight ml-1">Search Resident</label>
+
+    {{-- Search Resident --}}
+    <div class="md:col-span-2 space-y-1.5">
+      <label class="text-xs font-bold text-slate-400 uppercase tracking-tight">Search Resident</label>
       <div class="relative">
         <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
-        <input
-          class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary pl-10 py-2.5 text-slate-700 dark:text-slate-200"
-          placeholder="Search by name or unit number..." type="text" />
+        <input name="search" value="{{ $search }}"
+          class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary pl-10 pr-4 py-2.5 text-slate-700 dark:text-slate-200 outline-none"
+          placeholder="Name or unit number..." />
       </div>
     </div>
-    <div class="flex items-end">
-      <button
-        class="w-full bg-primary/10 dark:bg-primary/20 text-primary hover:bg-primary/20 py-2.5 rounded-lg text-sm font-bold transition-colors">
-        Search
+
+    {{-- Apply / Clear --}}
+    <div class="flex items-end gap-2">
+      <button type="submit"
+        class="flex-1 bg-primary/10 text-primary hover:bg-primary/20 py-2.5 rounded-lg text-sm font-bold transition-colors">
+        Apply
       </button>
+      @if($search || $blockId)
+        <a href="{{ route('reports.index', ['year' => $year]) }}"
+          class="py-2.5 px-3 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+          <span class="material-icons text-base leading-none">close</span>
+        </a>
+      @endif
     </div>
+
   </div>
-</section>
+</form>
