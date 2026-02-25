@@ -27,6 +27,7 @@ Trigger: openModal('modal-create')
     <form method="POST" action="{{ route('users.store') }}" class="p-8 pt-0 space-y-5 max-h-[80vh] overflow-y-auto"
       novalidate>
       @csrf
+      <input type="hidden" name="_form_type" value="create" />
 
       {{-- Name --}}
       <div class="space-y-1.5">
@@ -115,14 +116,14 @@ Trigger: openModal('modal-create')
             <label class="cursor-pointer group">
               <input class="peer sr-only" name="role_id" type="radio" value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'checked' : '' }} />
               <div class="relative p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700
-                              hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5
-                              transition-all h-full flex items-center gap-3">
+                                hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5
+                                transition-all h-full flex items-center gap-3">
                 <div class="absolute top-2 right-2 opacity-0 peer-checked:opacity-100 text-primary transition-opacity">
                   <span class="material-icons text-sm">check_circle</span>
                 </div>
                 <div
                   class="w-9 h-9 rounded-lg {{ $role->bg_class }} {{ $role->text_class }}
-                                flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                  flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                   <span class="material-icons text-lg">{{ $role->icon }}</span>
                 </div>
                 <div>

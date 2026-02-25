@@ -83,6 +83,7 @@ closeModalOnBackdrop, togglePw, openEditModal.
       radio.checked = (radio.value !== '' && parseInt(radio.value) === roleId)
         || (radio.value === '' && !roleId);
     });
+    document.getElementById('edit-user-id-field').value = id;
     document.getElementById('form-edit-user').action = `/users/${id}`;
     openModal('modal-edit');
   }

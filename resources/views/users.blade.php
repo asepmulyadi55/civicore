@@ -40,4 +40,23 @@
   {{-- User confirm modal + shared JS helpers (component, consistent with other modals) --}}
   <x-modals.user-actions />
 
+  {{-- Auto-reopen modal on validation failure --}}
+  @if($errors->any())
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const formType = @json(old('_form_type'));
+        if (formType === 'create') {
+          openModal('modal-create');
+        } else if (formType === 'edit') {
+          const id = @json(old('_user_id'));
+          const name = @json(old('name'));
+          const username = @json(old('username'));
+          const email = @json(old('email'));
+          const roleId = @json(old('role_id'));
+          openEditModal(id, name, username, email, roleId, null);
+        }
+      });
+    </script>
+  @endif
+
 </x-layouts.app>

@@ -44,7 +44,7 @@ Review Modal, and all associated JavaScript.
       {{-- Step 1: Resident + Year --}}
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Resident</label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Resident <span class="text-red-500">*</span></label>
           <div class="relative">
             <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">person</span>
             <select id="cm-resident-select"
@@ -61,6 +61,9 @@ Review Modal, and all associated JavaScript.
             <span
               class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
           </div>
+          <p id="cm-error-resident" class="hidden text-xs text-red-500 items-center gap-1">
+            <span class="material-icons text-xs">error_outline</span> Please select a resident.
+          </p>
         </div>
         <div class="flex flex-col gap-2">
           <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Year</label>
@@ -82,9 +85,13 @@ Review Modal, and all associated JavaScript.
 
       {{-- Step 2: Month Grid --}}
       <div id="cm-months-section" class="opacity-40 pointer-events-none transition-opacity duration-300">
-        <h3 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4">
+        <h3 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
           Select Months (<span id="cm-year-label">{{ now()->year }}</span>)
+          <span class="font-normal text-slate-400 lowercase normal-case">— select at least one</span>
         </h3>
+        <p id="cm-error-months" class="hidden text-xs text-red-500 items-center gap-1 mb-3">
+          <span class="material-icons text-xs">error_outline</span> Please select at least one month.
+        </p>
         <div id="cm-month-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3">
           {{-- Rendered by JS after resident is chosen --}}
         </div>
@@ -158,13 +165,16 @@ Review Modal, and all associated JavaScript.
         {{-- Amount per month --}}
         <div class="mt-5 flex flex-col gap-2">
           <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Amount per Month
-            ({{ $currency }})</label>
+            ({{ $currency }}) <span class="text-red-500">*</span></label>
           <div class="relative">
             <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">payments</span>
             <input id="cm-amount" type="number" min="0" step="1000" placeholder="e.g. 150000"
               class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
-              oninput="updateSummary()" />
+              oninput="clearCmError('cm-error-amount'); updateSummary()" />
           </div>
+          <p id="cm-error-amount" class="hidden text-xs text-red-500 flex items-center gap-1">
+            <span class="material-icons text-xs">error_outline</span> Please enter a valid amount per month.
+          </p>
         </div>
       </div>
 
@@ -488,6 +498,8 @@ Review Modal, and all associated JavaScript.
     document.getElementById('cm-summary').classList.add('hidden');
     document.getElementById('cm-month-grid').innerHTML = '';
     document.getElementById('cm-year-label').textContent = selectedYear;
+    // Clear any inline errors
+    ['cm-error-resident', 'cm-error-months', 'cm-error-amount'].forEach(id => clearCmError(id));
     selectedMonths.clear(); selectedYear = {{ now()->year }}; currentResident = null;
   }
 
@@ -504,6 +516,7 @@ Review Modal, and all associated JavaScript.
       selectedMonths.clear(); return;
     }
     currentResident = { id: opt.value, name: opt.dataset.name, unit: opt.dataset.unit };
+    clearCmError('cm-error-resident');
     document.getElementById('cm-resident-name').textContent = opt.dataset.name;
     document.getElementById('cm-unit-label').textContent = opt.dataset.unit;
     document.getElementById('cm-rate-badge').textContent = '— / month';
@@ -560,6 +573,7 @@ Review Modal, and all associated JavaScript.
     const badge = inner.querySelectorAll('span')[1];
     if (cb.checked) {
       selectedMonths.add(key);
+      showMonthError(false);
       inner.classList.add('border-primary', 'bg-primary/5');
       inner.classList.remove('border-slate-200', 'dark:border-slate-700');
       badge.textContent = 'Selected'; badge.classList.add('text-primary'); badge.classList.remove('text-slate-400');
@@ -585,11 +599,30 @@ Review Modal, and all associated JavaScript.
     document.getElementById('cm-months-list').textContent = `${names.join(', ')} @ ${currency} ${amt.toLocaleString()} ea.`;
   }
 
+  function showCmError(id, show) {
+    document.getElementById(id).classList.toggle('hidden', !show);
+    if (show) document.getElementById(id).classList.add('flex');
+  }
+  function clearCmError(id) {
+    const el = document.getElementById(id);
+    if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+  }
+
+  // Inline error for month selection — shown inside the month grid section header
+  function showMonthError(show) {
+    let el = document.getElementById('cm-error-months');
+    if (!el) return;
+    el.classList.toggle('hidden', !show);
+    if (show) el.classList.add('flex');
+  }
+
   function submitCreateModal() {
-    if (!currentResident) { alert('Please select a resident.'); return; }
-    if (selectedMonths.size === 0) { alert('Please select at least one month.'); return; }
+    let valid = true;
+    if (!currentResident) { showCmError('cm-error-resident', true); valid = false; } else { clearCmError('cm-error-resident'); }
+    if (selectedMonths.size === 0) { showMonthError(true); valid = false; } else { showMonthError(false); }
     const amt = parseFloat(document.getElementById('cm-amount').value);
-    if (!amt || amt <= 0) { alert('Please enter a valid amount per month.'); return; }
+    if (!amt || amt <= 0) { showCmError('cm-error-amount', true); valid = false; } else { clearCmError('cm-error-amount'); }
+    if (!valid) return;
     const form = document.getElementById('cm-form');
     form.innerHTML = `<input type="hidden" name="_token" value="{{ csrf_token() }}">`;
     form.insertAdjacentHTML('beforeend', `<input type="hidden" name="resident_id" value="${currentResident.id}">`);

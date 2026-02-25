@@ -17,17 +17,6 @@
   </div>
 @endif
 
-@if($errors->any())
-  <div
-    class="mb-4 flex items-start gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
-    <span class="material-icons text-base mt-0.5">error</span>
-    <ul class="space-y-0.5">
-      @foreach($errors->all() as $error)
-        <li>{{ $error }}</li>
-      @endforeach
-    </ul>
-  </div>
-@endif
 
 {{-- ── Table ────────────────────────────────────────────────── --}}
 <div
@@ -111,13 +100,14 @@
 
                 {{-- Edit (always shown) --}}
                 <button onclick="openEditModal(
-                        {{ $user->id }},
-                        {{ json_encode($user->name) }},
-                        {{ json_encode($user->username) }},
-                        {{ json_encode($user->email) }},
-                        {{ $user->role_id ?? 'null' }},
-                        {{ $user->block_id ?? 'null' }}
-                      )" class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                          {{ $user->id }},
+                          {{ json_encode($user->name) }},
+                          {{ json_encode($user->username) }},
+                          {{ json_encode($user->email) }},
+                          {{ $user->role_id ?? 'null' }},
+                          {{ $user->block_id ?? 'null' }}
+                        )"
+                  class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                   title="Edit user">
                   <span class="material-icons text-lg">edit</span>
                 </button>
