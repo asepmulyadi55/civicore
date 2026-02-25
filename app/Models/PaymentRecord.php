@@ -9,6 +9,7 @@ class PaymentRecord extends Model
 {
     protected $fillable = [
         'resident_id',
+        'batch_id',
         'payment_month',
         'amount',
         'payment_method_id',

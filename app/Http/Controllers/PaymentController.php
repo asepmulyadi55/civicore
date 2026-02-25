@@ -8,6 +8,7 @@ use App\Models\Resident;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {
@@ -115,6 +116,7 @@ class PaymentController extends Controller
 
         $created = 0;
         $skipped = 0;
+        $batchId = (string) Str::uuid(); // shared across all months in this submission
         foreach ($request->months as $monthStr) {
             $paymentMonth = $monthStr . '-01';
             $exists = PaymentRecord::where('resident_id', $request->resident_id)
@@ -124,7 +126,10 @@ class PaymentController extends Controller
                 $skipped++;
                 continue;
             }
-            PaymentRecord::create(array_merge($baseData, ['payment_month' => $paymentMonth]));
+            PaymentRecord::create(array_merge($baseData, [
+                'payment_month' => $paymentMonth,
+                'batch_id' => $batchId,
+            ]));
             $created++;
         }
 
@@ -210,5 +215,54 @@ class PaymentController extends Controller
 
         return redirect()->route('payments.index')
             ->with('success', "Payment rejected and resident has been notified.");
+    }
+
+    // ── Batch approve / reject ─────────────────────────────────────────
+    public function approveBatch(string $batchId)
+    {
+        $records = PaymentRecord::where('batch_id', $batchId)
+            ->where('status', 'pending')
+            ->get();
+
+        $count = $records->count();
+        if ($count === 0) {
+            return redirect()->route('payments.index')
+                ->with('info', 'No pending records found in this batch.');
+        }
+
+        $records->each->update([
+            'status' => 'approved',
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
+            'rejection_reason' => null,
+        ]);
+
+        $name = $records->first()->resident->fullname ?? 'Resident';
+        return redirect()->route('payments.index')
+            ->with('success', "{$count} payment(s) from {$name} approved.");
+    }
+
+    public function rejectBatch(Request $request, string $batchId)
+    {
+        $request->validate([
+            'rejection_reason' => ['required', 'string', 'min:10', 'max:500'],
+        ], [
+            'rejection_reason.required' => 'Please provide a reason for rejection.',
+            'rejection_reason.min' => 'Rejection reason must be at least 10 characters.',
+        ]);
+
+        $records = PaymentRecord::where('batch_id', $batchId)->get();
+        $count = $records->count();
+
+        $records->each->update([
+            'status' => 'rejected',
+            'rejection_reason' => $request->rejection_reason,
+            'approved_by' => null,
+            'approved_at' => null,
+        ]);
+
+        $name = $records->first()?->resident->fullname ?? 'Resident';
+        return redirect()->route('payments.index')
+            ->with('success', "{$count} payment(s) from {$name} rejected.");
     }
 }

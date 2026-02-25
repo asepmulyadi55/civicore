@@ -36,12 +36,15 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId)
         <label class="text-xs font-bold text-slate-500 uppercase">Full Name <span class="text-red-500">*</span></label>
         <input id="edit-name" name="name" type="text"
           class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('name') border-red-500 @enderror"
-          placeholder="e.g. John Smith" />
+          placeholder="e.g. John Smith" oninput="clearUErr('js-eu-name')" />
         @error('name')
           <p class="text-xs text-red-500 flex items-center gap-1 mt-1">
             <span class="material-icons text-xs">error_outline</span> {{ $message }}
           </p>
         @enderror
+        <p id="js-eu-name" class="hidden text-xs text-red-500 items-center gap-1 mt-1">
+          <span class="material-icons text-xs">error_outline</span> Please enter the full name.
+        </p>
       </div>
 
       {{-- Username --}}
@@ -49,12 +52,15 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId)
         <label class="text-xs font-bold text-slate-500 uppercase">Username <span class="text-red-500">*</span></label>
         <input id="edit-username" name="username" type="text"
           class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('username') border-red-500 @enderror"
-          placeholder="e.g. jsmith" />
+          placeholder="e.g. jsmith" oninput="clearUErr('js-eu-username')" />
         @error('username')
           <p class="text-xs text-red-500 flex items-center gap-1 mt-1">
             <span class="material-icons text-xs">error_outline</span> {{ $message }}
           </p>
         @enderror
+        <p id="js-eu-username" class="hidden text-xs text-red-500 items-center gap-1 mt-1">
+          <span class="material-icons text-xs">error_outline</span> Please enter a username.
+        </p>
       </div>
 
       {{-- Email --}}
@@ -63,12 +69,15 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId)
             class="text-red-500">*</span></label>
         <input id="edit-email" name="email" type="email"
           class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('email') border-red-500 @enderror"
-          placeholder="john.smith@example.com" />
+          placeholder="john.smith@example.com" oninput="clearUErr('js-eu-email')" />
         @error('email')
           <p class="text-xs text-red-500 flex items-center gap-1 mt-1">
             <span class="material-icons text-xs">error_outline</span> {{ $message }}
           </p>
         @enderror
+        <p id="js-eu-email" class="hidden text-xs text-red-500 items-center gap-1 mt-1">
+          <span class="material-icons text-xs">error_outline</span> Please enter a valid email address.
+        </p>
       </div>
 
       {{-- New Password (optional) --}}
@@ -121,14 +130,14 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId)
             <label class="cursor-pointer group">
               <input class="peer sr-only edit-role-radio" name="role_id" type="radio" value="{{ $role->id }}" />
               <div class="relative p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700
-                                hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5
-                                transition-all h-full flex items-center gap-3">
+                                  hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5
+                                  transition-all h-full flex items-center gap-3">
                 <div class="absolute top-2 right-2 opacity-0 peer-checked:opacity-100 text-primary transition-opacity">
                   <span class="material-icons text-sm">check_circle</span>
                 </div>
                 <div
                   class="w-9 h-9 rounded-lg {{ $role->bg_class }} {{ $role->text_class }}
-                                  flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                    flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                   <span class="material-icons text-lg">{{ $role->icon }}</span>
                 </div>
                 <div>
@@ -156,3 +165,21 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId)
     </form>
   </div>
 </div>
+
+<script>
+  // ── Edit-User form: client-side validation ────────────────────────
+  document.getElementById('form-edit-user')?.addEventListener('submit', function (e) {
+    let valid = true;
+    const checks = [
+      ['edit-name', 'js-eu-name', v => v.trim().length > 0],
+      ['edit-username', 'js-eu-username', v => v.trim().length > 0],
+      ['edit-email', 'js-eu-email', v => v.trim().length > 0 && v.includes('@')],
+    ];
+    checks.forEach(([fieldId, errId, fn]) => {
+      const el = document.getElementById(fieldId);
+      if (el && !fn(el.value)) { showUErr(errId); valid = false; }
+      else if (el) clearUErr(errId);
+    });
+    if (!valid) e.preventDefault();
+  });
+</script>

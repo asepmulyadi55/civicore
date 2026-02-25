@@ -39,14 +39,19 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
           <div class="relative">
             <span
               class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">apartment</span>
-            <input type="text" name="name" value="{{ old('name') }}" placeholder="e.g. Block A, Tower B"
-              class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('name') border-red-500 @enderror" />
+            <input id="add-block-name" type="text" name="name" value="{{ old('name') }}"
+              placeholder="e.g. Block A, Tower B"
+              class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('name') border-red-500 @enderror"
+              oninput="clearBErr('js-bm-name')" />
           </div>
           @error('name')
             <p class="text-xs text-red-500 flex items-center gap-1">
               <span class="material-icons text-xs">error_outline</span> {{ $message }}
             </p>
           @enderror
+          <p id="js-bm-name" class="hidden text-xs text-red-500 items-center gap-1">
+            <span class="material-icons text-xs">error_outline</span> Please enter the block name.
+          </p>
         </div>
 
         {{-- Description --}}
@@ -112,8 +117,12 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
             <span
               class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">apartment</span>
             <input type="text" id="edit-block-name" name="name"
-              class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white" />
+              class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
+              oninput="clearBErr('js-ebm-name')" />
           </div>
+          <p id="js-ebm-name" class="hidden text-xs text-red-500 items-center gap-1">
+            <span class="material-icons text-xs">error_outline</span> Please enter the block name.
+          </p>
         </div>
 
         {{-- Description --}}
@@ -194,4 +203,24 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
   @if($errors->any() && !old('_edit'))
     document.addEventListener('DOMContentLoaded', () => openAddBlockModal());
   @endif
+
+    // ── Block modal: client-side validation ─────────────────────────────
+    function clearBErr(id) {
+      const el = document.getElementById(id);
+      if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+    }
+  function showBErr(id) {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('hidden'); el.classList.add('flex'); }
+  }
+  document.getElementById('form-add-block')?.addEventListener('submit', function (e) {
+    const name = document.getElementById('add-block-name');
+    if (!name || name.value.trim() === '') { showBErr('js-bm-name'); e.preventDefault(); }
+    else clearBErr('js-bm-name');
+  });
+  document.getElementById('form-edit-block')?.addEventListener('submit', function (e) {
+    const name = document.getElementById('edit-block-name');
+    if (!name || name.value.trim() === '') { showBErr('js-ebm-name'); e.preventDefault(); }
+    else clearBErr('js-ebm-name');
+  });
 </script>

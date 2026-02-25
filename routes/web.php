@@ -82,6 +82,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
     Route::patch('/payments/{payment}/approve', [PaymentController::class, 'approve'])->name('payments.approve');
     Route::patch('/payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
+    Route::post('/payments/batch/{batchId}/approve', [PaymentController::class, 'approveBatch'])->name('payments.batch.approve');
+    Route::post('/payments/batch/{batchId}/reject', [PaymentController::class, 'rejectBatch'])->name('payments.batch.reject');
 
     // Reports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');

@@ -42,10 +42,14 @@
           </label>
           <div class="relative">
             <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">person</span>
-            <input type="text" name="fullname" value="{{ old('fullname') }}" placeholder="e.g. Ahmad Fauzi"
-              class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('fullname') border-red-500 @enderror" />
+            <input id="add-fullname" type="text" name="fullname" value="{{ old('fullname') }}" placeholder="e.g. Ahmad Fauzi"
+              class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('fullname') border-red-500 @enderror"
+              oninput="clearRmErr('js-rm-fullname')" />
           </div>
           @error('fullname') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+          <p id="js-rm-fullname" class="hidden text-xs text-red-500 items-center gap-1">
+            <span class="material-icons text-xs">error_outline</span> Please enter the full name.
+          </p>
         </div>
 
         {{-- Phone --}}
@@ -82,8 +86,9 @@
             </label>
             <div class="relative">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">domain</span>
-              <select name="block_id"
-                class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('block_id') border-red-500 @enderror">
+              <select id="add-block_id" name="block_id"
+                class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('block_id') border-red-500 @enderror"
+                onchange="clearRmErr('js-rm-block_id')">
                 <option value="">Select block</option>
                 @foreach($blocks as $block)
                   <option value="{{ $block->id }}" {{ old('block_id') == $block->id ? 'selected' : '' }}>{{ $block->name }}</option>
@@ -92,6 +97,9 @@
               <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
             </div>
             @error('block_id') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+            <p id="js-rm-block_id" class="hidden text-xs text-red-500 items-center gap-1">
+              <span class="material-icons text-xs">error_outline</span> Please select a block.
+            </p>
           </div>
           <div class="flex flex-col gap-2">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
@@ -99,10 +107,14 @@
             </label>
             <div class="relative">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">meeting_room</span>
-              <input type="text" name="unit_number" value="{{ old('unit_number') }}" placeholder="e.g. A-101"
-                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('unit_number') border-red-500 @enderror" />
+              <input id="add-unit_number" type="text" name="unit_number" value="{{ old('unit_number') }}" placeholder="e.g. A-101"
+                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('unit_number') border-red-500 @enderror"
+                oninput="clearRmErr('js-rm-unit_number')" />
             </div>
             @error('unit_number') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+            <p id="js-rm-unit_number" class="hidden text-xs text-red-500 items-center gap-1">
+              <span class="material-icons text-xs">error_outline</span> Please enter the unit number.
+            </p>
           </div>
         </div>
 
@@ -116,10 +128,14 @@
             </label>
             <div class="relative">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">payments</span>
-              <input type="number" name="monthly_fee" value="{{ old('monthly_fee') }}" placeholder="500000" min="0" step="1000"
-                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('monthly_fee') border-red-500 @enderror" />
+              <input id="add-monthly_fee" type="number" name="monthly_fee" value="{{ old('monthly_fee') }}" placeholder="500000" min="0" step="1000"
+                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('monthly_fee') border-red-500 @enderror"
+                oninput="clearRmErr('js-rm-monthly_fee')" />
             </div>
             @error('monthly_fee') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+            <p id="js-rm-monthly_fee" class="hidden text-xs text-red-500 items-center gap-1">
+              <span class="material-icons text-xs">error_outline</span> Please enter the monthly fee.
+            </p>
           </div>
           <div class="flex flex-col gap-2">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
@@ -127,10 +143,14 @@
             </label>
             <div class="relative">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">calendar_today</span>
-              <input type="month" name="fee_start" value="{{ old('fee_start', now()->format('Y-m')) }}"
-                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('fee_start') border-red-500 @enderror" />
+              <input id="add-fee_start" type="month" name="fee_start" value="{{ old('fee_start', now()->format('Y-m')) }}"
+                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('fee_start') border-red-500 @enderror"
+                oninput="clearRmErr('js-rm-fee_start')" />
             </div>
             @error('fee_start') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+            <p id="js-rm-fee_start" class="hidden text-xs text-red-500 items-center gap-1">
+              <span class="material-icons text-xs">error_outline</span> Please select the fee start month.
+            </p>
           </div>
         </div>
 
@@ -362,4 +382,46 @@
   @if($errors->any() && old('_form') === 'add')
     document.addEventListener('DOMContentLoaded', () => openAddResidentModal());
   @endif
+
+  // ── Resident modal: client-side validation ────────────────────────
+  function clearRmErr(id) {
+    const el = document.getElementById(id);
+    if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+  }
+  function showRmErr(id) {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('hidden'); el.classList.add('flex'); }
+  }
+
+  document.getElementById('form-add-resident')?.addEventListener('submit', function (e) {
+    let valid = true;
+    const checks = [
+      ['add-fullname',    'js-rm-fullname',    v => v.trim().length > 0],
+      ['add-block_id',   'js-rm-block_id',    v => v !== ''],
+      ['add-unit_number','js-rm-unit_number', v => v.trim().length > 0],
+      ['add-monthly_fee','js-rm-monthly_fee', v => v.trim().length > 0 && parseFloat(v) >= 0],
+      ['add-fee_start',  'js-rm-fee_start',   v => v.trim().length > 0],
+    ];
+    checks.forEach(([fieldId, errId, fn]) => {
+      const el = document.getElementById(fieldId);
+      if (el && !fn(el.value)) { showRmErr(errId); valid = false; }
+      else if (el) clearRmErr(errId);
+    });
+    if (!valid) e.preventDefault();
+  });
+
+  document.getElementById('form-edit-resident')?.addEventListener('submit', function (e) {
+    let valid = true;
+    const checks = [
+      ['edit-fullname',    'js-erm-fullname',    v => v.trim().length > 0],
+      ['edit-block_id',   'js-erm-block_id',    v => v !== ''],
+      ['edit-unit_number','js-erm-unit_number', v => v.trim().length > 0],
+    ];
+    checks.forEach(([fieldId, errId, fn]) => {
+      const el = document.getElementById(fieldId);
+      if (el && !fn(el.value)) { showRmErr(errId); valid = false; }
+      else if (el) clearRmErr(errId);
+    });
+    if (!valid) e.preventDefault();
+  });
 </script>
