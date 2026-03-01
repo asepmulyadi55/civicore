@@ -5,7 +5,8 @@
   <x-nav.sidebar active="payments" />
 
   {{-- Payment modals — pass controller vars as explicit props --}}
-  <x-modals.record-payment :currency="$currency" :paidMonthsByResident="$paidMonthsByResident" :residents="$residents"
+  <x-modals.record-payment :currency="$currency" :paidMonthsByResident="$paidMonthsByResident"
+    :pendingMonthsByResident="$pendingMonthsByResident" :residentFees="$residentFees" :residents="$residents"
     :canApprove="$canApprove" />
 
   <main class="lg:ml-64 flex flex-col h-screen overflow-hidden">

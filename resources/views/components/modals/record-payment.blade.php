@@ -4,10 +4,12 @@ Includes: Create Payment, Edit Payment, Proof Lightbox,
 Review Modal, and all associated JavaScript.
 ============================================================ --}}
 @props([
-  'currency'             => \App\Models\Setting::get('currency_symbol', 'Rp'),
-  'paidMonthsByResident' => [],
-  'residents'            => collect(),
-  'canApprove'           => false,
+  'currency'                => \App\Models\Setting::get('currency_symbol', 'Rp'),
+  'paidMonthsByResident'    => [],
+  'pendingMonthsByResident' => [],
+  'residentFees'            => [],
+  'residents'               => collect(),
+  'canApprove'              => false,
 ])
 
 {{-- ════════════════════════════════════════════════════════════════ --}}
@@ -55,7 +57,8 @@ Review Modal, and all associated JavaScript.
               <option value="">— Select Resident —</option>
               @foreach($residents as $r)
                 <option value="{{ $r->id }}" data-name="{{ $r->fullname }}" data-unit="Unit {{ $r->unit_number }}"
-                  data-block="{{ $r->block?->name ?? '' }}">
+                  data-block="{{ $r->block?->name ?? '' }}"
+                  data-fee="{{ $r->currentFee()?->amount ?? 0 }}">
                   {{ $r->fullname }} — {{ $r->block?->name }} Unit {{ $r->unit_number }}
                 </option>
               @endforeach
@@ -170,10 +173,12 @@ Review Modal, and all associated JavaScript.
             ({{ $currency }}) <span class="text-red-500">*</span></label>
           <div class="relative">
             <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">payments</span>
-            <input id="cm-amount" type="number" min="0" step="1000" placeholder="e.g. 150000"
-              class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
-              oninput="clearCmError('cm-error-amount'); updateSummary()" />
+            <input id="cm-amount" type="number" min="0" step="1000" placeholder="Select a resident first"
+              readonly
+              class="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none dark:text-white cursor-not-allowed"
+              oninput="updateSummary()" />
           </div>
+          <p class="text-[11px] text-slate-400">Auto-filled from resident's current monthly fee.</p>
           <p id="cm-error-amount" class="hidden text-xs text-red-500 flex items-center gap-1">
             <span class="material-icons text-xs">error_outline</span> Please enter a valid amount per month.
           </p>
@@ -293,9 +298,11 @@ Review Modal, and all associated JavaScript.
               <span
                 class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">payments</span>
               <input type="number" id="em-amount" name="amount" min="0" step="1000" required
+                readonly
                 oninput="updateEmSummary()"
-                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white" />
+                class="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none dark:text-white cursor-not-allowed" />
             </div>
+            <p class="text-[11px] text-slate-400">Auto-filled from resident's current monthly fee.</p>
           </div>
 
           {{-- Payment Method --}}
@@ -544,7 +551,9 @@ Review Modal, and all associated JavaScript.
 </style>
 
 <script>
-  const paidMonthsMap = @json($paidMonthsByResident ?? []);
+  const paidMonthsMap    = @json($paidMonthsByResident ?? []);
+  const pendingMonthsMap = @json($pendingMonthsByResident ?? []);
+  const residentFeesMap  = @json($residentFees ?? []);
   const currency = '{{ $currency }}';
 
   let selectedMonths = new Set();
@@ -603,7 +612,17 @@ Review Modal, and all associated JavaScript.
     clearCmError('cm-error-resident');
     document.getElementById('cm-resident-name').textContent = opt.dataset.name;
     document.getElementById('cm-unit-label').textContent = opt.dataset.unit;
-    document.getElementById('cm-rate-badge').textContent = '— / month';
+    // Auto-fill amount from resident's fee; allow manual entry if fee is 0
+    const fee = parseFloat(opt.dataset.fee) || 0;
+    const amtInput = document.getElementById('cm-amount');
+    amtInput.value = fee || '';
+    amtInput.readOnly = fee > 0;  // allow typing only if no fee is set
+    amtInput.classList.toggle('cursor-not-allowed', fee > 0);
+    amtInput.classList.toggle('bg-slate-100', fee > 0);
+    amtInput.classList.toggle('dark:bg-slate-800/60', fee > 0);
+    amtInput.classList.toggle('bg-slate-50', !fee);
+    amtInput.classList.toggle('focus:border-primary', !fee);
+    document.getElementById('cm-rate-badge').textContent = fee ? `${currency} ${fee.toLocaleString()} / month` : '— / month';
     document.getElementById('cm-header-info').classList.remove('hidden');
     document.getElementById('cm-select-hint').classList.add('hidden');
     document.getElementById('cm-months-section').classList.remove('opacity-40', 'pointer-events-none');
@@ -620,21 +639,30 @@ Review Modal, and all associated JavaScript.
   }
 
   function renderMonthGrid() {
-    const grid = document.getElementById('cm-month-grid');
-    const paid = (paidMonthsMap[currentResident.id] || []);
+    const grid    = document.getElementById('cm-month-grid');
+    const paid    = (paidMonthsMap[currentResident.id] || []);
+    const pending = (pendingMonthsMap[currentResident.id] || []);
     grid.innerHTML = '';
     for (let m = 1; m <= 12; m++) {
-      const padM = String(m).padStart(2, '0');
-      const key = `${selectedYear}-${padM}`;
-      const isPaid = paid.includes(key);
+      const padM  = String(m).padStart(2, '0');
+      const key   = `${selectedYear}-${padM}`;
       const label = MONTH_NAMES[m - 1].toUpperCase();
-      if (isPaid) {
+      if (paid.includes(key)) {
         grid.insertAdjacentHTML('beforeend', `
           <div class="month-card-paid border border-slate-200 dark:border-slate-700 rounded-xl p-3 flex flex-col items-center justify-center gap-1">
             <span class="text-xs font-bold text-slate-400">${label}</span>
             <div class="text-emerald-600 flex items-center gap-1">
               <span class="material-icons text-sm">check_circle</span>
               <span class="text-[10px] font-extrabold tracking-tighter uppercase">Paid</span>
+            </div>
+          </div>`);
+      } else if (pending.includes(key)) {
+        grid.insertAdjacentHTML('beforeend', `
+          <div class="month-card-paid border border-amber-200 dark:border-amber-800/40 rounded-xl p-3 flex flex-col items-center justify-center gap-1">
+            <span class="text-xs font-bold text-slate-400">${label}</span>
+            <div class="text-amber-500 flex items-center gap-1">
+              <span class="material-icons text-sm">hourglass_top</span>
+              <span class="text-[10px] font-extrabold tracking-tighter uppercase">Pending</span>
             </div>
           </div>`);
       } else {
@@ -735,22 +763,32 @@ Review Modal, and all associated JavaScript.
   let emResidentId = null;
 
   function renderEmGrid() {
-    const grid = document.getElementById('em-month-grid');
-    const paid = (paidMonthsMap[emResidentId] || []);
+    const grid    = document.getElementById('em-month-grid');
+    const paid    = (paidMonthsMap[emResidentId] || []);
+    const pending = (pendingMonthsMap[emResidentId] || []);
     grid.innerHTML = '';
     for (let m = 1; m <= 12; m++) {
       const padM = String(m).padStart(2, '0');
       const key  = `${emYear}-${padM}`;
-      // Don't gray-out the currently-edited month
-      const isPaid = paid.includes(key) && !emSelectedMonths.has(key);
-      const label  = MONTH_NAMES[m - 1].toUpperCase();
-      if (isPaid) {
+      const label = MONTH_NAMES[m - 1].toUpperCase();
+      // Exclude currently-edited months so they remain selectable
+      const isEditedMonth = emSelectedMonths.has(key);
+      if (!isEditedMonth && paid.includes(key)) {
         grid.insertAdjacentHTML('beforeend', `
           <div class="month-card-paid border border-slate-200 dark:border-slate-700 rounded-xl p-3 flex flex-col items-center justify-center gap-1">
             <span class="text-xs font-bold text-slate-400">${label}</span>
             <div class="text-emerald-600 flex items-center gap-1">
               <span class="material-icons text-sm">check_circle</span>
               <span class="text-[10px] font-extrabold tracking-tighter uppercase">Paid</span>
+            </div>
+          </div>`);
+      } else if (!isEditedMonth && pending.includes(key)) {
+        grid.insertAdjacentHTML('beforeend', `
+          <div class="month-card-paid border border-amber-200 dark:border-amber-800/40 rounded-xl p-3 flex flex-col items-center justify-center gap-1">
+            <span class="text-xs font-bold text-slate-400">${label}</span>
+            <div class="text-amber-500 flex items-center gap-1">
+              <span class="material-icons text-sm">hourglass_top</span>
+              <span class="text-[10px] font-extrabold tracking-tighter uppercase">Pending</span>
             </div>
           </div>`);
       } else {
@@ -771,13 +809,13 @@ Review Modal, and all associated JavaScript.
   function onEmYearChange(sel) {
     emYear = parseInt(sel.value);
     document.getElementById('em-year-label').textContent = emYear;
-    // Remap selected months to new year
     const oldKeys = [...emSelectedMonths];
-    const paid = (paidMonthsMap[emResidentId] || []);
+    const paid    = (paidMonthsMap[emResidentId] || []);
+    const pending = (pendingMonthsMap[emResidentId] || []);
     emSelectedMonths.clear();
     oldKeys.forEach(k => {
       const newKey = `${emYear}-${k.split('-')[1]}`;
-      if (!paid.includes(newKey)) emSelectedMonths.add(newKey);
+      if (!paid.includes(newKey) && !pending.includes(newKey)) emSelectedMonths.add(newKey);
     });
     renderEmGrid();
   }
@@ -854,7 +892,10 @@ Review Modal, and all associated JavaScript.
     document.getElementById('em-year-label').textContent = emYear;
     renderEmGrid();
 
-    document.getElementById('em-amount').value = amount;
+    // Auto-fill from resident's current fee (fallback to stored amount if no fee)
+    const fee = residentFeesMap[residentId] || amount;
+    document.getElementById('em-amount').value = fee;
+    updateEmSummary();
     document.getElementById('em-notes').value = notes;
     document.getElementById('em-rejection').value = rejection;
     document.getElementById('em-method').value = methodId ?? '';

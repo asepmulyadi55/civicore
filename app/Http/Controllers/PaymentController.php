@@ -79,11 +79,16 @@ class PaymentController extends Controller
         $blocks = Block::active()->orderBy('name')->get();
         $currency = Setting::get('currency_symbol', 'Rp');
 
-        $residents = Resident::with('block')
+        $residents = Resident::with(['block', 'feeHistories'])
             ->where('is_active', true)
             ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
             ->orderBy('fullname')
             ->get();
+
+        // Build a residentId → current fee amount map for the JS modal
+        $residentFees = $residents->mapWithKeys(fn($r) => [
+            $r->id => (float) ($r->currentFee()?->amount ?? 0)
+        ]);
 
         // Summary stats based on raw records
         $statBase = PaymentRecord::when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)));
@@ -97,11 +102,19 @@ class PaymentController extends Controller
                 ->whereYear('payment_month', now()->year)->whereMonth('payment_month', now()->month))
             ->count();
 
-        $paidMonthsByResident = PaymentRecord::whereIn('status', ['pending', 'approved'])
+        $paidMonthsByResident = PaymentRecord::where('status', 'approved')
             ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
             ->get(['resident_id', 'payment_month'])
             ->groupBy('resident_id')
-            ->map(fn($rows) => $rows->map(fn($r) => Carbon::parse($r->payment_month)->format('Y-m'))->values()->all());
+            ->map(fn($rows) => $rows->map(fn($r) => Carbon::parse($r->payment_month)->format('Y-m'))->values()->all())
+            ->toArray();
+
+        $pendingMonthsByResident = PaymentRecord::where('status', 'pending')
+            ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
+            ->get(['resident_id', 'payment_month'])
+            ->groupBy('resident_id')
+            ->map(fn($rows) => $rows->map(fn($r) => Carbon::parse($r->payment_month)->format('Y-m'))->values()->all())
+            ->toArray();
 
         return view('payments', compact(
             'payments',
@@ -112,8 +125,10 @@ class PaymentController extends Controller
             'collectedMonth',
             'unpaidCount',
             'paidMonthsByResident',
+            'pendingMonthsByResident',
             'canApprove',
-            'residents'
+            'residents',
+            'residentFees'
         ));
     }
 
