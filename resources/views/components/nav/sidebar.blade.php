@@ -1,26 +1,22 @@
 @props(['active' => ''])
 
 @php
-  /**
-   * Navigation items definition.
-   * To add, rename, or reorder a link — edit ONLY this array.
-   *
-   * Keys:
-   *   key   – matches the value passed to the `active` prop
-   *   label – display name in the sidebar
-   *   icon  – Material Icons name
-   *   route – named Laravel route (use '#' for not-yet-implemented pages)
-   */
   $navItems = [
-    ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'dashboard'],
-    ['key' => 'payments', 'label' => 'Payments', 'icon' => 'payments', 'route' => 'payments.index'],
-    ['key' => 'residents', 'label' => 'Residents', 'icon' => 'people', 'route' => 'residents.index'],
-    ['key' => 'blocks', 'label' => 'Blocks', 'icon' => 'domain', 'route' => 'blocks.index'],
-    ['key' => 'users', 'label' => 'User Management', 'icon' => 'manage_accounts', 'route' => 'users.index'],
-    ['key' => 'reports', 'label' => 'Reports', 'icon' => 'bar_chart', 'route' => 'reports.index'],
-    ['key' => 'events', 'label' => 'Events', 'icon' => 'event', 'route' => 'events.index'],
-    ['key' => 'settings', 'label' => 'Settings', 'icon' => 'settings', 'route' => 'settings.index'],
+    ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'dashboard', 'roles' => null],
+    ['key' => 'payments', 'label' => 'Payments', 'icon' => 'payments', 'route' => 'payments.index', 'roles' => null],
+    ['key' => 'residents', 'label' => 'Residents', 'icon' => 'people', 'route' => 'residents.index', 'roles' => null],
+    ['key' => 'blocks', 'label' => 'Blocks', 'icon' => 'domain', 'route' => 'blocks.index', 'roles' => ['admin', 'treasurer']],
+    ['key' => 'users', 'label' => 'User Management', 'icon' => 'manage_accounts', 'route' => 'users.index', 'roles' => ['admin']],
+    ['key' => 'reports', 'label' => 'Reports', 'icon' => 'bar_chart', 'route' => 'reports.index', 'roles' => null],
+    ['key' => 'events', 'label' => 'Events', 'icon' => 'event', 'route' => 'events.index', 'roles' => ['admin', 'treasurer']],
+    ['key' => 'settings', 'label' => 'Settings', 'icon' => 'settings', 'route' => 'settings.index', 'roles' => ['admin']],
   ];
+
+  // Filter by the logged-in user's role
+  $userRoleName = Auth::user()->role?->name;
+  $navItems = array_filter($navItems, function ($item) use ($userRoleName) {
+    return $item['roles'] === null || in_array($userRoleName, $item['roles']);
+  });
 @endphp
 
 {{-- Mobile overlay (triggered by each page's toggleSidebar()) --}}
@@ -46,7 +42,7 @@
         $href = $item['route'] === '#' ? '#' : route($item['route']);
       @endphp
       <a href="{{ $href }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg font-{{ $isActive ? 'semibold' : 'medium' }} transition-all group
-                      {{ $isActive
+                          {{ $isActive
       ? 'bg-primary/10 text-primary'
       : 'text-slate-500 hover:text-primary hover:bg-primary/5' }}">
         <span class="material-icons text-[20px]">{{ $item['icon'] }}</span>
@@ -54,24 +50,6 @@
       </a>
     @endforeach
   </nav>
-
-  {{-- Logged-in user + logout --}}
-  <div class="p-4 border-t border-slate-200 dark:border-slate-800">
-    <div class="flex items-center space-x-3 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-      <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-        <span class="material-icons text-primary">person</span>
-      </div>
-      <div class="flex-1 overflow-hidden">
-        <p class="text-sm font-bold truncate">{{ Auth::user()->name }}</p>
-        <p class="text-xs text-slate-500 truncate">{{ Auth::user()->email }}</p>
-      </div>
-      <form action="{{ route('logout') }}" method="POST">
-        @csrf
-        <button type="submit" class="text-slate-400 hover:text-primary transition-colors" title="Logout">
-          <span class="material-icons text-sm">logout</span>
-        </button>
-      </form>
-    </div>
-  </div>
+  <x-nav.user-footer />
 
 </aside>

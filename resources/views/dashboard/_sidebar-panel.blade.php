@@ -19,15 +19,18 @@
         class="material-icons text-2xl text-primary group-hover:scale-110 transition-transform">picture_as_pdf</span>
       <span class="text-xs font-bold">Generate Report</span>
     </a>
+    @if(auth()->user()->isAdmin() || auth()->user()->isTreasurer())
     <a href="{{ route('blocks.index') }}"
       class="flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors space-y-2 text-center group">
       <span class="material-icons text-2xl text-primary group-hover:scale-110 transition-transform">domain</span>
       <span class="text-xs font-bold">Manage Blocks</span>
     </a>
+    @endif
   </div>
 
+  {{-- Community Status: admin/treasurer only --}}
+  @if(auth()->user()->isAdmin() || auth()->user()->isTreasurer())
   <hr class="border-slate-100 dark:border-slate-800" />
-
   <div class="space-y-4">
     <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Community Status</h3>
     <div class="space-y-3">
@@ -51,6 +54,7 @@
       </div>
     </div>
   </div>
+  @endif
 
   <div class="p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-lg">
     <div class="flex items-center space-x-2 text-amber-700 dark:text-amber-400 mb-2">

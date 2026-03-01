@@ -36,30 +36,50 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name(
 // ── Auth-protected pages ──────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
 
-    // Admin dashboard
+    // Dashboard
     Route::get('/dashboard', function () {
+        $user = auth()->user();
+        $scopeBlockId = $user->isBlockCoordinator() ? $user->block_id : null;
         $currency = \App\Models\Setting::get('currency_symbol', 'Rp');
+
         $totalCollected = \App\Models\PaymentRecord::where('status', 'approved')
             ->whereYear('payment_month', now()->year)
             ->whereMonth('payment_month', now()->month)
+            ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
             ->sum('amount');
-        $pendingCount = \App\Models\PaymentRecord::where('status', 'pending')->count();
+
+        $pendingCount = \App\Models\PaymentRecord::where('status', 'pending')
+            ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
+            ->count();
+
         $unpaidCount = \App\Models\Resident::where('is_active', true)
+            ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
             ->whereDoesntHave(
                 'paymentRecords',
-                fn($q) =>
-                $q->where('status', 'approved')
+                fn($q) => $q->where('status', 'approved')
                     ->whereYear('payment_month', now()->year)
                     ->whereMonth('payment_month', now()->month)
             )->count();
-        $activeResidents = \App\Models\Resident::where('is_active', true)->count();
+
+        $activeResidents = \App\Models\Resident::where('is_active', true)
+            ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
+            ->count();
+
+        // Recent activity: last 7 pending/approved payments, scoped to block for coordinator
+        $recentActivity = \App\Models\PaymentRecord::with(['resident.block'])
+            ->whereIn('status', ['pending', 'approved', 'rejected'])
+            ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
+            ->orderByDesc('updated_at')
+            ->limit(7)
+            ->get();
 
         return view('dashboard', compact(
             'currency',
             'totalCollected',
             'pendingCount',
             'unpaidCount',
-            'activeResidents'
+            'activeResidents',
+            'recentActivity'
         ));
     })->name('dashboard');
 

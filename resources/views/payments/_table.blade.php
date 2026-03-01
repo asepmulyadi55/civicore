@@ -1,4 +1,4 @@
-﻿{{-- Payments Table --}}
+{{-- Payments Table --}}
 @php
   // Pre-count pending records per batch_id so we can decide when to show batch buttons
   $batchPendingCounts = $payments->getCollection()
@@ -112,32 +112,48 @@
                 </button>
 
                 {{-- Review / Batch buttons --}}
-                @if($isMultiBatch && $payment->status === 'pending' && $isBatchLastRow)
-                  {{-- Approve All batch --}}
-                  <form method="POST" action="{{ route('payments.batch.approve', $bid) }}" class="inline">
-                    @csrf
-                    <button type="submit"
-                      class="text-emerald-600 hover:text-emerald-700 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-emerald-300 dark:border-emerald-700/50 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all whitespace-nowrap">
-                      ✓ All ({{ $batchPendingCount }})
+                @if($canApprove)
+                  @if($isMultiBatch && $payment->status === 'pending' && $isBatchLastRow)
+                    {{-- Approve All batch --}}
+                    <form method="POST" action="{{ route('payments.batch.approve', $bid) }}" class="inline">
+                      @csrf
+                      <button type="submit"
+                        class="text-emerald-600 hover:text-emerald-700 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-emerald-300 dark:border-emerald-700/50 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all whitespace-nowrap">
+                        ✓ All ({{ $batchPendingCount }})
+                      </button>
+                    </form>
+                    {{-- Reject All batch --}}
+                    <button
+                      onclick="openBatchRejectModal('{{ $bid }}', {{ $batchPendingCount }})"
+                      class="text-rose-500 hover:text-rose-600 font-bold text-xs uppercase tracking-widest px-2 py-1 border border-rose-200 dark:border-rose-700/50 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all">
+                      ✕
                     </button>
-                  </form>
-                  {{-- Reject All batch --}}
-                  <button
-                    onclick="openBatchRejectModal('{{ $bid }}', {{ $batchPendingCount }})"
-                    class="text-rose-500 hover:text-rose-600 font-bold text-xs uppercase tracking-widest px-2 py-1 border border-rose-200 dark:border-rose-700/50 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all">
-                    ✕
-                  </button>
-                @elseif($isMultiBatch && $payment->status === 'pending')
-                  {{-- Non-last rows in the batch: suppress the individual Review button --}}
-                @elseif($payment->status === 'pending')
-                  <button onclick="openReviewModal({{ $payment->id }}, '{{ addslashes($payment->resident->fullname) }}', '{{ $payment->resident->unit_number }}', '{{ $currency }} {{ number_format($payment->amount) }}', '{{ \Carbon\Carbon::parse($payment->payment_month)->format('F Y') }}')"
-                    class="text-primary hover:text-primary/80 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-primary/20 rounded-lg hover:bg-primary/5 transition-all">
-                    Review
-                  </button>
-                @elseif($payment->status === 'approved')
-                  <span class="text-xs text-slate-400">Approved {{ $payment->approved_at?->format('d M') }}</span>
-                @elseif($payment->status === 'rejected')
-                  <span class="text-xs text-rose-400" title="{{ $payment->rejection_reason }}">Rejected</span>
+                  @elseif($isMultiBatch && $payment->status === 'pending')
+                    {{-- Non-last rows in the batch: suppress the individual Review button --}}
+                  @elseif($payment->status === 'pending')
+                    <button onclick="openReviewModal({{ $payment->id }}, '{{ addslashes($payment->resident->fullname) }}', '{{ $payment->resident->unit_number }}', '{{ $currency }} {{ number_format($payment->amount) }}', '{{ \Carbon\Carbon::parse($payment->payment_month)->format('F Y') }}')"
+                      class="text-primary hover:text-primary/80 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-primary/20 rounded-lg hover:bg-primary/5 transition-all">
+                      Review
+                    </button>
+                  @endif
+                @else
+                  {{-- Coordinator: no approve/reject actions --}}
+                  @if($payment->status === 'approved')
+                    <span class="text-xs text-slate-400">Approved {{ $payment->approved_at?->format('d M') }}</span>
+                  @elseif($payment->status === 'rejected')
+                    <span class="text-xs text-rose-400" title="{{ $payment->rejection_reason }}">Rejected</span>
+                  @endif
+                @endif
+
+                {{-- Approved/Rejected labels for non-pending rows (only shown when canApprove for pending above) --}}
+                @if($canApprove)
+                  @if(!$isMultiBatch || $payment->status !== 'pending')
+                    @if($payment->status === 'approved')
+                      <span class="text-xs text-slate-400">Approved {{ $payment->approved_at?->format('d M') }}</span>
+                    @elseif($payment->status === 'rejected')
+                      <span class="text-xs text-rose-400" title="{{ $payment->rejection_reason }}">Rejected</span>
+                    @endif
+                  @endif
                 @endif
 
               </div>

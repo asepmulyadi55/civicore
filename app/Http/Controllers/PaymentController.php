@@ -14,9 +14,18 @@ class PaymentController extends Controller
 {
     public function index(Request $request)
     {
+        $user = auth()->user();
+        $scopeBlockId = $user->isBlockCoordinator() ? $user->block_id : null;
+        $canApprove = $user->canApprovePayments();
+
         $query = PaymentRecord::with(['resident.block', 'paymentMethod', 'submittedBy'])
             ->orderByRaw("FIELD(status, 'pending', 'rejected', 'approved') ASC")
             ->orderByDesc('payment_month');
+
+        // Scope to coordinator's block
+        if ($scopeBlockId) {
+            $query->whereHas('resident', fn($q) => $q->where('block_id', $scopeBlockId));
+        }
 
         // Search by resident name or unit
         if ($search = $request->get('search')) {
@@ -26,8 +35,8 @@ class PaymentController extends Controller
             });
         }
 
-        // Block filter
-        if ($blockId = $request->get('block_id')) {
+        // Block filter (only for non-coordinators)
+        if (!$scopeBlockId && $blockId = $request->get('block_id')) {
             $query->whereHas('resident', fn($q) => $q->where('block_id', $blockId));
         }
 
@@ -45,24 +54,32 @@ class PaymentController extends Controller
         $blocks = Block::active()->orderBy('name')->get();
         $currency = Setting::get('currency_symbol', 'Rp');
 
-        // Summary stats
-        $pendingCount = PaymentRecord::where('status', 'pending')->count();
-        $pendingTotal = PaymentRecord::where('status', 'pending')->sum('amount');
-        $collectedMonth = PaymentRecord::where('status', 'approved')
+        // Summary stats — scoped to coordinator's block when applicable
+        $statBase = PaymentRecord::when(
+            $scopeBlockId,
+            fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId))
+        );
+        $pendingCount = (clone $statBase)->where('status', 'pending')->count();
+        $pendingTotal = (clone $statBase)->where('status', 'pending')->sum('amount');
+        $collectedMonth = (clone $statBase)->where('status', 'approved')
             ->whereYear('payment_month', now()->year)
             ->whereMonth('payment_month', now()->month)
             ->sum('amount');
         $unpaidCount = Resident::where('is_active', true)
+            ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
             ->whereDoesntHave(
                 'paymentRecords',
-                fn($q) =>
-                $q->where('status', 'approved')
+                fn($q) => $q->where('status', 'approved')
                     ->whereYear('payment_month', now()->year)
                     ->whereMonth('payment_month', now()->month)
             )->count();
 
         // Build paid-months map for JS month grid: residentId → ['YYYY-MM', ...]
         $paidMonthsByResident = PaymentRecord::whereIn('status', ['pending', 'approved'])
+            ->when(
+                $scopeBlockId,
+                fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId))
+            )
             ->get(['resident_id', 'payment_month'])
             ->groupBy('resident_id')
             ->map(fn($rows) => $rows->map(
@@ -77,7 +94,8 @@ class PaymentController extends Controller
             'pendingTotal',
             'collectedMonth',
             'unpaidCount',
-            'paidMonthsByResident'
+            'paidMonthsByResident',
+            'canApprove'
         ));
     }
 

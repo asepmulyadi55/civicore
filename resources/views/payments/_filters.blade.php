@@ -12,7 +12,8 @@
 
     <div class="flex flex-wrap gap-2 items-center">
 
-      {{-- Block filter --}}
+      {{-- Block filter (admin & treasurer only) --}}
+      @unless(auth()->user()->isBlockCoordinator())
       <div class="relative">
         <select name="block_id"
           class="appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-sm py-2 pl-4 pr-9 outline-none transition-all text-slate-600 dark:text-slate-300">
@@ -25,6 +26,8 @@
         </select>
         <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
       </div>
+      @endunless
+
 
       {{-- Status filter --}}
       <div class="relative">

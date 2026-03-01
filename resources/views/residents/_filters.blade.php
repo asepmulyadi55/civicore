@@ -9,20 +9,23 @@
       class="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-slate-100 dark:placeholder-slate-500" />
   </div>
 
-  {{-- Block filter --}}
-  <div class="relative">
-    <select name="block_id"
-      class="appearance-none pl-4 pr-9 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
-      <option value="">All Blocks</option>
-      @foreach ($blocks as $block)
-        <option value="{{ $block->id }}" {{ request('block_id') == $block->id ? 'selected' : '' }}>
-          {{ $block->name }}
-        </option>
-      @endforeach
-    </select>
-    <span
-      class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
-  </div>
+  {{-- Block filter (admin & treasurer only) --}}
+  @unless(auth()->user()->isBlockCoordinator())
+    <div class="relative">
+      <select name="block_id"
+        class="appearance-none pl-4 pr-9 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+        <option value="">All Blocks</option>
+        @foreach ($blocks as $block)
+          <option value="{{ $block->id }}" {{ request('block_id') == $block->id ? 'selected' : '' }}>
+            {{ $block->name }}
+          </option>
+        @endforeach
+      </select>
+      <span
+        class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
+    </div>
+  @endunless
+
 
   {{-- Status filter --}}
   <div class="relative">

@@ -18,12 +18,20 @@ class ResidentController extends Controller
 {
     public function index(Request $request)
     {
+        $user = auth()->user();
+        $scopeBlockId = $user->isBlockCoordinator() ? $user->block_id : null;
+
         $query = Resident::with([
             'block',
             'feeHistories' => function ($q) {
                 $q->orderByDesc('effective_from')->limit(1);
             }
         ])->orderBy('block_id')->orderBy('unit_number');
+
+        // Scope to coordinator's block
+        if ($scopeBlockId) {
+            $query->where('block_id', $scopeBlockId);
+        }
 
         // Live search
         if ($search = $request->get('search')) {
@@ -35,8 +43,8 @@ class ResidentController extends Controller
             });
         }
 
-        // Block filter
-        if ($blockId = $request->get('block_id')) {
+        // Block filter (hidden for coordinators, but harmless if still sent)
+        if (!$scopeBlockId && $blockId = $request->get('block_id')) {
             $query->where('block_id', $blockId);
         }
 
@@ -49,8 +57,10 @@ class ResidentController extends Controller
 
         $residents = $query->paginate(15)->withQueryString();
         $blocks = Block::active()->orderBy('name')->get();
-        $totalCount = Resident::count();
-        $activeCount = Resident::where('is_active', true)->count();
+
+        $baseCount = Resident::when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId));
+        $totalCount = (clone $baseCount)->count();
+        $activeCount = (clone $baseCount)->where('is_active', true)->count();
         $currency = Setting::get('currency_symbol', 'Rp');
 
         return view('residents', compact('residents', 'blocks', 'totalCount', 'activeCount', 'currency'));

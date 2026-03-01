@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -48,7 +49,8 @@ class SocialAuthController extends Controller
         }
 
         Auth::login($user, true);
-        return redirect('/dashboard')->with('success', 'Welcome back!');
+        $redirectTo = $user->isResident() ? '/my-overview' : '/dashboard';
+        return redirect($redirectTo)->with('success', 'Welcome back, ' . $user->name . '!');
       }
 
       // Check if user exists by email
@@ -57,9 +59,9 @@ class SocialAuthController extends Controller
       if ($user) {
         // User exists but no Google ID linked
         if ($intent === 'login') {
-          // LOGIN flow: Don't auto-link, ask them to register
+          // LOGIN flow: Don't auto-link, show clear instructions
           return redirect('/')
-            ->with('error', 'Account exists. Please use the regular login or register with Google first.');
+            ->with('error', 'This email is already registered without Google. Please log in with your password, then link Google from your profile. Or use "Register with Google" to connect your account.');
         }
 
         // REGISTER flow: Link Google to existing account
@@ -69,7 +71,8 @@ class SocialAuthController extends Controller
 
         $user->update(['google_id' => $googleUser->id]);
         Auth::login($user, true);
-        return redirect('/dashboard')->with('success', 'Google account linked successfully!');
+        $redirectTo = $user->isResident() ? '/my-overview' : '/dashboard';
+        return redirect($redirectTo)->with('success', 'Google account linked successfully!');
       }
 
       // No existing user
@@ -79,20 +82,23 @@ class SocialAuthController extends Controller
           ->with('error', 'No account found. Please register first.');
       }
 
-      // REGISTER flow: Create new user
+      // REGISTER flow: Create new user with default 'resident' role
+      $residentRole = Role::where('name', 'resident')->first();
+
       $user = User::create([
         'name' => $googleUser->name,
         'username' => $this->generateUsername($googleUser->email),
         'email' => $googleUser->email,
         'google_id' => $googleUser->id,
-        'password' => Hash::make(uniqid()), // Random password
-        'is_active' => false, // Require admin approval
+        'password' => Hash::make(uniqid()), // Random password — Google users sign in via OAuth
+        'role_id' => $residentRole?->id,   // Default role so views don't break
+        'is_active' => false,                 // Require admin approval
         'email_verified_at' => now(),
       ]);
 
-      // Don't login yet - redirect to login with message
+      // Don't login yet — redirect to login with message
       return redirect('/')
-        ->with('success', 'Account created successfully! Please wait for admin approval before logging in.');
+        ->with('success', 'Account created! Please wait for admin approval before logging in.');
 
     } catch (\Exception $e) {
       return redirect('/')->with('error', 'Failed to authenticate with Google. Please try again.');

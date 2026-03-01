@@ -13,8 +13,12 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
+        $user = auth()->user();
+        $isCoordinator = $user->isBlockCoordinator();
+
         $year = (int) $request->get('year', now()->year);
-        $blockId = $request->get('block_id');
+        // Force coordinator to their own block; ignore any request block_id
+        $blockId = $isCoordinator ? $user->block_id : $request->get('block_id');
         $search = $request->get('search');
         $currency = Setting::get('currency_symbol', 'Rp');
 
@@ -73,7 +77,8 @@ class ReportController extends Controller
             'paidCount',
             'unpaidCount',
             'collectionRate',
-            'totalResidents'
+            'totalResidents',
+            'isCoordinator'
         ));
     }
 }
