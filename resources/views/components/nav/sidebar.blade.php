@@ -2,20 +2,22 @@
 
 @php
   $navItems = [
-    ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'dashboard', 'roles' => null],
-    ['key' => 'payments', 'label' => 'Payments', 'icon' => 'payments', 'route' => 'payments.index', 'roles' => null],
-    ['key' => 'residents', 'label' => 'Residents', 'icon' => 'people', 'route' => 'residents.index', 'roles' => null],
-    ['key' => 'blocks', 'label' => 'Blocks', 'icon' => 'domain', 'route' => 'blocks.index', 'roles' => ['admin', 'treasurer']],
-    ['key' => 'users', 'label' => 'User Management', 'icon' => 'manage_accounts', 'route' => 'users.index', 'roles' => ['admin']],
-    ['key' => 'reports', 'label' => 'Reports', 'icon' => 'bar_chart', 'route' => 'reports.index', 'roles' => null],
-    ['key' => 'events', 'label' => 'Events', 'icon' => 'event', 'route' => 'events.index', 'roles' => ['admin', 'treasurer']],
-    ['key' => 'settings', 'label' => 'Settings', 'icon' => 'settings', 'route' => 'settings.index', 'roles' => ['admin']],
+    ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'dashboard', 'permission' => 'dashboard.view'],
+    ['key' => 'payments', 'label' => 'Payments', 'icon' => 'payments', 'route' => 'payments.index', 'permission' => 'payments.view'],
+    ['key' => 'residents', 'label' => 'Residents', 'icon' => 'people', 'route' => 'residents.index', 'permission' => 'residents.view'],
+    ['key' => 'blocks', 'label' => 'Blocks', 'icon' => 'domain', 'route' => 'blocks.index', 'permission' => 'blocks.view'],
+    ['key' => 'users', 'label' => 'User Management', 'icon' => 'manage_accounts', 'route' => 'users.index', 'permission' => 'users.view'],
+    ['key' => 'roles', 'label' => 'Roles & Permissions', 'icon' => 'admin_panel_settings', 'route' => 'roles.index', 'permission' => 'roles.view'],
+    ['key' => 'reports', 'label' => 'Reports', 'icon' => 'bar_chart', 'route' => 'reports.index', 'permission' => 'reports.view'],
+    ['key' => 'events', 'label' => 'Events', 'icon' => 'event', 'route' => 'events.index', 'permission' => null],
+    ['key' => 'settings', 'label' => 'Settings', 'icon' => 'settings', 'route' => 'settings.index', 'permission' => null],
   ];
 
-  // Filter by the logged-in user's role
-  $userRoleName = Auth::user()->role?->name;
-  $navItems = array_filter($navItems, function ($item) use ($userRoleName) {
-    return $item['roles'] === null || in_array($userRoleName, $item['roles']);
+  $user = Auth::user();
+  $navItems = array_filter($navItems, function ($item) use ($user) {
+    if ($item['permission'] === null)
+      return true;
+    return $user->can($item['permission']);
   });
 @endphp
 
@@ -42,7 +44,7 @@
         $href = $item['route'] === '#' ? '#' : route($item['route']);
       @endphp
       <a href="{{ $href }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg font-{{ $isActive ? 'semibold' : 'medium' }} transition-all group
-                          {{ $isActive
+                              {{ $isActive
       ? 'bg-primary/10 text-primary'
       : 'text-slate-500 hover:text-primary hover:bg-primary/5' }}">
         <span class="material-icons text-[20px]">{{ $item['icon'] }}</span>

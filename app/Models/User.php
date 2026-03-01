@@ -79,8 +79,28 @@ class User extends Authenticatable
     return $this->role?->name === 'resident';
   }
 
+  // ── Permission Checking ──────────────────────────────────────
+
+  /**
+   * Check if this user has a given permission (e.g. 'payments.approve').
+   * Admins always have all permissions.
+   * Overrides Authenticatable::can() for simple string permissions.
+   */
+  public function can($ability, $arguments = []): bool
+  {
+    // If $ability is a string permission key (our custom system)
+    if (is_string($ability) && str_contains($ability, '.')) {
+      if ($this->isAdmin())
+        return true;
+      return $this->role?->hasPermission($ability) ?? false;
+    }
+    // Fall back to standard Laravel Gate / policy check
+    return parent::can($ability, $arguments);
+  }
+
+  /** @deprecated Use can('payments.approve') instead */
   public function canApprovePayments(): bool
   {
-    return $this->isAdmin() || $this->isTreasurer();
+    return $this->can('payments.approve');
   }
 }

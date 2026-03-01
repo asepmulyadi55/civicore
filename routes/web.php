@@ -12,6 +12,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\MyOverviewController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoleController;
 
 
 // ── Auth ──────────────────────────────────────────────────────────────────
@@ -65,13 +66,26 @@ Route::middleware('auth')->group(function () {
             ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
             ->count();
 
-        // Recent activity: last 7 pending/approved payments, scoped to block for coordinator
-        $recentActivity = \App\Models\PaymentRecord::with(['resident.block'])
+        // Recent activity: last 7 batches (grouped by batch_id), scoped to block for coordinator
+        $rawActivity = \App\Models\PaymentRecord::with(['resident.block'])
             ->whereIn('status', ['pending', 'approved', 'rejected'])
             ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
             ->orderByDesc('updated_at')
-            ->limit(7)
+            ->limit(50)
             ->get();
+
+        $recentActivity = $rawActivity
+            ->groupBy(fn($r) => $r->batch_id ?? 'single_' . $r->id)
+            ->map(function ($records) {
+                $lead = $records->sortBy('payment_month')->first();
+                $lead->all_months = $records->pluck('payment_month')->sort()->values();
+                $lead->total_amount = $records->sum('amount');
+                $lead->month_count = $records->count();
+                return $lead;
+            })
+            ->sortByDesc('updated_at')
+            ->take(7)
+            ->values();
 
         return view('dashboard', compact(
             'currency',
@@ -116,6 +130,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/users/{user}/approve', [UserController::class, 'approve'])->name('users.approve');
     Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
+    // Roles Management
+    Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+    Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+    Route::patch('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+    Route::patch('/roles/{role}/permissions', [RoleController::class, 'updatePermissions'])->name('roles.permissions');
+    Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
 
     // Coming Soon pages
     Route::get('/events', function () {

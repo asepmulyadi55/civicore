@@ -1,4 +1,4 @@
-{{-- Recent Activity Table (real data from DB) --}}
+{{-- Recent Activity Table (real data from DB, batch-grouped) --}}
 <div
   class="xl:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
   <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
@@ -10,7 +10,7 @@
       <thead>
         <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-xs uppercase tracking-wider font-bold">
           <th class="px-6 py-4">Resident</th>
-          <th class="px-6 py-4">Month</th>
+          <th class="px-6 py-4">Month(s)</th>
           <th class="px-6 py-4">Unit / Block</th>
           <th class="px-6 py-4">Date</th>
           <th class="px-6 py-4 text-right">Status</th>
@@ -18,6 +18,11 @@
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
         @forelse($recentActivity as $activity)
+          @php
+            $isMulti = ($activity->month_count ?? 1) > 1;
+            $allMonths = $activity->all_months ?? collect([$activity->payment_month]);
+            $monthLabels = $allMonths->map(fn($m) => \Carbon\Carbon::parse($m)->format('M Y'))->implode(', ');
+          @endphp
           <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
             <td class="px-6 py-4">
               <div class="flex items-center space-x-3">
@@ -28,7 +33,10 @@
               </div>
             </td>
             <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
-              {{ \Carbon\Carbon::parse($activity->payment_month)->format('M Y') }}
+              {{ $monthLabels }}
+              @if($isMulti)
+                <span class="ml-1 text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded">{{ $activity->month_count }} Months</span>
+              @endif
             </td>
             <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
               {{ $activity->resident->block?->name ?? '—' }} · {{ $activity->resident->unit_number }}
