@@ -285,14 +285,15 @@ Review Modal, and all associated JavaScript.
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-          {{-- Amount --}}
+          {{-- Amount per month --}}
           <div class="flex flex-col gap-2">
-            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Amount
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Amount per Month
               ({{ $currency }})</label>
             <div class="relative">
               <span
                 class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">payments</span>
               <input type="number" id="em-amount" name="amount" min="0" step="1000" required
+                oninput="updateEmSummary()"
                 class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white" />
             </div>
           </div>
@@ -385,6 +386,20 @@ Review Modal, and all associated JavaScript.
             <span class="font-normal text-slate-400 normal-case">(optional)</span></label>
           <textarea id="em-notes" name="notes" rows="3"
             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white resize-none"></textarea>
+        </div>
+
+        {{-- Summary Panel --}}
+        <div id="em-summary" class="hidden p-5 bg-primary/10 dark:bg-primary/5 rounded-2xl border border-primary/20">
+          <div class="flex items-center justify-between">
+            <div class="flex flex-col">
+              <span class="text-xs font-bold text-primary uppercase tracking-widest">Calculated Total</span>
+              <span id="em-total-amount" class="text-2xl font-extrabold text-slate-900 dark:text-slate-100 mt-1">{{ $currency }} 0</span>
+            </div>
+            <div class="text-right">
+              <span id="em-months-count" class="text-sm font-bold text-slate-700 dark:text-slate-300">0 Months Selected</span>
+              <p id="em-months-list" class="text-[11px] text-slate-500 mt-0.5"></p>
+            </div>
+          </div>
         </div>
 
         {{-- Footer --}}
@@ -750,6 +765,7 @@ Review Modal, and all associated JavaScript.
           </label>`);
       }
     }
+    updateEmSummary();
   }
 
   function onEmYearChange(sel) {
@@ -782,6 +798,20 @@ Review Modal, and all associated JavaScript.
       inner.classList.add('border-slate-200');
       badge.textContent = 'Unpaid'; badge.classList.remove('text-primary'); badge.classList.add('text-slate-400');
     }
+    updateEmSummary();
+  }
+
+  function updateEmSummary() {
+    const amt   = parseFloat(document.getElementById('em-amount').value) || 0;
+    const count = emSelectedMonths.size;
+    const total = amt * count;
+    const summaryEl = document.getElementById('em-summary');
+    if (count === 0 || amt === 0) { summaryEl.classList.add('hidden'); return; }
+    summaryEl.classList.remove('hidden');
+    document.getElementById('em-total-amount').textContent = `${currency} ${total.toLocaleString()}`;
+    document.getElementById('em-months-count').textContent = `${count} Month${count > 1 ? 's' : ''} Selected`;
+    const names = [...emSelectedMonths].sort().map(k => MONTH_NAMES[parseInt(k.split('-')[1]) - 1]);
+    document.getElementById('em-months-list').textContent = `${names.join(', ')} @ ${currency} ${amt.toLocaleString()} ea.`;
   }
 
   function submitEditModal(e) {
@@ -809,15 +839,17 @@ Review Modal, and all associated JavaScript.
     return false;
   }
 
-  function openEditModal(id, residentId, name, unit, month, amount, methodId, status, rejection, notes, proofUrl) {
+  function openEditModal(id, residentId, name, unit, monthsCsv, amount, methodId, status, rejection, notes, proofUrl) {
     document.getElementById('em-resident-name').textContent = name;
     document.getElementById('em-unit-label').textContent = 'Unit ' + unit;
 
-    // Set up month grid pre-populated with current month
+    // Parse comma-sep months string, e.g. "2026-01,2026-02"
+    const monthsList = monthsCsv.split(',').map(m => m.trim()).filter(Boolean);
     emResidentId = residentId;
     emSelectedMonths.clear();
-    emYear = parseInt(month.split('-')[0]);
-    emSelectedMonths.add(month);
+    // Use the first month's year as the initial year
+    emYear = parseInt(monthsList[0].split('-')[0]);
+    monthsList.forEach(m => emSelectedMonths.add(m));
     document.getElementById('em-year-select').value = emYear;
     document.getElementById('em-year-label').textContent = emYear;
     renderEmGrid();
@@ -874,14 +906,38 @@ Review Modal, and all associated JavaScript.
   }
 
   // ── Review modal ───────────────────────────────────────────────────
-  function openReviewModal(id, name, unit, amount, month, notes) {
+  function openReviewModal(id, name, unit, amount, month, notes, batchId = null) {
     document.getElementById('modal-resident').textContent = name + ' (' + unit + ')';
     document.getElementById('modal-amount').textContent = amount;
     document.getElementById('modal-month').textContent = month;
     document.getElementById('modal-rejection-reason').value = '';
     document.getElementById('modal-error').classList.add('hidden');
-    document.getElementById('modal-approve-form').action = '/payments/' + id + '/approve';
-    document.getElementById('modal-reject-form').action = '/payments/' + id + '/reject';
+
+    const approveForm = document.getElementById('modal-approve-form');
+    const rejectForm  = document.getElementById('modal-reject-form');
+
+    // Find or create the _method hidden inputs
+    let approveMeth = approveForm.querySelector('input[name="_method"]');
+    let rejectMeth  = rejectForm.querySelector('input[name="_method"]');
+
+    if (batchId) {
+      // Batch: POST to batch routes (no _method override needed)
+      approveForm.action = `/payments/batch/${batchId}/approve`;
+      rejectForm.action  = `/payments/batch/${batchId}/reject`;
+      if (approveMeth) approveMeth.remove();
+      if (rejectMeth)  rejectMeth.remove();
+    } else {
+      // Single: PATCH to individual routes
+      approveForm.action = `/payments/${id}/approve`;
+      rejectForm.action  = `/payments/${id}/reject`;
+      if (!approveMeth) {
+        approveForm.insertAdjacentHTML('afterbegin', '<input type="hidden" name="_method" value="PATCH">');
+      } else { approveMeth.value = 'PATCH'; }
+      if (!rejectMeth) {
+        rejectForm.insertAdjacentHTML('afterbegin', '<input type="hidden" name="_method" value="PATCH">');
+      } else { rejectMeth.value = 'PATCH'; }
+    }
+
     // Show coordinator notes if any
     const notesWrap = document.getElementById('modal-notes-wrap');
     const notesEl   = document.getElementById('modal-notes');

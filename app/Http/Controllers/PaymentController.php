@@ -8,6 +8,7 @@ use App\Models\Resident;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class PaymentController extends Controller
@@ -18,80 +19,89 @@ class PaymentController extends Controller
         $scopeBlockId = $user->isBlockCoordinator() ? $user->block_id : null;
         $canApprove = $user->canApprovePayments();
 
-        $query = PaymentRecord::with(['resident.block', 'paymentMethod', 'submittedBy'])
-            ->orderByRaw("FIELD(status, 'pending', 'rejected', 'approved') ASC")
-            ->orderByDesc('payment_month');
+        // Build base query scoped to coordinator's block if applicable
+        $baseQ = PaymentRecord::query()
+            ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)));
 
-        // Scope to coordinator's block
-        if ($scopeBlockId) {
-            $query->whereHas('resident', fn($q) => $q->where('block_id', $scopeBlockId));
-        }
-
-        // Search by resident name or unit
+        // Apply search, block, status, and month filters to base query
         if ($search = $request->get('search')) {
-            $query->whereHas('resident', function ($q) use ($search) {
+            $baseQ->whereHas('resident', function ($q) use ($search) {
                 $q->where('fullname', 'like', "%{$search}%")
                     ->orWhere('unit_number', 'like', "%{$search}%");
             });
         }
-
-        // Block filter (only for non-coordinators)
         if (!$scopeBlockId && $blockId = $request->get('block_id')) {
-            $query->whereHas('resident', fn($q) => $q->where('block_id', $blockId));
+            $baseQ->whereHas('resident', fn($q) => $q->where('block_id', $blockId));
         }
-
-        // Status filter
         if ($status = $request->get('status')) {
-            $query->where('status', $status);
+            $baseQ->where('status', $status);
         }
-
-        // Month filter
         if ($month = $request->get('month')) {
-            $query->where('payment_month', 'like', $month . '%');
+            $baseQ->where('payment_month', 'like', $month . '%');
         }
 
-        $payments = $query->paginate(20)->withQueryString();
+        // Fetch all matching records and group in PHP by batch_key
+        // This collapses multi-month batches into a single "lead" record
+        // with extra virtual properties: all_months (array), total_amount, month_count
+        $allRecords = $baseQ
+            ->with(['resident.block', 'paymentMethod', 'submittedBy'])
+            ->orderByRaw("FIELD(status, 'pending', 'rejected', 'approved') ASC")
+            ->orderByDesc('payment_month')
+            ->get();
+
+        // Group by batch_key (batch_id if present, else cast id as string)
+        $batchGroups = $allRecords->groupBy(fn($p) => $p->batch_id ?? (string) $p->id);
+
+        // For each batch, take the lead record and attach virtual properties
+        $flatRows = $batchGroups->map(function ($records) {
+            /** @var \App\Models\PaymentRecord $lead */
+            $lead = $records->sortBy('payment_month')->first(); // earliest month as lead
+            $lead->all_months = $records->pluck('payment_month')->sort()->values();
+            $lead->total_amount = $records->sum('amount');
+            $lead->month_count = $records->count();
+            $lead->all_ids = $records->pluck('id')->all();
+            return $lead;
+        })->values();
+
+        // Manually paginate the flat rows
+        $perPage = 20;
+        $page = $request->get('page', 1);
+        $total = $flatRows->count();
+        $items = $flatRows->slice(($page - 1) * $perPage, $perPage)->values();
+        $payments = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         $blocks = Block::active()->orderBy('name')->get();
         $currency = Setting::get('currency_symbol', 'Rp');
 
-        // Residents for the Add/Edit modal dropdowns — scoped to coordinator's block
         $residents = Resident::with('block')
             ->where('is_active', true)
             ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
             ->orderBy('fullname')
             ->get();
 
-        // Summary stats — scoped to coordinator's block when applicable
-        $statBase = PaymentRecord::when(
-            $scopeBlockId,
-            fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId))
-        );
+        // Summary stats based on raw records
+        $statBase = PaymentRecord::when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)));
         $pendingCount = (clone $statBase)->where('status', 'pending')->count();
         $pendingTotal = (clone $statBase)->where('status', 'pending')->sum('amount');
         $collectedMonth = (clone $statBase)->where('status', 'approved')
-            ->whereYear('payment_month', now()->year)
-            ->whereMonth('payment_month', now()->month)
-            ->sum('amount');
+            ->whereYear('payment_month', now()->year)->whereMonth('payment_month', now()->month)->sum('amount');
         $unpaidCount = Resident::where('is_active', true)
             ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
-            ->whereDoesntHave(
-                'paymentRecords',
-                fn($q) => $q->where('status', 'approved')
-                    ->whereYear('payment_month', now()->year)
-                    ->whereMonth('payment_month', now()->month)
-            )->count();
+            ->whereDoesntHave('paymentRecords', fn($q) => $q->where('status', 'approved')
+                ->whereYear('payment_month', now()->year)->whereMonth('payment_month', now()->month))
+            ->count();
 
-        // Build paid-months map for JS month grid: residentId → ['YYYY-MM', ...]
         $paidMonthsByResident = PaymentRecord::whereIn('status', ['pending', 'approved'])
-            ->when(
-                $scopeBlockId,
-                fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId))
-            )
+            ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
             ->get(['resident_id', 'payment_month'])
             ->groupBy('resident_id')
-            ->map(fn($rows) => $rows->map(
-                fn($r) => \Carbon\Carbon::parse($r->payment_month)->format('Y-m')
-            )->values()->all());
+            ->map(fn($rows) => $rows->map(fn($r) => Carbon::parse($r->payment_month)->format('Y-m'))->values()->all());
 
         return view('payments', compact(
             'payments',
@@ -168,9 +178,10 @@ class PaymentController extends Controller
 
     public function update(Request $request, PaymentRecord $payment)
     {
-        $data = $request->validate([
+        $request->validate([
+            'months' => ['required', 'array', 'min:1'],
+            'months.*' => ['required', 'string', 'regex:/^\d{4}-\d{2}$/'],
             'amount' => ['required', 'numeric', 'min:0'],
-            'payment_month' => ['required', 'string'],
             'payment_method_id' => ['nullable', 'exists:payment_methods,id'],
             'status' => ['required', 'in:unpaid,pending,approved,rejected'],
             'rejection_reason' => ['nullable', 'string', 'max:1000'],
@@ -178,36 +189,82 @@ class PaymentController extends Controller
             'proof' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
         ]);
 
-        $data['payment_month'] = $data['payment_month'] . '-01';
-
-        // Proof replacement
+        // Handle proof replacement
+        $proofPath = $payment->proof_path;
         if ($request->hasFile('proof')) {
-            // Delete old file
-            if ($payment->proof_path) {
-                \Storage::disk('public')->delete($payment->proof_path);
+            if ($proofPath)
+                \Storage::disk('public')->delete($proofPath);
+            $proofPath = $request->file('proof')->store('proofs', 'public');
+        }
+
+        $status = $request->status;
+        $approvedBy = $payment->approved_by;
+        $approvedAt = $payment->approved_at;
+        if ($status === 'approved' && $payment->status !== 'approved') {
+            $approvedBy = auth()->id();
+            $approvedAt = now();
+        } elseif ($status !== 'approved') {
+            $approvedBy = null;
+            $approvedAt = null;
+        }
+
+        $baseData = [
+            'amount' => $request->amount,
+            'payment_method_id' => $request->payment_method_id ?: null,
+            'status' => $status,
+            'rejection_reason' => $status === 'rejected' ? $request->rejection_reason : null,
+            'notes' => $request->notes,
+            'proof_path' => $proofPath,
+            'approved_by' => $approvedBy,
+            'approved_at' => $approvedAt,
+        ];
+
+        $months = $request->months;
+        $batchId = $payment->batch_id ?? (string) Str::uuid();
+
+        // Remove all old sibling records from this batch (except the lead)
+        // so we start fresh with exactly the months the user selected
+        if ($payment->batch_id) {
+            PaymentRecord::where('batch_id', $payment->batch_id)
+                ->where('id', '!=', $payment->id)
+                ->delete();
+        }
+
+        // Update existing lead record with first month
+        $payment->update(array_merge($baseData, [
+            'payment_month' => $months[0] . '-01',
+            'batch_id' => $batchId,
+        ]));
+
+        // Create records for remaining months
+        $created = 0;
+        $skipped = 0;
+        foreach (array_slice($months, 1) as $monthStr) {
+            $paymentMonth = $monthStr . '-01';
+            $exists = PaymentRecord::where('resident_id', $payment->resident_id)
+                ->where('payment_month', $paymentMonth)
+                ->where('id', '!=', $payment->id)
+                ->exists();
+            if ($exists) {
+                $skipped++;
+                continue;
             }
-            $data['proof_path'] = $request->file('proof')->store('proofs', 'public');
-        }
-        unset($data['proof']);
-
-        // Re-stamp approval if now approved
-        if ($data['status'] === 'approved' && $payment->status !== 'approved') {
-            $data['approved_by'] = auth()->id();
-            $data['approved_at'] = now();
-        } elseif ($data['status'] !== 'approved') {
-            $data['approved_by'] = null;
-            $data['approved_at'] = null;
+            PaymentRecord::create(array_merge($baseData, [
+                'resident_id' => $payment->resident_id,
+                'payment_month' => $paymentMonth,
+                'batch_id' => $batchId,
+                'submitted_by' => $payment->submitted_by,
+            ]));
+            $created++;
         }
 
-        // Clear rejection reason if status is not rejected
-        if ($data['status'] !== 'rejected') {
-            $data['rejection_reason'] = null;
-        }
+        $msg = 'Payment updated successfully.';
+        if ($created)
+            $msg .= " {$created} additional month(s) added.";
+        if ($skipped)
+            $msg .= " {$skipped} month(s) skipped (already exist).";
 
-        $payment->update($data);
-
-        return redirect()->route('payments.index')
-            ->with('success', 'Payment updated successfully.');
+        return redirect()->route('payments.index')->with('success', $msg);
     }
 
     public function approve(PaymentRecord $payment)
