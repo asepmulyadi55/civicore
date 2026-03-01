@@ -4,8 +4,10 @@ Includes: Create Payment, Edit Payment, Proof Lightbox,
 Review Modal, and all associated JavaScript.
 ============================================================ --}}
 @props([
-  'currency'              => \App\Models\Setting::get('currency_symbol', 'Rp'),
-  'paidMonthsByResident'  => [],
+  'currency'             => \App\Models\Setting::get('currency_symbol', 'Rp'),
+  'paidMonthsByResident' => [],
+  'residents'            => collect(),
+  'canApprove'           => false,
 ])
 
 {{-- ════════════════════════════════════════════════════════════════ --}}
@@ -51,7 +53,7 @@ Review Modal, and all associated JavaScript.
               class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
               onchange="onResidentChange(this)">
               <option value="">— Select Resident —</option>
-              @foreach(\App\Models\Resident::with('block')->where('is_active', true)->orderBy('fullname')->get() as $r)
+              @foreach($residents as $r)
                 <option value="{{ $r->id }}" data-name="{{ $r->fullname }}" data-unit="Unit {{ $r->unit_number }}"
                   data-block="{{ $r->block?->name ?? '' }}">
                   {{ $r->fullname }} — {{ $r->block?->name }} Unit {{ $r->unit_number }}
@@ -247,22 +249,41 @@ Review Modal, and all associated JavaScript.
 
     {{-- Body --}}
     <div class="flex-1 overflow-y-auto px-8 py-6">
-      <form id="em-form" method="POST" action="" enctype="multipart/form-data" class="space-y-5" novalidate>
+      <form id="em-form" method="POST" action="" enctype="multipart/form-data" class="space-y-5" novalidate onsubmit="return submitEditModal(event)">
         @csrf
         @method('PATCH')
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {{-- Payment Month --}}
-          <div class="flex flex-col gap-2">
-            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Payment
-              Month</label>
-            <div class="relative">
-              <span
-                class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">calendar_month</span>
-              <input type="month" id="em-month" name="payment_month" required
-                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white" />
-            </div>
+        {{-- Year Selector --}}
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Year</label>
+          <div class="relative">
+            <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">calendar_today</span>
+            <select id="em-year-select"
+              class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
+              onchange="onEmYearChange(this)">
+              @for($y = now()->year; $y >= 2023; $y--)
+                <option value="{{ $y }}" {{ $y === now()->year ? 'selected' : '' }}>{{ $y }}</option>
+              @endfor
+            </select>
+            <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
           </div>
+        </div>
+
+        {{-- Month Grid --}}
+        <div class="col-span-full">
+          <h3 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            Select Month(s) (<span id="em-year-label">{{ now()->year }}</span>)
+            <span class="font-normal text-slate-400 lowercase normal-case">— select at least one</span>
+          </h3>
+          <p id="em-error-months" class="hidden text-xs text-red-500 items-center gap-1 mb-3">
+            <span class="material-icons text-xs">error_outline</span> Please select at least one month.
+          </p>
+          <div id="em-month-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+            {{-- Rendered by JS when modal opens --}}
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
           {{-- Amount --}}
           <div class="flex flex-col gap-2">
@@ -301,26 +322,36 @@ Review Modal, and all associated JavaScript.
             <div class="relative">
               <span
                 class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">verified</span>
+              @unless($canApprove)
+              {{-- Read-only badge: shown by JS when status is approved/rejected for coordinator --}}
+              <div id="em-status-readonly"
+                class="hidden pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm italic">
+                <span id="em-status-readonly-label" class="text-slate-500 dark:text-slate-400"></span>
+              </div>
+              @endunless
               <select id="em-status" name="status"
                 class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
                 onchange="toggleEditRejection(this.value)">
                 <option value="unpaid">Unpaid</option>
                 <option value="pending">Pending (awaiting review)</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
+                @if($canApprove)
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                @endif
               </select>
-              <span
+              <span id="em-status-chevron"
                 class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
             </div>
           </div>
         </div>
 
-        {{-- Rejection reason --}}
+        {{-- Rejection reason (read-only for coordinators) --}}
         <div id="em-rejection-wrap" class="flex flex-col gap-2 hidden">
           <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Rejection
             Reason</label>
           <textarea id="em-rejection" name="rejection_reason" rows="3"
-            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white resize-none"></textarea>
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white resize-none"
+            {{ $canApprove ? '' : 'disabled placeholder="Rejection reason from Treasurer"' }}></textarea>
         </div>
 
         {{-- Current Proof --}}
@@ -418,6 +449,14 @@ Review Modal, and all associated JavaScript.
           <span id="modal-amount" class="font-bold text-sm text-primary"></span>
         </div>
       </div>
+      {{-- Coordinator notes (read-only) --}}
+      <div id="modal-notes-wrap" class="hidden">
+        <label class="block text-sm font-semibold mb-2 text-slate-700 dark:text-slate-300">
+          Notes from Coordinator
+        </label>
+        <div id="modal-notes"
+          class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-600 dark:text-slate-300 min-h-[60px] whitespace-pre-wrap"></div>
+      </div>
       <div>
         <label class="block text-sm font-semibold mb-2">Rejection Reason
           <span class="text-slate-400 font-normal">(only if rejecting)</span></label>
@@ -447,6 +486,36 @@ Review Modal, and all associated JavaScript.
   </div>
 </div>
 
+
+{{-- ── Payment Delete Confirmation Modal ────────────────────────────── --}}
+<div id="payment-delete-modal"
+  class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4"
+  onclick="if(event.target===this) closePaymentDeleteModal()">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden
+    transform transition-all duration-200 scale-95 opacity-0" id="pdm-card">
+    <div class="flex flex-col items-center pt-8 pb-5 px-6 text-center">
+      <div class="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mb-4">
+        <span class="material-icons text-3xl text-rose-600">delete_outline</span>
+      </div>
+      <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Delete Payment?</h3>
+      <p id="pdm-body" class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed"></p>
+    </div>
+    <div class="flex gap-3 px-6 pb-6">
+      <button onclick="closePaymentDeleteModal()"
+        class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold
+          text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+        Cancel
+      </button>
+      <form id="pdm-form" method="POST" action="" class="flex-1">
+        @csrf @method('DELETE')
+        <button type="submit"
+          class="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 transition-all">
+          Yes, Delete
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
 <style>
   .month-card-paid {
     opacity: 0.55;
@@ -645,16 +714,135 @@ Review Modal, and all associated JavaScript.
   }
 
   // ── EDIT MODAL ─────────────────────────────────────────────────────
-  function openEditModal(id, name, unit, month, amount, methodId, status, rejection, notes, proofUrl) {
+  const canApprove  = {{ $canApprove ? 'true' : 'false' }};
+  let emSelectedMonths = new Set();
+  let emYear = {{ now()->year }};
+  let emResidentId = null;
+
+  function renderEmGrid() {
+    const grid = document.getElementById('em-month-grid');
+    const paid = (paidMonthsMap[emResidentId] || []);
+    grid.innerHTML = '';
+    for (let m = 1; m <= 12; m++) {
+      const padM = String(m).padStart(2, '0');
+      const key  = `${emYear}-${padM}`;
+      // Don't gray-out the currently-edited month
+      const isPaid = paid.includes(key) && !emSelectedMonths.has(key);
+      const label  = MONTH_NAMES[m - 1].toUpperCase();
+      if (isPaid) {
+        grid.insertAdjacentHTML('beforeend', `
+          <div class="month-card-paid border border-slate-200 dark:border-slate-700 rounded-xl p-3 flex flex-col items-center justify-center gap-1">
+            <span class="text-xs font-bold text-slate-400">${label}</span>
+            <div class="text-emerald-600 flex items-center gap-1">
+              <span class="material-icons text-sm">check_circle</span>
+              <span class="text-[10px] font-extrabold tracking-tighter uppercase">Paid</span>
+            </div>
+          </div>`);
+      } else {
+        const isSel = emSelectedMonths.has(key);
+        grid.insertAdjacentHTML('beforeend', `
+          <label class="cursor-pointer group">
+            <input type="checkbox" data-key="${key}" class="hidden peer em-month-cb" ${isSel ? 'checked' : ''} onchange="onEmMonthToggle(this)" />
+            <div class="border-2 ${isSel ? 'border-primary bg-primary/5' : 'border-slate-200 dark:border-slate-700'} rounded-xl p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
+              <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${label}</span>
+              <span class="text-[10px] font-bold ${isSel ? 'text-primary' : 'text-slate-400'} uppercase">${isSel ? 'Selected' : 'Unpaid'}</span>
+            </div>
+          </label>`);
+      }
+    }
+  }
+
+  function onEmYearChange(sel) {
+    emYear = parseInt(sel.value);
+    document.getElementById('em-year-label').textContent = emYear;
+    // Remap selected months to new year
+    const oldKeys = [...emSelectedMonths];
+    const paid = (paidMonthsMap[emResidentId] || []);
+    emSelectedMonths.clear();
+    oldKeys.forEach(k => {
+      const newKey = `${emYear}-${k.split('-')[1]}`;
+      if (!paid.includes(newKey)) emSelectedMonths.add(newKey);
+    });
+    renderEmGrid();
+  }
+
+  function onEmMonthToggle(cb) {
+    const key   = cb.dataset.key;
+    const inner = cb.closest('label').querySelector('div');
+    const badge = inner.querySelectorAll('span')[1];
+    if (cb.checked) {
+      emSelectedMonths.add(key);
+      document.getElementById('em-error-months')?.classList.add('hidden');
+      inner.classList.add('border-primary', 'bg-primary/5');
+      inner.classList.remove('border-slate-200', 'dark:border-slate-700');
+      badge.textContent = 'Selected'; badge.classList.add('text-primary'); badge.classList.remove('text-slate-400');
+    } else {
+      emSelectedMonths.delete(key);
+      inner.classList.remove('border-primary', 'bg-primary/5');
+      inner.classList.add('border-slate-200');
+      badge.textContent = 'Unpaid'; badge.classList.remove('text-primary'); badge.classList.add('text-slate-400');
+    }
+  }
+
+  function submitEditModal(e) {
+    e.preventDefault();
+    if (emSelectedMonths.size === 0) {
+      const errEl = document.getElementById('em-error-months');
+      if (errEl) { errEl.classList.remove('hidden'); errEl.classList.add('flex'); }
+      return false;
+    }
+    const form = document.getElementById('em-form');
+    form.querySelectorAll('input[name="months[]"]').forEach(el => el.remove());
+    emSelectedMonths.forEach(k => {
+      const inp = document.createElement('input');
+      inp.type = 'hidden'; inp.name = 'months[]'; inp.value = k;
+      form.appendChild(inp);
+    });
+    const fileInput = form.querySelector('input[type="file"][name="proof"]');
+    if (fileInput && fileInput.files.length) {
+      const fd = new FormData(form);
+      fetch(form.action, { method: 'POST', body: fd })
+        .then(r => { if (r.redirected) window.location.href = r.url; else window.location.reload(); });
+      return false;
+    }
+    form.submit();
+    return false;
+  }
+
+  function openEditModal(id, residentId, name, unit, month, amount, methodId, status, rejection, notes, proofUrl) {
     document.getElementById('em-resident-name').textContent = name;
     document.getElementById('em-unit-label').textContent = 'Unit ' + unit;
-    document.getElementById('em-month').value = month;
+
+    // Set up month grid pre-populated with current month
+    emResidentId = residentId;
+    emSelectedMonths.clear();
+    emYear = parseInt(month.split('-')[0]);
+    emSelectedMonths.add(month);
+    document.getElementById('em-year-select').value = emYear;
+    document.getElementById('em-year-label').textContent = emYear;
+    renderEmGrid();
+
     document.getElementById('em-amount').value = amount;
     document.getElementById('em-notes').value = notes;
-    document.getElementById('em-status').value = status;
     document.getElementById('em-rejection').value = rejection;
     document.getElementById('em-method').value = methodId ?? '';
     document.getElementById('em-proof-name').textContent = 'Click to upload new file';
+
+    const isLocked = !canApprove && status === 'approved';
+    const readonlyEl = document.getElementById('em-status-readonly');
+    const selectEl   = document.getElementById('em-status');
+    const chevronEl  = document.getElementById('em-status-chevron');
+    if (readonlyEl) {
+      const labels = { approved: 'Approved — cannot be changed' };
+      readonlyEl.classList.toggle('hidden', !isLocked);
+      document.getElementById('em-status-readonly-label').textContent = labels[status] ?? status;
+      selectEl.classList.toggle('hidden', isLocked);
+      if (chevronEl) chevronEl.classList.toggle('hidden', isLocked);
+    }
+    if (!isLocked) {
+      selectEl.value = (!canApprove && status === 'rejected') ? 'pending' : status;
+    }
+
     toggleEditRejection(status);
     const proofWrap = document.getElementById('em-proof-wrap');
     if (proofUrl) { document.getElementById('em-proof-link').href = proofUrl; proofWrap.classList.remove('hidden'); }
@@ -686,7 +874,7 @@ Review Modal, and all associated JavaScript.
   }
 
   // ── Review modal ───────────────────────────────────────────────────
-  function openReviewModal(id, name, unit, amount, month) {
+  function openReviewModal(id, name, unit, amount, month, notes) {
     document.getElementById('modal-resident').textContent = name + ' (' + unit + ')';
     document.getElementById('modal-amount').textContent = amount;
     document.getElementById('modal-month').textContent = month;
@@ -694,6 +882,15 @@ Review Modal, and all associated JavaScript.
     document.getElementById('modal-error').classList.add('hidden');
     document.getElementById('modal-approve-form').action = '/payments/' + id + '/approve';
     document.getElementById('modal-reject-form').action = '/payments/' + id + '/reject';
+    // Show coordinator notes if any
+    const notesWrap = document.getElementById('modal-notes-wrap');
+    const notesEl   = document.getElementById('modal-notes');
+    if (notes && notes.trim()) {
+      notesEl.textContent = notes;
+      notesWrap.classList.remove('hidden');
+    } else {
+      notesWrap.classList.add('hidden');
+    }
     const el = document.getElementById('review-modal-overlay');
     el.classList.remove('hidden'); el.classList.add('flex');
     document.body.classList.add('overflow-hidden');
@@ -720,5 +917,33 @@ Review Modal, and all associated JavaScript.
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeCreateModal(); closeEditModal(); closeReviewModal(); closeProofModal(); }
+  });
+
+  // ── Payment Delete Modal ────────────────────────────────────────────
+  function openPaymentDeleteModal(id, name) {
+    document.getElementById('pdm-body').innerHTML =
+      `Payment record for <strong class="text-slate-800 dark:text-slate-200">${name}</strong> will be permanently removed. This <em>cannot</em> be undone.`;
+    document.getElementById('pdm-form').action = `/payments/${id}`;
+    const modal = document.getElementById('payment-delete-modal');
+    const card  = document.getElementById('pdm-card');
+    modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+    requestAnimationFrame(() => {
+      card.classList.remove('scale-95', 'opacity-0');
+      card.classList.add('scale-100', 'opacity-100');
+    });
+  }
+  function closePaymentDeleteModal() {
+    const modal = document.getElementById('payment-delete-modal');
+    const card  = document.getElementById('pdm-card');
+    card.classList.remove('scale-100', 'opacity-100');
+    card.classList.add('scale-95', 'opacity-0');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }, 150);
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closePaymentDeleteModal();
   });
 </script>

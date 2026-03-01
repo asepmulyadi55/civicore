@@ -54,6 +54,13 @@ class PaymentController extends Controller
         $blocks = Block::active()->orderBy('name')->get();
         $currency = Setting::get('currency_symbol', 'Rp');
 
+        // Residents for the Add/Edit modal dropdowns — scoped to coordinator's block
+        $residents = Resident::with('block')
+            ->where('is_active', true)
+            ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
+            ->orderBy('fullname')
+            ->get();
+
         // Summary stats — scoped to coordinator's block when applicable
         $statBase = PaymentRecord::when(
             $scopeBlockId,
@@ -95,7 +102,8 @@ class PaymentController extends Controller
             'collectedMonth',
             'unpaidCount',
             'paidMonthsByResident',
-            'canApprove'
+            'canApprove',
+            'residents'
         ));
     }
 
@@ -282,5 +290,33 @@ class PaymentController extends Controller
         $name = $records->first()?->resident->fullname ?? 'Resident';
         return redirect()->route('payments.index')
             ->with('success', "{$count} payment(s) from {$name} rejected.");
+    }
+
+    public function destroy(PaymentRecord $payment)
+    {
+        // Only admin can delete payments
+        if (!auth()->user()->isAdmin()) {
+            return redirect()->route('payments.index')
+                ->with('error', 'Only administrators can delete payments.');
+        }
+
+        // Protect approved payments — they are financial records
+        if ($payment->status === 'approved') {
+            return redirect()->route('payments.index')
+                ->with('error', 'Approved payments cannot be deleted. They are part of the financial record.');
+        }
+
+        // If part of a batch, delete the entire batch together
+        $count = 1;
+        $name = $payment->resident->fullname ?? 'Resident';
+        if ($payment->batch_id) {
+            $count = PaymentRecord::where('batch_id', $payment->batch_id)->count();
+            PaymentRecord::where('batch_id', $payment->batch_id)->delete();
+        } else {
+            $payment->delete();
+        }
+
+        return redirect()->route('payments.index')
+            ->with('success', "{$count} payment record(s) for {$name} deleted.");
     }
 }

@@ -131,7 +131,7 @@
                   @elseif($isMultiBatch && $payment->status === 'pending')
                     {{-- Non-last rows in the batch: suppress the individual Review button --}}
                   @elseif($payment->status === 'pending')
-                    <button onclick="openReviewModal({{ $payment->id }}, '{{ addslashes($payment->resident->fullname) }}', '{{ $payment->resident->unit_number }}', '{{ $currency }} {{ number_format($payment->amount) }}', '{{ \Carbon\Carbon::parse($payment->payment_month)->format('F Y') }}')"
+                    <button onclick="openReviewModal({{ $payment->id }}, '{{ addslashes($payment->resident->fullname) }}', '{{ $payment->resident->unit_number }}', '{{ $currency }} {{ number_format($payment->amount) }}', '{{ \Carbon\Carbon::parse($payment->payment_month)->format('F Y') }}', '{{ addslashes($payment->notes ?? '') }}')"
                       class="text-primary hover:text-primary/80 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-primary/20 rounded-lg hover:bg-primary/5 transition-all">
                       Review
                     </button>
@@ -153,6 +153,23 @@
                     @elseif($payment->status === 'rejected')
                       <span class="text-xs text-rose-400" title="{{ $payment->rejection_reason }}">Rejected</span>
                     @endif
+                  @endif
+                @endif
+
+                {{-- Delete button: admin only, not allowed on approved payments --}}
+                @if(auth()->user()->isAdmin())
+                  @if($payment->status !== 'approved')
+                    <button type="button"
+                      onclick="openPaymentDeleteModal({{ $payment->id }}, '{{ addslashes($payment->resident->fullname) }}')"
+                      title="Delete payment"
+                      class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors">
+                      <span class="material-icons text-lg">delete_outline</span>
+                    </button>
+                  @else
+                    <span title="Approved payments cannot be deleted"
+                      class="p-1.5 text-slate-300 dark:text-slate-600 cursor-not-allowed inline-flex">
+                      <span class="material-icons text-lg">lock_outline</span>
+                    </span>
                   @endif
                 @endif
 
