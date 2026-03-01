@@ -14,6 +14,11 @@ class LoginController extends Controller
    */
   public function showLoginForm()
   {
+    if (Auth::check()) {
+      $user = Auth::user();
+      $redirectTo = $user->isResident() ? '/my-overview' : '/dashboard';
+      return redirect($redirectTo);
+    }
     return view('login');
   }
 
