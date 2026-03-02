@@ -5,19 +5,32 @@
 
   <main class="lg:ml-64 flex flex-col h-screen overflow-hidden">
     {{-- Header --}}
-    <div
-      class="sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur px-8 py-5 flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-extrabold tracking-tight">Roles & Permissions</h1>
-        <p class="text-sm text-slate-500 mt-0.5">Manage roles and configure what each role can access.</p>
-      </div>
-      @if(auth()->user()->isAdmin())
-        <button onclick="openAddRoleModal()"
-          class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 active:scale-95 transition-all">
-          <span class="material-icons text-sm">add</span> Add Role
+    <header
+      class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 lg:px-8 shrink-0">
+      <div class="flex items-center gap-4">
+        <button class="lg:hidden p-2 rounded-lg border border-slate-200 dark:border-slate-800"
+          onclick="toggleSidebar()">
+          <span class="material-icons text-slate-500">menu</span>
         </button>
-      @endif
-    </div>
+        <h1 class="text-xl font-bold text-slate-900 dark:text-white">Roles & Permissions</h1>
+        <span
+          class="hidden sm:inline px-2 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg uppercase">Manage</span>
+      </div>
+      <div class="flex items-center gap-3">
+        @if(auth()->user()->isAdmin())
+          <button onclick="openAddRoleModal()"
+            class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-sm shadow-primary/20 text-sm">
+            <span class="material-icons text-sm">add</span>
+            <span class="hidden sm:inline">Add Role</span>
+          </button>
+        @endif
+        <button
+          class="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-primary/50 transition-all"
+          onclick="toggleDark()" title="Toggle dark mode">
+          <span class="material-icons text-slate-500 text-[20px]">dark_mode</span>
+        </button>
+      </div>
+    </header>
 
     <div class="flex-1 overflow-y-auto p-8 space-y-6">
       {{-- Flash messages --}}

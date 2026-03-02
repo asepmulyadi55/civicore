@@ -44,7 +44,7 @@
         $href = $item['route'] === '#' ? '#' : route($item['route']);
       @endphp
       <a href="{{ $href }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg font-{{ $isActive ? 'semibold' : 'medium' }} transition-all group
-                              {{ $isActive
+                                {{ $isActive
       ? 'bg-primary/10 text-primary'
       : 'text-slate-500 hover:text-primary hover:bg-primary/5' }}">
         <span class="material-icons text-[20px]">{{ $item['icon'] }}</span>
@@ -55,3 +55,10 @@
   <x-nav.user-footer />
 
 </aside>
+
+<script>
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('-translate-x-full');
+    document.getElementById('sidebar-overlay').classList.toggle('hidden');
+  }
+</script>

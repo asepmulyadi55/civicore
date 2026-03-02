@@ -144,7 +144,7 @@
             <div class="relative">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">calendar_today</span>
               <input id="add-fee_start" type="month" name="fee_start" value="{{ old('fee_start', now()->format('Y-m')) }}"
-                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('fee_start') border-red-500 @enderror"
+                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white dark:[color-scheme:dark] @error('fee_start') border-red-500 @enderror"
                 oninput="clearRmErr('js-rm-fee_start')" />
             </div>
             @error('fee_start') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
@@ -299,7 +299,7 @@
               <div class="relative">
                 <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">calendar_today</span>
                 <input type="month" id="edit-fee_start" name="new_fee_start" value="{{ now()->format('Y-m') }}"
-                  class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white" />
+                  class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white dark:[color-scheme:dark]" />
               </div>
             </div>
           </div>

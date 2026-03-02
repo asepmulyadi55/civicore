@@ -160,7 +160,27 @@
   @if($payments->hasPages())
     <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
       <p class="text-sm text-slate-500">Showing {{ $payments->firstItem() }}–{{ $payments->lastItem() }} of {{ $payments->total() }}</p>
-      {{ $payments->links() }}
+      <div class="flex items-center gap-1">
+        @if ($payments->onFirstPage())
+          <button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 cursor-not-allowed" disabled>
+            <span class="material-icons text-sm">chevron_left</span>
+          </button>
+        @else
+          <a href="{{ $payments->previousPageUrl() }}" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            <span class="material-icons text-sm">chevron_left</span>
+          </a>
+        @endif
+
+        @if ($payments->hasMorePages())
+          <a href="{{ $payments->nextPageUrl() }}" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            <span class="material-icons text-sm">chevron_right</span>
+          </a>
+        @else
+          <button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 cursor-not-allowed" disabled>
+            <span class="material-icons text-sm">chevron_right</span>
+          </button>
+        @endif
+      </div>
     </div>
   @endif
 </div>
