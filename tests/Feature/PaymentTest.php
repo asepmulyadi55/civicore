@@ -14,6 +14,15 @@ class PaymentTest extends TestCase
 {
   use RefreshDatabase;
 
+  // ── Test Fixture Constants ────────────────────────────────────────────────────
+
+  private const BLOCK_NAME = 'Block A';
+  private const RESIDENT_NAME = 'Ahmad Fauzi';
+  private const PAYMENT_MONTH = '2024-01-01';
+  private const PAYMENT_MONTH_2 = '2024-02-01';
+  private const MONTH_INPUT = '2024-01';      // YYYY-MM format used in form inputs
+  private const PAYMENT_AMOUNT = 500000;
+
   // ── Helpers ─────────────────────────────────────────────────────────────────
 
   private function createRoles(): array
@@ -27,9 +36,10 @@ class PaymentTest extends TestCase
         'payments.create' => true,
         'payments.edit' => true,
         'payments.approve' => true,
-      ]
+      ],
     ]);
     $resident = Role::create(['name' => 'resident', 'label' => 'Resident', 'permissions' => []]);
+
     return compact('admin', 'treasurer', 'resident');
   }
 
@@ -57,23 +67,18 @@ class PaymentTest extends TestCase
     ]);
   }
 
-  private function makeResident(Block $block, array $roles): array
+  /** Shared helper: create a Block + Resident for tests that need one. */
+  private function makeResidentInBlock(string $fullname = 'Budi'): array
   {
+    $block = Block::create(['name' => self::BLOCK_NAME, 'is_active' => true]);
     $resident = Resident::create([
       'block_id' => $block->id,
       'unit_number' => 'A-101',
-      'fullname' => 'Budi Santoso',
+      'fullname' => $fullname,
       'is_active' => true,
     ]);
-    $residentUser = User::create([
-      'name' => 'Budi',
-      'username' => 'budi',
-      'email' => 'budi@test.com',
-      'password' => bcrypt('password'),
-      'is_active' => true,
-      'role_id' => $roles['resident']->id,
-    ]);
-    return compact('resident', 'residentUser');
+
+    return compact('block', 'resident');
   }
 
   // ── Authorization ────────────────────────────────────────────────────────────
@@ -100,18 +105,23 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $admin = $this->makeAdmin($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Ahmad Fauzi', 'is_active' => true]);
+    $block = Block::create(['name' => self::BLOCK_NAME, 'is_active' => true]);
+    $resident = Resident::create([
+      'block_id' => $block->id,
+      'unit_number' => 'A-101',
+      'fullname' => self::RESIDENT_NAME,
+      'is_active' => true,
+    ]);
 
     PaymentRecord::create([
       'resident_id' => $resident->id,
-      'payment_month' => '2024-01-01',
-      'amount' => 500000,
+      'payment_month' => self::PAYMENT_MONTH,
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'approved',
     ]);
 
     $response = $this->actingAs($admin)->get(route('payments.index'));
-    $response->assertOk()->assertSee('Ahmad Fauzi');
+    $response->assertOk()->assertSee(self::RESIDENT_NAME);
   }
 
   /** @test */
@@ -119,13 +129,13 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $admin = $this->makeAdmin($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $block = Block::create(['name' => self::BLOCK_NAME, 'is_active' => true]);
 
-    $r1 = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Ahmad Fauzi', 'is_active' => true]);
+    $r1 = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => self::RESIDENT_NAME, 'is_active' => true]);
     $r2 = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-102', 'fullname' => 'Siti Rahayu', 'is_active' => true]);
 
-    PaymentRecord::create(['resident_id' => $r1->id, 'payment_month' => '2024-01-01', 'amount' => 500000, 'status' => 'pending']);
-    PaymentRecord::create(['resident_id' => $r2->id, 'payment_month' => '2024-01-01', 'amount' => 500000, 'status' => 'pending']);
+    PaymentRecord::create(['resident_id' => $r1->id, 'payment_month' => self::PAYMENT_MONTH, 'amount' => self::PAYMENT_AMOUNT, 'status' => 'pending']);
+    PaymentRecord::create(['resident_id' => $r2->id, 'payment_month' => self::PAYMENT_MONTH, 'amount' => self::PAYMENT_AMOUNT, 'status' => 'pending']);
 
     $response = $this->actingAs($admin)->get(route('payments.index', ['search' => 'Ahmad']));
     $response->assertOk();
@@ -133,7 +143,7 @@ class PaymentTest extends TestCase
     // Check view data: only Ahmad's payment should be in the paginator, not Siti's
     $payments = $response->viewData('payments');
     $names = collect(iterator_to_array($payments->getIterator()))->pluck('resident.fullname');
-    $this->assertContains('Ahmad Fauzi', $names);
+    $this->assertContains(self::RESIDENT_NAME, $names);
     $this->assertNotContains('Siti Rahayu', $names);
   }
 
@@ -142,11 +152,11 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $admin = $this->makeAdmin($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $block = Block::create(['name' => self::BLOCK_NAME, 'is_active' => true]);
     $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Ahmad', 'is_active' => true]);
 
-    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => '2024-01-01', 'amount' => 500000, 'status' => 'approved']);
-    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => '2024-02-01', 'amount' => 500000, 'status' => 'pending']);
+    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => self::PAYMENT_MONTH, 'amount' => self::PAYMENT_AMOUNT, 'status' => 'approved']);
+    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => self::PAYMENT_MONTH_2, 'amount' => self::PAYMENT_AMOUNT, 'status' => 'pending']);
 
     $response = $this->actingAs($admin)->get(route('payments.index', ['status' => 'approved']));
     $response->assertOk();
@@ -160,22 +170,20 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $admin = $this->makeAdmin($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     $this->actingAs($admin)->post(route('payments.store'), [
       'resident_id' => $resident->id,
-      'months' => ['2024-01'],
-      'amount' => 500000,
+      'months' => [self::MONTH_INPUT],
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'pending',
     ]);
 
-    // SQLite stores dates with time suffix — use model query for reliable comparison
     $record = PaymentRecord::where('resident_id', $resident->id)->first();
     $this->assertNotNull($record, 'Payment record was not created.');
-    $this->assertEquals('2024-01-01', \Carbon\Carbon::parse($record->payment_month)->format('Y-m-d'));
+    $this->assertEquals(self::PAYMENT_MONTH, \Carbon\Carbon::parse($record->payment_month)->format('Y-m-d'));
     $this->assertEquals('pending', $record->status);
-    $this->assertEquals(500000, (int) $record->amount);
+    $this->assertEquals(self::PAYMENT_AMOUNT, (int) $record->amount);
   }
 
   /** @test */
@@ -183,13 +191,12 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $admin = $this->makeAdmin($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     $this->actingAs($admin)->post(route('payments.store'), [
       'resident_id' => $resident->id,
       'months' => ['2024-01', '2024-02', '2024-03'],
-      'amount' => 500000,
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'pending',
     ]);
 
@@ -204,17 +211,16 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $admin = $this->makeAdmin($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     // Pre-create payment for January
-    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => '2024-01-01', 'amount' => 500000, 'status' => 'pending']);
+    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => self::PAYMENT_MONTH, 'amount' => self::PAYMENT_AMOUNT, 'status' => 'pending']);
 
     // Try submitting the same month again
     $this->actingAs($admin)->post(route('payments.store'), [
       'resident_id' => $resident->id,
-      'months' => ['2024-01'],
-      'amount' => 500000,
+      'months' => [self::MONTH_INPUT],
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'pending',
     ]);
 
@@ -230,8 +236,8 @@ class PaymentTest extends TestCase
 
     $response = $this->actingAs($admin)->post(route('payments.store'), [
       'resident_id' => '',
-      'months' => ['2024-01'],
-      'amount' => 500000,
+      'months' => [self::MONTH_INPUT],
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'pending',
     ]);
 
@@ -243,13 +249,12 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $admin = $this->makeAdmin($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     $response = $this->actingAs($admin)->post(route('payments.store'), [
       'resident_id' => $resident->id,
       'months' => [],
-      'amount' => 500000,
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'pending',
     ]);
 
@@ -261,13 +266,12 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $admin = $this->makeAdmin($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     $response = $this->actingAs($admin)->post(route('payments.store'), [
       'resident_id' => $resident->id,
-      'months' => ['2024-01'],
-      'amount' => 500000,
+      'months' => [self::MONTH_INPUT],
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'invalid_status',
     ]);
 
@@ -281,13 +285,12 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $treasurer = $this->makeTreasurer($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     $payment = PaymentRecord::create([
       'resident_id' => $resident->id,
-      'payment_month' => '2024-01-01',
-      'amount' => 500000,
+      'payment_month' => self::PAYMENT_MONTH,
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'pending',
     ]);
 
@@ -305,13 +308,12 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $treasurer = $this->makeTreasurer($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     $payment = PaymentRecord::create([
       'resident_id' => $resident->id,
-      'payment_month' => '2024-01-01',
-      'amount' => 500000,
+      'payment_month' => self::PAYMENT_MONTH,
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'pending',
     ]);
 
@@ -330,13 +332,12 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $treasurer = $this->makeTreasurer($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     $payment = PaymentRecord::create([
       'resident_id' => $resident->id,
-      'payment_month' => '2024-01-01',
-      'amount' => 500000,
+      'payment_month' => self::PAYMENT_MONTH,
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'pending',
     ]);
 
@@ -356,13 +357,12 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $treasurer = $this->makeTreasurer($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     $payment = PaymentRecord::create([
       'resident_id' => $resident->id,
-      'payment_month' => '2024-01-01',
-      'amount' => 500000,
+      'payment_month' => self::PAYMENT_MONTH,
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'pending',
     ]);
 
@@ -378,13 +378,12 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $treasurer = $this->makeTreasurer($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     $payment = PaymentRecord::create([
       'resident_id' => $resident->id,
-      'payment_month' => '2024-01-01',
-      'amount' => 500000,
+      'payment_month' => self::PAYMENT_MONTH,
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'pending',
     ]);
 
@@ -402,13 +401,12 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $admin = $this->makeAdmin($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     $payment = PaymentRecord::create([
       'resident_id' => $resident->id,
-      'payment_month' => '2024-01-01',
-      'amount' => 500000,
+      'payment_month' => self::PAYMENT_MONTH,
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'pending',
     ]);
 
@@ -423,13 +421,12 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $admin = $this->makeAdmin($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     $payment = PaymentRecord::create([
       'resident_id' => $resident->id,
-      'payment_month' => '2024-01-01',
-      'amount' => 500000,
+      'payment_month' => self::PAYMENT_MONTH,
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'approved',
     ]);
 
@@ -445,13 +442,12 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $treasurer = $this->makeTreasurer($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     $payment = PaymentRecord::create([
       'resident_id' => $resident->id,
-      'payment_month' => '2024-01-01',
-      'amount' => 500000,
+      'payment_month' => self::PAYMENT_MONTH,
+      'amount' => self::PAYMENT_AMOUNT,
       'status' => 'pending',
     ]);
 
@@ -467,12 +463,11 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $admin = $this->makeAdmin($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     $batchId = 'test-batch-uuid-001';
-    $p1 = PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => '2024-01-01', 'amount' => 500000, 'status' => 'pending', 'batch_id' => $batchId]);
-    $p2 = PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => '2024-02-01', 'amount' => 500000, 'status' => 'pending', 'batch_id' => $batchId]);
+    $p1 = PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => self::PAYMENT_MONTH, 'amount' => self::PAYMENT_AMOUNT, 'status' => 'pending', 'batch_id' => $batchId]);
+    $p2 = PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => self::PAYMENT_MONTH_2, 'amount' => self::PAYMENT_AMOUNT, 'status' => 'pending', 'batch_id' => $batchId]);
 
     $this->actingAs($admin)->delete(route('payments.destroy', $p1));
 
@@ -487,12 +482,11 @@ class PaymentTest extends TestCase
   {
     $roles = $this->createRoles();
     $treasurer = $this->makeTreasurer($roles);
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+    ['resident' => $resident] = $this->makeResidentInBlock();
 
     $batchId = 'batch-approve-test';
-    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => '2024-01-01', 'amount' => 500000, 'status' => 'pending', 'batch_id' => $batchId]);
-    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => '2024-02-01', 'amount' => 500000, 'status' => 'pending', 'batch_id' => $batchId]);
+    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => self::PAYMENT_MONTH, 'amount' => self::PAYMENT_AMOUNT, 'status' => 'pending', 'batch_id' => $batchId]);
+    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => self::PAYMENT_MONTH_2, 'amount' => self::PAYMENT_AMOUNT, 'status' => 'pending', 'batch_id' => $batchId]);
 
     // Route: POST /payments/batch/{batchId}/approve  →  name: payments.batch.approve
     $this->actingAs($treasurer)
