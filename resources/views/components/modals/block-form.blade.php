@@ -17,8 +17,8 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
     {{-- Header --}}
     <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
       <div>
-        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Add New Block</h2>
-        <p class="text-sm text-slate-400 mt-0.5">Create a new residential block or tower.</p>
+        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ __('app.add_new_block') }}</h2>
+        <p class="text-sm text-slate-400 mt-0.5">{{ __('app.add_block_desc') }}</p>
       </div>
       <button onclick="closeAddBlockModal()"
         class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1">
@@ -34,13 +34,13 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
         {{-- Block Name --}}
         <div class="flex flex-col gap-2">
           <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-            Block Name <span class="text-red-500">*</span>
+            {{ __('app.block_name') }} <span class="text-red-500">*</span>
           </label>
           <div class="relative">
             <span
               class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">apartment</span>
             <input id="add-block-name" type="text" name="name" value="{{ old('name') }}"
-              placeholder="e.g. Block A, Tower B"
+              placeholder="{{ __('app.eg_block_name') }}"
               class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('name') border-red-500 @enderror"
               oninput="clearBErr('js-bm-name')" />
           </div>
@@ -50,16 +50,17 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
             </p>
           @enderror
           <p id="js-bm-name" class="hidden text-xs text-red-500 items-center gap-1">
-            <span class="material-icons text-xs">error_outline</span> Please enter the block name.
+            <span class="material-icons text-xs">error_outline</span> {{ __('app.err_block_name') }}
           </p>
         </div>
 
         {{-- Description --}}
         <div class="flex flex-col gap-2">
           <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-            Description <span class="font-normal text-slate-400 normal-case">(optional)</span>
+            {{ __('app.description') }} <span
+              class="font-normal text-slate-400 normal-case">{{ __('app.description_optional') }}</span>
           </label>
-          <textarea name="description" rows="3" placeholder="e.g. Terrace units on the east wing"
+          <textarea name="description" rows="3" placeholder="{{ __('app.eg_block_desc') }}"
             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white resize-none">{{ old('description') }}</textarea>
         </div>
 
@@ -67,12 +68,12 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
         <div class="flex gap-3 pt-1">
           <button type="button" onclick="closeAddBlockModal()"
             class="flex-1 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-            Cancel
+            {{ __('app.btn_cancel') }}
           </button>
           <button type="submit"
             class="flex-1 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 active:scale-95">
             <span class="material-icons text-sm">add_home</span>
-            Save Block
+            {{ __('app.btn_save_block') }}
           </button>
         </div>
       </form>
@@ -92,7 +93,7 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
     {{-- Header --}}
     <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
       <div>
-        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Edit Block</h2>
+        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ __('app.edit_block') }}</h2>
         <span id="ebm-name-badge"
           class="px-2 py-0.5 bg-primary/10 text-primary rounded-lg text-xs font-bold mt-1 inline-block"></span>
       </div>
@@ -111,7 +112,7 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
         {{-- Block Name --}}
         <div class="flex flex-col gap-2">
           <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-            Block Name <span class="text-red-500">*</span>
+            {{ __('app.block_name') }} <span class="text-red-500">*</span>
           </label>
           <div class="relative">
             <span
@@ -121,14 +122,15 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
               oninput="clearBErr('js-ebm-name')" />
           </div>
           <p id="js-ebm-name" class="hidden text-xs text-red-500 items-center gap-1">
-            <span class="material-icons text-xs">error_outline</span> Please enter the block name.
+            <span class="material-icons text-xs">error_outline</span> {{ __('app.err_block_name') }}
           </p>
         </div>
 
         {{-- Description --}}
         <div class="flex flex-col gap-2">
           <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-            Description <span class="font-normal text-slate-400 normal-case">(optional)</span>
+            {{ __('app.description') }} <span
+              class="font-normal text-slate-400 normal-case">{{ __('app.description_optional') }}</span>
           </label>
           <textarea id="edit-block-description" name="description" rows="3"
             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white resize-none"></textarea>
@@ -140,8 +142,8 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
           <input type="checkbox" id="edit-block-active" name="is_active" value="1"
             class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary/20" />
           <div>
-            <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Active Block</span>
-            <p class="text-xs text-slate-400">Inactive blocks are hidden from resident assignment.</p>
+            <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.active_block') }}</span>
+            <p class="text-xs text-slate-400">{{ __('app.inactive_block_hint') }}</p>
           </div>
         </label>
 
@@ -149,12 +151,12 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
         <div class="flex gap-3 pt-1">
           <button type="button" onclick="closeEditBlockModal()"
             class="flex-1 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-            Cancel
+            {{ __('app.btn_cancel') }}
           </button>
           <button type="submit"
             class="flex-1 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 active:scale-95">
             <span class="material-icons text-sm">save</span>
-            Save Changes
+            {{ __('app.btn_save_changes') }}
           </button>
         </div>
       </form>

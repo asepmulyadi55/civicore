@@ -20,8 +20,8 @@
     {{-- Header --}}
     <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center shrink-0">
       <div>
-        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Add New Resident</h2>
-        <p class="text-sm text-slate-400 mt-0.5">Fill in the details to register a new resident.</p>
+        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ __('app.add_new_resident') }}</h2>
+        <p class="text-sm text-slate-400 mt-0.5">{{ __('app.add_resident_desc') }}</p>
       </div>
       <button onclick="closeAddResidentModal()"
         class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1">
@@ -38,26 +38,26 @@
         {{-- Full Name --}}
         <div class="flex flex-col gap-2">
           <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-            Full Name <span class="text-red-500">*</span>
+            {{ __('app.full_name') }} <span class="text-red-500">*</span>
           </label>
           <div class="relative">
             <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">person</span>
-            <input id="add-fullname" type="text" name="fullname" value="{{ old('fullname') }}" placeholder="e.g. Ahmad Fauzi"
+            <input id="add-fullname" type="text" name="fullname" value="{{ old('fullname') }}" placeholder="{{ __('app.eg_name') }}"
               class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('fullname') border-red-500 @enderror"
               oninput="clearRmErr('js-rm-fullname')" />
           </div>
           @error('fullname') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
           <p id="js-rm-fullname" class="hidden text-xs text-red-500 items-center gap-1">
-            <span class="material-icons text-xs">error_outline</span> Please enter the full name.
+            <span class="material-icons text-xs">error_outline</span> {{ __('app.err_fullname') }}
           </p>
         </div>
 
         {{-- Phone --}}
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Phone Number</label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.phone_number') }}</label>
           <div class="relative">
             <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">phone</span>
-            <input type="tel" name="phone" value="{{ old('phone') }}" placeholder="e.g. 081234567890"
+            <input type="tel" name="phone" value="{{ old('phone') }}" placeholder="{{ __('app.eg_phone') }}"
               class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('phone') border-red-500 @enderror" />
           </div>
           @error('phone') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
@@ -66,11 +66,11 @@
         {{-- Email --}}
         <div class="flex flex-col gap-2">
           <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-            Email Address <span class="font-normal text-slate-400 normal-case">(optional — enables resident login)</span>
+            {{ __('app.email_address') }} <span class="font-normal text-slate-400 normal-case">{{ __('app.email_optional_hint') }}</span>
           </label>
           <div class="relative">
             <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">email</span>
-            <input type="email" name="email" value="{{ old('email') }}" placeholder="e.g. resident@email.com"
+            <input type="email" name="email" value="{{ old('email') }}" placeholder="{{ __('app.eg_email') }}"
               class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('email') border-red-500 @enderror" />
           </div>
           @error('email') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
@@ -82,14 +82,14 @@
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col gap-2">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-              Block <span class="text-red-500">*</span>
+              {{ __('app.block') }} <span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">domain</span>
               <select id="add-block_id" name="block_id"
                 class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('block_id') border-red-500 @enderror"
                 onchange="clearRmErr('js-rm-block_id')">
-                <option value="">Select block</option>
+                <option value="">{{ __('app.select_block') }}</option>
                 @foreach($blocks as $block)
                   <option value="{{ $block->id }}" {{ old('block_id') == $block->id ? 'selected' : '' }}>{{ $block->name }}</option>
                 @endforeach
@@ -98,22 +98,22 @@
             </div>
             @error('block_id') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
             <p id="js-rm-block_id" class="hidden text-xs text-red-500 items-center gap-1">
-              <span class="material-icons text-xs">error_outline</span> Please select a block.
+              <span class="material-icons text-xs">error_outline</span> {{ __('app.err_block') }}
             </p>
           </div>
           <div class="flex flex-col gap-2">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-              Unit No. <span class="text-red-500">*</span>
+              {{ __('app.unit_no') }} <span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">meeting_room</span>
-              <input id="add-unit_number" type="text" name="unit_number" value="{{ old('unit_number') }}" placeholder="e.g. A-101"
+              <input id="add-unit_number" type="text" name="unit_number" value="{{ old('unit_number') }}" placeholder="{{ __('app.eg_unit') }}"
                 class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('unit_number') border-red-500 @enderror"
                 oninput="clearRmErr('js-rm-unit_number')" />
             </div>
             @error('unit_number') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
             <p id="js-rm-unit_number" class="hidden text-xs text-red-500 items-center gap-1">
-              <span class="material-icons text-xs">error_outline</span> Please enter the unit number.
+              <span class="material-icons text-xs">error_outline</span> {{ __('app.err_unit') }}
             </p>
           </div>
         </div>
@@ -124,7 +124,7 @@
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col gap-2">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-              Monthly Fee ({{ $currency }}) <span class="text-red-500">*</span>
+              {{ __('app.monthly_fee') }} ({{ $currency }}) <span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">payments</span>
@@ -134,12 +134,12 @@
             </div>
             @error('monthly_fee') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
             <p id="js-rm-monthly_fee" class="hidden text-xs text-red-500 items-center gap-1">
-              <span class="material-icons text-xs">error_outline</span> Please enter the monthly fee.
+              <span class="material-icons text-xs">error_outline</span> {{ __('app.err_monthly_fee') }}
             </p>
           </div>
           <div class="flex flex-col gap-2">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-              Fee Start Month <span class="text-red-500">*</span>
+              {{ __('app.fee_start_month') }} <span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">calendar_today</span>
@@ -149,7 +149,7 @@
             </div>
             @error('fee_start') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
             <p id="js-rm-fee_start" class="hidden text-xs text-red-500 items-center gap-1">
-              <span class="material-icons text-xs">error_outline</span> Please select the fee start month.
+              <span class="material-icons text-xs">error_outline</span> {{ __('app.err_fee_start') }}
             </p>
           </div>
         </div>
@@ -158,12 +158,12 @@
         <div class="flex gap-3 pt-2">
           <button type="button" onclick="closeAddResidentModal()"
             class="flex-1 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-            Cancel
+            {{ __('app.btn_cancel') }}
           </button>
           <button type="submit"
             class="flex-1 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 active:scale-95">
             <span class="material-icons text-sm">person_add</span>
-            Save Resident
+            {{ __('app.btn_save_resident') }}
           </button>
         </div>
       </form>
@@ -183,7 +183,7 @@
     {{-- Header --}}
     <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center shrink-0">
       <div>
-        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Edit Resident</h2>
+        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ __('app.edit_resident') }}</h2>
         <div class="flex items-center gap-2 mt-0.5 text-sm">
           <span id="erm-unit-badge" class="px-2 py-0.5 bg-primary/10 text-primary rounded-lg text-xs font-bold"></span>
           <span id="erm-name-sub" class="text-slate-400 text-xs"></span>
@@ -205,7 +205,7 @@
         {{-- Full Name --}}
         <div class="flex flex-col gap-2">
           <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-            Full Name <span class="text-red-500">*</span>
+            {{ __('app.full_name') }} <span class="text-red-500">*</span>
           </label>
           <div class="relative">
             <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">person</span>
@@ -216,7 +216,7 @@
 
         {{-- Phone --}}
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Phone Number</label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.phone_number') }}</label>
           <div class="relative">
             <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">phone</span>
             <input type="tel" id="edit-phone" name="phone"
@@ -227,7 +227,7 @@
         {{-- Email --}}
         <div class="flex flex-col gap-2">
           <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-            Email Address <span class="font-normal text-slate-400 normal-case">(optional)</span>
+            {{ __('app.email_address') }} <span class="font-normal text-slate-400 normal-case">(optional)</span>
           </label>
           <div class="relative">
             <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">email</span>
@@ -242,7 +242,7 @@
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col gap-2">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-              Block <span class="text-red-500">*</span>
+              {{ __('app.block') }} <span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">domain</span>
@@ -257,7 +257,7 @@
           </div>
           <div class="flex flex-col gap-2">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-              Unit No. <span class="text-red-500">*</span>
+              {{ __('app.unit_no') }} <span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">meeting_room</span>
@@ -274,27 +274,27 @@
           <div class="flex items-start gap-2">
             <span class="material-icons text-amber-500 text-lg mt-0.5">info</span>
             <div>
-              <p class="text-sm font-semibold text-amber-700 dark:text-amber-400">Update Monthly Fee</p>
+              <p class="text-sm font-semibold text-amber-700 dark:text-amber-400">{{ __('app.update_monthly_fee') }}</p>
               <p class="text-xs text-amber-600/80 dark:text-amber-500/80 mt-0.5">
-                Leave blank to keep the current fee. Filling this creates a new fee history entry effective from the chosen month.
+                {{ __('app.update_fee_hint') }}
               </p>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div class="flex flex-col gap-2">
               <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                New Monthly Fee ({{ $currency }})
+                {{ __('app.new_monthly_fee') }} ({{ $currency }})
               </label>
               <div class="relative">
                 <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">payments</span>
                 <input type="number" id="edit-monthly_fee" name="new_monthly_fee" min="0" step="1000"
-                  placeholder="Leave blank to keep current"
+                  placeholder="{{ __('app.leave_blank_keep_current') }}"
                   class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white" />
               </div>
             </div>
             <div class="flex flex-col gap-2">
               <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                Effective From
+                {{ __('app.effective_from') }}
               </label>
               <div class="relative">
                 <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">calendar_today</span>
@@ -310,8 +310,8 @@
           <input type="checkbox" id="edit-is_active" name="is_active" value="1"
             class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary/20" />
           <div>
-            <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Active Resident</span>
-            <p class="text-xs text-slate-400">Uncheck to mark as inactive (payment history is preserved).</p>
+            <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.active_resident') }}</span>
+            <p class="text-xs text-slate-400">{{ __('app.uncheck_inactive_hint') }}</p>
           </div>
         </label>
 
@@ -319,12 +319,12 @@
         <div class="flex gap-3 pt-2">
           <button type="button" onclick="closeEditResidentModal()"
             class="flex-1 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-            Cancel
+            {{ __('app.btn_cancel') }}
           </button>
           <button type="submit"
             class="flex-1 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 active:scale-95">
             <span class="material-icons text-sm">save</span>
-            Save Changes
+            {{ __('app.btn_save_changes') }}
           </button>
         </div>
       </form>

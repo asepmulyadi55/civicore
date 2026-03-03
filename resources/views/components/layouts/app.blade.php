@@ -67,9 +67,69 @@
   <script>
     function toggleDark() {
       var isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
     }
   </script>
+
+  @auth
+    {{-- ── Idle Session Timeout ──────────────────────────────────────────── --}}
+    @php $timeoutMinutes = (int) \App\Models\Setting::get('session_timeout_minutes', 30); @endphp
+    <div id="idle-warning" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-8 max-w-sm w-full text-center space-y-4">
+        <div class="w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto">
+          <span class="material-icons text-amber-500 text-2xl">timer</span>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Session Expiring</h3>
+        <p class="text-sm text-slate-500">You'll be logged out in <strong id="idle-countdown" class="text-rose-500">60</strong> seconds due to inactivity.</p>
+        <button onclick="resetIdleTimer()"
+          class="w-full bg-primary hover:bg-primary/90 text-white py-2.5 rounded-xl font-bold transition-all">
+          Stay Logged In
+        </button>
+      </div>
+    </div>
+    <form id="auto-logout-form" method="POST" action="{{ route('logout') }}" class="hidden">
+      @csrf
+    </form>
+    <script>
+      (function() {
+        var TIMEOUT_MS    = {{ $timeoutMinutes * 60 * 1000 }};
+        var WARNING_MS    = 60000; // show warning 60 s before logout
+        var idleTimer, countdownInterval;
+        var warningEl    = document.getElementById('idle-warning');
+        var countdownEl  = document.getElementById('idle-countdown');
+        var logoutForm   = document.getElementById('auto-logout-form');
+
+        function startLogoutCountdown() {
+          var secs = 60;
+          countdownEl.textContent = secs;
+          warningEl.classList.remove('hidden');
+          countdownInterval = setInterval(function() {
+            secs--;
+            countdownEl.textContent = secs;
+            if (secs <= 0) {
+              clearInterval(countdownInterval);
+              logoutForm.submit();
+            }
+          }, 1000);
+        }
+
+        function resetIdleTimer() {
+          clearTimeout(idleTimer);
+          clearInterval(countdownInterval);
+          warningEl.classList.add('hidden');
+          idleTimer = setTimeout(startLogoutCountdown, TIMEOUT_MS - WARNING_MS);
+        }
+
+        window.resetIdleTimer = resetIdleTimer;
+
+        ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(function(evt) {
+          document.addEventListener(evt, resetIdleTimer, { passive: true });
+        });
+
+        resetIdleTimer();
+      })();
+    </script>
+  @endauth
 </body>
 
 </html>

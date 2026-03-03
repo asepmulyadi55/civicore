@@ -44,11 +44,11 @@
         $href = $item['route'] === '#' ? '#' : route($item['route']);
       @endphp
       <a href="{{ $href }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg font-{{ $isActive ? 'semibold' : 'medium' }} transition-all group
-                                {{ $isActive
+                                  {{ $isActive
       ? 'bg-primary/10 text-primary'
       : 'text-slate-500 hover:text-primary hover:bg-primary/5' }}">
         <span class="material-icons text-[20px]">{{ $item['icon'] }}</span>
-        <span>{{ $item['label'] }}</span>
+        <span>{{ __('app.nav_' . $item['key']) }}</span>
       </a>
     @endforeach
   </nav>

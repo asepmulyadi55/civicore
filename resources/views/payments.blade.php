@@ -1,5 +1,5 @@
 {{-- payments.blade.php — Orchestrator --}}
-<x-layouts.app title="Payments"
+<x-layouts.app :title="__('app.nav_payments')"
   class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 antialiased min-h-screen">
 
   <x-nav.sidebar active="payments" />

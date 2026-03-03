@@ -3,7 +3,7 @@
 
   {{-- Collection Rate --}}
   <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Collection Rate</p>
+    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">{{ __('app.collection_rate') }}</p>
     <div class="flex items-end justify-between mt-1">
       <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ $collectionRate }}%</h3>
       <span class="text-{{ $collectionRate >= 80 ? 'emerald' : 'amber' }}-500 text-xs font-bold flex items-center">
@@ -17,23 +17,23 @@
 
   {{-- Active Residents --}}
   <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Active Residents</p>
+    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">{{ __('app.active_residents') }}</p>
     <h3 class="text-xl font-bold text-slate-900 dark:text-white mt-1">{{ $totalResidents }}</h3>
-    <p class="text-xs text-slate-500 mt-2">Included in report</p>
+    <p class="text-xs text-slate-500 mt-2">{{ __('app.included_in_report') }}</p>
   </div>
 
   {{-- Paid Months --}}
   <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Paid Months</p>
+    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">{{ __('app.paid_months') }}</p>
     <h3 class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{{ number_format($paidCount) }}</h3>
-    <p class="text-xs text-slate-500 mt-2">Confirmed payments</p>
+    <p class="text-xs text-slate-500 mt-2">{{ __('app.confirmed_payments') }}</p>
   </div>
 
   {{-- Outstanding --}}
   <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Outstanding</p>
+    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">{{ __('app.outstanding') }}</p>
     <h3 class="text-xl font-bold text-red-500 mt-1">{{ number_format($unpaidCount) }}</h3>
-    <p class="text-xs text-slate-500 mt-2">Months unpaid/pending</p>
+    <p class="text-xs text-slate-500 mt-2">{{ __('app.months_unpaid_pending') }}</p>
   </div>
 
 </div>

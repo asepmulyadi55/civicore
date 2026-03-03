@@ -15,11 +15,16 @@ use App\Http\Controllers\MyOverviewController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\SessionConflictController;
 
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:10,1');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// ── Single-session conflict (public — no auth required) ────────────────────────
+Route::get('/session-conflict', [SessionConflictController::class, 'show'])->name('session.conflict');
+Route::post('/session-use-this', [SessionConflictController::class, 'useThisDevice'])->name('session.use-this');
 
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:5,1');
@@ -123,9 +128,10 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('events.index');
 
-    // ── Settings ──────────────────────────────────────────────────────────────
-    Route::get('/settings', [SettingController::class, 'index'])
-        ->middleware('permission:settings.view')->name('settings.index');
-    Route::post('/settings', [SettingController::class, 'update'])
-        ->middleware('permission:settings.edit')->name('settings.update');
+    // ── Settings (profile — all roles) ────────────────────────────────────────
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('/settings/profile', [SettingController::class, 'updateProfile'])->name('settings.profile');
+    Route::post('/settings/password', [SettingController::class, 'updatePassword'])->name('settings.password');
+    Route::post('/settings/reset-link', [SettingController::class, 'sendResetLink'])->name('settings.reset-link');
+    Route::post('/settings/security', [SettingController::class, 'updateSecurity'])->middleware('permission:settings.edit')->name('settings.security');
 });

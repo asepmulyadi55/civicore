@@ -3,15 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
-  /**
-   * Show the login form.
-   */
   public function showLoginForm()
   {
     if (Auth::check()) {
@@ -20,9 +18,6 @@ class LoginController extends Controller
     return view('login');
   }
 
-  /**
-   * Handle a login request to the application.
-   */
   public function login(Request $request)
   {
     $request->validate([
@@ -33,34 +28,52 @@ class LoginController extends Controller
       'password.required' => 'Please enter your password.',
     ]);
 
-    // Determine credential field (email or username)
     $field = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-    $user = \App\Models\User::where($field, $request->username)->first();
+    $user = User::where($field, $request->username)->first();
 
-    // Verify credentials BEFORE creating a session
     if (!$user || !Hash::check($request->password, $user->password)) {
       return back()->with('error', 'Invalid username or password. Please try again.')
         ->withInput($request->only('username', 'remember'));
     }
 
-    // Check activation status BEFORE logging in
     if (!$user->is_active) {
       return back()->with('error', 'Your account is pending admin approval.')
         ->withInput($request->only('username', 'remember'));
     }
 
+    // ── Single-session check ──────────────────────────────────────────────
+    // If another active session exists for this user, redirect to conflict page
+    // so they can choose to cancel or kick the other device.
+    if ($user->session_token && $user->session_token !== $request->session()->getId()) {
+      // Store user_id in session temporarily (guest session) so the conflict
+      // page can offer the "Use this device" action.
+      session(['conflict_user_id' => $user->id]);
+      return redirect()->route('session.conflict');
+    }
+
+    // ── Successful login ──────────────────────────────────────────────────
     Auth::login($user, $request->boolean('remember'));
     $request->session()->regenerate();
+
+    // Track session and activity timestamps
+    $user->session_token = $request->session()->getId();
+    $user->last_login_at = now();
+    $user->last_active_at = now();
+    $user->save();
 
     return redirect()->intended($user->homeUrl())
       ->with('success', 'Welcome back, ' . $user->name . '!');
   }
 
-  /**
-   * Log the user out of the application.
-   */
   public function logout(Request $request)
   {
+    $user = Auth::user();
+    if ($user) {
+      /** @var \App\Models\User $user */
+      $user->session_token = null;
+      $user->save();
+    }
+
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();

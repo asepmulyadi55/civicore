@@ -1,5 +1,5 @@
 {{-- reports.blade.php — Orchestrator --}}
-<x-layouts.app title="Reports"
+<x-layouts.app title="{{ __('app.nav_reports') }}"
   class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 antialiased min-h-screen">
 
   <x-nav.sidebar active="reports" />
@@ -16,7 +16,8 @@
       {{-- Footer --}}
       <footer class="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
         <p class="text-xs text-slate-400 font-medium">
-          &copy; {{ now()->year }} CiviCore Community Management. Generated {{ now()->format('M d, Y \a\t h:i A') }}.
+          &copy; {{ now()->year }} CiviCore Community Management. {{ __('app.generated') }}
+          {{ now()->format('M d, Y \a\t h:i A') }}.
         </p>
       </footer>
     </div>

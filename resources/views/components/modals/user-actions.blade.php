@@ -21,27 +21,27 @@ closeModalOnBackdrop, togglePw, openEditModal.
     <div class="flex gap-3 px-6 pb-6">
       <button onclick="closeUserConfirmModal()"
         class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
-        Cancel
+        {{ __('app.btn_cancel') }}
       </button>
       <form id="ucm-form-approve" method="POST" action="" class="flex-1 hidden">
         @csrf @method('PATCH')
         <button type="submit"
           class="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all">
-          Yes, Approve
+          {{ __('app.btn_yes_approve') }}
         </button>
       </form>
       <form id="ucm-form-deactivate" method="POST" action="" class="flex-1 hidden">
         @csrf @method('PATCH')
         <button type="submit"
           class="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 transition-all">
-          Yes, Deactivate
+          {{ __('app.btn_yes_deactivate') }}
         </button>
       </form>
       <form id="ucm-form-delete" method="POST" action="" class="flex-1 hidden">
         @csrf @method('DELETE')
         <button type="submit"
           class="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition-all">
-          Yes, Delete
+          {{ __('app.btn_yes_delete') }}
         </button>
       </form>
     </div>
@@ -94,8 +94,8 @@ closeModalOnBackdrop, togglePw, openEditModal.
       iconWrap: 'bg-emerald-100 dark:bg-emerald-900/30',
       icon: 'verified',
       iconColor: 'text-emerald-600 dark:text-emerald-400',
-      title: 'Approve User?',
-      body: name => `<strong class="text-slate-800 dark:text-slate-200">${name}</strong> will be activated and can log in.`,
+      title: '{{ __('app.approve_user_title') }}',
+      body: name => `<strong class="text-slate-800 dark:text-slate-200">${name}</strong> {{ __('app.approve_user_body') }}`,
       form: 'ucm-form-approve',
       route: id => `/users/${id}/approve`,
     },
@@ -103,8 +103,8 @@ closeModalOnBackdrop, togglePw, openEditModal.
       iconWrap: 'bg-amber-100 dark:bg-amber-900/30',
       icon: 'person_off',
       iconColor: 'text-amber-600 dark:text-amber-400',
-      title: 'Deactivate User?',
-      body: name => `<strong class="text-slate-800 dark:text-slate-200">${name}</strong> will be deactivated and can no longer log in.`,
+      title: '{{ __('app.deactivate_user_title') }}',
+      body: name => `<strong class="text-slate-800 dark:text-slate-200">${name}</strong> {{ __('app.deactivate_user_body') }}`,
       form: 'ucm-form-deactivate',
       route: id => `/users/${id}/deactivate`,
     },
@@ -112,8 +112,8 @@ closeModalOnBackdrop, togglePw, openEditModal.
       iconWrap: 'bg-red-100 dark:bg-red-900/30',
       icon: 'delete_forever',
       iconColor: 'text-red-600 dark:text-red-400',
-      title: 'Delete User?',
-      body: name => `<strong class="text-slate-800 dark:text-slate-200">${name}</strong> will be permanently deleted. This cannot be undone.`,
+      title: '{{ __('app.delete_user_title') }}',
+      body: name => `<strong class="text-slate-800 dark:text-slate-200">${name}</strong> {{ __('app.delete_user_body') }}`,
       form: 'ucm-form-delete',
       route: id => `/users/${id}`,
     },

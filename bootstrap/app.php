@@ -13,6 +13,13 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'permission' => \App\Http\Middleware\RequirePermission::class,
+            'single.session' => \App\Http\Middleware\CheckSingleSession::class,
+        ]);
+
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\UpdateLastActive::class,
+            \App\Http\Middleware\CheckSingleSession::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

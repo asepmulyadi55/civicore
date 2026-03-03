@@ -1,5 +1,5 @@
 {{-- users.blade.php — Orchestrator --}}
-<x-layouts.app title="User Management"
+<x-layouts.app title="{{ __('app.user_access_roles') }}"
   class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 antialiased min-h-screen">
 
   <x-nav.sidebar active="users" />
