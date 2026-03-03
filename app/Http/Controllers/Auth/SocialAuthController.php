@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
@@ -49,8 +50,7 @@ class SocialAuthController extends Controller
         }
 
         Auth::login($user, true);
-        $redirectTo = $user->isResident() ? '/my-overview' : '/dashboard';
-        return redirect($redirectTo)->with('success', 'Welcome back, ' . $user->name . '!');
+        return redirect($user->homeUrl())->with('success', 'Welcome back, ' . $user->name . '!');
       }
 
       // Check if user exists by email
@@ -71,8 +71,7 @@ class SocialAuthController extends Controller
 
         $user->update(['google_id' => $googleUser->id]);
         Auth::login($user, true);
-        $redirectTo = $user->isResident() ? '/my-overview' : '/dashboard';
-        return redirect($redirectTo)->with('success', 'Google account linked successfully!');
+        return redirect($user->homeUrl())->with('success', 'Google account linked successfully!');
       }
 
       // No existing user
@@ -101,6 +100,11 @@ class SocialAuthController extends Controller
         ->with('success', 'Account created! Please wait for admin approval before logging in.');
 
     } catch (\Exception $e) {
+      Log::error('Google OAuth failed', [
+        'error' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+      ]);
       return redirect('/')->with('error', 'Failed to authenticate with Google. Please try again.');
     }
   }

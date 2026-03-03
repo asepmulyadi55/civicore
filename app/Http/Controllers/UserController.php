@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -139,6 +140,12 @@ class UserController extends Controller
         ->update(['user_id' => $user->id]);
     }
 
+    Log::info('User approved', [
+      'user_id' => $user->id,
+      'email' => $user->email,
+      'approved_by' => auth()->id(),
+    ]);
+
     return redirect()->route('users.index')
       ->with('success', "\"{$user->name}\" has been approved and can now log in.");
   }
@@ -151,6 +158,12 @@ class UserController extends Controller
     }
 
     $user->update(['is_active' => false]);
+
+    Log::info('User deactivated', [
+      'user_id' => $user->id,
+      'email' => $user->email,
+      'deactivated_by' => auth()->id(),
+    ]);
 
     return redirect()->route('users.index')
       ->with('success', "\"{$user->name}\" has been deactivated.");
@@ -166,6 +179,13 @@ class UserController extends Controller
     $name = $user->name;
     Resident::where('user_id', $user->id)->update(['user_id' => null]);
     $user->delete();
+
+    Log::warning('User permanently deleted', [
+      'user_id' => $user->id,
+      'name' => $name,
+      'email' => $user->email,
+      'deleted_by' => auth()->id(),
+    ]);
 
     return redirect()->route('users.index')
       ->with('success', "\"{$name}\" has been deleted.");

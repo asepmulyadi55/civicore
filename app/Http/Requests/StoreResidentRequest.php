@@ -3,12 +3,13 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreResidentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('residents.create');
     }
 
     public function rules(): array
@@ -18,7 +19,12 @@ class StoreResidentRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:25'],
             'email' => ['nullable', 'email', 'max:255', 'unique:residents,email'],
             'block_id' => ['required', 'exists:blocks,id'],
-            'unit_number' => ['required', 'string', 'max:20'],
+            'unit_number' => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('residents')->where('block_id', $this->block_id),
+            ],
             'monthly_fee' => ['required', 'numeric', 'min:0'],
             'fee_start' => ['required', 'date_format:Y-m'],
         ];

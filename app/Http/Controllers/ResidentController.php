@@ -11,8 +11,8 @@ use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ResidentController extends Controller
 {
@@ -83,7 +83,7 @@ class ResidentController extends Controller
                 'resident_id' => $resident->id,
                 'amount' => $request->monthly_fee,
                 'effective_from' => Carbon::createFromFormat('Y-m', $request->fee_start)->startOfMonth(),
-                'created_by' => Auth::id(),
+                'created_by' => auth()->id(),
                 'notes' => 'Initial fee assignment',
             ]);
 
@@ -106,7 +106,7 @@ class ResidentController extends Controller
                     'resident_id' => $resident->id,
                     'amount' => $request->new_monthly_fee,
                     'effective_from' => Carbon::createFromFormat('Y-m', $request->new_fee_start ?? now()->format('Y-m'))->startOfMonth(),
-                    'created_by' => Auth::id(),
+                    'created_by' => auth()->id(),
                     'notes' => 'Fee updated via resident edit',
                 ]);
             }
@@ -126,6 +126,12 @@ class ResidentController extends Controller
     {
         $resident->update(['is_active' => false]);
 
+        Log::info('Resident deactivated', [
+            'resident_id' => $resident->id,
+            'name' => $resident->fullname,
+            'by' => auth()->id(),
+        ]);
+
         return redirect()->route('residents.index')
             ->with('success', "{$resident->fullname} has been deactivated.");
     }
@@ -137,11 +143,17 @@ class ResidentController extends Controller
     {
         $name = $resident->fullname;
 
-        // Unlink from user account so the user isn't orphaned
+        // Unlink from user account so the user isn't orphaned, then delete
         User::where('email', $resident->email)->update(['block_id' => null]);
-        Resident::where('id', $resident->id)->update(['user_id' => null]);
-
+        $resident->update(['user_id' => null]);
         $resident->delete();
+
+        Log::warning('Resident permanently deleted', [
+            'resident_id' => $resident->id,
+            'name' => $name,
+            'block' => $resident->block_id,
+            'deleted_by' => auth()->id(),
+        ]);
 
         return redirect()->route('residents.index')
             ->with('success', "{$name} has been permanently deleted.");

@@ -103,7 +103,7 @@ class LoginTest extends TestCase
       'password' => '',
     ]);
 
-    $response->assertSessionHas('error', 'Please enter your username or email.');
+    $response->assertSessionHasErrors(['username', 'password']);
   }
 
   /** @test */

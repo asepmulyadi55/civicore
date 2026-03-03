@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class RoleController extends Controller
 {
@@ -58,7 +60,7 @@ class RoleController extends Controller
         // PHP converts dots to underscores in $_POST keys (language-level behavior),
         // so <input name="dashboard.view"> arrives as $_POST['dashboard_view'].
         // We store as dot-notation keys ('dashboard.view') but look up with underscores.
-        $raw = $request->post(); // flat array from $_POST
+        $raw = $request->all(); // works for all HTTP methods including PATCH
         $permissions = [];
         foreach (Role::$availablePermissions as $module => $actions) {
             foreach ($actions as $action) {
@@ -68,9 +70,19 @@ class RoleController extends Controller
             }
         }
 
+        $oldPermissions = $role->permissions;
         $role->update(['permissions' => $permissions]);
 
-        return redirect()->back()->with('success', "Permissions for '{$role->label}' updated.");
+        Log::info('Role permissions updated', [
+            'role_id' => $role->id,
+            'role' => $role->name,
+            'old' => $oldPermissions,
+            'new' => $permissions,
+            'by' => auth()->id(),
+        ]);
+
+        return redirect()->route('roles.index')
+            ->with('success', "Permissions for \"{$role->label}\" updated.");
     }
 
     public function destroy(Role $role)

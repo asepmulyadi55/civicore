@@ -434,6 +434,7 @@ class PaymentTest extends TestCase
     ]);
 
     $this->actingAs($admin)->delete(route('payments.destroy', $payment))
+      ->assertRedirect(route('payments.index'))
       ->assertSessionHas('error');
 
     $this->assertDatabaseHas('payment_records', ['id' => $payment->id]);
@@ -454,8 +455,9 @@ class PaymentTest extends TestCase
       'status' => 'pending',
     ]);
 
+    // Treasurer lacks 'payments.delete' permission — middleware returns 403
     $this->actingAs($treasurer)->delete(route('payments.destroy', $payment))
-      ->assertSessionHas('error');
+      ->assertForbidden();
 
     $this->assertDatabaseHas('payment_records', ['id' => $payment->id]);
   }

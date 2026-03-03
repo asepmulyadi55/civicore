@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\PaymentController;
@@ -14,14 +15,13 @@ use App\Http\Controllers\MyOverviewController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 
-
-// ── Auth ──────────────────────────────────────────────────────────────────
+// ── Auth (public) ─────────────────────────────────────────────────────────────
 Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
+Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:10,1');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [RegisterController::class, 'register']);
+Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:5,1');
 
 // Google OAuth
 Route::get('/auth/google/login', [SocialAuthController::class, 'redirectToGoogleLogin'])->name('auth.google.login');
@@ -30,113 +30,88 @@ Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleC
 
 // Forgot / Reset Password
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email')->middleware('throttle:5,1');
 Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update')->middleware('throttle:5,1');
 
-// ── Auth-protected pages ──────────────────────────────────────────────────
+// ── Auth-protected pages ──────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', function () {
-        $user = auth()->user();
-        $scopeBlockId = $user->isBlockCoordinator() ? $user->block_id : null;
-        $currency = \App\Models\Setting::get('currency_symbol', 'Rp');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        $totalCollected = \App\Models\PaymentRecord::where('status', 'approved')
-            ->whereYear('payment_month', now()->year)
-            ->whereMonth('payment_month', now()->month)
-            ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
-            ->sum('amount');
-
-        $pendingCount = \App\Models\PaymentRecord::where('status', 'pending')
-            ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
-            ->count();
-
-        $unpaidCount = \App\Models\Resident::where('is_active', true)
-            ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
-            ->whereDoesntHave(
-                'paymentRecords',
-                fn($q) => $q->where('status', 'approved')
-                    ->whereYear('payment_month', now()->year)
-                    ->whereMonth('payment_month', now()->month)
-            )->count();
-
-        $activeResidents = \App\Models\Resident::where('is_active', true)
-            ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
-            ->count();
-
-        // Recent activity: last 7 batches (grouped by batch_id), scoped to block for coordinator
-        $rawActivity = \App\Models\PaymentRecord::with(['resident.block'])
-            ->whereIn('status', ['pending', 'approved', 'rejected'])
-            ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
-            ->orderByDesc('updated_at')
-            ->limit(50)
-            ->get();
-
-        $recentActivity = $rawActivity
-            ->groupBy(fn($r) => $r->batch_id ?? 'single_' . $r->id)
-            ->map(function ($records) {
-                $lead = $records->sortBy('payment_month')->first();
-                $lead->all_months = $records->pluck('payment_month')->sort()->values();
-                $lead->total_amount = $records->sum('amount');
-                $lead->month_count = $records->count();
-                return $lead;
-            })
-            ->sortByDesc('updated_at')
-            ->take(7)
-            ->values();
-
-        return view('dashboard', compact(
-            'currency',
-            'totalCollected',
-            'pendingCount',
-            'unpaidCount',
-            'activeResidents',
-            'recentActivity'
-        ));
-    })->name('dashboard');
-
-    // Resident personal overview
+    // Resident personal overview (residents only, no secondary permission needed)
     Route::get('/my-overview', [MyOverviewController::class, 'index'])->name('my-overview');
 
-    // Residents CRUD
-    Route::resource('residents', ResidentController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
+    // ── Residents ─────────────────────────────────────────────────────────────
+    Route::get('/residents', [ResidentController::class, 'index'])
+        ->middleware('permission:residents.view')->name('residents.index');
+    Route::post('/residents', [ResidentController::class, 'store'])
+        ->middleware('permission:residents.create')->name('residents.store');
+    Route::match(['PUT', 'PATCH'], '/residents/{resident}', [ResidentController::class, 'update'])
+        ->middleware('permission:residents.edit')->name('residents.update');
     Route::patch('/residents/{resident}/deactivate', [ResidentController::class, 'deactivate'])
-        ->name('residents.deactivate');
+        ->middleware('permission:residents.edit')->name('residents.deactivate');
+    Route::delete('/residents/{resident}', [ResidentController::class, 'destroy'])
+        ->middleware('permission:residents.delete')->name('residents.destroy');
 
-    // Blocks CRUD
-    Route::resource('blocks', BlockController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
+    // ── Blocks ────────────────────────────────────────────────────────────────
+    Route::get('/blocks', [BlockController::class, 'index'])
+        ->middleware('permission:blocks.view')->name('blocks.index');
+    Route::post('/blocks', [BlockController::class, 'store'])
+        ->middleware('permission:blocks.create')->name('blocks.store');
+    Route::match(['PUT', 'PATCH'], '/blocks/{block}', [BlockController::class, 'update'])
+        ->middleware('permission:blocks.edit')->name('blocks.update');
+    Route::delete('/blocks/{block}', [BlockController::class, 'destroy'])
+        ->middleware('permission:blocks.delete')->name('blocks.destroy');
 
-    // Payments (admin)
-    Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
-    Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
-    Route::patch('/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
-    Route::patch('/payments/{payment}/approve', [PaymentController::class, 'approve'])->name('payments.approve');
-    Route::patch('/payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
-    Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
-    Route::post('/payments/batch/{batchId}/approve', [PaymentController::class, 'approveBatch'])->name('payments.batch.approve');
-    Route::post('/payments/batch/{batchId}/reject', [PaymentController::class, 'rejectBatch'])->name('payments.batch.reject');
+    // ── Payments ──────────────────────────────────────────────────────────────
+    Route::get('/payments', [PaymentController::class, 'index'])
+        ->middleware('permission:payments.view')->name('payments.index');
+    Route::post('/payments', [PaymentController::class, 'store'])
+        ->middleware('permission:payments.create')->name('payments.store');
+    Route::match(['PUT', 'PATCH'], '/payments/{payment}', [PaymentController::class, 'update'])
+        ->middleware('permission:payments.edit')->name('payments.update');
+    Route::patch('/payments/{payment}/approve', [PaymentController::class, 'approve'])
+        ->middleware('permission:payments.approve')->name('payments.approve');
+    Route::patch('/payments/{payment}/reject', [PaymentController::class, 'reject'])
+        ->middleware('permission:payments.approve')->name('payments.reject');
+    Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])
+        ->middleware('permission:payments.delete')->name('payments.destroy');
+    Route::post('/payments/batch/{batchId}/approve', [PaymentController::class, 'approveBatch'])
+        ->middleware('permission:payments.approve')->name('payments.batch.approve');
+    Route::post('/payments/batch/{batchId}/reject', [PaymentController::class, 'rejectBatch'])
+        ->middleware('permission:payments.approve')->name('payments.batch.reject');
 
-    // Reports
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    // ── Reports ───────────────────────────────────────────────────────────────
+    Route::get('/reports', [ReportController::class, 'index'])
+        ->middleware('permission:reports.view')->name('reports.index');
 
-    // User Management
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
-    Route::patch('/users/{user}/approve', [UserController::class, 'approve'])->name('users.approve');
-    Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
-    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    // ── User Management ───────────────────────────────────────────────────────
+    Route::get('/users', [UserController::class, 'index'])
+        ->middleware('permission:users.view')->name('users.index');
+    Route::post('/users', [UserController::class, 'store'])
+        ->middleware('permission:users.create')->name('users.store');
+    Route::match(['PUT', 'PATCH'], '/users/{user}', [UserController::class, 'update'])
+        ->middleware('permission:users.edit')->name('users.update');
+    Route::patch('/users/{user}/approve', [UserController::class, 'approve'])
+        ->middleware('permission:users.approve')->name('users.approve');
+    Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate'])
+        ->middleware('permission:users.edit')->name('users.deactivate');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])
+        ->middleware('permission:users.delete')->name('users.destroy');
 
-    // Roles Management
-    Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
-    Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
-    Route::patch('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
-    Route::patch('/roles/{role}/permissions', [RoleController::class, 'updatePermissions'])->name('roles.permissions');
-    Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+    // ── Roles ─────────────────────────────────────────────────────────────────
+    Route::get('/roles', [RoleController::class, 'index'])
+        ->middleware('permission:roles.view')->name('roles.index');
+    Route::post('/roles', [RoleController::class, 'store'])
+        ->middleware('permission:roles.create')->name('roles.store');
+    Route::match(['PUT', 'PATCH'], '/roles/{role}', [RoleController::class, 'update'])
+        ->middleware('permission:roles.edit')->name('roles.update');
+    Route::patch('/roles/{role}/permissions', [RoleController::class, 'updatePermissions'])
+        ->middleware('permission:roles.edit')->name('roles.permissions');
+    Route::delete('/roles/{role}', [RoleController::class, 'destroy'])
+        ->middleware('permission:roles.delete')->name('roles.destroy');
 
     // Coming Soon pages
     Route::get('/events', function () {

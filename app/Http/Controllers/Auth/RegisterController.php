@@ -7,7 +7,6 @@ use App\Models\Resident;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
 {
@@ -24,12 +23,12 @@ class RegisterController extends Controller
    */
   public function register(Request $request)
   {
-    // Validate the request
-    $validator = Validator::make($request->all(), [
+    $request->validate([
       'fullname' => ['required', 'string', 'max:255'],
       'username' => ['required', 'string', 'max:255', 'unique:users'],
       'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-      'password' => ['required', 'string', 'min:8'],
+      'password' => ['required', 'string', 'min:8', 'confirmed'],
+      'password_confirmation' => ['required'],
     ], [
       'fullname.required' => 'Please enter your full name.',
       'username.required' => 'Please choose a username.',
@@ -39,26 +38,20 @@ class RegisterController extends Controller
       'email.unique' => 'This email is already registered. Please login instead.',
       'password.required' => 'Please enter a password.',
       'password.min' => 'Password must be at least 8 characters.',
+      'password.confirmed' => 'Passwords do not match. Please try again.',
+      'password_confirmation.required' => 'Please confirm your password.',
     ]);
 
-    if ($validator->fails()) {
-      return redirect()->back()
-        ->withErrors($validator)
-        ->withInput();
-    }
-
-    // #12b: Email must exist in the residents table before registration is allowed.
+    // Email must exist in the residents table before registration is allowed.
     // This ensures every user account is linked to a resident record.
-    $residentExists = Resident::where('email', $request->email)->exists();
-    if (!$residentExists) {
-      return redirect()->back()
+    if (!Resident::where('email', $request->email)->exists()) {
+      return back()
         ->withErrors([
           'email' => 'Your email is not registered as a resident. Please contact your Block Coordinator or the administrator to have your email added to your resident profile first.',
         ])
         ->withInput();
     }
 
-    // Create the user (pending approval)
     User::create([
       'name' => $request->fullname,
       'username' => $request->username,
@@ -67,8 +60,6 @@ class RegisterController extends Controller
       'is_active' => false, // Requires admin approval
     ]);
 
-    // Redirect to login with success message
     return redirect('/')->with('success', 'Registration successful! Please wait for admin approval before logging in.');
   }
 }
-

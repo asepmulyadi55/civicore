@@ -9,6 +9,7 @@ use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class PaymentController extends Controller
@@ -17,7 +18,7 @@ class PaymentController extends Controller
     {
         $user = auth()->user();
         $scopeBlockId = $user->isBlockCoordinator() ? $user->block_id : null;
-        $canApprove = $user->canApprovePayments();
+        $canApprove = $user->can('payments.approve');
 
         // Build base query scoped to coordinator's block if applicable
         $baseQ = PaymentRecord::query()
@@ -64,7 +65,7 @@ class PaymentController extends Controller
         })->values();
 
         // Manually paginate the flat rows
-        $perPage = 20;
+        $perPage = config('civicore.pagination.payments', 20);
         $page = $request->get('page', 1);
         $total = $flatRows->count();
         $items = $flatRows->slice(($page - 1) * $perPage, $perPage)->values();
@@ -141,7 +142,7 @@ class PaymentController extends Controller
             'amount' => ['required', 'numeric', 'min:0'],
             'payment_method_id' => ['nullable', 'exists:payment_methods,id'],
             'status' => ['required', 'in:unpaid,pending,approved'],
-            'proof' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
+            'proof' => ['nullable', 'file', 'mimetypes:image/jpeg,image/png,image/webp,application/pdf', 'max:5120'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -159,6 +160,15 @@ class PaymentController extends Controller
             'proof_path' => $proofPath,
             'submitted_by' => auth()->id(),
         ];
+
+        // Residents can only submit 'pending' — they cannot self-approve
+        $user = auth()->user();
+        $allowedStatuses = $user->can('payments.approve')
+            ? ['unpaid', 'pending', 'approved']
+            : ['pending'];
+        if (!in_array($request->status, $allowedStatuses, true)) {
+            return back()->withErrors(['status' => 'You are not authorized to set this payment status.'])->withInput();
+        }
 
         if ($baseData['status'] === 'approved') {
             $baseData['approved_by'] = auth()->id();
@@ -201,7 +211,7 @@ class PaymentController extends Controller
             'status' => ['required', 'in:unpaid,pending,approved,rejected'],
             'rejection_reason' => ['nullable', 'string', 'max:1000'],
             'notes' => ['nullable', 'string', 'max:1000'],
-            'proof' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
+            'proof' => ['nullable', 'file', 'mimetypes:image/jpeg,image/png,image/webp,application/pdf', 'max:5120'],
         ]);
 
         // Handle proof replacement
@@ -291,8 +301,16 @@ class PaymentController extends Controller
             'rejection_reason' => null,
         ]);
 
+        $residentName = $payment->resident->fullname ?? 'Unknown';
+        Log::info('Payment approved', [
+            'payment_id' => $payment->id,
+            'resident' => $residentName,
+            'amount' => $payment->amount,
+            'month' => $payment->payment_month,
+            'approved_by' => auth()->id(),
+        ]);
         return redirect()->route('payments.index')
-            ->with('success', "Payment from {$payment->resident->fullname} has been approved.");
+            ->with('success', "Payment from {$residentName} has been approved.");
     }
 
     public function reject(Request $request, PaymentRecord $payment)
@@ -311,8 +329,14 @@ class PaymentController extends Controller
             'approved_at' => null,
         ]);
 
+        Log::info('Payment rejected', [
+            'payment_id' => $payment->id,
+            'resident' => $payment->resident->fullname ?? 'Unknown',
+            'reason' => $request->rejection_reason,
+            'rejected_by' => auth()->id(),
+        ]);
         return redirect()->route('payments.index')
-            ->with('success', "Payment rejected and resident has been notified.");
+            ->with('success', 'Payment rejected and resident has been notified.');
     }
 
     // ── Batch approve / reject ─────────────────────────────────────────
@@ -328,14 +352,23 @@ class PaymentController extends Controller
                 ->with('info', 'No pending records found in this batch.');
         }
 
-        $records->each->update([
-            'status' => 'approved',
-            'approved_by' => auth()->id(),
-            'approved_at' => now(),
-            'rejection_reason' => null,
-        ]);
+        // Bulk update in a single query — avoids N+1 and is safe without model observers
+        PaymentRecord::where('batch_id', $batchId)
+            ->where('status', 'pending')
+            ->update([
+                'status' => 'approved',
+                'approved_by' => auth()->id(),
+                'approved_at' => now(),
+                'rejection_reason' => null,
+            ]);
 
-        $name = $records->first()->resident->fullname ?? 'Resident';
+        $name = $records->first()?->resident?->fullname ?? 'Resident';
+        Log::info('Batch payments approved', [
+            'batch_id' => $batchId,
+            'count' => $count,
+            'resident' => $name,
+            'approved_by' => auth()->id(),
+        ]);
         return redirect()->route('payments.index')
             ->with('success', "{$count} payment(s) from {$name} approved.");
     }
@@ -352,14 +385,22 @@ class PaymentController extends Controller
         $records = PaymentRecord::where('batch_id', $batchId)->get();
         $count = $records->count();
 
-        $records->each->update([
+        // Bulk update — single query instead of N+1
+        PaymentRecord::where('batch_id', $batchId)->update([
             'status' => 'rejected',
             'rejection_reason' => $request->rejection_reason,
             'approved_by' => null,
             'approved_at' => null,
         ]);
 
-        $name = $records->first()?->resident->fullname ?? 'Resident';
+        $name = $records->first()?->resident?->fullname ?? 'Resident';
+        Log::info('Batch payments rejected', [
+            'batch_id' => $batchId,
+            'count' => $count,
+            'resident' => $name,
+            'reason' => $request->rejection_reason,
+            'rejected_by' => auth()->id(),
+        ]);
         return redirect()->route('payments.index')
             ->with('success', "{$count} payment(s) from {$name} rejected.");
     }
@@ -373,21 +414,34 @@ class PaymentController extends Controller
         }
 
         // Protect approved payments — they are financial records
-        if ($payment->status === 'approved') {
+        if ($payment->isApproved()) {
             return redirect()->route('payments.index')
                 ->with('error', 'Approved payments cannot be deleted. They are part of the financial record.');
         }
 
-        // If part of a batch, delete the entire batch together
+        // If part of a batch, check ALL records — prevent deleting any approved ones
         $count = 1;
         $name = $payment->resident->fullname ?? 'Resident';
         if ($payment->batch_id) {
+            $hasApproved = PaymentRecord::where('batch_id', $payment->batch_id)
+                ->where('status', 'approved')
+                ->exists();
+            if ($hasApproved) {
+                return redirect()->route('payments.index')
+                    ->with('error', 'Cannot delete — the batch contains approved records.');
+            }
             $count = PaymentRecord::where('batch_id', $payment->batch_id)->count();
             PaymentRecord::where('batch_id', $payment->batch_id)->delete();
         } else {
             $payment->delete();
         }
 
+        Log::info('Payment deleted', [
+            'batch_id' => $payment->batch_id,
+            'count' => $count,
+            'resident' => $name,
+            'deleted_by' => auth()->id(),
+        ]);
         return redirect()->route('payments.index')
             ->with('success', "{$count} payment record(s) for {$name} deleted.");
     }

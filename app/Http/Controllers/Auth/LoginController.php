@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -15,9 +15,7 @@ class LoginController extends Controller
   public function showLoginForm()
   {
     if (Auth::check()) {
-      $user = Auth::user();
-      $redirectTo = $user->isResident() ? '/my-overview' : '/dashboard';
-      return redirect($redirectTo);
+      return redirect(Auth::user()->homeUrl());
     }
     return view('login');
   }
@@ -27,8 +25,7 @@ class LoginController extends Controller
    */
   public function login(Request $request)
   {
-    // Validate the request
-    $validator = Validator::make($request->all(), [
+    $request->validate([
       'username' => ['required', 'string'],
       'password' => ['required', 'string'],
     ], [
@@ -36,43 +33,27 @@ class LoginController extends Controller
       'password.required' => 'Please enter your password.',
     ]);
 
-    if ($validator->fails()) {
-      return redirect()->back()
-        ->with('error', $validator->errors()->first())
+    // Determine credential field (email or username)
+    $field = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+    $user = \App\Models\User::where($field, $request->username)->first();
+
+    // Verify credentials BEFORE creating a session
+    if (!$user || !Hash::check($request->password, $user->password)) {
+      return back()->with('error', 'Invalid username or password. Please try again.')
         ->withInput($request->only('username', 'remember'));
     }
 
-    // Attempt to log the user in using either username or email
-    $credentials = [
-      'password' => $request->password,
-    ];
-
-    // Check if input is email or username
-    if (filter_var($request->username, FILTER_VALIDATE_EMAIL)) {
-      $credentials['email'] = $request->username;
-    } else {
-      $credentials['username'] = $request->username;
+    // Check activation status BEFORE logging in
+    if (!$user->is_active) {
+      return back()->with('error', 'Your account is pending admin approval.')
+        ->withInput($request->only('username', 'remember'));
     }
 
-    // Attempt authentication
-    if (Auth::attempt($credentials, $request->filled('remember'))) {
-      $request->session()->regenerate();
+    Auth::login($user, $request->boolean('remember'));
+    $request->session()->regenerate();
 
-      // Check if user is active
-      if (!Auth::user()->is_active) {
-        Auth::logout();
-        return redirect()->back()->with('error', 'Your account is pending admin approval.');
-      }
-
-      // Role-based redirect
-      $user = Auth::user();
-      $redirectTo = $user->isResident() ? '/my-overview' : '/dashboard';
-
-      return redirect()->intended($redirectTo)->with('success', 'Welcome back, ' . $user->name . '!');
-    }
-
-    // Authentication failed
-    return redirect()->back()->with('error', 'Invalid username or password. Please try again.');
+    return redirect()->intended($user->homeUrl())
+      ->with('success', 'Welcome back, ' . $user->name . '!');
   }
 
   /**
@@ -81,10 +62,8 @@ class LoginController extends Controller
   public function logout(Request $request)
   {
     Auth::logout();
-
     $request->session()->invalidate();
     $request->session()->regenerateToken();
-
     return redirect('/');
   }
 }

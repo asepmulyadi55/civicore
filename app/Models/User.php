@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -52,9 +52,9 @@ class User extends Authenticatable
   }
 
   // If this user is also a resident (linked account)
-  public function resident(): HasMany
+  public function resident(): HasOne
   {
-    return $this->hasMany(Resident::class);
+    return $this->hasOne(Resident::class);
   }
 
   // ── Role Helpers ────────────────────────────────────────────
@@ -79,6 +79,14 @@ class User extends Authenticatable
     return $this->role?->name === 'resident';
   }
 
+  /**
+   * The URL to redirect this user to after login.
+   */
+  public function homeUrl(): string
+  {
+    return $this->isResident() ? '/my-overview' : '/dashboard';
+  }
+
   // ── Permission Checking ──────────────────────────────────────
 
   /**
@@ -98,9 +106,5 @@ class User extends Authenticatable
     return parent::can($ability, $arguments);
   }
 
-  /** @deprecated Use can('payments.approve') instead */
-  public function canApprovePayments(): bool
-  {
-    return $this->can('payments.approve');
-  }
+
 }
