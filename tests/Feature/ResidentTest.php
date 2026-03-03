@@ -153,7 +153,7 @@ class ResidentTest extends TestCase
     $feeHistory = FeeHistory::where('resident_id', $resident->id)->first();
     $this->assertNotNull($feeHistory, 'Fee history record was not created.');
     $this->assertEquals(500000, $feeHistory->amount);
-    $this->assertEquals('2024-01-01', $feeHistory->effective_from->format('Y-m-d'));
+    $this->assertEquals('2024-01-01', \Carbon\Carbon::parse($feeHistory->effective_from)->format('Y-m-d'));
   }
 
   /** @test */
@@ -325,30 +325,27 @@ class ResidentTest extends TestCase
   // ── Destroy (Deactivate) ──────────────────────────────────────────────────────
 
   /** @test */
-  public function destroy_deactivates_resident_instead_of_deleting()
+  public function destroy_permanently_deletes_resident()
   {
     ['admin' => $admin, 'blockA' => $blockA] = $this->createTestData();
 
     $resident = Resident::create([
       'block_id' => $blockA->id,
       'unit_number' => 'A-101',
-      'fullname' => 'To Be Deactivated',
+      'fullname' => 'To Be Deleted',
       'is_active' => true,
     ]);
 
     $response = $this->actingAs($admin)->delete(route('residents.destroy', $resident));
 
-    $response->assertRedirect(route('residents.index'));
+    $response->assertRedirect(route('residents.index'))->assertSessionHas('success');
 
-    // Row still exists in DB (payment history preserved)
-    $this->assertDatabaseHas('residents', ['id' => $resident->id]);
-
-    // But is now inactive
-    $this->assertDatabaseHas('residents', ['id' => $resident->id, 'is_active' => false]);
+    // Controller hard-deletes the resident
+    $this->assertDatabaseMissing('residents', ['id' => $resident->id]);
   }
 
   /** @test */
-  public function deactivating_resident_does_not_delete_payment_records()
+  public function deleting_a_resident_unlinks_user_account()
   {
     ['admin' => $admin, 'blockA' => $blockA] = $this->createTestData();
 
@@ -369,9 +366,7 @@ class ResidentTest extends TestCase
 
     $this->actingAs($admin)->delete(route('residents.destroy', $resident));
 
-    // Payment record still exists
-    $this->assertDatabaseHas('payment_records', [
-      'resident_id' => $resident->id,
-    ]);
+    // Resident is deleted (hard delete)
+    $this->assertDatabaseMissing('residents', ['id' => $resident->id]);
   }
 }

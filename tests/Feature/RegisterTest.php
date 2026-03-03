@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Block;
+use App\Models\Resident;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -22,6 +24,16 @@ class RegisterTest extends TestCase
   /** @test */
   public function user_can_register_with_valid_data()
   {
+    // RegisterController requires the email to exist as a resident first
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    Resident::create([
+      'block_id' => $block->id,
+      'unit_number' => 'A-101',
+      'fullname' => 'John Doe',
+      'email' => 'john@example.com',
+      'is_active' => true
+    ]);
+
     $response = $this->post('/register', [
       'fullname' => 'John Doe',
       'username' => 'johndoe',
@@ -43,6 +55,15 @@ class RegisterTest extends TestCase
   /** @test */
   public function new_user_is_inactive_by_default()
   {
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    Resident::create([
+      'block_id' => $block->id,
+      'unit_number' => 'A-101',
+      'fullname' => 'John Doe',
+      'email' => 'john@example.com',
+      'is_active' => true
+    ]);
+
     $this->post('/register', [
       'fullname' => 'John Doe',
       'username' => 'johndoe',
@@ -159,6 +180,15 @@ class RegisterTest extends TestCase
   /** @test */
   public function password_is_hashed_when_stored()
   {
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    Resident::create([
+      'block_id' => $block->id,
+      'unit_number' => 'A-101',
+      'fullname' => 'John Doe',
+      'email' => 'john@example.com',
+      'is_active' => true
+    ]);
+
     $this->post('/register', [
       'fullname' => 'John Doe',
       'username' => 'johndoe',

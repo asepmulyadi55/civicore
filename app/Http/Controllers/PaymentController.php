@@ -45,7 +45,7 @@ class PaymentController extends Controller
         // with extra virtual properties: all_months (array), total_amount, month_count
         $allRecords = $baseQ
             ->with(['resident.block', 'paymentMethod', 'submittedBy'])
-            ->orderByRaw("FIELD(status, 'pending', 'rejected', 'approved') ASC")
+            ->orderByRaw("CASE status WHEN 'pending' THEN 0 WHEN 'rejected' THEN 1 ELSE 2 END ASC")
             ->orderByDesc('payment_month')
             ->get();
 

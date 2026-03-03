@@ -1,0 +1,503 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Block;
+use App\Models\PaymentRecord;
+use App\Models\Resident;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class PaymentTest extends TestCase
+{
+  use RefreshDatabase;
+
+  // ── Helpers ─────────────────────────────────────────────────────────────────
+
+  private function createRoles(): array
+  {
+    $admin = Role::create(['name' => 'admin', 'label' => 'Admin', 'permissions' => []]);
+    $treasurer = Role::create([
+      'name' => 'treasurer',
+      'label' => 'Treasurer',
+      'permissions' => [
+        'payments.view' => true,
+        'payments.create' => true,
+        'payments.edit' => true,
+        'payments.approve' => true,
+      ]
+    ]);
+    $resident = Role::create(['name' => 'resident', 'label' => 'Resident', 'permissions' => []]);
+    return compact('admin', 'treasurer', 'resident');
+  }
+
+  private function makeAdmin(array $roles): User
+  {
+    return User::create([
+      'name' => 'Admin',
+      'username' => 'admin',
+      'email' => 'admin@test.com',
+      'password' => bcrypt('password'),
+      'is_active' => true,
+      'role_id' => $roles['admin']->id,
+    ]);
+  }
+
+  private function makeTreasurer(array $roles): User
+  {
+    return User::create([
+      'name' => 'Treasurer',
+      'username' => 'treasurer',
+      'email' => 'treasurer@test.com',
+      'password' => bcrypt('password'),
+      'is_active' => true,
+      'role_id' => $roles['treasurer']->id,
+    ]);
+  }
+
+  private function makeResident(Block $block, array $roles): array
+  {
+    $resident = Resident::create([
+      'block_id' => $block->id,
+      'unit_number' => 'A-101',
+      'fullname' => 'Budi Santoso',
+      'is_active' => true,
+    ]);
+    $residentUser = User::create([
+      'name' => 'Budi',
+      'username' => 'budi',
+      'email' => 'budi@test.com',
+      'password' => bcrypt('password'),
+      'is_active' => true,
+      'role_id' => $roles['resident']->id,
+    ]);
+    return compact('resident', 'residentUser');
+  }
+
+  // ── Authorization ────────────────────────────────────────────────────────────
+
+  /** @test */
+  public function guests_are_redirected_from_payments_page()
+  {
+    $this->get(route('payments.index'))->assertRedirect(route('login'));
+  }
+
+  /** @test */
+  public function authenticated_user_can_view_payments_page()
+  {
+    $roles = $this->createRoles();
+    $admin = $this->makeAdmin($roles);
+
+    $this->actingAs($admin)->get(route('payments.index'))->assertOk();
+  }
+
+  // ── Index / Listing ──────────────────────────────────────────────────────────
+
+  /** @test */
+  public function payments_page_shows_existing_records()
+  {
+    $roles = $this->createRoles();
+    $admin = $this->makeAdmin($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Ahmad Fauzi', 'is_active' => true]);
+
+    PaymentRecord::create([
+      'resident_id' => $resident->id,
+      'payment_month' => '2024-01-01',
+      'amount' => 500000,
+      'status' => 'approved',
+    ]);
+
+    $response = $this->actingAs($admin)->get(route('payments.index'));
+    $response->assertOk()->assertSee('Ahmad Fauzi');
+  }
+
+  /** @test */
+  public function payments_can_be_searched_by_resident_name()
+  {
+    $roles = $this->createRoles();
+    $admin = $this->makeAdmin($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+
+    $r1 = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Ahmad Fauzi', 'is_active' => true]);
+    $r2 = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-102', 'fullname' => 'Siti Rahayu', 'is_active' => true]);
+
+    PaymentRecord::create(['resident_id' => $r1->id, 'payment_month' => '2024-01-01', 'amount' => 500000, 'status' => 'pending']);
+    PaymentRecord::create(['resident_id' => $r2->id, 'payment_month' => '2024-01-01', 'amount' => 500000, 'status' => 'pending']);
+
+    $response = $this->actingAs($admin)->get(route('payments.index', ['search' => 'Ahmad']));
+    $response->assertOk();
+
+    // Check view data: only Ahmad's payment should be in the paginator, not Siti's
+    $payments = $response->viewData('payments');
+    $names = collect(iterator_to_array($payments->getIterator()))->pluck('resident.fullname');
+    $this->assertContains('Ahmad Fauzi', $names);
+    $this->assertNotContains('Siti Rahayu', $names);
+  }
+
+  /** @test */
+  public function payments_can_be_filtered_by_status()
+  {
+    $roles = $this->createRoles();
+    $admin = $this->makeAdmin($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Ahmad', 'is_active' => true]);
+
+    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => '2024-01-01', 'amount' => 500000, 'status' => 'approved']);
+    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => '2024-02-01', 'amount' => 500000, 'status' => 'pending']);
+
+    $response = $this->actingAs($admin)->get(route('payments.index', ['status' => 'approved']));
+    $response->assertOk();
+    $this->assertCount(1, $response->viewData('payments'));
+  }
+
+  // ── Store (Create) ────────────────────────────────────────────────────────────
+
+  /** @test */
+  public function admin_can_create_a_single_month_payment()
+  {
+    $roles = $this->createRoles();
+    $admin = $this->makeAdmin($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    $this->actingAs($admin)->post(route('payments.store'), [
+      'resident_id' => $resident->id,
+      'months' => ['2024-01'],
+      'amount' => 500000,
+      'status' => 'pending',
+    ]);
+
+    // SQLite stores dates with time suffix — use model query for reliable comparison
+    $record = PaymentRecord::where('resident_id', $resident->id)->first();
+    $this->assertNotNull($record, 'Payment record was not created.');
+    $this->assertEquals('2024-01-01', \Carbon\Carbon::parse($record->payment_month)->format('Y-m-d'));
+    $this->assertEquals('pending', $record->status);
+    $this->assertEquals(500000, (int) $record->amount);
+  }
+
+  /** @test */
+  public function admin_can_create_multi_month_payment_with_shared_batch_id()
+  {
+    $roles = $this->createRoles();
+    $admin = $this->makeAdmin($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    $this->actingAs($admin)->post(route('payments.store'), [
+      'resident_id' => $resident->id,
+      'months' => ['2024-01', '2024-02', '2024-03'],
+      'amount' => 500000,
+      'status' => 'pending',
+    ]);
+
+    $records = PaymentRecord::where('resident_id', $resident->id)->get();
+    $this->assertCount(3, $records);
+    // All records share the same batch_id
+    $this->assertEquals(1, $records->pluck('batch_id')->unique()->count());
+  }
+
+  /** @test */
+  public function store_skips_already_existing_months()
+  {
+    $roles = $this->createRoles();
+    $admin = $this->makeAdmin($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    // Pre-create payment for January
+    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => '2024-01-01', 'amount' => 500000, 'status' => 'pending']);
+
+    // Try submitting the same month again
+    $this->actingAs($admin)->post(route('payments.store'), [
+      'resident_id' => $resident->id,
+      'months' => ['2024-01'],
+      'amount' => 500000,
+      'status' => 'pending',
+    ]);
+
+    // No duplicate should have been created
+    $this->assertCount(1, PaymentRecord::where('resident_id', $resident->id)->get());
+  }
+
+  /** @test */
+  public function store_requires_resident_id()
+  {
+    $roles = $this->createRoles();
+    $admin = $this->makeAdmin($roles);
+
+    $response = $this->actingAs($admin)->post(route('payments.store'), [
+      'resident_id' => '',
+      'months' => ['2024-01'],
+      'amount' => 500000,
+      'status' => 'pending',
+    ]);
+
+    $response->assertSessionHasErrors('resident_id');
+  }
+
+  /** @test */
+  public function store_requires_at_least_one_month()
+  {
+    $roles = $this->createRoles();
+    $admin = $this->makeAdmin($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    $response = $this->actingAs($admin)->post(route('payments.store'), [
+      'resident_id' => $resident->id,
+      'months' => [],
+      'amount' => 500000,
+      'status' => 'pending',
+    ]);
+
+    $response->assertSessionHasErrors('months');
+  }
+
+  /** @test */
+  public function store_requires_valid_status()
+  {
+    $roles = $this->createRoles();
+    $admin = $this->makeAdmin($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    $response = $this->actingAs($admin)->post(route('payments.store'), [
+      'resident_id' => $resident->id,
+      'months' => ['2024-01'],
+      'amount' => 500000,
+      'status' => 'invalid_status',
+    ]);
+
+    $response->assertSessionHasErrors('status');
+  }
+
+  // ── Approve ───────────────────────────────────────────────────────────────────
+
+  /** @test */
+  public function treasurer_can_approve_a_payment()
+  {
+    $roles = $this->createRoles();
+    $treasurer = $this->makeTreasurer($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    $payment = PaymentRecord::create([
+      'resident_id' => $resident->id,
+      'payment_month' => '2024-01-01',
+      'amount' => 500000,
+      'status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($treasurer)->patch(route('payments.approve', $payment));
+
+    $response->assertRedirect(route('payments.index'))->assertSessionHas('success');
+    $this->assertDatabaseHas('payment_records', [
+      'id' => $payment->id,
+      'status' => 'approved',
+    ]);
+  }
+
+  /** @test */
+  public function approve_sets_approved_by_and_approved_at()
+  {
+    $roles = $this->createRoles();
+    $treasurer = $this->makeTreasurer($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    $payment = PaymentRecord::create([
+      'resident_id' => $resident->id,
+      'payment_month' => '2024-01-01',
+      'amount' => 500000,
+      'status' => 'pending',
+    ]);
+
+    $this->actingAs($treasurer)->patch(route('payments.approve', $payment));
+
+    $payment->refresh();
+    $this->assertEquals('approved', $payment->status);
+    $this->assertEquals($treasurer->id, $payment->approved_by);
+    $this->assertNotNull($payment->approved_at);
+  }
+
+  // ── Reject ────────────────────────────────────────────────────────────────────
+
+  /** @test */
+  public function treasurer_can_reject_a_payment_with_reason()
+  {
+    $roles = $this->createRoles();
+    $treasurer = $this->makeTreasurer($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    $payment = PaymentRecord::create([
+      'resident_id' => $resident->id,
+      'payment_month' => '2024-01-01',
+      'amount' => 500000,
+      'status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($treasurer)->patch(route('payments.reject', $payment), [
+      'rejection_reason' => 'Bukti pembayaran tidak jelas.',
+    ]);
+
+    $response->assertRedirect(route('payments.index'))->assertSessionHas('success');
+    $this->assertDatabaseHas('payment_records', [
+      'id' => $payment->id,
+      'status' => 'rejected',
+    ]);
+  }
+
+  /** @test */
+  public function reject_requires_reason_of_at_least_10_characters()
+  {
+    $roles = $this->createRoles();
+    $treasurer = $this->makeTreasurer($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    $payment = PaymentRecord::create([
+      'resident_id' => $resident->id,
+      'payment_month' => '2024-01-01',
+      'amount' => 500000,
+      'status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($treasurer)->patch(route('payments.reject', $payment), [
+      'rejection_reason' => 'Short',
+    ]);
+
+    $response->assertSessionHasErrors('rejection_reason');
+  }
+
+  /** @test */
+  public function reject_requires_a_reason()
+  {
+    $roles = $this->createRoles();
+    $treasurer = $this->makeTreasurer($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    $payment = PaymentRecord::create([
+      'resident_id' => $resident->id,
+      'payment_month' => '2024-01-01',
+      'amount' => 500000,
+      'status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($treasurer)->patch(route('payments.reject', $payment), [
+      'rejection_reason' => '',
+    ]);
+
+    $response->assertSessionHasErrors('rejection_reason');
+  }
+
+  // ── Destroy ───────────────────────────────────────────────────────────────────
+
+  /** @test */
+  public function admin_can_delete_a_pending_payment()
+  {
+    $roles = $this->createRoles();
+    $admin = $this->makeAdmin($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    $payment = PaymentRecord::create([
+      'resident_id' => $resident->id,
+      'payment_month' => '2024-01-01',
+      'amount' => 500000,
+      'status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($admin)->delete(route('payments.destroy', $payment));
+
+    $response->assertRedirect(route('payments.index'))->assertSessionHas('success');
+    $this->assertDatabaseMissing('payment_records', ['id' => $payment->id]);
+  }
+
+  /** @test */
+  public function admin_cannot_delete_an_approved_payment()
+  {
+    $roles = $this->createRoles();
+    $admin = $this->makeAdmin($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    $payment = PaymentRecord::create([
+      'resident_id' => $resident->id,
+      'payment_month' => '2024-01-01',
+      'amount' => 500000,
+      'status' => 'approved',
+    ]);
+
+    $this->actingAs($admin)->delete(route('payments.destroy', $payment))
+      ->assertSessionHas('error');
+
+    $this->assertDatabaseHas('payment_records', ['id' => $payment->id]);
+  }
+
+  /** @test */
+  public function non_admin_cannot_delete_payments()
+  {
+    $roles = $this->createRoles();
+    $treasurer = $this->makeTreasurer($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    $payment = PaymentRecord::create([
+      'resident_id' => $resident->id,
+      'payment_month' => '2024-01-01',
+      'amount' => 500000,
+      'status' => 'pending',
+    ]);
+
+    $this->actingAs($treasurer)->delete(route('payments.destroy', $payment))
+      ->assertSessionHas('error');
+
+    $this->assertDatabaseHas('payment_records', ['id' => $payment->id]);
+  }
+
+  /** @test */
+  public function deleting_one_record_in_a_batch_deletes_entire_batch()
+  {
+    $roles = $this->createRoles();
+    $admin = $this->makeAdmin($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    $batchId = 'test-batch-uuid-001';
+    $p1 = PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => '2024-01-01', 'amount' => 500000, 'status' => 'pending', 'batch_id' => $batchId]);
+    $p2 = PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => '2024-02-01', 'amount' => 500000, 'status' => 'pending', 'batch_id' => $batchId]);
+
+    $this->actingAs($admin)->delete(route('payments.destroy', $p1));
+
+    $this->assertDatabaseMissing('payment_records', ['id' => $p1->id]);
+    $this->assertDatabaseMissing('payment_records', ['id' => $p2->id]);
+  }
+
+  // ── Batch Approve/Reject ──────────────────────────────────────────────────────
+
+  /** @test */
+  public function treasurer_can_approve_a_batch_of_payments()
+  {
+    $roles = $this->createRoles();
+    $treasurer = $this->makeTreasurer($roles);
+    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
+    $resident = Resident::create(['block_id' => $block->id, 'unit_number' => 'A-101', 'fullname' => 'Budi', 'is_active' => true]);
+
+    $batchId = 'batch-approve-test';
+    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => '2024-01-01', 'amount' => 500000, 'status' => 'pending', 'batch_id' => $batchId]);
+    PaymentRecord::create(['resident_id' => $resident->id, 'payment_month' => '2024-02-01', 'amount' => 500000, 'status' => 'pending', 'batch_id' => $batchId]);
+
+    // Route: POST /payments/batch/{batchId}/approve  →  name: payments.batch.approve
+    $this->actingAs($treasurer)
+      ->post(route('payments.batch.approve', $batchId))
+      ->assertRedirect(route('payments.index'))
+      ->assertSessionHas('success');
+
+    $this->assertEquals(2, PaymentRecord::where('batch_id', $batchId)->where('status', 'approved')->count());
+  }
+}
