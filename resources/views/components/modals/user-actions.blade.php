@@ -1,12 +1,13 @@
 {{-- ============================================================
 components/modals/user-actions.blade.php
-Confirmation modal for: Approve / Deactivate / Delete user.
-Trigger via: openUserConfirmModal('approve'|'deactivate'|'delete', userId, userName)
+Confirmation modal for: Deactivate / Delete user.
+Trigger via: openUserConfirmModal('deactivate'|'delete', userId, userName)
+Approve now uses its own modal: openApproveModal(userId, userName, email)
 Also contains shared JS helpers: toggleSidebar, openModal, closeModal,
-closeModalOnBackdrop, togglePw, openEditModal.
+closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
 ============================================================ --}}
 
-{{-- ── Confirmation Modal ─────────────────────────────────────────── --}}
+{{-- ── Confirmation Modal (Deactivate / Delete) ───────────────────── --}}
 <div id="user-confirm-modal"
   class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4"
   onclick="if(event.target===this) closeUserConfirmModal()">
@@ -23,13 +24,6 @@ closeModalOnBackdrop, togglePw, openEditModal.
         class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
         {{ __('app.btn_cancel') }}
       </button>
-      <form id="ucm-form-approve" method="POST" action="" class="flex-1 hidden">
-        @csrf @method('PATCH')
-        <button type="submit"
-          class="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all">
-          {{ __('app.btn_yes_approve') }}
-        </button>
-      </form>
       <form id="ucm-form-deactivate" method="POST" action="" class="flex-1 hidden">
         @csrf @method('PATCH')
         <button type="submit"
@@ -54,17 +48,21 @@ closeModalOnBackdrop, togglePw, openEditModal.
     document.getElementById('sidebar').classList.toggle('-translate-x-full');
     document.getElementById('sidebar-overlay').classList.toggle('hidden');
   }
+
   function openModal(id) {
     document.getElementById(id).classList.remove('hidden');
     document.body.classList.add('overflow-hidden');
   }
+
   function closeModal(id) {
     document.getElementById(id).classList.add('hidden');
     document.body.classList.remove('overflow-hidden');
   }
+
   function closeModalOnBackdrop(event, id) {
     if (event.target === document.getElementById(id)) closeModal(id);
   }
+
   function togglePw(inputId, iconId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
@@ -74,31 +72,92 @@ closeModalOnBackdrop, togglePw, openEditModal.
   }
 
   // ── Edit modal helper ─────────────────────────────────────────────
-  function openEditModal(id, name, username, email, roleId, blockId) {
+  function openEditModal(id, name, username, email, roleId, blockId, unitNumber) {
     document.getElementById('edit-name').value = name;
     document.getElementById('edit-username').value = username;
     document.getElementById('edit-email').value = email;
     document.getElementById('edit-password').value = '';
     document.querySelectorAll('.edit-role-radio').forEach(radio => {
-      radio.checked = (radio.value !== '' && parseInt(radio.value) === roleId)
-        || (radio.value === '' && !roleId);
+      radio.checked = (radio.value !== '' && parseInt(radio.value) === roleId) ||
+        (radio.value === '' && !roleId);
     });
     document.getElementById('edit-user-id-field').value = id;
     document.getElementById('form-edit-user').action = `/users/${id}`;
+
+    // Set block and unit from current user data, then lookup resident
+    const blockSel = document.getElementById('edit-block-id');
+    const unitInp = document.getElementById('edit-unit-number');
+    if (blockSel) blockSel.value = blockId ?? '';
+    if (unitInp) unitInp.value = unitNumber ?? '';
+
+    // Reset badges
+    ['found', 'notfound', 'loading'].forEach(s => {
+      const el = document.getElementById(`edit-resident-badge-${s}`);
+      if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+    });
+
+    // Run resident lookup for the current email
+    if (typeof lookupResidentForEdit === 'function') {
+      lookupResidentForEdit(email);
+    }
+
     openModal('modal-edit');
   }
 
-  // ── Confirm modal (approve / deactivate / delete) ─────────────────
+  // ── Approve modal helper ──────────────────────────────────────────
+  const CHECK_URL_APPROVE = '{{ route('users.check-resident-email') }}';
+  const CSRF_APPROVE = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+
+  function openApproveModal(userId, userName, userEmail) {
+    document.getElementById('approve-subtitle').textContent = userName + ' — ' + userEmail;
+    document.getElementById('form-approve-user').action = `/users/${userId}/approve`;
+
+    const blockSel = document.getElementById('approve-block-id');
+    const unitInp = document.getElementById('approve-unit-number');
+    if (blockSel) { blockSel.value = ''; blockSel.disabled = false; }
+    if (unitInp) { unitInp.value = ''; unitInp.readOnly = false; }
+
+    // Reset badges
+    ['found', 'notfound'].forEach(s => {
+      const el = document.getElementById(`approve-resident-badge-${s}`);
+      if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+    });
+
+    openModal('modal-approve');
+
+    // Run lookup if email provided
+    if (userEmail) {
+      fetch(CHECK_URL_APPROVE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_APPROVE },
+        body: JSON.stringify({ email: userEmail }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          const badgeFound = document.getElementById('approve-resident-badge-found');
+          const badgeNot = document.getElementById('approve-resident-badge-notfound');
+          if (data.found) {
+            badgeFound?.classList.remove('hidden');
+            badgeFound?.classList.add('flex');
+            badgeNot?.classList.add('hidden');
+            if (blockSel) { blockSel.value = data.block_id ?? ''; blockSel.disabled = true; }
+            if (unitInp) {
+              unitInp.value = data.unit_number ?? '';
+              unitInp.readOnly = true;
+              unitInp.classList.add('bg-slate-100', 'cursor-not-allowed');
+            }
+          } else {
+            badgeNot?.classList.remove('hidden');
+            badgeNot?.classList.add('flex');
+            badgeFound?.classList.add('hidden');
+          }
+        })
+        .catch(() => { });
+    }
+  }
+
+  // ── Confirm modal (deactivate / delete) ───────────────────────────
   const UCM_CONFIGS = {
-    approve: {
-      iconWrap: 'bg-emerald-100 dark:bg-emerald-900/30',
-      icon: 'verified',
-      iconColor: 'text-emerald-600 dark:text-emerald-400',
-      title: '{{ __('app.approve_user_title') }}',
-      body: name => `<strong class="text-slate-800 dark:text-slate-200">${name}</strong> {{ __('app.approve_user_body') }}`,
-      form: 'ucm-form-approve',
-      route: id => `/users/${id}/approve`,
-    },
     deactivate: {
       iconWrap: 'bg-amber-100 dark:bg-amber-900/30',
       icon: 'person_off',
@@ -121,6 +180,7 @@ closeModalOnBackdrop, togglePw, openEditModal.
 
   function openUserConfirmModal(action, userId, userName) {
     const cfg = UCM_CONFIGS[action];
+    if (!cfg) return;
     document.getElementById('ucm-icon-wrap').className =
       `w-16 h-16 rounded-full flex items-center justify-center mb-4 ${cfg.iconWrap}`;
     const iconEl = document.getElementById('ucm-icon');
@@ -128,7 +188,7 @@ closeModalOnBackdrop, togglePw, openEditModal.
     iconEl.className = `material-icons text-3xl ${cfg.iconColor}`;
     document.getElementById('ucm-title').textContent = cfg.title;
     document.getElementById('ucm-body').innerHTML = cfg.body(userName);
-    ['approve', 'deactivate', 'delete'].forEach(a =>
+    ['deactivate', 'delete'].forEach(a =>
       document.getElementById(`ucm-form-${a}`).classList.toggle('hidden', a !== action)
     );
     document.getElementById(`ucm-form-${action}`).action = cfg.route(userId);
@@ -145,6 +205,7 @@ closeModalOnBackdrop, togglePw, openEditModal.
     if (e.key === 'Escape') {
       closeModal('modal-create');
       closeModal('modal-edit');
+      closeModal('modal-approve');
       closeUserConfirmModal();
     }
   });

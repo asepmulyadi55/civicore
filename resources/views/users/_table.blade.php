@@ -34,9 +34,11 @@
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}
           </th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {{ __('app.table_last_login') }}</th>
+            {{ __('app.table_last_login') }}
+          </th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
-            {{ __('app.table_actions') }}</th>
+            {{ __('app.table_actions') }}
+          </th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
@@ -130,21 +132,23 @@
 
                 {{-- Edit (always shown) --}}
                 <button onclick="openEditModal(
-                              {{ $user->id }},
-                              {{ json_encode($user->name) }},
-                              {{ json_encode($user->username) }},
-                              {{ json_encode($user->email) }},
-                              {{ $user->role_id ?? 'null' }},
-                              {{ $user->block_id ?? 'null' }}
-                            )"
+                                {{ $user->id }},
+                                {{ json_encode($user->name) }},
+                                {{ json_encode($user->username) }},
+                                {{ json_encode($user->email) }},
+                                {{ $user->role_id ?? 'null' }},
+                                {{ $user->block_id ?? 'null' }},
+                                {{ json_encode($user->resident?->unit_number) }}
+                              )"
                   class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                   title="{{ __('app.title_edit_user') }}">
                   <span class="material-icons text-lg">edit</span>
                 </button>
 
                 @if($isPending)
-                  {{-- Approve button → triggers modal --}}
-                  <button onclick="openUserConfirmModal('approve', {{ $user->id }}, {{ json_encode($user->name) }})"
+                  {{-- Approve button → triggers approve modal with block/unit assignment --}}
+                  <button
+                    onclick="openApproveModal({{ $user->id }}, {{ json_encode($user->name) }}, {{ json_encode($user->email) }})"
                     class="bg-primary text-white text-[10px] px-3 py-1.5 rounded font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors flex items-center gap-1">
                     <span class="material-icons text-xs">verified</span>
                     {{ __('app.btn_approve') }}

@@ -43,7 +43,8 @@
             </td>
             <td class="px-6 py-4 text-sm font-bold">{{ $currency }} {{ number_format($payment->total_amount ?? $payment->amount) }}</td>
             <td class="px-6 py-4">
-              @switch($payment->status)
+              @php $statusValue = $payment->status instanceof \App\Enums\PaymentStatus ? $payment->status->value : $payment->status; @endphp
+              @switch($statusValue)
                 @case('approved')
                   <span class="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-xs font-bold uppercase">{{ __('app.status_approved') }}</span>
                   @break
@@ -74,29 +75,35 @@
                   </span>
                 @endif
 
-                {{-- Edit button --}}
-                <button
-                  onclick="openEditModal(
-                    {{ $payment->id }},
-                    {{ $payment->resident_id }},
-                    '{{ addslashes($payment->resident->fullname) }}',
-                    '{{ $payment->resident->unit_number }}',
-                    '{{ $monthsForJs }}',
-                    {{ $payment->amount }},
-                    {{ $payment->payment_method_id ?? 'null' }},
-                    '{{ $payment->status }}',
-                    '{{ addslashes($payment->rejection_reason ?? '') }}',
-                    '{{ addslashes($payment->notes ?? '') }}',
-                    '{{ $payment->proof_path ? asset('storage/' . $payment->proof_path) : '' }}'
-                  )"
-                  title="Edit payment"
-                  class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
-                  <span class="material-icons text-lg">edit</span>
-                </button>
+                {{-- Edit button: hidden for block coordinators on approved payments --}}
+                @if($canEditApproved || $statusValue !== 'approved')
+                  <button
+                    onclick="openEditModal(
+                      {{ $payment->id }},
+                      {{ $payment->resident_id }},
+                      '{{ addslashes($payment->resident->fullname) }}',
+                      '{{ $payment->resident->unit_number }}',
+                      '{{ $monthsForJs }}',
+                      {{ $payment->amount }},
+                      {{ $payment->payment_method_id ?? 'null' }},
+                      '{{ $payment->status instanceof \App\Enums\PaymentStatus ? $payment->status->value : $payment->status }}',
+                      '{{ addslashes($payment->rejection_reason ?? '') }}',
+                      '{{ addslashes($payment->notes ?? '') }}',
+                      '{{ $payment->proof_path ? asset('storage/' . $payment->proof_path) : '' }}'
+                    )"
+                    title="Edit payment"
+                    class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                    <span class="material-icons text-lg">edit</span>
+                  </button>
+                @else
+                  <span class="p-1.5 text-slate-200 dark:text-slate-700 cursor-not-allowed inline-flex" title="Approved payments can only be edited by Admin or Treasurer">
+                    <span class="material-icons text-lg">lock_outline</span>
+                  </span>
+                @endif
 
                 {{-- Review / Approve / Reject --}}
                 @if($canApprove)
-                  @if($payment->status === 'pending')
+                  @if($statusValue === 'pending')
                     <button onclick="openReviewModal(
                         {{ $payment->id }},
                         '{{ addslashes($payment->resident->fullname) }}',
@@ -109,23 +116,23 @@
                       class="text-primary hover:text-primary/80 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-primary/20 rounded-lg hover:bg-primary/5 transition-all">
                       {{ __('app.review_payment') }}
                     </button>
-                  @elseif($payment->status === 'approved')
+                  @elseif($statusValue === 'approved')
                     <span class="text-xs text-slate-400">{{ __('app.status_approved') }} {{ $payment->approved_at?->format('d M') }}</span>
-                  @elseif($payment->status === 'rejected')
+                  @elseif($statusValue === 'rejected')
                     <span class="text-xs text-rose-400" title="{{ $payment->rejection_reason }}">{{ __('app.status_rejected') }}</span>
                   @endif
                 @else
                   {{-- Coordinator: no approve/reject --}}
-                  @if($payment->status === 'approved')
+                  @if($statusValue === 'approved')
                     <span class="text-xs text-slate-400">{{ __('app.status_approved') }} {{ $payment->approved_at?->format('d M') }}</span>
-                  @elseif($payment->status === 'rejected')
+                  @elseif($statusValue === 'rejected')
                     <span class="text-xs text-rose-400" title="{{ $payment->rejection_reason }}">{{ __('app.status_rejected') }}</span>
                   @endif
                 @endif
 
                 {{-- Delete: admin only, not for approved --}}
                 @if(auth()->user()->isAdmin())
-                  @if($payment->status !== 'approved')
+                  @if($statusValue !== 'approved')
                     <button type="button"
                       onclick="openPaymentDeleteModal({{ $payment->id }}, '{{ addslashes($payment->resident->fullname) }}')"
                       title="Delete payment"

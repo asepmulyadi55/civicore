@@ -1,9 +1,10 @@
 @php
   $roles = \App\Models\Role::orderBy('name')->get();
+  $blocks = \App\Models\Block::active()->orderBy('name')->get();
 @endphp
 {{-- ============================================================
 Modal: Edit User — same design as Create User
-Trigger: openEditModal(id, name, username, email, roleId, blockId)
+Trigger: openEditModal(id, name, username, email, roleId, blockId, unitNumber)
 ============================================================ --}}
 <div id="modal-edit"
   class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
@@ -24,7 +25,7 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId)
     </div>
 
     {{-- Form --}}
-    <form id="form-edit-user" method="POST" action="" class="p-8 pt-0 space-y-5 max-h-[80vh] overflow-y-auto"
+    <form id="form-edit-user" method="POST" action="" class="p-8 pt-6 space-y-5 max-h-[80vh] overflow-y-auto"
       novalidate>
       @csrf
       @method('PATCH')
@@ -129,18 +130,18 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId)
               </div>
             </div>
           </label>
-          @foreach($roles as $role)
+          @foreach ($roles as $role)
             <label class="cursor-pointer group">
               <input class="peer sr-only edit-role-radio" name="role_id" type="radio" value="{{ $role->id }}" />
               <div class="relative p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700
-                                    hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5
-                                    transition-all h-full flex items-center gap-3">
+                                      hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5
+                                      transition-all h-full flex items-center gap-3">
                 <div class="absolute top-2 right-2 opacity-0 peer-checked:opacity-100 text-primary transition-opacity">
                   <span class="material-icons text-sm">check_circle</span>
                 </div>
                 <div
                   class="w-9 h-9 rounded-lg {{ $role->bg_class }} {{ $role->text_class }}
-                                      flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                        flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                   <span class="material-icons text-lg">{{ $role->icon }}</span>
                 </div>
                 <div>
@@ -149,6 +150,66 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId)
               </div>
             </label>
           @endforeach
+        </div>
+      </div>
+
+      {{-- Household Assignment ──────────────────────────────── --}}
+      <div class="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Household Assignment</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Auto-filled if email matches a resident record.</p>
+        </div>
+        <div class="p-4 space-y-4">
+
+          <div id="edit-resident-badge-found"
+            class="hidden items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800">
+            <span class="material-icons text-sm">check_circle</span>
+            Resident record found — block &amp; unit locked.
+          </div>
+          <div id="edit-resident-badge-notfound"
+            class="hidden items-center gap-2 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800">
+            <span class="material-icons text-sm">info</span>
+            No resident record — assign manually (optional).
+          </div>
+          <div id="edit-resident-badge-loading"
+            class="hidden items-center gap-2 text-xs text-slate-500 px-3 py-2 rounded-lg">
+            <svg class="animate-spin h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+            Looking up resident…
+          </div>
+
+          {{-- Block Select --}}
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase">Block</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="material-icons text-slate-400 text-sm">location_city</span>
+              </span>
+              <select id="edit-block-id" name="block_id"
+                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none">
+                <option value="">— No block assigned —</option>
+                @foreach ($blocks as $block)
+                  <option value="{{ $block->id }}">{{ $block->name }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+
+          {{-- Unit Number --}}
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase">Unit Number</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="material-icons text-slate-400 text-sm">home</span>
+              </span>
+              <input id="edit-unit-number" name="unit_number" type="text"
+                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                placeholder="e.g. A-01" />
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -180,9 +241,77 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId)
     ];
     checks.forEach(([fieldId, errId, fn]) => {
       const el = document.getElementById(fieldId);
-      if (el && !fn(el.value)) { showUErr(errId); valid = false; }
-      else if (el) clearUErr(errId);
+      if (el && !fn(el.value)) {
+        showUErr(errId);
+        valid = false;
+      } else if (el) clearUErr(errId);
     });
     if (!valid) e.preventDefault();
+  });
+
+  // ── Resident lookup helpers ───────────────────────────────────────
+  const CHECK_EMAIL_URL = '{{ route('users.check-resident-email') }}';
+  const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.content
+    || '{{ csrf_token() }}';
+
+  function setEditResidentBadge(state) {
+    // state: 'found' | 'notfound' | 'loading' | 'none'
+    ['found', 'notfound', 'loading'].forEach(s => {
+      document.getElementById(`edit-resident-badge-${s}`)?.classList.toggle('hidden', s !== state);
+      document.getElementById(`edit-resident-badge-${s}`)?.classList.toggle('flex', s === state);
+    });
+  }
+
+  function lockEditHousehold(blockId, unitNumber) {
+    const blockSel = document.getElementById('edit-block-id');
+    const unitInp = document.getElementById('edit-unit-number');
+    blockSel.value = blockId ?? '';
+    unitInp.value = unitNumber ?? '';
+    blockSel.disabled = true;
+    unitInp.readOnly = true;
+    unitInp.classList.add('bg-slate-100', 'dark:bg-slate-700/50', 'cursor-not-allowed');
+    blockSel.classList.add('opacity-60', 'cursor-not-allowed');
+  }
+
+  function unlockEditHousehold() {
+    const blockSel = document.getElementById('edit-block-id');
+    const unitInp = document.getElementById('edit-unit-number');
+    blockSel.disabled = false;
+    unitInp.readOnly = false;
+    unitInp.classList.remove('bg-slate-100', 'dark:bg-slate-700/50', 'cursor-not-allowed');
+    blockSel.classList.remove('opacity-60', 'cursor-not-allowed');
+  }
+
+  function lookupResidentForEdit(email) {
+    if (!email || !email.includes('@')) {
+      setEditResidentBadge('none');
+      unlockEditHousehold();
+      return;
+    }
+    setEditResidentBadge('loading');
+    fetch(CHECK_EMAIL_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
+      body: JSON.stringify({ email }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.found) {
+          setEditResidentBadge('found');
+          lockEditHousehold(data.block_id, data.unit_number);
+        } else {
+          setEditResidentBadge('notfound');
+          unlockEditHousehold();
+        }
+      })
+      .catch(() => {
+        setEditResidentBadge('none');
+        unlockEditHousehold();
+      });
+  }
+
+  // Trigger on email change
+  document.getElementById('edit-email')?.addEventListener('change', function () {
+    lookupResidentForEdit(this.value.trim());
   });
 </script>

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Resident;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -19,7 +18,8 @@ class RegisterController extends Controller
   }
 
   /**
-   * Handle a registration request for the application.
+   * Handle a registration request.
+   * Anyone can register — Admin will assign block/unit and approve from User Management.
    */
   public function register(Request $request)
   {
@@ -42,22 +42,12 @@ class RegisterController extends Controller
       'password_confirmation.required' => 'Please confirm your password.',
     ]);
 
-    // Email must exist in the residents table before registration is allowed.
-    // This ensures every user account is linked to a resident record.
-    if (!Resident::where('email', $request->email)->exists()) {
-      return back()
-        ->withErrors([
-          'email' => 'Your email is not registered as a resident. Please contact your Block Coordinator or the administrator to have your email added to your resident profile first.',
-        ])
-        ->withInput();
-    }
-
     User::create([
       'name' => $request->fullname,
       'username' => $request->username,
       'email' => $request->email,
       'password' => Hash::make($request->password),
-      'is_active' => false, // Requires admin approval
+      'is_active' => false,
     ]);
 
     return redirect('/')->with('success', 'Registration successful! Please wait for admin approval before logging in.');

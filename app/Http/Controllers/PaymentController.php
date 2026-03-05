@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\PaymentStatus;
 use App\Models\Block;
 use App\Models\PaymentRecord;
 use App\Models\Resident;
@@ -48,9 +49,11 @@ class PaymentController extends Controller
 
         $blocks = Block::active()->orderBy('name')->get();
         $currency = Setting::get('currency_symbol', 'Rp');
+        // Admin and Treasurer can edit approved payments; Block Coordinator cannot
+        $canEditApproved = $user->isAdmin() || $user->can('payments.approve');
 
         return view('payments', array_merge(
-            compact('payments', 'blocks', 'currency', 'canApprove'),
+            compact('payments', 'blocks', 'currency', 'canApprove', 'canEditApproved'),
             $stats,
             $residentData
         ));
@@ -460,7 +463,7 @@ class PaymentController extends Controller
 
         if ($payment->batch_id) {
             $hasApproved = PaymentRecord::where('batch_id', $payment->batch_id)
-                ->where('status', 'approved')
+                ->where('status', PaymentStatus::Approved)
                 ->exists();
             if ($hasApproved) {
                 return 'Cannot delete — the batch contains approved records.';

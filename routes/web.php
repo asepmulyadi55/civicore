@@ -29,6 +29,7 @@ Route::post('/session-use-this', [SessionConflictController::class, 'useThisDevi
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:5,1');
 
+
 // Google OAuth
 Route::get('/auth/google/login', [SocialAuthController::class, 'redirectToGoogleLogin'])->name('auth.google.login');
 Route::get('/auth/google/register', [SocialAuthController::class, 'redirectToGoogleRegister'])->name('auth.google.register');
@@ -100,12 +101,15 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:users.create')->name('users.store');
     Route::match(['PUT', 'PATCH'], '/users/{user}', [UserController::class, 'update'])
         ->middleware('permission:users.edit')->name('users.update');
-    Route::patch('/users/{user}/approve', [UserController::class, 'approve'])
+    Route::post('/users/{user}/approve', [UserController::class, 'approve'])
         ->middleware('permission:users.approve')->name('users.approve');
+    Route::post('/users/check-resident-email', [UserController::class, 'checkResidentEmail'])
+        ->middleware('throttle:30,1')->name('users.check-resident-email');
     Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate'])
         ->middleware('permission:users.edit')->name('users.deactivate');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])
         ->middleware('permission:users.delete')->name('users.destroy');
+
 
     // ── Roles ─────────────────────────────────────────────────────────────────
     Route::get('/roles', [RoleController::class, 'index'])

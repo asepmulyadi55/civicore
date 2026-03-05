@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -28,7 +29,7 @@ class PaymentRecord extends Model
             'payment_month' => 'date',
             'amount' => 'decimal:2',
             'approved_at' => 'datetime',
-            // status is kept as a plain string so all Blade templates continue to work
+            'status' => PaymentStatus::class,
         ];
     }
 
@@ -80,22 +81,22 @@ class PaymentRecord extends Model
 
     public function isUnpaid(): bool
     {
-        return $this->status === 'unpaid';
+        return $this->status === PaymentStatus::Unpaid;
     }
 
     public function isPending(): bool
     {
-        return $this->status === 'pending';
+        return $this->status === PaymentStatus::Pending;
     }
 
     public function isApproved(): bool
     {
-        return $this->status === 'approved';
+        return $this->status === PaymentStatus::Approved;
     }
 
     public function isRejected(): bool
     {
-        return $this->status === 'rejected';
+        return $this->status === PaymentStatus::Rejected;
     }
 
     /**
@@ -105,15 +106,15 @@ class PaymentRecord extends Model
     public function statusBadge(): array
     {
         return match ($this->status) {
-            'approved' => [
+            PaymentStatus::Approved => [
                 'label' => 'Approved',
                 'class' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
             ],
-            'pending' => [
+            PaymentStatus::Pending => [
                 'label' => 'Pending',
                 'class' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
             ],
-            'rejected' => [
+            PaymentStatus::Rejected => [
                 'label' => 'Rejected',
                 'class' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
             ],

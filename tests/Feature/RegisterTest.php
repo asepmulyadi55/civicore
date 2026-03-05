@@ -24,16 +24,6 @@ class RegisterTest extends TestCase
   /** @test */
   public function user_can_register_with_valid_data()
   {
-    // RegisterController requires the email to exist as a resident first
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    Resident::create([
-      'block_id' => $block->id,
-      'unit_number' => 'A-101',
-      'fullname' => 'John Doe',
-      'email' => 'john@example.com',
-      'is_active' => true
-    ]);
-
     $response = $this->post('/register', [
       'fullname' => 'John Doe',
       'username' => 'johndoe',
@@ -56,15 +46,6 @@ class RegisterTest extends TestCase
   /** @test */
   public function new_user_is_inactive_by_default()
   {
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    Resident::create([
-      'block_id' => $block->id,
-      'unit_number' => 'A-101',
-      'fullname' => 'John Doe',
-      'email' => 'john@example.com',
-      'is_active' => true
-    ]);
-
     $this->post('/register', [
       'fullname' => 'John Doe',
       'username' => 'johndoe',
@@ -76,6 +57,23 @@ class RegisterTest extends TestCase
     $user = User::where('email', 'john@example.com')->first();
     $this->assertEquals(0, $user->is_active);
   }
+
+  /** @test */
+  public function any_email_can_register_without_being_a_resident()
+  {
+    // Anyone can register; admin assigns block/unit at approval time
+    $response = $this->post('/register', [
+      'fullname' => 'Unknown Person',
+      'username' => 'unknownperson',
+      'email' => 'notaresident@example.com',
+      'password' => 'password123',
+      'password_confirmation' => 'password123',
+    ]);
+
+    $response->assertRedirect('/');
+    $this->assertDatabaseCount('users', 1);
+  }
+
 
   /** @test */
   public function registration_validates_required_fullname()

@@ -4,9 +4,10 @@
 
   <x-nav.sidebar active="users" />
 
-  {{-- Create / Edit modals (Blade components) --}}
+  {{-- Create / Edit / Approve modals (Blade components) --}}
   <x-modals.create-user />
   <x-modals.edit-user />
+  <x-modals.approve-user />
 
   <main class="lg:ml-64 flex flex-col min-h-screen">
 
@@ -53,7 +54,9 @@
           const username = @json(old('username'));
           const email = @json(old('email'));
           const roleId = @json(old('role_id'));
-          openEditModal(id, name, username, email, roleId, null);
+          const blockId = @json(old('block_id'));
+          const unitNum = @json(old('unit_number'));
+          openEditModal(id, name, username, email, roleId ? parseInt(roleId) : null, blockId ? parseInt(blockId) : null, unitNum);
         }
       });
     </script>

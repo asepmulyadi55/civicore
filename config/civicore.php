@@ -15,4 +15,12 @@ return [
     'reports' => 25,
   ],
 
+  /*
+  |--------------------------------------------------------------------------
+  | Registration Limits
+  |--------------------------------------------------------------------------
+  | Maximum number of user accounts allowed per residential unit.
+  */
+  'max_accounts_per_unit' => 3,
+
 ];

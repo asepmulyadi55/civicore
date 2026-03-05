@@ -93,12 +93,13 @@
               {{-- Status + Actions --}}
               <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
                 @if($block->is_active)
-                  class="px-2 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[10px]
-                  font-bold uppercase rounded">{{ __('app.status_active') }}</span>
+                  <span
+                    class="px-2 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[10px] font-bold uppercase rounded">{{ __('app.status_active') }}</span>
                 @else
-                  class="px-2 py-0.5 bg-slate-200 text-slate-500 text-[10px] font-bold uppercase
-                  rounded">{{ __('app.status_inactive') }}</span>
+                  <span
+                    class="px-2 py-0.5 bg-slate-200 text-slate-500 text-[10px] font-bold uppercase rounded">{{ __('app.status_inactive') }}</span>
                 @endif
+
                 <div class="flex gap-1">
                   <button
                     onclick="openEditBlockDrawer({{ $block->id }}, '{{ addslashes($block->name) }}', '{{ addslashes($block->description ?? '') }}', {{ $block->is_active ? 'true' : 'false' }})"

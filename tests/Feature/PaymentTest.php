@@ -39,8 +39,31 @@ class PaymentTest extends TestCase
       ],
     ]);
     $resident = Role::create(['name' => 'resident', 'label' => 'Resident', 'permissions' => []]);
+    $coordinator = Role::create([
+      'name' => 'block_coordinator',
+      'label' => 'Block Coordinator',
+      'permissions' => [
+        'payments.view' => true,
+        'payments.create' => true,
+        'payments.edit' => true,
+      ],
+    ]);
 
-    return compact('admin', 'treasurer', 'resident');
+    return compact('admin', 'treasurer', 'resident', 'coordinator');
+  }
+
+  private function makeCoordinator(array $roles): User
+  {
+    $block = Block::create(['name' => 'Coordinator Block', 'is_active' => true]);
+    return User::create([
+      'name' => 'Coordinator',
+      'username' => 'coordinator',
+      'email' => 'coordinator@test.com',
+      'password' => bcrypt('password'),
+      'is_active' => true,
+      'role_id' => $roles['coordinator']->id,
+      'block_id' => $block->id,
+    ]);
   }
 
   private function makeAdmin(array $roles): User
@@ -182,7 +205,7 @@ class PaymentTest extends TestCase
     $record = PaymentRecord::where('resident_id', $resident->id)->first();
     $this->assertNotNull($record, 'Payment record was not created.');
     $this->assertEquals(self::PAYMENT_MONTH, \Carbon\Carbon::parse($record->payment_month)->format('Y-m-d'));
-    $this->assertEquals('pending', $record->status);
+    $this->assertEquals('pending', $record->status->value);
     $this->assertEquals(self::PAYMENT_AMOUNT, (int) $record->amount);
   }
 
@@ -320,7 +343,7 @@ class PaymentTest extends TestCase
     $this->actingAs($treasurer)->patch(route('payments.approve', $payment));
 
     $payment->refresh();
-    $this->assertEquals('approved', $payment->status);
+    $this->assertEquals('approved', $payment->status->value);
     $this->assertEquals($treasurer->id, $payment->approved_by);
     $this->assertNotNull($payment->approved_at);
   }
@@ -473,6 +496,41 @@ class PaymentTest extends TestCase
 
     $this->assertDatabaseMissing('payment_records', ['id' => $p1->id]);
     $this->assertDatabaseMissing('payment_records', ['id' => $p2->id]);
+  }
+
+  // ── Edit Restriction (canEditApproved) ──────────────────────────────────────
+
+  /** @test */
+  public function block_coordinator_sees_canEditApproved_as_false()
+  {
+    $roles = $this->createRoles();
+    $coordinator = $this->makeCoordinator($roles);
+
+    $response = $this->actingAs($coordinator)->get(route('payments.index'));
+    $response->assertOk();
+    $this->assertFalse($response->viewData('canEditApproved'));
+  }
+
+  /** @test */
+  public function admin_sees_canEditApproved_as_true()
+  {
+    $roles = $this->createRoles();
+    $admin = $this->makeAdmin($roles);
+
+    $response = $this->actingAs($admin)->get(route('payments.index'));
+    $response->assertOk();
+    $this->assertTrue($response->viewData('canEditApproved'));
+  }
+
+  /** @test */
+  public function treasurer_sees_canEditApproved_as_true()
+  {
+    $roles = $this->createRoles();
+    $treasurer = $this->makeTreasurer($roles);
+
+    $response = $this->actingAs($treasurer)->get(route('payments.index'));
+    $response->assertOk();
+    $this->assertTrue($response->viewData('canEditApproved'));
   }
 
   // ── Batch Approve/Reject ──────────────────────────────────────────────────────
