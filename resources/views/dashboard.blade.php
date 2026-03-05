@@ -1,4 +1,4 @@
-<x-layouts.app title="Dashboard"
+<x-layouts.app :title="__('app.nav_dashboard')"
   class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 antialiased min-h-screen">
 
   {{-- Sidebar --}}
@@ -11,7 +11,8 @@
 
     {{-- Flash messages --}}
     @if (session('success'))
-      <div class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/30 rounded-xl flex items-center space-x-3">
+      <div
+        class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/30 rounded-xl flex items-center space-x-3">
         <span class="material-icons text-green-500">check_circle</span>
         <p class="text-sm text-green-700 dark:text-green-400">{{ session('success') }}</p>
       </div>

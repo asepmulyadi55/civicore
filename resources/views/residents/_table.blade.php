@@ -17,13 +17,20 @@
     <table class="w-full text-left">
       <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
         <tr>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Resident Name</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Block / Unit</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Monthly Fee</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Fee Since</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Actions</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            {{ __('app.table_resident_name') }}</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            {{ __('app.table_block_unit') }}</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_phone') }}
+          </th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
+            {{ __('app.table_monthly_fee') }}</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            {{ __('app.table_fee_since') }}</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}
+          </th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+            {{ __('app.table_actions') }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -48,7 +55,8 @@
                 </div>
                 <div>
                   <div class="text-sm font-semibold text-slate-900 dark:text-white">{{ $resident->fullname }}</div>
-                  <div class="text-xs text-slate-400">Member since {{ $resident->created_at->format('Y') }}</div>
+                  <div class="text-xs text-slate-400">{{ __('app.member_since') }}
+                    {{ $resident->created_at->format('Y') }}</div>
                 </div>
               </div>
             </td>
@@ -57,7 +65,7 @@
             <td class="px-6 py-4">
               <span
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                              {{ $isBlockA ? 'bg-primary/10 text-primary' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' }}">
+                                {{ $isBlockA ? 'bg-primary/10 text-primary' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' }}">
                 {{ $blockLabel }}
               </span>
             </td>
@@ -80,12 +88,12 @@
               @if ($resident->is_active)
                 <span
                   class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> {{ __('app.status_active') }}
                 </span>
               @else
                 <span
                   class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Inactive
+                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> {{ __('app.status_inactive') }}
                 </span>
               @endif
             </td>
@@ -98,7 +106,7 @@
                 <button
                   onclick="openEditDrawer({{ $resident->id }}, {{ json_encode(['fullname' => $resident->fullname, 'phone' => $resident->phone, 'email' => $resident->email, 'block_id' => $resident->block_id, 'unit_number' => $resident->unit_number, 'is_active' => $resident->is_active]) }})"
                   class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                  title="Edit resident">
+                  title="{{ __('app.title_edit_resident') }}">
                   <span class="material-icons text-lg">edit</span>
                 </button>
 
@@ -107,12 +115,12 @@
                   <button
                     onclick="openResidentConfirmModal('deactivate', {{ $resident->id }}, '{{ addslashes($resident->fullname) }}')"
                     class="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
-                    title="Deactivate resident">
+                    title="{{ __('app.title_deactivate_resident') }}">
                     <span class="material-icons text-lg">person_off</span>
                   </button>
                 @else
                   <button disabled class="p-1.5 text-slate-200 dark:text-slate-700 rounded-lg cursor-not-allowed"
-                    title="Already inactive">
+                    title="{{ __('app.title_already_inactive') }}">
                     <span class="material-icons text-lg">person_off</span>
                   </button>
                 @endif
@@ -121,7 +129,7 @@
                 <button
                   onclick="openResidentConfirmModal('delete', {{ $resident->id }}, '{{ addslashes($resident->fullname) }}')"
                   class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                  title="Delete permanently">
+                  title="{{ __('app.title_delete_permanently') }}">
                   <span class="material-icons text-lg">delete_forever</span>
                 </button>
 
@@ -133,9 +141,10 @@
             <td colspan="7" class="px-6 py-16 text-center">
               <div class="flex flex-col items-center gap-3 text-slate-400">
                 <span class="material-icons text-5xl">people_outline</span>
-                <p class="text-sm font-medium">No residents found.</p>
+                <p class="text-sm font-medium">{{ __('app.no_residents_found') }}</p>
                 @if(request()->hasAny(['search', 'block_id', 'status']))
-                  <a href="{{ route('residents.index') }}" class="text-primary text-sm hover:underline">Clear filters</a>
+                  <a href="{{ route('residents.index') }}"
+                    class="text-primary text-sm hover:underline">{{ __('app.clear_filters') }}</a>
                 @endif
               </div>
             </td>
@@ -149,8 +158,9 @@
   {{-- Pagination --}}
   @if($residents->hasPages())
     <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-      <p class="text-sm text-slate-500">Showing {{ $residents->firstItem() }}–{{ $residents->lastItem() }} of
-        {{ $residents->total() }} residents
+      <p class="text-sm text-slate-500">{{ __('app.showing') }} {{ $residents->firstItem() }}–{{ $residents->lastItem() }}
+        {{ __('app.of') }}
+        {{ $residents->total() }} {{ __('app.residents_lowercase') }}
       </p>
       <div class="flex items-center gap-1">
         @if ($residents->onFirstPage())

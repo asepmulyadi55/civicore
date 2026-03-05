@@ -258,7 +258,7 @@ class UserTest extends TestCase
       'role_id' => $role->id,
     ]);
 
-    $this->actingAs($admin)->patch(route('users.approve', $pendingUser))
+    $this->actingAs($admin)->post(route('users.approve', $pendingUser))
       ->assertRedirect()->assertSessionHas('success');
 
     $this->assertDatabaseHas('users', ['id' => $pendingUser->id, 'is_active' => true]);

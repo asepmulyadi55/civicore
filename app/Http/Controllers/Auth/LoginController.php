@@ -3,32 +3,24 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
-  /**
-   * Show the login form.
-   */
   public function showLoginForm()
   {
     if (Auth::check()) {
-      $user = Auth::user();
-      $redirectTo = $user->isResident() ? '/my-overview' : '/dashboard';
-      return redirect($redirectTo);
+      return redirect(Auth::user()->homeUrl());
     }
     return view('login');
   }
 
-  /**
-   * Handle a login request to the application.
-   */
   public function login(Request $request)
   {
-    // Validate the request
-    $validator = Validator::make($request->all(), [
+    $request->validate([
       'username' => ['required', 'string'],
       'password' => ['required', 'string'],
     ], [
@@ -36,55 +28,55 @@ class LoginController extends Controller
       'password.required' => 'Please enter your password.',
     ]);
 
-    if ($validator->fails()) {
-      return redirect()->back()
-        ->with('error', $validator->errors()->first())
+    $field = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+    $user = User::where($field, $request->username)->first();
+
+    if (!$user || !Hash::check($request->password, $user->password)) {
+      return back()->with('error', 'Invalid username or password. Please try again.')
         ->withInput($request->only('username', 'remember'));
     }
 
-    // Attempt to log the user in using either username or email
-    $credentials = [
-      'password' => $request->password,
-    ];
-
-    // Check if input is email or username
-    if (filter_var($request->username, FILTER_VALIDATE_EMAIL)) {
-      $credentials['email'] = $request->username;
-    } else {
-      $credentials['username'] = $request->username;
+    if (!$user->is_active) {
+      return back()->with('error', 'Your account is pending admin approval.')
+        ->withInput($request->only('username', 'remember'));
     }
 
-    // Attempt authentication
-    if (Auth::attempt($credentials, $request->filled('remember'))) {
-      $request->session()->regenerate();
-
-      // Check if user is active
-      if (!Auth::user()->is_active) {
-        Auth::logout();
-        return redirect()->back()->with('error', 'Your account is pending admin approval.');
-      }
-
-      // Role-based redirect
-      $user = Auth::user();
-      $redirectTo = $user->isResident() ? '/my-overview' : '/dashboard';
-
-      return redirect()->intended($redirectTo)->with('success', 'Welcome back, ' . $user->name . '!');
+    // ── Single-session check ──────────────────────────────────────────────
+    // If another active session exists for this user, redirect to conflict page
+    // so they can choose to cancel or kick the other device.
+    if ($user->session_token && $user->session_token !== $request->session()->getId()) {
+      // Store user_id in session temporarily (guest session) so the conflict
+      // page can offer the "Use this device" action.
+      session(['conflict_user_id' => $user->id]);
+      return redirect()->route('session.conflict');
     }
 
-    // Authentication failed
-    return redirect()->back()->with('error', 'Invalid username or password. Please try again.');
+    // ── Successful login ──────────────────────────────────────────────────
+    Auth::login($user, $request->boolean('remember'));
+    $request->session()->regenerate();
+
+    // Track session and activity timestamps
+    $user->session_token = $request->session()->getId();
+    $user->last_login_at = now();
+    $user->last_active_at = now();
+    $user->save();
+
+    return redirect()->intended($user->homeUrl())
+      ->with('success', 'Welcome back, ' . $user->name . '!');
   }
 
-  /**
-   * Log the user out of the application.
-   */
   public function logout(Request $request)
   {
-    Auth::logout();
+    $user = Auth::user();
+    if ($user) {
+      /** @var \App\Models\User $user */
+      $user->session_token = null;
+      $user->save();
+    }
 
+    Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
-
     return redirect('/');
   }
 }

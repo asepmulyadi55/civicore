@@ -4,9 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -22,6 +23,11 @@ class User extends Authenticatable
     'google_id',
     'role_id',
     'block_id',
+    'avatar',
+    'language',
+    'session_token',
+    'last_login_at',
+    'last_active_at',
   ];
 
   protected $hidden = [
@@ -35,6 +41,8 @@ class User extends Authenticatable
       'email_verified_at' => 'datetime',
       'password' => 'hashed',
       'is_active' => 'boolean',
+      'last_login_at' => 'datetime',
+      'last_active_at' => 'datetime',
     ];
   }
 
@@ -52,9 +60,9 @@ class User extends Authenticatable
   }
 
   // If this user is also a resident (linked account)
-  public function resident(): HasMany
+  public function resident(): HasOne
   {
-    return $this->hasMany(Resident::class);
+    return $this->hasOne(Resident::class);
   }
 
   // ── Role Helpers ────────────────────────────────────────────
@@ -79,6 +87,35 @@ class User extends Authenticatable
     return $this->role?->name === 'resident';
   }
 
+  /**
+   * The URL to redirect this user to after login.
+   */
+  public function homeUrl(): string
+  {
+    return $this->isResident() ? '/my-overview' : '/dashboard';
+  }
+
+  /**
+   * Returns the user's avatar URL, falling back to a DiceBear initials avatar.
+   */
+  public function avatarUrl(): string
+  {
+    if ($this->avatar && Storage::disk('public')->exists($this->avatar)) {
+      return Storage::url($this->avatar);
+    }
+    $initials = urlencode(mb_substr($this->name, 0, 2, 'UTF-8'));
+    return "https://api.dicebear.com/8.x/initials/svg?seed={$initials}&backgroundColor=4f46e5&fontFamily=Arial";
+  }
+
+  /**
+   * Returns true if the user has been active within the last 5 minutes.
+   */
+  public function isOnline(): bool
+  {
+    return $this->last_active_at !== null
+      && $this->last_active_at->diffInMinutes(now()) < 5;
+  }
+
   // ── Permission Checking ──────────────────────────────────────
 
   /**
@@ -90,17 +127,14 @@ class User extends Authenticatable
   {
     // If $ability is a string permission key (our custom system)
     if (is_string($ability) && str_contains($ability, '.')) {
-      if ($this->isAdmin())
+      if ($this->isAdmin()) {
         return true;
+      }
       return $this->role?->hasPermission($ability) ?? false;
     }
     // Fall back to standard Laravel Gate / policy check
     return parent::can($ability, $arguments);
   }
 
-  /** @deprecated Use can('payments.approve') instead */
-  public function canApprovePayments(): bool
-  {
-    return $this->can('payments.approve');
-  }
+
 }

@@ -25,11 +25,20 @@
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">User</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Email</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Role</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_user') }}
+          </th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_email') }}
+          </th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_role') }}
+          </th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}
+          </th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            {{ __('app.table_last_login') }}
+          </th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
+            {{ __('app.table_actions') }}
+          </th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
@@ -75,22 +84,45 @@
                   {{ str_replace('_', ' ', $user->role->name) }}
                 </span>
               @else
-                <span class="text-xs text-slate-400 italic">No role</span>
+                <span class="text-xs text-slate-400 italic">{{ __('app.no_role') }}</span>
               @endif
             </td>
 
-            {{-- Status --}}
+            {{-- Status + Online badge --}}
             <td class="px-6 py-4">
-              @if($user->is_active)
-                <span
-                  class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Active
+              <div class="flex flex-col gap-1.5">
+                @if($user->is_active)
+                  <span
+                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>{{ __('app.status_active') }}
+                  </span>
+                @else
+                  <span
+                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>{{ __('app.status_pending') }}
+                  </span>
+                @endif
+                @if($user->isOnline())
+                  <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>{{ __('app.status_online') }}
+                  </span>
+                @else
+                  <span class="inline-flex items-center gap-1 text-[10px] font-medium text-slate-400">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600"></span>{{ __('app.status_offline') }}
+                  </span>
+                @endif
+              </div>
+            </td>
+
+            {{-- Last Login --}}
+            <td class="px-6 py-4 text-sm text-slate-500">
+              @if($user->last_login_at)
+                <span title="{{ $user->last_login_at->format('d M Y H:i') }}">
+                  {{ $user->last_login_at->diffForHumans() }}
                 </span>
               @else
-                <span
-                  class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
-                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>Pending
-                </span>
+                <span class="text-slate-300 dark:text-slate-600 italic text-xs">{{ __('app.never_logged_in') }}</span>
               @endif
             </td>
 
@@ -100,31 +132,33 @@
 
                 {{-- Edit (always shown) --}}
                 <button onclick="openEditModal(
-                          {{ $user->id }},
-                          {{ json_encode($user->name) }},
-                          {{ json_encode($user->username) }},
-                          {{ json_encode($user->email) }},
-                          {{ $user->role_id ?? 'null' }},
-                          {{ $user->block_id ?? 'null' }}
-                        )"
+                                {{ $user->id }},
+                                {{ json_encode($user->name) }},
+                                {{ json_encode($user->username) }},
+                                {{ json_encode($user->email) }},
+                                {{ $user->role_id ?? 'null' }},
+                                {{ $user->block_id ?? 'null' }},
+                                {{ json_encode($user->resident?->unit_number) }}
+                              )"
                   class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                  title="Edit user">
+                  title="{{ __('app.title_edit_user') }}">
                   <span class="material-icons text-lg">edit</span>
                 </button>
 
                 @if($isPending)
-                  {{-- Approve button → triggers modal --}}
-                  <button onclick="openUserConfirmModal('approve', {{ $user->id }}, {{ json_encode($user->name) }})"
+                  {{-- Approve button → triggers approve modal with block/unit assignment --}}
+                  <button
+                    onclick="openApproveModal({{ $user->id }}, {{ json_encode($user->name) }}, {{ json_encode($user->email) }})"
                     class="bg-primary text-white text-[10px] px-3 py-1.5 rounded font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors flex items-center gap-1">
                     <span class="material-icons text-xs">verified</span>
-                    Approve
+                    {{ __('app.btn_approve') }}
                   </button>
                 @else
                   @if(!$isSelf)
                     {{-- Deactivate button → triggers modal --}}
                     <button onclick="openUserConfirmModal('deactivate', {{ $user->id }}, {{ json_encode($user->name) }})"
                       class="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
-                      title="Deactivate">
+                      title="{{ __('app.title_deactivate_user') }}">
                       <span class="material-icons text-lg">person_off</span>
                     </button>
                   @endif
@@ -134,7 +168,7 @@
                 @if(!$isSelf)
                   <button onclick="openUserConfirmModal('delete', {{ $user->id }}, {{ json_encode($user->name) }})"
                     class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    title="Delete">
+                    title="{{ __('app.title_delete_user') }}">
                     <span class="material-icons text-lg">delete_outline</span>
                   </button>
                 @endif
@@ -144,12 +178,13 @@
           </tr>
         @empty
           <tr>
-            <td colspan="5" class="px-6 py-16 text-center">
+            <td colspan="6" class="px-6 py-16 text-center">
               <div class="flex flex-col items-center gap-3 text-slate-400">
                 <span class="material-icons text-5xl">manage_accounts</span>
-                <p class="text-sm font-medium">No users found.</p>
+                <p class="text-sm font-medium">{{ __('app.no_users_found') }}</p>
                 @if(request()->hasAny(['search', 'role_id', 'status']))
-                  <a href="{{ route('users.index') }}" class="text-primary text-sm hover:underline">Clear filters</a>
+                  <a href="{{ route('users.index') }}"
+                    class="text-primary text-sm hover:underline">{{ __('app.btn_clear') }}</a>
                 @endif
               </div>
             </td>
@@ -163,7 +198,8 @@
   {{-- Pagination --}}
   <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-3">
     <span class="text-sm text-slate-500">
-      Showing {{ $users->firstItem() ?? 0 }}–{{ $users->lastItem() ?? 0 }} of {{ $users->total() }} users
+      {{ __('app.showing') }} {{ $users->firstItem() ?? 0 }}–{{ $users->lastItem() ?? 0 }} {{ __('app.of') }}
+      {{ $users->total() }} {{ __('app.users_lowercase') }}
     </span>
     {{ $users->links() }}
   </div>

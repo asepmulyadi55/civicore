@@ -24,21 +24,12 @@ class RegisterTest extends TestCase
   /** @test */
   public function user_can_register_with_valid_data()
   {
-    // RegisterController requires the email to exist as a resident first
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    Resident::create([
-      'block_id' => $block->id,
-      'unit_number' => 'A-101',
-      'fullname' => 'John Doe',
-      'email' => 'john@example.com',
-      'is_active' => true
-    ]);
-
     $response = $this->post('/register', [
       'fullname' => 'John Doe',
       'username' => 'johndoe',
       'email' => 'john@example.com',
       'password' => 'password123',
+      'password_confirmation' => 'password123',
     ]);
 
     $response->assertRedirect('/');
@@ -55,25 +46,34 @@ class RegisterTest extends TestCase
   /** @test */
   public function new_user_is_inactive_by_default()
   {
-    $block = Block::create(['name' => 'Block A', 'is_active' => true]);
-    Resident::create([
-      'block_id' => $block->id,
-      'unit_number' => 'A-101',
-      'fullname' => 'John Doe',
-      'email' => 'john@example.com',
-      'is_active' => true
-    ]);
-
     $this->post('/register', [
       'fullname' => 'John Doe',
       'username' => 'johndoe',
       'email' => 'john@example.com',
       'password' => 'password123',
+      'password_confirmation' => 'password123',
     ]);
 
     $user = User::where('email', 'john@example.com')->first();
     $this->assertEquals(0, $user->is_active);
   }
+
+  /** @test */
+  public function any_email_can_register_without_being_a_resident()
+  {
+    // Anyone can register; admin assigns block/unit at approval time
+    $response = $this->post('/register', [
+      'fullname' => 'Unknown Person',
+      'username' => 'unknownperson',
+      'email' => 'notaresident@example.com',
+      'password' => 'password123',
+      'password_confirmation' => 'password123',
+    ]);
+
+    $response->assertRedirect('/');
+    $this->assertDatabaseCount('users', 1);
+  }
+
 
   /** @test */
   public function registration_validates_required_fullname()
@@ -83,6 +83,7 @@ class RegisterTest extends TestCase
       'username' => 'johndoe',
       'email' => 'john@example.com',
       'password' => 'password123',
+      'password_confirmation' => 'password123',
     ]);
 
     $response->assertSessionHasErrors(['fullname']);
@@ -97,6 +98,7 @@ class RegisterTest extends TestCase
       'username' => '',
       'email' => 'john@example.com',
       'password' => 'password123',
+      'password_confirmation' => 'password123',
     ]);
 
     $response->assertSessionHasErrors(['username']);
@@ -113,6 +115,7 @@ class RegisterTest extends TestCase
       'username' => 'johndoe',
       'email' => 'john@example.com',
       'password' => 'password123',
+      'password_confirmation' => 'password123',
     ]);
 
     $response->assertSessionHasErrors(['username']);
@@ -127,6 +130,7 @@ class RegisterTest extends TestCase
       'username' => 'johndoe',
       'email' => '',
       'password' => 'password123',
+      'password_confirmation' => 'password123',
     ]);
 
     $response->assertSessionHasErrors(['email']);
@@ -141,6 +145,7 @@ class RegisterTest extends TestCase
       'username' => 'johndoe',
       'email' => 'invalid-email',
       'password' => 'password123',
+      'password_confirmation' => 'password123',
     ]);
 
     $response->assertSessionHasErrors(['email']);
@@ -157,6 +162,7 @@ class RegisterTest extends TestCase
       'username' => 'johndoe',
       'email' => 'john@example.com',
       'password' => 'password123',
+      'password_confirmation' => 'password123',
     ]);
 
     $response->assertSessionHasErrors(['email']);
@@ -164,6 +170,7 @@ class RegisterTest extends TestCase
   }
 
   /** @test */
+  #[\PHPUnit\Framework\Attributes\Test]
   public function registration_validates_password_minimum_length()
   {
     $response = $this->post('/register', [
@@ -171,6 +178,7 @@ class RegisterTest extends TestCase
       'username' => 'johndoe',
       'email' => 'john@example.com',
       'password' => '1234',
+      'password_confirmation' => '1234',
     ]);
 
     $response->assertSessionHasErrors(['password']);
@@ -178,6 +186,22 @@ class RegisterTest extends TestCase
   }
 
   /** @test */
+  public function registration_requires_password_confirmation()
+  {
+    $response = $this->post('/register', [
+      'fullname' => 'John Doe',
+      'username' => 'johndoe',
+      'email' => 'john@example.com',
+      'password' => 'password123',
+      'password_confirmation' => 'differentpassword',
+    ]);
+
+    $response->assertSessionHasErrors(['password']);
+    $this->assertDatabaseCount('users', 0);
+  }
+
+  /** @test */
+  #[\PHPUnit\Framework\Attributes\Test]
   public function password_is_hashed_when_stored()
   {
     $block = Block::create(['name' => 'Block A', 'is_active' => true]);
@@ -194,6 +218,7 @@ class RegisterTest extends TestCase
       'username' => 'johndoe',
       'email' => 'john@example.com',
       'password' => 'password123',
+      'password_confirmation' => 'password123',
     ]);
 
     $user = User::where('email', 'john@example.com')->first();

@@ -37,13 +37,16 @@ class BlockController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100', "unique:blocks,name,{$block->id}"],
             'description' => ['nullable', 'string', 'max:255'],
-            'is_active' => ['boolean'],
+            'is_active' => ['nullable', 'boolean'],
         ], [
             'name.required' => 'Please enter a block name.',
             'name.unique' => 'A block with this name already exists.',
         ]);
 
-        $block->update($data);
+        // $request->boolean() correctly returns false when checkbox is absent (unchecked)
+        $block->update(array_merge($data, [
+            'is_active' => $request->boolean('is_active'),
+        ]));
 
         return redirect()->route('blocks.index')->with('success', "Block \"{$block->name}\" has been updated.");
     }

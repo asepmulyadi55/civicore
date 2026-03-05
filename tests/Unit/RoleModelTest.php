@@ -212,7 +212,7 @@ class RoleModelTest extends TestCase
   }
 
   /** @test */
-  public function can_approve_payments_returns_true_for_treasurer()
+  public function user_can_approve_payments_when_role_has_permission()
   {
     $role = Role::create([
       'name' => 'treasurer',
@@ -228,11 +228,11 @@ class RoleModelTest extends TestCase
       'role_id' => $role->id,
     ]);
 
-    $this->assertTrue($user->canApprovePayments());
+    $this->assertTrue($user->can('payments.approve'));
   }
 
   /** @test */
-  public function can_approve_payments_returns_false_for_resident()
+  public function user_cannot_approve_payments_when_role_lacks_permission()
   {
     $role = Role::create([
       'name' => 'resident',
@@ -248,6 +248,6 @@ class RoleModelTest extends TestCase
       'role_id' => $role->id,
     ]);
 
-    $this->assertFalse($user->canApprovePayments());
+    $this->assertFalse($user->can('payments.approve'));
   }
 }

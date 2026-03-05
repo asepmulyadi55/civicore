@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Setting extends Model
 {
@@ -10,19 +11,23 @@ class Setting extends Model
 
     /**
      * Get a setting value by key with an optional default.
+     * Results are cached for 1 hour to avoid repeated DB hits.
      */
     public static function get(string $key, mixed $default = null): mixed
     {
-        $setting = static::where('key', $key)->first();
-        return $setting ? $setting->value : $default;
+        return Cache::remember("setting:{$key}", 3600, function () use ($key, $default) {
+            $setting = static::where('key', $key)->first();
+            return $setting?->value ?? $default;
+        });
     }
 
     /**
-     * Set (upsert) a setting value by key.
+     * Upsert a setting value by key and invalidate the cache.
      */
     public static function set(string $key, mixed $value): void
     {
-        static::where('key', $key)->update(['value' => $value]);
+        static::updateOrInsert(['key' => $key], ['value' => $value]);
+        Cache::forget("setting:{$key}");
     }
 
     // All settings for a given group

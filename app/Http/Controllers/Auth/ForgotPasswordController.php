@@ -23,7 +23,7 @@ class ForgotPasswordController extends Controller
         ]);
 
         // Send the password reset link using Laravel's built-in broker
-        $status = Password::sendResetLink(
+        Password::sendResetLink(
             $request->only('email')
         );
 

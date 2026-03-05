@@ -7,13 +7,14 @@
         <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
           <th
             class="sticky left-0 z-20 bg-slate-50 dark:bg-slate-800 px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 dark:border-slate-800 w-40">
-            Unit &amp; Resident
+            {{ __('app.unit_and_resident') }}
           </th>
           @foreach($months as $m)
             <th class="px-3 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">{{ $m['label'] }}
             </th>
           @endforeach
-          <th class="px-6 py-4 text-right text-xs font-bold text-primary uppercase tracking-wider">Annual Total</th>
+          <th class="px-6 py-4 text-right text-xs font-bold text-primary uppercase tracking-wider">
+            {{ __('app.annual_total') }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -75,7 +76,7 @@
           <tr>
             <td colspan="{{ count($months) + 2 }}" class="px-6 py-16 text-center">
               <span class="material-icons text-4xl text-slate-300 dark:text-slate-600 block mb-2">assessment</span>
-              <p class="text-slate-500 font-medium">No residents found</p>
+              <p class="text-slate-500 font-medium">{{ __('app.no_residents_found') }}</p>
             </td>
           </tr>
         @endforelse
@@ -89,19 +90,19 @@
     <div class="flex items-center gap-6">
       <div class="flex items-center gap-2">
         <div class="w-3 h-3 bg-emerald-500 rounded-sm"></div>
-        <span class="text-xs font-medium text-slate-500">Paid</span>
+        <span class="text-xs font-medium text-slate-500">{{ __('app.legend_paid') }}</span>
       </div>
       <div class="flex items-center gap-2">
         <div class="w-3 h-3 bg-amber-400 rounded-sm"></div>
-        <span class="text-xs font-medium text-slate-500">Pending</span>
+        <span class="text-xs font-medium text-slate-500">{{ __('app.legend_pending') }}</span>
       </div>
       <div class="flex items-center gap-2">
         <div class="w-3 h-3 bg-red-400 rounded-sm"></div>
-        <span class="text-xs font-medium text-slate-500">Unpaid</span>
+        <span class="text-xs font-medium text-slate-500">{{ __('app.legend_unpaid') }}</span>
       </div>
       <div class="flex items-center gap-2">
         <div class="w-3 h-3 bg-slate-200 dark:bg-slate-700 rounded-sm"></div>
-        <span class="text-xs font-medium text-slate-500">Future</span>
+        <span class="text-xs font-medium text-slate-500">{{ __('app.legend_future') }}</span>
       </div>
     </div>
     @if($residents->hasPages())

@@ -25,7 +25,7 @@ Review Modal, and all associated JavaScript.
     {{-- Header --}}
     <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-start shrink-0">
       <div>
-        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Record Payment</h2>
+        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ __('app.record_payment') }}</h2>
         <div id="cm-header-info" class="flex items-center gap-2 mt-1 text-sm hidden">
           <span id="cm-resident-name" class="text-primary font-bold"></span>
           <span class="text-slate-400">•</span>
@@ -34,7 +34,7 @@ Review Modal, and all associated JavaScript.
           <span id="cm-rate-badge"
             class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded text-xs font-semibold"></span>
         </div>
-        <p id="cm-select-hint" class="text-sm text-slate-400 mt-1">Select a resident to continue</p>
+        <p id="cm-select-hint" class="text-sm text-slate-400 mt-1">{{ __('app.select_resident') }}</p>
       </div>
       <button onclick="closeCreateModal()"
         class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1">
@@ -48,13 +48,13 @@ Review Modal, and all associated JavaScript.
       {{-- Step 1: Resident + Year --}}
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Resident <span class="text-red-500">*</span></label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.resident_req') }}</label>
           <div class="relative">
             <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">person</span>
             <select id="cm-resident-select"
               class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
               onchange="onResidentChange(this)">
-              <option value="">— Select Resident —</option>
+              <option value="">{{ __('app.select_resident_first') }}</option>
               @foreach($residents as $r)
                 <option value="{{ $r->id }}" data-name="{{ $r->fullname }}" data-unit="Unit {{ $r->unit_number }}"
                   data-block="{{ $r->block?->name ?? '' }}"
@@ -67,11 +67,11 @@ Review Modal, and all associated JavaScript.
               class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
           </div>
           <p id="cm-error-resident" class="hidden text-xs text-red-500 items-center gap-1">
-            <span class="material-icons text-xs">error_outline</span> Please select a resident.
+            <span class="material-icons text-xs">error_outline</span> {{ __('app.err_select_resident') }}
           </p>
         </div>
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Year</label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.year') }}</label>
           <div class="relative">
             <span
               class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">calendar_today</span>
@@ -91,11 +91,11 @@ Review Modal, and all associated JavaScript.
       {{-- Step 2: Month Grid --}}
       <div id="cm-months-section" class="opacity-40 pointer-events-none transition-opacity duration-300">
         <h3 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-          Select Months (<span id="cm-year-label">{{ now()->year }}</span>)
-          <span class="font-normal text-slate-400 lowercase normal-case">— select at least one</span>
+          {{ __('app.select_months') }} (<span id="cm-year-label">{{ now()->year }}</span>)
+          <span class="font-normal text-slate-400 lowercase normal-case">{{ __('app.select_at_least_one') }}</span>
         </h3>
         <p id="cm-error-months" class="hidden text-xs text-red-500 items-center gap-1 mb-3">
-          <span class="material-icons text-xs">error_outline</span> Please select at least one month.
+          <span class="material-icons text-xs">error_outline</span> {{ __('app.err_select_months') }}
         </p>
         <div id="cm-month-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3">
           {{-- Rendered by JS after resident is chosen --}}
@@ -108,14 +108,13 @@ Review Modal, and all associated JavaScript.
 
           {{-- Payment Method --}}
           <div class="flex flex-col gap-2">
-            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Payment
-              Method</label>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.payment_method') }}</label>
             <div class="relative">
               <span
                 class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">account_balance</span>
               <select id="cm-method"
                 class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white">
-                <option value="">— None —</option>
+                <option value="">{{ __('app.none') }}</option>
                 @foreach(\App\Models\PaymentMethod::active()->orderBy('label')->get() as $pm)
                   <option value="{{ $pm->id }}">{{ $pm->label }}</option>
                 @endforeach
@@ -127,15 +126,13 @@ Review Modal, and all associated JavaScript.
 
           {{-- Proof Upload --}}
           <div class="flex flex-col gap-2">
-            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Proof of
-              Payment
-              <span class="font-normal text-slate-400 normal-case">(optional)</span></label>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.proof_of_payment') }}
+              <span class="font-normal text-slate-400 normal-case">{{ __('app.optional') }}</span></label>
             <label id="cm-proof-label"
               class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-primary/5 hover:border-primary/50 transition-colors">
               <span class="material-icons text-primary mb-1">cloud_upload</span>
-              <span id="cm-proof-name" class="text-xs font-medium text-slate-600 dark:text-slate-400">Click to upload
-                receipt</span>
-              <span class="text-[10px] text-slate-400 uppercase mt-1">PDF, JPG, PNG (Max 5MB)</span>
+              <span id="cm-proof-name" class="text-xs font-medium text-slate-600 dark:text-slate-400">{{ __('app.click_to_upload') }}</span>
+              <span class="text-[10px] text-slate-400 uppercase mt-1">{{ __('app.max_size') }}</span>
               <input id="cm-proof-input" type="file" accept="image/*,.pdf" class="sr-only"
                 onchange="document.getElementById('cm-proof-name').textContent = this.files[0]?.name ?? 'Click to upload receipt'" />
             </label>
@@ -143,15 +140,15 @@ Review Modal, and all associated JavaScript.
 
           {{-- Status --}}
           <div class="flex flex-col gap-2">
-            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Status</label>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.status') }}</label>
             <div class="relative">
               <span
                 class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">verified</span>
               <select id="cm-status"
                 class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white">
-                <option value="unpaid">Unpaid</option>
-                <option value="pending">Pending (awaiting review)</option>
-                <option value="approved">Approved</option>
+                <option value="unpaid">{{ __('app.status_unpaid') }}</option>
+                <option value="pending">{{ __('app.pending_review') }}</option>
+                <option value="approved">{{ __('app.status_approved') }}</option>
               </select>
               <span
                 class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
@@ -160,16 +157,16 @@ Review Modal, and all associated JavaScript.
 
           {{-- Notes --}}
           <div class="flex flex-col gap-2">
-            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Notes
-              <span class="font-normal text-slate-400 normal-case">(optional)</span></label>
-            <textarea id="cm-notes" rows="3" placeholder="Any additional notes..."
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.notes') }}
+              <span class="font-normal text-slate-400 normal-case">{{ __('app.optional') }}</span></label>
+            <textarea id="cm-notes" rows="3" placeholder="{{ __('app.any_additional_notes') }}"
               class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white resize-none"></textarea>
           </div>
         </div>
 
         {{-- Amount per month --}}
         <div class="mt-5 flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Amount per Month
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.amount_per_month') }}
             ({{ $currency }}) <span class="text-red-500">*</span></label>
           <div class="relative">
             <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">payments</span>
@@ -178,9 +175,9 @@ Review Modal, and all associated JavaScript.
               class="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none dark:text-white cursor-not-allowed"
               oninput="updateSummary()" />
           </div>
-          <p class="text-[11px] text-slate-400">Auto-filled from resident's current monthly fee.</p>
+          <p class="text-[11px] text-slate-400">{{ __('app.amount_hint') }}</p>
           <p id="cm-error-amount" class="hidden text-xs text-red-500 flex items-center gap-1">
-            <span class="material-icons text-xs">error_outline</span> Please enter a valid amount per month.
+            <span class="material-icons text-xs">error_outline</span> {{ __('app.err_amount') }}
           </p>
         </div>
       </div>
@@ -189,15 +186,14 @@ Review Modal, and all associated JavaScript.
       <div id="cm-summary" class="hidden p-6 bg-primary/10 dark:bg-primary/5 rounded-2xl border border-primary/20">
         <div class="flex items-center justify-between">
           <div class="flex flex-col">
-            <span class="text-xs font-bold text-primary uppercase tracking-widest">Calculated Total</span>
+            <span class="text-xs font-bold text-primary uppercase tracking-widest">{{ __('app.calculated_total') }}</span>
             <div class="flex items-baseline gap-2 mt-1">
               <span id="cm-total-amount"
                 class="text-3xl font-extrabold text-slate-900 dark:text-slate-100">{{ $currency }} 0</span>
             </div>
           </div>
           <div class="text-right">
-            <span id="cm-months-count" class="text-sm font-bold text-slate-700 dark:text-slate-300">0 Months
-              Selected</span>
+            <span id="cm-months-count" class="text-sm font-bold text-slate-700 dark:text-slate-300">0 {{ __('app.months_selected') }}</span>
             <p id="cm-months-list" class="text-[11px] text-slate-500 mt-0.5"></p>
           </div>
         </div>
@@ -209,12 +205,12 @@ Review Modal, and all associated JavaScript.
     <div class="px-8 py-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3 shrink-0">
       <button onclick="closeCreateModal()"
         class="px-6 py-2.5 rounded-xl font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-        Cancel
+        {{ __('app.btn_cancel') }}
       </button>
       <button onclick="submitCreateModal()"
         class="bg-primary hover:bg-primary/90 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 flex items-center gap-2 transition-all active:scale-95">
         <span class="material-icons text-lg">verified</span>
-        Confirm Payment
+        {{ __('app.btn_confirm_payment') }}
       </button>
     </div>
 
@@ -239,7 +235,7 @@ Review Modal, and all associated JavaScript.
     {{-- Header --}}
     <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-start shrink-0">
       <div>
-        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Edit Payment</h2>
+        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ __('app.edit_payment') }}</h2>
         <div class="flex items-center gap-2 mt-1 text-sm">
           <span id="em-resident-name" class="text-primary font-bold"></span>
           <span class="text-slate-400">•</span>
@@ -260,7 +256,7 @@ Review Modal, and all associated JavaScript.
 
         {{-- Year Selector --}}
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Year</label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.year') }}</label>
           <div class="relative">
             <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">calendar_today</span>
             <select id="em-year-select"
@@ -277,11 +273,11 @@ Review Modal, and all associated JavaScript.
         {{-- Month Grid --}}
         <div class="col-span-full">
           <h3 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-            Select Month(s) (<span id="em-year-label">{{ now()->year }}</span>)
-            <span class="font-normal text-slate-400 lowercase normal-case">— select at least one</span>
+            {{ __('app.select_months') }} (<span id="em-year-label">{{ now()->year }}</span>)
+            <span class="font-normal text-slate-400 lowercase normal-case">{{ __('app.select_at_least_one') }}</span>
           </h3>
           <p id="em-error-months" class="hidden text-xs text-red-500 items-center gap-1 mb-3">
-            <span class="material-icons text-xs">error_outline</span> Please select at least one month.
+            <span class="material-icons text-xs">error_outline</span> {{ __('app.err_select_months') }}
           </p>
           <div id="em-month-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3">
             {{-- Rendered by JS when modal opens --}}
@@ -292,7 +288,7 @@ Review Modal, and all associated JavaScript.
 
           {{-- Amount per month --}}
           <div class="flex flex-col gap-2">
-            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Amount per Month
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.amount_per_month') }}
               ({{ $currency }})</label>
             <div class="relative">
               <span
@@ -302,19 +298,18 @@ Review Modal, and all associated JavaScript.
                 oninput="updateEmSummary()"
                 class="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none dark:text-white cursor-not-allowed" />
             </div>
-            <p class="text-[11px] text-slate-400">Auto-filled from resident's current monthly fee.</p>
+            <p class="text-[11px] text-slate-400">{{ __('app.amount_hint') }}</p>
           </div>
 
           {{-- Payment Method --}}
           <div class="flex flex-col gap-2">
-            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Payment
-              Method</label>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.payment_method') }}</label>
             <div class="relative">
               <span
                 class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">account_balance</span>
               <select id="em-method" name="payment_method_id"
                 class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white">
-                <option value="">— None —</option>
+                <option value="">{{ __('app.none') }}</option>
                 @foreach(\App\Models\PaymentMethod::active()->orderBy('label')->get() as $pm)
                   <option value="{{ $pm->id }}">{{ $pm->label }}</option>
                 @endforeach
@@ -326,7 +321,7 @@ Review Modal, and all associated JavaScript.
 
           {{-- Status --}}
           <div class="flex flex-col gap-2">
-            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Status</label>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.status') }}</label>
             <div class="relative">
               <span
                 class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">verified</span>
@@ -340,11 +335,11 @@ Review Modal, and all associated JavaScript.
               <select id="em-status" name="status"
                 class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
                 onchange="toggleEditRejection(this.value)">
-                <option value="unpaid">Unpaid</option>
-                <option value="pending">Pending (awaiting review)</option>
+                <option value="unpaid">{{ __('app.status_unpaid') }}</option>
+                <option value="pending">{{ __('app.pending_review') }}</option>
                 @if($canApprove)
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
+                  <option value="approved">{{ __('app.status_approved') }}</option>
+                  <option value="rejected">{{ __('app.status_rejected') }}</option>
                 @endif
               </select>
               <span id="em-status-chevron"
@@ -355,42 +350,40 @@ Review Modal, and all associated JavaScript.
 
         {{-- Rejection reason (read-only for coordinators) --}}
         <div id="em-rejection-wrap" class="flex flex-col gap-2 hidden">
-          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Rejection
-            Reason</label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.rejection_reason') }}</label>
           <textarea id="em-rejection" name="rejection_reason" rows="3"
             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white resize-none"
-            {{ $canApprove ? '' : 'disabled placeholder="Rejection reason from Treasurer"' }}></textarea>
+            {{ $canApprove ? '' : 'disabled placeholder="__(\'app.rejection_from_treasurer\')"' }}></textarea>
         </div>
 
         {{-- Current Proof --}}
         <div id="em-proof-wrap" class="hidden">
           <label
-            class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-2">Current
-            Proof</label>
+            class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-2">{{ __('app.current_proof') }}</label>
           <a id="em-proof-link" href="" target="_blank"
             class="inline-flex items-center gap-2 text-sm text-primary hover:underline">
             <span class="material-icons text-base">receipt_long</span>
-            View current proof
+            {{ __('app.view_current_proof') }}
           </a>
         </div>
 
         {{-- Replace Proof --}}
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Replace Proof
-            <span class="font-normal text-slate-400 normal-case">(optional)</span></label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.replace_proof') }}
+            <span class="font-normal text-slate-400 normal-case">{{ __('app.optional') }}</span></label>
           <label
             class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-4 flex items-center gap-3 cursor-pointer hover:bg-primary/5 hover:border-primary/50 transition-colors">
             <span class="material-icons text-primary">cloud_upload</span>
-            <span id="em-proof-name" class="text-sm text-slate-500">Click to upload new file</span>
+            <span id="em-proof-name" class="text-sm text-slate-500">{{ __('app.click_to_upload_new') }}</span>
             <input type="file" name="proof" accept="image/*,.pdf" class="sr-only"
-              onchange="document.getElementById('em-proof-name').textContent = this.files[0]?.name ?? 'Click to upload new file'" />
+              onchange="document.getElementById('em-proof-name').textContent = this.files[0]?.name ?? '{{ __('app.click_to_upload_new') }}'" />
           </label>
         </div>
 
         {{-- Notes --}}
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Notes
-            <span class="font-normal text-slate-400 normal-case">(optional)</span></label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.notes') }}
+            <span class="font-normal text-slate-400 normal-case">{{ __('app.optional') }}</span></label>
           <textarea id="em-notes" name="notes" rows="3"
             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white resize-none"></textarea>
         </div>
@@ -399,11 +392,11 @@ Review Modal, and all associated JavaScript.
         <div id="em-summary" class="hidden p-5 bg-primary/10 dark:bg-primary/5 rounded-2xl border border-primary/20">
           <div class="flex items-center justify-between">
             <div class="flex flex-col">
-              <span class="text-xs font-bold text-primary uppercase tracking-widest">Calculated Total</span>
+              <span class="text-xs font-bold text-primary uppercase tracking-widest">{{ __('app.calculated_total') }}</span>
               <span id="em-total-amount" class="text-2xl font-extrabold text-slate-900 dark:text-slate-100 mt-1">{{ $currency }} 0</span>
             </div>
             <div class="text-right">
-              <span id="em-months-count" class="text-sm font-bold text-slate-700 dark:text-slate-300">0 Months Selected</span>
+              <span id="em-months-count" class="text-sm font-bold text-slate-700 dark:text-slate-300">0 {{ __('app.months_selected') }}</span>
               <p id="em-months-list" class="text-[11px] text-slate-500 mt-0.5"></p>
             </div>
           </div>
@@ -413,12 +406,12 @@ Review Modal, and all associated JavaScript.
         <div class="flex gap-3 pt-2">
           <button type="button" onclick="closeEditModal()"
             class="flex-1 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-            Cancel
+            {{ __('app.btn_cancel') }}
           </button>
           <button type="submit"
             class="flex-1 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 active:scale-95">
             <span class="material-icons text-sm">save</span>
-            Save Changes
+            {{ __('app.btn_save_changes') }}
           </button>
         </div>
       </form>
@@ -450,8 +443,8 @@ Review Modal, and all associated JavaScript.
     <div class="p-8 flex flex-col gap-6">
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-xl font-bold">Review Payment</h2>
-          <p class="text-sm text-slate-500">Verify details before approving</p>
+          <h2 class="text-xl font-bold">{{ __('app.review_payment') }}</h2>
+          <p class="text-sm text-slate-500">{{ __('app.verify_details') }}</p>
         </div>
         <button onclick="closeReviewModal()" class="text-slate-400 hover:text-slate-600 p-1">
           <span class="material-icons">close</span>
@@ -459,32 +452,32 @@ Review Modal, and all associated JavaScript.
       </div>
       <div class="space-y-4">
         <div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-          <span class="text-slate-500 text-sm">Resident</span>
+          <span class="text-slate-500 text-sm">{{ __('app.table_resident') }}</span>
           <span id="modal-resident" class="font-semibold text-sm"></span>
         </div>
         <div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-          <span class="text-slate-500 text-sm">Month</span>
+          <span class="text-slate-500 text-sm">{{ __('app.table_months') }}</span>
           <span id="modal-month" class="font-semibold text-sm"></span>
         </div>
         <div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-          <span class="text-slate-500 text-sm">Amount</span>
+          <span class="text-slate-500 text-sm">{{ __('app.table_amount') }}</span>
           <span id="modal-amount" class="font-bold text-sm text-primary"></span>
         </div>
       </div>
       {{-- Coordinator notes (read-only) --}}
       <div id="modal-notes-wrap" class="hidden">
         <label class="block text-sm font-semibold mb-2 text-slate-700 dark:text-slate-300">
-          Notes from Coordinator
+          {{ __('app.notes_from_coordinator') }}
         </label>
         <div id="modal-notes"
           class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-600 dark:text-slate-300 min-h-[60px] whitespace-pre-wrap"></div>
       </div>
       <div>
-        <label class="block text-sm font-semibold mb-2">Rejection Reason
-          <span class="text-slate-400 font-normal">(only if rejecting)</span></label>
+        <label class="block text-sm font-semibold mb-2">{{ __('app.rejection_reason') }}
+          <span class="text-slate-400 font-normal">{{ __('app.only_if_rejecting') }}</span></label>
         <textarea id="modal-rejection-reason"
           class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary min-h-[100px] resize-none"
-          placeholder="Example: Image is blurry, amount doesn't match..."></textarea>
+          placeholder="{{ __('app.rejection_placeholder') }}"></textarea>
         <p id="modal-error" class="text-rose-500 text-xs mt-1 hidden"></p>
       </div>
       <div class="grid grid-cols-2 gap-4">
@@ -493,14 +486,14 @@ Review Modal, and all associated JavaScript.
           <input type="hidden" name="rejection_reason" id="modal-rejection-input" />
           <button type="submit" onclick="return submitReject()"
             class="w-full py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 font-bold text-sm hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 dark:hover:bg-rose-950/20 transition-all uppercase tracking-wide">
-            Reject
+            {{ __('app.btn_reject') }}
           </button>
         </form>
         <form id="modal-approve-form" method="POST" action="">
           @csrf @method('PATCH')
           <button type="submit"
             class="w-full py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 shadow-lg shadow-primary/30 transition-all uppercase tracking-wide">
-            Approve
+            {{ __('app.btn_approve') }}
           </button>
         </form>
       </div>
@@ -519,20 +512,20 @@ Review Modal, and all associated JavaScript.
       <div class="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mb-4">
         <span class="material-icons text-3xl text-rose-600">delete_outline</span>
       </div>
-      <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Delete Payment?</h3>
+      <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">{{ __('app.delete_payment') }}</h3>
       <p id="pdm-body" class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed"></p>
     </div>
     <div class="flex gap-3 px-6 pb-6">
       <button onclick="closePaymentDeleteModal()"
         class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold
           text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
-        Cancel
+        {{ __('app.btn_cancel') }}
       </button>
       <form id="pdm-form" method="POST" action="" class="flex-1">
         @csrf @method('DELETE')
         <button type="submit"
           class="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 transition-all">
-          Yes, Delete
+          {{ __('app.btn_yes_delete') }}
         </button>
       </form>
     </div>

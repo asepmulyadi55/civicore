@@ -6,8 +6,8 @@
       <span class="material-icons text-slate-500">menu</span>
     </button>
     <div>
-      <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white">Dashboard Overview</h1>
-      <p class="text-slate-500 text-sm">Welcome back, {{ Auth::user()->name }}! Here's what's happening today.</p>
+      <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ __('app.dashboard_overview') }}</h1>
+      <p class="text-slate-500 text-sm">{{ __('app.dashboard_welcome', ['name' => Auth::user()->name]) }}</p>
     </div>
   </div>
   <div class="flex items-center space-x-4">
@@ -15,7 +15,7 @@
       <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
       <input
         class="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm"
-        placeholder="Search data..." type="text" />
+        placeholder="{{ __('app.search_data') }}" type="text" />
     </div>
     <button
       class="relative p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-primary/50 transition-all">

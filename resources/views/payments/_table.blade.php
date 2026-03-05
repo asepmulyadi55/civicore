@@ -4,12 +4,12 @@
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Resident</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Block</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Month(s)</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Amount</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_resident') }}</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_block') }}</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_months') }}</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_amount') }}</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">{{ __('app.table_actions') }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -38,23 +38,24 @@
             <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
               {{ $monthLabels }}
               @if($isMulti)
-                <span class="ml-1 text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded">{{ $payment->month_count }} Months</span>
+                <span class="ml-1 text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded">{{ $payment->month_count }} {{ __('app.months_count') }}</span>
               @endif
             </td>
             <td class="px-6 py-4 text-sm font-bold">{{ $currency }} {{ number_format($payment->total_amount ?? $payment->amount) }}</td>
             <td class="px-6 py-4">
-              @switch($payment->status)
+              @php $statusValue = $payment->status instanceof \App\Enums\PaymentStatus ? $payment->status->value : $payment->status; @endphp
+              @switch($statusValue)
                 @case('approved')
-                  <span class="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-xs font-bold uppercase">Approved</span>
+                  <span class="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-xs font-bold uppercase">{{ __('app.status_approved') }}</span>
                   @break
                 @case('pending')
-                  <span class="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold uppercase">Pending</span>
+                  <span class="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold uppercase">{{ __('app.status_pending') }}</span>
                   @break
                 @case('rejected')
-                  <span class="px-3 py-1 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full text-xs font-bold uppercase">Rejected</span>
+                  <span class="px-3 py-1 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full text-xs font-bold uppercase">{{ __('app.status_rejected') }}</span>
                   @break
                 @default
-                  <span class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full text-xs font-bold uppercase">Unpaid</span>
+                  <span class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full text-xs font-bold uppercase">{{ __('app.status_unpaid') }}</span>
               @endswitch
             </td>
             <td class="px-6 py-4">
@@ -74,29 +75,35 @@
                   </span>
                 @endif
 
-                {{-- Edit button --}}
-                <button
-                  onclick="openEditModal(
-                    {{ $payment->id }},
-                    {{ $payment->resident_id }},
-                    '{{ addslashes($payment->resident->fullname) }}',
-                    '{{ $payment->resident->unit_number }}',
-                    '{{ $monthsForJs }}',
-                    {{ $payment->amount }},
-                    {{ $payment->payment_method_id ?? 'null' }},
-                    '{{ $payment->status }}',
-                    '{{ addslashes($payment->rejection_reason ?? '') }}',
-                    '{{ addslashes($payment->notes ?? '') }}',
-                    '{{ $payment->proof_path ? asset('storage/' . $payment->proof_path) : '' }}'
-                  )"
-                  title="Edit payment"
-                  class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
-                  <span class="material-icons text-lg">edit</span>
-                </button>
+                {{-- Edit button: hidden for block coordinators on approved payments --}}
+                @if($canEditApproved || $statusValue !== 'approved')
+                  <button
+                    onclick="openEditModal(
+                      {{ $payment->id }},
+                      {{ $payment->resident_id }},
+                      '{{ addslashes($payment->resident->fullname) }}',
+                      '{{ $payment->resident->unit_number }}',
+                      '{{ $monthsForJs }}',
+                      {{ $payment->amount }},
+                      {{ $payment->payment_method_id ?? 'null' }},
+                      '{{ $payment->status instanceof \App\Enums\PaymentStatus ? $payment->status->value : $payment->status }}',
+                      '{{ addslashes($payment->rejection_reason ?? '') }}',
+                      '{{ addslashes($payment->notes ?? '') }}',
+                      '{{ $payment->proof_path ? asset('storage/' . $payment->proof_path) : '' }}'
+                    )"
+                    title="Edit payment"
+                    class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                    <span class="material-icons text-lg">edit</span>
+                  </button>
+                @else
+                  <span class="p-1.5 text-slate-200 dark:text-slate-700 cursor-not-allowed inline-flex" title="Approved payments can only be edited by Admin or Treasurer">
+                    <span class="material-icons text-lg">lock_outline</span>
+                  </span>
+                @endif
 
                 {{-- Review / Approve / Reject --}}
                 @if($canApprove)
-                  @if($payment->status === 'pending')
+                  @if($statusValue === 'pending')
                     <button onclick="openReviewModal(
                         {{ $payment->id }},
                         '{{ addslashes($payment->resident->fullname) }}',
@@ -107,25 +114,25 @@
                         {{ $isMulti ? "'{$payment->batch_id}'" : 'null' }}
                       )"
                       class="text-primary hover:text-primary/80 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-primary/20 rounded-lg hover:bg-primary/5 transition-all">
-                      Review
+                      {{ __('app.review_payment') }}
                     </button>
-                  @elseif($payment->status === 'approved')
-                    <span class="text-xs text-slate-400">Approved {{ $payment->approved_at?->format('d M') }}</span>
-                  @elseif($payment->status === 'rejected')
-                    <span class="text-xs text-rose-400" title="{{ $payment->rejection_reason }}">Rejected</span>
+                  @elseif($statusValue === 'approved')
+                    <span class="text-xs text-slate-400">{{ __('app.status_approved') }} {{ $payment->approved_at?->format('d M') }}</span>
+                  @elseif($statusValue === 'rejected')
+                    <span class="text-xs text-rose-400" title="{{ $payment->rejection_reason }}">{{ __('app.status_rejected') }}</span>
                   @endif
                 @else
                   {{-- Coordinator: no approve/reject --}}
-                  @if($payment->status === 'approved')
-                    <span class="text-xs text-slate-400">Approved {{ $payment->approved_at?->format('d M') }}</span>
-                  @elseif($payment->status === 'rejected')
-                    <span class="text-xs text-rose-400" title="{{ $payment->rejection_reason }}">Rejected</span>
+                  @if($statusValue === 'approved')
+                    <span class="text-xs text-slate-400">{{ __('app.status_approved') }} {{ $payment->approved_at?->format('d M') }}</span>
+                  @elseif($statusValue === 'rejected')
+                    <span class="text-xs text-rose-400" title="{{ $payment->rejection_reason }}">{{ __('app.status_rejected') }}</span>
                   @endif
                 @endif
 
                 {{-- Delete: admin only, not for approved --}}
                 @if(auth()->user()->isAdmin())
-                  @if($payment->status !== 'approved')
+                  @if($statusValue !== 'approved')
                     <button type="button"
                       onclick="openPaymentDeleteModal({{ $payment->id }}, '{{ addslashes($payment->resident->fullname) }}')"
                       title="Delete payment"
@@ -147,8 +154,8 @@
           <tr>
             <td colspan="6" class="px-6 py-16 text-center">
               <span class="material-icons text-4xl text-slate-300 dark:text-slate-600 block mb-2">receipt_long</span>
-              <p class="text-slate-500 font-medium">No payments found</p>
-              <p class="text-slate-400 text-sm mt-1">Try adjusting your filters</p>
+              <p class="text-slate-500 font-medium">{{ __('app.no_payments_found') }}</p>
+              <p class="text-slate-400 text-sm mt-1">{{ __('app.try_adjusting_filters') }}</p>
             </td>
           </tr>
         @endforelse
@@ -159,7 +166,7 @@
   {{-- Pagination --}}
   @if($payments->hasPages())
     <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-      <p class="text-sm text-slate-500">Showing {{ $payments->firstItem() }}–{{ $payments->lastItem() }} of {{ $payments->total() }}</p>
+      <p class="text-sm text-slate-500">{{ __('app.showing') }} {{ $payments->firstItem() }}–{{ $payments->lastItem() }} {{ __('app.of') }} {{ $payments->total() }}</p>
       <div class="flex items-center gap-1">
         @if ($payments->onFirstPage())
           <button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 cursor-not-allowed" disabled>

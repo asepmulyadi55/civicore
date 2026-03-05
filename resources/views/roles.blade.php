@@ -12,16 +12,16 @@
           onclick="toggleSidebar()">
           <span class="material-icons text-slate-500">menu</span>
         </button>
-        <h1 class="text-xl font-bold text-slate-900 dark:text-white">Roles & Permissions</h1>
+        <h1 class="text-xl font-bold text-slate-900 dark:text-white">{{ __('app.nav_roles') }}</h1>
         <span
-          class="hidden sm:inline px-2 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg uppercase">Manage</span>
+          class="hidden sm:inline px-2 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg uppercase">{{ __('app.manage') }}</span>
       </div>
       <div class="flex items-center gap-3">
         @if(auth()->user()->isAdmin())
           <button onclick="openAddRoleModal()"
             class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-sm shadow-primary/20 text-sm">
             <span class="material-icons text-sm">add</span>
-            <span class="hidden sm:inline">Add Role</span>
+            <span class="hidden sm:inline">{{ __('app.add_role') }}</span>
           </button>
         @endif
         <button
@@ -51,12 +51,17 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Role</th>
-                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Description</th>
-                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Users</th>
-                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Permissions</th>
+                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  {{ __('app.table_role') }}</th>
+                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  {{ __('app.table_description') }}</th>
+                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  {{ __('app.table_users_count') }}</th>
+                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  {{ __('app.table_permissions') }}</th>
                 @if(auth()->user()->isAdmin())
-                  <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                  <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
+                    {{ __('app.table_actions') }}</th>
                 @endif
               </tr>
             </thead>
@@ -85,7 +90,7 @@
                     @if($role->name === 'admin')
                       <span
                         class="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold">
-                        <span class="material-icons text-xs">verified</span> Full Access
+                        <span class="material-icons text-xs">verified</span> {{ __('app.full_access') }}
                       </span>
                     @else
                       @php
@@ -93,7 +98,7 @@
                         $total = collect(\App\Models\Role::$availablePermissions)->flatten()->count();
                       @endphp
                       <span class="text-sm text-slate-600 dark:text-slate-400">{{ $count }} / {{ $total }}
-                        permissions</span>
+                        {{ __('app.permissions_lowercase') }}</span>
                     @endif
                   </td>
                   @if(auth()->user()->isAdmin())
@@ -104,20 +109,20 @@
                           <button
                             onclick="openPermissionsModal({{ $role->id }}, '{{ addslashes($role->label) }}', {{ json_encode($role->permissions ?? new stdClass()) }})"
                             class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                            title="Edit Permissions">
+                            title="{{ __('app.title_edit_permissions') }}">
                             <span class="material-icons text-lg">tune</span>
                           </button>
                           {{-- Edit Role --}}
                           <button
                             onclick="openEditRoleModal({{ $role->id }}, '{{ addslashes($role->label) }}', '{{ addslashes($role->description ?? '') }}')"
                             class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                            title="Edit Role">
+                            title="{{ __('app.title_edit_role') }}">
                             <span class="material-icons text-lg">edit</span>
                           </button>
                           {{-- Delete --}}
                           <button onclick="openDeleteRoleModal({{ $role->id }}, '{{ addslashes($role->label) }}')"
                             class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors"
-                            title="Delete Role">
+                            title="{{ __('app.title_delete_role') }}">
                             <span class="material-icons text-lg">delete_outline</span>
                           </button>
                         @endif
@@ -127,7 +132,7 @@
                 </tr>
               @empty
                 <tr>
-                  <td colspan="5" class="px-6 py-16 text-center text-slate-400">No roles found.</td>
+                  <td colspan="5" class="px-6 py-16 text-center text-slate-400">{{ __('app.no_roles_found') }}</td>
                 </tr>
               @endforelse
             </tbody>
@@ -142,42 +147,43 @@
     class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md">
       <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-        <h3 class="text-lg font-bold">Add New Role</h3>
+        <h3 class="text-lg font-bold">{{ __('app.add_new_role') }}</h3>
         <button onclick="closeAddRoleModal()" class="text-slate-400 hover:text-slate-600"><span
             class="material-icons">close</span></button>
       </div>
       <form method="POST" action="{{ route('roles.store') }}" class="p-6 space-y-4" novalidate id="add-role-form">
         @csrf
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Role Name (slug) <span
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.role_name_slug') }} <span
               class="text-red-500">*</span></label>
-          <input type="text" id="ar-name" name="name" placeholder="e.g. finance_manager" pattern="[a-zA-Z0-9_\-]+"
+          <input type="text" id="ar-name" name="name" placeholder="{{ __('app.eg_finance_manager') }}"
+            pattern="[a-zA-Z0-9_\-]+"
             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:text-white"
             oninput="hideFmErr('ar-err-name')" />
-          <p class="text-[11px] text-slate-400">Only letters, numbers, underscores, hyphens. Used internally.</p>
+          <p class="text-[11px] text-slate-400">{{ __('app.role_slug_hint') }}</p>
           <p id="ar-err-name" class="hidden text-xs text-red-500 flex items-center gap-1"><span
-              class="material-icons text-xs">error_outline</span> Role name is required.</p>
+              class="material-icons text-xs">error_outline</span> {{ __('app.err_role_name') }}</p>
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Display Label <span
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.display_label') }} <span
               class="text-red-500">*</span></label>
-          <input type="text" id="ar-label" name="label" placeholder="e.g. Finance Manager"
+          <input type="text" id="ar-label" name="label" placeholder="{{ __('app.eg_finance_manager_label') }}"
             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:text-white"
             oninput="hideFmErr('ar-err-label')" />
           <p id="ar-err-label" class="hidden text-xs text-red-500 flex items-center gap-1"><span
-              class="material-icons text-xs">error_outline</span> Display label is required.</p>
+              class="material-icons text-xs">error_outline</span> {{ __('app.err_role_label') }}</p>
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Description</label>
-          <input type="text" name="description" placeholder="Brief description of this role"
+          <label
+            class="text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.form_description') }}</label>
+          <input type="text" name="description" placeholder="{{ __('app.role_desc_placeholder') }}"
             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:text-white" />
         </div>
         <div class="flex gap-3 pt-2">
           <button type="button" onclick="closeAddRoleModal()"
-            class="flex-1 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+            class="flex-1 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ __('app.btn_cancel') }}</button>
           <button type="button" onclick="submitAddRole()"
-            class="flex-1 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95">Create
-            Role</button>
+            class="flex-1 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95">{{ __('app.btn_create_role') }}</button>
         </div>
       </form>
     </div>
@@ -188,32 +194,32 @@
     class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md">
       <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-        <h3 class="text-lg font-bold">Edit Role</h3>
+        <h3 class="text-lg font-bold">{{ __('app.edit_role_title') }}</h3>
         <button onclick="closeEditRoleModal()" class="text-slate-400 hover:text-slate-600"><span
             class="material-icons">close</span></button>
       </div>
       <form id="edit-role-form" method="POST" action="" class="p-6 space-y-4" novalidate>
         @csrf @method('PATCH')
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Display Label <span
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.display_label') }} <span
               class="text-red-500">*</span></label>
           <input type="text" id="er-label" name="label"
             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:text-white"
             oninput="hideFmErr('er-err-label')" />
           <p id="er-err-label" class="hidden text-xs text-red-500 flex items-center gap-1"><span
-              class="material-icons text-xs">error_outline</span> Display label is required.</p>
+              class="material-icons text-xs">error_outline</span> {{ __('app.err_role_label') }}</p>
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Description</label>
+          <label
+            class="text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.form_description') }}</label>
           <input type="text" id="er-description" name="description"
             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:text-white" />
         </div>
         <div class="flex gap-3 pt-2">
           <button type="button" onclick="closeEditRoleModal()"
-            class="flex-1 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+            class="flex-1 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ __('app.btn_cancel') }}</button>
           <button type="button" onclick="submitEditRole()"
-            class="flex-1 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95">Save
-            Changes</button>
+            class="flex-1 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95">{{ __('app.btn_save_changes') }}</button>
         </div>
       </form>
     </div>
@@ -228,17 +234,17 @@
           <span class="material-icons text-rose-500 text-2xl">delete_forever</span>
         </div>
         <div>
-          <h3 class="text-lg font-bold">Delete Role?</h3>
-          <p class="text-sm text-slate-500 mt-1">Are you sure you want to delete <strong id="delete-role-name"
-              class="text-slate-700 dark:text-slate-300"></strong>? This cannot be undone.</p>
+          <h3 class="text-lg font-bold">{{ __('app.delete_role_title') }}</h3>
+          <p class="text-sm text-slate-500 mt-1">{{ __('app.delete_role_confirm_1') }} <strong id="delete-role-name"
+              class="text-slate-700 dark:text-slate-300"></strong>{{ __('app.delete_role_confirm_2') }}</p>
         </div>
         <div class="flex gap-3 w-full">
           <button onclick="closeDeleteRoleModal()"
-            class="flex-1 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+            class="flex-1 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ __('app.btn_cancel') }}</button>
           <form id="delete-role-form" method="POST" action="" class="flex-1">
             @csrf @method('DELETE')
             <button type="submit"
-              class="w-full py-3 bg-rose-500 text-white rounded-xl text-sm font-bold hover:bg-rose-600 transition-all active:scale-95">Delete</button>
+              class="w-full py-3 bg-rose-500 text-white rounded-xl text-sm font-bold hover:bg-rose-600 transition-all active:scale-95">{{ __('app.btn_delete') ?? 'Delete' }}</button>
           </form>
         </div>
       </div>
@@ -251,7 +257,7 @@
     <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
       <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
         <div>
-          <h3 class="text-lg font-bold">Permissions</h3>
+          <h3 class="text-lg font-bold">{{ __('app.permissions_title') }}</h3>
           <p id="perms-role-label" class="text-sm text-slate-500 mt-0.5"></p>
         </div>
         <button onclick="closePermissionsModal()" class="text-slate-400 hover:text-slate-600"><span
@@ -265,21 +271,22 @@
             $allPerms = \App\Models\Role::$availablePermissions;
             $allActions = ['view', 'create', 'edit', 'delete', 'approve'];
             $moduleLabels = [
-              'dashboard' => 'Dashboard',
-              'residents' => 'Residents',
-              'blocks' => 'Blocks',
-              'payments' => 'Payments',
-              'reports' => 'Reports',
-              'users' => 'User Management',
-              'roles' => 'Roles & Permissions',
+              'dashboard' => __('app.nav_dashboard'),
+              'residents' => __('app.nav_residents'),
+              'blocks' => __('app.nav_blocks'),
+              'payments' => __('app.nav_payments'),
+              'reports' => __('app.nav_reports'),
+              'users' => __('app.nav_users'),
+              'roles' => __('app.nav_roles'),
             ];
           @endphp
 
           {{-- Header row --}}
           <div class="grid grid-cols-6 gap-2 mb-3">
-            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Module</div>
+            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.module_title') }}</div>
             @foreach($allActions as $action)
-              <div class="text-xs font-bold text-slate-500 uppercase tracking-wider text-center">{{ ucfirst($action) }}
+              <div class="text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                {{ __('app.action_' . $action) }}
               </div>
             @endforeach
           </div>
@@ -319,18 +326,18 @@
 
           <div class="mt-4 flex gap-2 items-center">
             <button type="button" onclick="selectAllPerms(true)"
-              class="text-xs font-bold text-primary hover:underline">Select All</button>
+              class="text-xs font-bold text-primary hover:underline">{{ __('app.select_all') }}</button>
             <span class="text-slate-300">·</span>
             <button type="button" onclick="selectAllPerms(false)"
-              class="text-xs font-bold text-slate-400 hover:underline">Deselect All</button>
+              class="text-xs font-bold text-slate-400 hover:underline">{{ __('app.deselect_all') }}</button>
           </div>
 
           <div class="flex gap-3 mt-6">
             <button type="button" onclick="closePermissionsModal()"
-              class="flex-1 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+              class="flex-1 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ __('app.btn_cancel') }}</button>
             <button type="submit"
               class="flex-1 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95">
-              <span class="material-icons text-sm align-middle mr-1">save</span> Save Permissions
+              <span class="material-icons text-sm align-middle mr-1">save</span> {{ __('app.btn_save_permissions') }}
             </button>
           </div>
         </form>

@@ -46,6 +46,7 @@ class ReportController extends Controller
         }
 
         $residents = $residentQuery->paginate(25)->withQueryString();
+        $totalResidents = $residents->total(); // paginator already computes total count correctly
 
         // Summary stats for the selected year + block
         $baseQuery = PaymentRecord::whereYear('payment_month', $year);
@@ -53,9 +54,9 @@ class ReportController extends Controller
             $baseQuery->whereHas('resident', fn($q) => $q->where('block_id', $blockId));
         }
 
-        $totalResidents = $residentQuery->toBase()->count();
         $paidCount = (clone $baseQuery)->where('status', 'approved')->count();
         $unpaidCount = (clone $baseQuery)->where('status', '!=', 'approved')->count();
+
         $collectionRate = ($paidCount + $unpaidCount) > 0
             ? round($paidCount / ($paidCount + $unpaidCount) * 100)
             : 0;

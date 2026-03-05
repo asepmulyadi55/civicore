@@ -5,17 +5,16 @@
     <button class="lg:hidden p-2 rounded-lg border border-slate-200 dark:border-slate-800" onclick="toggleSidebar()">
       <span class="material-icons text-slate-500">menu</span>
     </button>
-    <h1 class="text-xl font-bold text-slate-900 dark:text-white">Payment Management</h1>
+    <h1 class="text-xl font-bold text-slate-900 dark:text-white">{{ __('app.payment_management') }}</h1>
     <span
-      class="hidden sm:inline px-2 py-1 text-xs font-semibold bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-lg uppercase">Financial
-      Console</span>
+      class="hidden sm:inline px-2 py-1 text-xs font-semibold bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-lg uppercase">{{ __('app.financial_console') }}</span>
   </div>
   <div class="flex items-center gap-3">
     {{-- Record Payment --}}
     <button onclick="openCreateModal()"
       class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-sm shadow-primary/20 text-sm">
       <span class="material-icons text-sm">add</span>
-      <span class="hidden sm:inline">Record Payment</span>
+      <span class="hidden sm:inline">{{ __('app.record_payment') }}</span>
     </button>
     {{-- Dark mode --}}
     <button

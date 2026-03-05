@@ -5,7 +5,7 @@
 
     {{-- Year --}}
     <div class="space-y-1.5">
-      <label class="text-xs font-bold text-slate-400 uppercase tracking-tight">Year</label>
+      <label class="text-xs font-bold text-slate-400 uppercase tracking-tight">{{ __('app.filter_year') }}</label>
       <div class="relative">
         <select name="year" onchange="this.form.submit()"
           class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none px-4 py-2.5 pr-9 text-slate-700 dark:text-slate-200 outline-none">
@@ -21,11 +21,11 @@
     {{-- Block (admin & treasurer only) --}}
     @unless($isCoordinator)
       <div class="space-y-1.5">
-        <label class="text-xs font-bold text-slate-400 uppercase tracking-tight">Block</label>
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-tight">{{ __('app.filter_block') }}</label>
         <div class="relative">
           <select name="block_id" onchange="this.form.submit()"
             class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none px-4 py-2.5 pr-9 text-slate-700 dark:text-slate-200 outline-none">
-            <option value="">All Blocks</option>
+            <option value="">{{ __('app.all_blocks') }}</option>
             @foreach($blocks as $block)
               <option value="{{ $block->id }}" {{ $blockId == $block->id ? 'selected' : '' }}>{{ $block->name }}</option>
             @endforeach
@@ -38,12 +38,12 @@
 
     {{-- Search Resident --}}
     <div class="md:col-span-2 space-y-1.5">
-      <label class="text-xs font-bold text-slate-400 uppercase tracking-tight">Search Resident</label>
+      <label class="text-xs font-bold text-slate-400 uppercase tracking-tight">{{ __('app.search_resident') }}</label>
       <div class="relative">
         <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
         <input name="search" value="{{ $search }}"
           class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary pl-10 pr-4 py-2.5 text-slate-700 dark:text-slate-200 outline-none"
-          placeholder="Name or unit number..." />
+          placeholder="{{ __('app.search_name_unit') }}" />
       </div>
     </div>
 
@@ -51,7 +51,7 @@
     <div class="flex items-end gap-2">
       <button type="submit"
         class="flex-1 bg-primary/10 text-primary hover:bg-primary/20 py-2.5 rounded-lg text-sm font-bold transition-colors">
-        Apply
+        {{ __('app.btn_apply') }}
       </button>
       @if($search || (!$isCoordinator && $blockId))
         <a href="{{ route('reports.index', ['year' => $year]) }}"

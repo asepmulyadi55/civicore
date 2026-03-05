@@ -17,9 +17,12 @@ class Role extends Model
         'permissions',
     ];
 
-    protected $casts = [
-        'permissions' => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'permissions' => 'array',
+        ];
+    }
 
     // ── Available permissions — single source of truth ──────────────
     public static array $availablePermissions = [

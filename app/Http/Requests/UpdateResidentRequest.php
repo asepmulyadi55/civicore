@@ -9,7 +9,7 @@ class UpdateResidentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('residents.edit');
     }
 
     public function rules(): array

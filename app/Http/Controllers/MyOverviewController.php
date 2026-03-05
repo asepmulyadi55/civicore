@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PaymentRecord;
+use App\Models\Resident;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class MyOverviewController extends Controller
         // Fallback: find by email (covers the case where resident was created
         // after the user was already approved, so user_id was never set)
         if (!$resident && $user->email) {
-            $resident = \App\Models\Resident::where('email', $user->email)
+            $resident = Resident::where('email', $user->email)
                 ->with(['block', 'feeHistories' => fn($q) => $q->orderByDesc('effective_from')])
                 ->first();
 

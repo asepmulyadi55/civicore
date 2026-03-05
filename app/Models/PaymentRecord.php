@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -22,11 +23,15 @@ class PaymentRecord extends Model
         'approved_at',
     ];
 
-    protected $casts = [
-        'payment_month' => 'date',
-        'amount' => 'decimal:2',
-        'approved_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'payment_month' => 'date',
+            'amount' => 'decimal:2',
+            'approved_at' => 'datetime',
+            'status' => PaymentStatus::class,
+        ];
+    }
 
     // ── Relationships ───────────────────────────────────────────
 
@@ -72,35 +77,51 @@ class PaymentRecord extends Model
         return $query->where('status', 'rejected');
     }
 
-    // ── Helpers ─────────────────────────────────────────────────
+    // ── Status Helpers ──────────────────────────────────────────
+
+    public function isUnpaid(): bool
+    {
+        return $this->status === PaymentStatus::Unpaid;
+    }
 
     public function isPending(): bool
     {
-        return $this->status === 'pending';
+        return $this->status === PaymentStatus::Pending;
     }
+
     public function isApproved(): bool
     {
-        return $this->status === 'approved';
+        return $this->status === PaymentStatus::Approved;
     }
+
     public function isRejected(): bool
     {
-        return $this->status === 'rejected';
-    }
-    public function isUnpaid(): bool
-    {
-        return $this->status === 'unpaid';
+        return $this->status === PaymentStatus::Rejected;
     }
 
     /**
      * Status badge config for use in Blade views.
+     * Returns ['label' => string, 'class' => string].
      */
     public function statusBadge(): array
     {
         return match ($this->status) {
-            'approved' => ['label' => 'Approved', 'class' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'],
-            'pending' => ['label' => 'Pending', 'class' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'],
-            'rejected' => ['label' => 'Rejected', 'class' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'],
-            default => ['label' => 'Unpaid', 'class' => 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'],
+            PaymentStatus::Approved => [
+                'label' => 'Approved',
+                'class' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+            ],
+            PaymentStatus::Pending => [
+                'label' => 'Pending',
+                'class' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+            ],
+            PaymentStatus::Rejected => [
+                'label' => 'Rejected',
+                'class' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+            ],
+            default => [
+                'label' => 'Unpaid',
+                'class' => 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400',
+            ],
         };
     }
 }
