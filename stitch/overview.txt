@@ -1,0 +1,167 @@
+────────────────────
+SYSTEM OVERVIEW
+────────────────────
+
+CiviCore is NOT a public SaaS platform. It is an internal management system used by housing administrators and residents.
+
+Main goals:
+- Transparent financial management
+- Clear approval workflow
+- Role-based access control
+- Long-term maintainability
+- Simple UX for non-technical users
+
+The platform currently focuses on the Monthly Fee Management module (Civipay), but must support future modules.
+
+────────────────────
+USER ROLES
+────────────────────
+
+There are four roles:
+
+1. ADMIN
+- Full system access
+- Also acts as Treasurer
+- Activates/deactivates accounts
+- Manages all users and blocks
+- Approves or rejects payments
+- Can directly edit approved payments
+- Generates reports
+- Access to all modules
+- Views audit history
+
+2. TREASURER
+- Reviews payment submissions
+- Approves or rejects payments
+- Must provide rejection reason
+- Views payment proof uploads
+- Can input payments directly
+- Cannot manage system configuration
+
+3. BLOCK COORDINATOR
+- Assigned to exactly one block
+- Inputs payments for residents in their block
+- Uploads payment proof (transfer or cash photo)
+- Can edit submissions but requires re-approval
+- Monitors unpaid residents in their block
+- Cannot approve payments
+
+4. RESIDENT
+- Read-only access
+- Can view personal payment history
+- Sees monthly payment status
+- Can only view current year and previous year
+- Cannot submit or edit payments
+
+────────────────────
+ACCOUNT REGISTRATION FLOW
+────────────────────
+
+Users can register via:
+- Registration form
+- Google (Gmail) login
+
+Rules:
+- Self-registered accounts are inactive by default
+- Admin must manually activate accounts
+- Admin can create accounts manually
+- Only active users can log in
+
+────────────────────
+PAYMENT SYSTEM RULES (CIVIPAY MODULE)
+────────────────────
+
+- Each resident has exactly ONE active monthly fee
+- Fee amount may differ per resident
+- Fee changes apply only from a specific month onward
+- Historical records must never change retroactively
+- One payment can cover multiple months
+- All payments require proof upload
+- Cash payments must also include photo proof
+
+Payment Status:
+- Unpaid
+- Pending Approval
+- Approved
+- Rejected (with reason)
+
+Editing Rules:
+- Admin can edit approved payments directly
+- Coordinator edits require re-approval
+
+────────────────────
+PAYMENT FLOW
+────────────────────
+
+FLOW A — Coordinator Input:
+1. Resident pays
+2. Coordinator inputs payment
+3. Upload proof
+4. Status = Pending
+5. Treasurer/Admin reviews
+6. Approve → month marked Paid
+7. Reject → reason stored
+
+FLOW B — Treasurer Direct Input:
+1. Treasurer receives payment
+2. Inputs payment
+3. Automatically Approved
+
+────────────────────
+REPORTING
+────────────────────
+
+Admin can generate reports:
+- Filter by year
+- Filter by block
+- Table format:
+  Rows = residents
+  Columns = months
+  Cell = payment date or unpaid indicator
+
+Reports must preserve historical fee values.
+
+────────────────────
+ADMIN INTERFACE REQUIREMENTS
+────────────────────
+
+- Left sidebar navigation
+- Expandable menu for future modules
+- Core sections:
+  Dashboard
+  Payments
+  Residents
+  Blocks
+  Users
+  Reports
+  Events
+  Settings
+
+Must include full CRUD states:
+- Create forms
+- Edit forms (pre-filled)
+- Delete confirmation dialogs
+- Empty states
+
+────────────────────
+AUDIT & TRANSPARENCY
+────────────────────
+
+System must track:
+- Who created data
+- Who edited data
+- Who approved/rejected
+- Timestamp of actions
+- Rejection reasons
+
+────────────────────
+FUTURE MODULES (SCALABILITY REQUIREMENT)
+────────────────────
+
+System architecture must allow future modules such as:
+- Community Events
+- Health Programs (Posyandu)
+- Announcements
+- Activity Management
+
+Modules should reuse authentication and role system.

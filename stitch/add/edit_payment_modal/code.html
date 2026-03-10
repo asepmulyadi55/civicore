@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>CiviCore - Record Payment</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#137fec",
+            "background-light": "#f6f7f8",
+            "background-dark": "#101922",
+          },
+          fontFamily: {
+            "display": ["Manrope", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Manrope', sans-serif;
+    }
+
+    .modal-overlay {
+      background-color: rgba(16, 25, 34, 0.6);
+      backdrop-filter: blur(4px);
+    }
+
+    .month-card-paid {
+      opacity: 0.6;
+      pointer-events: none;
+      background-color: #f1f5f9;
+    }
+
+    .month-card-selected {
+      border-color: #137fec;
+      background-color: rgba(19, 127, 236, 0.05);
+    }
+  </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen">
+  <!-- Background Screen Simulation (Payment Management) -->
+  <div class="p-8 opacity-40 select-none pointer-events-none">
+    <div class="max-w-6xl mx-auto">
+      <header class="flex justify-between items-center mb-8">
+        <div>
+          <h1 class="text-3xl font-extrabold text-slate-900">Payment Management</h1>
+          <p class="text-slate-500">Manage community fees and resident accounts</p>
+        </div>
+        <button class="bg-primary text-white px-6 py-2 rounded-lg font-bold">Add New Record</button>
+      </header>
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <table class="w-full text-left">
+          <thead class="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th class="px-6 py-4 text-sm font-semibold text-slate-600">Resident</th>
+              <th class="px-6 py-4 text-sm font-semibold text-slate-600">Unit</th>
+              <th class="px-6 py-4 text-sm font-semibold text-slate-600">Last Payment</th>
+              <th class="px-6 py-4 text-sm font-semibold text-slate-600">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50">
+              <td class="px-6 py-4">John Doe</td>
+              <td class="px-6 py-4">Unit 402B</td>
+              <td class="px-6 py-4">Feb 12, 2024</td>
+              <td class="px-6 py-4"><span
+                  class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold uppercase">Up
+                  to Date</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- Modal Overlay -->
+  <div class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
+    <!-- Modal Container -->
+    <div
+      class="bg-white dark:bg-background-dark w-full max-w-3xl rounded-xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+      <!-- Modal Header -->
+      <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-start">
+        <div>
+          <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Record Payment</h2>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-primary font-bold">John Doe</span>
+            <span class="text-slate-400">•</span>
+            <span class="text-slate-600 dark:text-slate-400">Unit 402B</span>
+            <span class="text-slate-400">•</span>
+            <span
+              class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded text-xs font-semibold">$50.00
+              / month</span>
+          </div>
+        </div>
+        <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <!-- Modal Content (Scrollable) -->
+      <div class="flex-1 overflow-y-auto px-8 py-6">
+        <!-- Month Selection Grid -->
+        <div class="mb-8">
+          <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-4">
+            Select Months (2024)</h3>
+          <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+            <!-- PAID Months -->
+            <div
+              class="month-card-paid border border-slate-200 rounded-lg p-3 flex flex-col items-center justify-center gap-1 relative overflow-hidden">
+              <span class="text-xs font-bold text-slate-400">JANUARY</span>
+              <div class="text-green-600 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm font-bold">check_circle</span>
+                <span class="text-[10px] font-extrabold tracking-tighter uppercase">Paid</span>
+              </div>
+            </div>
+            <div
+              class="month-card-paid border border-slate-200 rounded-lg p-3 flex flex-col items-center justify-center gap-1 relative overflow-hidden">
+              <span class="text-xs font-bold text-slate-400">FEBRUARY</span>
+              <div class="text-green-600 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm font-bold">check_circle</span>
+                <span class="text-[10px] font-extrabold tracking-tighter uppercase">Paid</span>
+              </div>
+            </div>
+            <!-- UNPAID / SELECTABLE Months -->
+            <!-- March (Selected) -->
+            <label class="cursor-pointer group">
+              <input checked="" class="hidden peer" type="checkbox" />
+              <div
+                class="month-card-selected border-2 border-primary bg-primary/5 rounded-lg p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 border-slate-200 hover:border-primary/50">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">MARCH</span>
+                <span class="text-[10px] font-bold text-primary uppercase">Selected</span>
+              </div>
+            </label>
+            <!-- April (Selected) -->
+            <label class="cursor-pointer group">
+              <input checked="" class="hidden peer" type="checkbox" />
+              <div
+                class="month-card-selected border-2 border-primary bg-primary/5 rounded-lg p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 border-slate-200 hover:border-primary/50">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">APRIL</span>
+                <span class="text-[10px] font-bold text-primary uppercase">Selected</span>
+              </div>
+            </label>
+            <!-- May (Selected) -->
+            <label class="cursor-pointer group">
+              <input checked="" class="hidden peer" type="checkbox" />
+              <div
+                class="month-card-selected border-2 border-primary bg-primary/5 rounded-lg p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 border-slate-200 hover:border-primary/50">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">MAY</span>
+                <span class="text-[10px] font-bold text-primary uppercase">Selected</span>
+              </div>
+            </label>
+            <!-- Unpaid Remaining -->
+            <label class="cursor-pointer group">
+              <input class="hidden peer" type="checkbox" />
+              <div
+                class="border-2 border-slate-200 dark:border-slate-800 rounded-lg p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">JUNE</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Unpaid</span>
+              </div>
+            </label>
+            <label class="cursor-pointer group">
+              <input class="hidden peer" type="checkbox" />
+              <div
+                class="border-2 border-slate-200 dark:border-slate-800 rounded-lg p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">JULY</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Unpaid</span>
+              </div>
+            </label>
+            <label class="cursor-pointer group">
+              <input class="hidden peer" type="checkbox" />
+              <div
+                class="border-2 border-slate-200 dark:border-slate-800 rounded-lg p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">AUGUST</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Unpaid</span>
+              </div>
+            </label>
+            <label class="cursor-pointer group">
+              <input class="hidden peer" type="checkbox" />
+              <div
+                class="border-2 border-slate-200 dark:border-slate-800 rounded-lg p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">SEPTEMBER</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Unpaid</span>
+              </div>
+            </label>
+            <label class="cursor-pointer group">
+              <input class="hidden peer" type="checkbox" />
+              <div
+                class="border-2 border-slate-200 dark:border-slate-800 rounded-lg p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">OCTOBER</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Unpaid</span>
+              </div>
+            </label>
+            <label class="cursor-pointer group">
+              <input class="hidden peer" type="checkbox" />
+              <div
+                class="border-2 border-slate-200 dark:border-slate-800 rounded-lg p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">NOVEMBER</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Unpaid</span>
+              </div>
+            </label>
+            <label class="cursor-pointer group">
+              <input class="hidden peer" type="checkbox" />
+              <div
+                class="border-2 border-slate-200 dark:border-slate-800 rounded-lg p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">DECEMBER</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Unpaid</span>
+              </div>
+            </label>
+          </div>
+        </div>
+        <!-- Payment Details -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Method -->
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Payment
+              Method</label>
+            <select
+              class="w-full h-12 rounded-lg border-slate-200 dark:border-slate-800 dark:bg-slate-900 focus:ring-primary focus:border-primary text-slate-700 dark:text-slate-200">
+              <option value="">Select Method</option>
+              <option selected="" value="bank">Bank Transfer</option>
+              <option value="cash">Cash</option>
+              <option value="mobile">Mobile Pay</option>
+              <option value="check">Check</option>
+            </select>
+          </div>
+          <!-- Receipt Upload -->
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Proof
+              of Payment</label>
+            <div
+              class="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
+              <span class="material-symbols-outlined text-primary mb-1">cloud_upload</span>
+              <span class="text-xs font-medium text-slate-600 dark:text-slate-400">Click to upload
+                receipt</span>
+              <span class="text-[10px] text-slate-400 uppercase mt-1">PDF, JPG, PNG (Max 5MB)</span>
+            </div>
+          </div>
+        </div>
+        <!-- Summary Panel -->
+        <div class="mt-8 p-6 bg-primary/10 rounded-xl border border-primary/20">
+          <div class="flex items-center justify-between">
+            <div class="flex flex-col">
+              <span class="text-xs font-bold text-primary uppercase tracking-widest">Calculated
+                Total</span>
+              <div class="flex items-baseline gap-2">
+                <span class="text-3xl font-extrabold text-slate-900 dark:text-slate-100">$150.00</span>
+                <span class="text-slate-500 font-medium">USD</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-sm font-bold text-slate-700 dark:text-slate-300">3 Months Selected</span>
+              <p class="text-[11px] text-slate-500">March, April, May @ $50.00 ea.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Modal Footer -->
+      <div class="px-8 py-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
+        <button
+          class="px-6 py-2.5 rounded-lg font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          Cancel
+        </button>
+        <button
+          class="bg-primary hover:bg-primary/90 text-white px-8 py-2.5 rounded-lg font-bold shadow-lg shadow-primary/20 flex items-center gap-2 transition-all active:scale-95">
+          <span class="material-symbols-outlined text-lg">verified</span>
+          Confirm Payment
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
