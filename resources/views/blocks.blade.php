@@ -90,6 +90,23 @@
                 </div>
               </div>
 
+              {{-- Coordinator --}}
+              <div class="flex items-center gap-2 py-2 border-t border-slate-100 dark:border-slate-800">
+                <span class="material-icons text-sm text-slate-400">manage_accounts</span>
+                @forelse($block->coordinators as $coord)
+                  @php
+                    $initials = strtoupper(substr($coord->name, 0, 2));
+                  @endphp
+                  <div
+                    class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                    {{ $initials }}
+                  </div>
+                  <span class="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">{{ $coord->name }}</span>
+                @empty
+                  <span class="text-xs text-slate-400 italic">No coordinator assigned</span>
+                @endforelse
+              </div>
+
               {{-- Status + Actions --}}
               <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
                 @if($block->is_active)

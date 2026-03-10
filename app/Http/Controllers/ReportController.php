@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ReportExport;
 use App\Models\Block;
 use App\Models\PaymentRecord;
 use App\Models\Resident;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
@@ -81,5 +83,19 @@ class ReportController extends Controller
             'totalResidents',
             'isCoordinator'
         ));
+    }
+
+    /** Download the current view as an Excel file. */
+    public function export(Request $request)
+    {
+        $user = auth()->user();
+        $year = (int) $request->get('year', now()->year);
+        $blockId = $user->isBlockCoordinator()
+            ? $user->block_id
+            : $request->get('block_id');
+
+        $filename = 'report-' . $year . ($blockId ? '-block' . $blockId : '') . '.xlsx';
+
+        return Excel::download(new ReportExport($year, $blockId), $filename);
     }
 }
