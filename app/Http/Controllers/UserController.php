@@ -225,6 +225,20 @@ class UserController extends Controller
       ->with('success', "\"{$user->name}\" has been deactivated.");
   }
 
+  public function reactivate(User $user)
+  {
+    $user->update(['is_active' => true]);
+
+    Log::info('User reactivated', [
+      'user_id' => $user->id,
+      'email' => $user->email,
+      'reactivated_by' => auth()->id(),
+    ]);
+
+    return redirect()->route('users.index')
+      ->with('success', "\"{$user->name}\" has been reactivated and can now log in.");
+  }
+
   public function destroy(User $user)
   {
     if ($user->id === auth()->id()) {

@@ -28,11 +28,16 @@ Automatically shows:
 <div class="p-4 border-t border-slate-200 dark:border-slate-800">
   <div class="flex items-center gap-3 px-2">
 
-    {{-- Initials avatar --}}
-    <div
-      class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0">
-      {{ $initials }}
-    </div>
+    {{-- Avatar: photo if uploaded, else initials --}}
+    @if($user->avatar)
+      <img src="{{ $user->avatarUrl() }}" alt="{{ $user->name }}"
+        class="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-slate-200 dark:border-slate-700">
+    @else
+      <div
+        class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0">
+        {{ $initials }}
+      </div>
+    @endif
 
     <div class="flex-1 min-w-0">
       <p class="text-sm font-bold truncate uppercase text-slate-900 dark:text-white">{{ $user->name }}</p>

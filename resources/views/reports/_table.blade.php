@@ -14,7 +14,8 @@
             </th>
           @endforeach
           <th class="px-6 py-4 text-right text-xs font-bold text-primary uppercase tracking-wider">
-            {{ __('app.annual_total') }}</th>
+            {{ __('app.annual_total') }}
+          </th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -39,16 +40,19 @@
                 $record = $yearRecords->get($m['num']);
                 $today = \Carbon\Carbon::create($year, $m['num'], 1);
                 $isFuture = $today->gt(now()->startOfMonth());
+                $recordStatus = $record
+                  ? ($record->status instanceof \App\Enums\PaymentStatus ? $record->status->value : (string) $record->status)
+                  : null;
               @endphp
               <td class="p-1">
-                @if($record && $record->status === 'approved')
+                @if($recordStatus === 'approved')
                   <div
                     class="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 py-3 rounded text-center">
                     <span
                       class="text-[10px] font-bold block">{{ \Carbon\Carbon::parse($record->paid_at ?? $record->updated_at)->format('d/m') }}</span>
                     <span class="material-icons text-sm">check_circle</span>
                   </div>
-                @elseif($record && $record->status === 'pending')
+                @elseif($recordStatus === 'pending')
                   <div
                     class="bg-amber-50 dark:bg-amber-900/20 text-amber-500 py-3 rounded text-center flex flex-col items-center justify-center h-full min-h-[44px]">
                     <span class="material-icons text-sm">hourglass_empty</span>

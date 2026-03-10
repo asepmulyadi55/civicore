@@ -96,12 +96,14 @@ class User extends Authenticatable
   }
 
   /**
-   * Returns the user's avatar URL, falling back to a DiceBear initials avatar.
+   * Returns the user's avatar URL.
+   * Served through the authenticated /private/* route — not publicly accessible.
+   * Falls back to a DiceBear initials avatar for users without an uploaded photo.
    */
   public function avatarUrl(): string
   {
-    if ($this->avatar && Storage::disk('public')->exists($this->avatar)) {
-      return Storage::url($this->avatar);
+    if ($this->avatar && Storage::disk('local')->exists($this->avatar)) {
+      return route('private.file', ['path' => $this->avatar]);
     }
     $initials = urlencode(mb_substr($this->name, 0, 2, 'UTF-8'));
     return "https://api.dicebear.com/8.x/initials/svg?seed={$initials}&backgroundColor=4f46e5&fontFamily=Arial";

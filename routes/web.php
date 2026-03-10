@@ -16,6 +16,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SessionConflictController;
+use App\Http\Controllers\PrivateFileController;
 
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
@@ -46,6 +47,11 @@ Route::middleware('auth')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // ── Private file serving (auth-protected) ─────────────────────────────────
+    Route::get('/private/{path}', [PrivateFileController::class, 'serve'])
+        ->where('path', '.+')
+        ->name('private.file');
 
     // Resident personal overview (residents only, no secondary permission needed)
     Route::get('/my-overview', [MyOverviewController::class, 'index'])->name('my-overview');
@@ -107,6 +113,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:30,1')->name('users.check-resident-email');
     Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate'])
         ->middleware('permission:users.edit')->name('users.deactivate');
+    Route::patch('/users/{user}/reactivate', [UserController::class, 'reactivate'])
+        ->middleware('permission:users.edit')->name('users.reactivate');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])
         ->middleware('permission:users.delete')->name('users.destroy');
 

@@ -64,7 +64,7 @@
                 {{-- View Proof --}}
                 @if($payment->proof_path)
                   <button
-                    onclick="openProofModal('{{ asset('storage/' . $payment->proof_path) }}')"
+                    onclick="openProofModal('{{ route('private.file', ['path' => $payment->proof_path]) }}')"
                     title="View payment proof"
                     class="p-1.5 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
                     <span class="material-icons text-lg">receipt_long</span>
@@ -89,7 +89,7 @@
                       '{{ $payment->status instanceof \App\Enums\PaymentStatus ? $payment->status->value : $payment->status }}',
                       '{{ addslashes($payment->rejection_reason ?? '') }}',
                       '{{ addslashes($payment->notes ?? '') }}',
-                      '{{ $payment->proof_path ? asset('storage/' . $payment->proof_path) : '' }}'
+                      '{{ $payment->proof_path ? route('private.file', ['path' => $payment->proof_path]) : '' }}'
                     )"
                     title="Edit payment"
                     class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">

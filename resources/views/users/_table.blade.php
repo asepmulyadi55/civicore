@@ -48,7 +48,8 @@
             $initials = collect(explode(' ', $user->name))->map(fn($w) => strtoupper($w[0]))->take(2)->implode('');
             $avatarColors = ['bg-primary/10 text-primary', 'bg-blue-100 text-blue-600', 'bg-emerald-100 text-emerald-600', 'bg-amber-100 text-amber-600', 'bg-indigo-100 text-indigo-600'];
             $color = $avatarColors[$user->id % count($avatarColors)];
-            $isPending = !$user->is_active;
+            $isPending = !$user->is_active && !$user->last_login_at;
+            $isInactive = !$user->is_active && $user->last_login_at;
             $isSelf = $user->id === auth()->id();
             $roleBadge = match ($user->role?->name) {
               'admin' => 'bg-purple-100 text-purple-700',
@@ -96,13 +97,18 @@
                     class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>{{ __('app.status_active') }}
                   </span>
+                @elseif($isInactive)
+                  <span
+                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>{{ __('app.status_inactive') }}
+                  </span>
                 @else
                   <span
                     class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>{{ __('app.status_pending') }}
                   </span>
                 @endif
-                @if($user->isOnline())
+                @if($user->id === auth()->id() || $user->isOnline())
                   <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>{{ __('app.status_online') }}
                   </span>
@@ -132,14 +138,14 @@
 
                 {{-- Edit (always shown) --}}
                 <button onclick="openEditModal(
-                                {{ $user->id }},
-                                {{ json_encode($user->name) }},
-                                {{ json_encode($user->username) }},
-                                {{ json_encode($user->email) }},
-                                {{ $user->role_id ?? 'null' }},
-                                {{ $user->block_id ?? 'null' }},
-                                {{ json_encode($user->resident?->unit_number) }}
-                              )"
+                                      {{ $user->id }},
+                                      {{ json_encode($user->name) }},
+                                      {{ json_encode($user->username) }},
+                                      {{ json_encode($user->email) }},
+                                      {{ $user->role_id ?? 'null' }},
+                                      {{ $user->block_id ?? 'null' }},
+                                      {{ json_encode($user->resident?->unit_number) }}
+                                    )"
                   class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                   title="{{ __('app.title_edit_user') }}">
                   <span class="material-icons text-lg">edit</span>
@@ -153,6 +159,15 @@
                     <span class="material-icons text-xs">verified</span>
                     {{ __('app.btn_approve') }}
                   </button>
+                @elseif($isInactive)
+                  @if(!$isSelf)
+                    {{-- Reactivate button → uses confirm modal --}}
+                    <button onclick="openUserConfirmModal('reactivate', {{ $user->id }}, {{ json_encode($user->name) }})"
+                      class="p-1.5 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                      title="Reactivate user">
+                      <span class="material-icons text-lg">person_add</span>
+                    </button>
+                  @endif
                 @else
                   @if(!$isSelf)
                     {{-- Deactivate button → triggers modal --}}

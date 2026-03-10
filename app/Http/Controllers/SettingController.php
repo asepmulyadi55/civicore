@@ -33,9 +33,9 @@ class SettingController extends Controller
     if ($request->hasFile('avatar')) {
       // Delete old avatar if exists
       if ($user->avatar) {
-        Storage::disk('public')->delete($user->avatar);
+        Storage::disk('local')->delete($user->avatar);
       }
-      $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+      $data['avatar'] = $request->file('avatar')->store('avatars', 'local');
     } else {
       unset($data['avatar']);
     }

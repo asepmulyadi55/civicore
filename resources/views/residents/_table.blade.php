@@ -18,19 +18,24 @@
       <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
         <tr>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {{ __('app.table_resident_name') }}</th>
+            {{ __('app.table_resident_name') }}
+          </th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {{ __('app.table_block_unit') }}</th>
+            {{ __('app.table_block_unit') }}
+          </th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_phone') }}
           </th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
-            {{ __('app.table_monthly_fee') }}</th>
+            {{ __('app.table_monthly_fee') }}
+          </th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {{ __('app.table_fee_since') }}</th>
+            {{ __('app.table_fee_since') }}
+          </th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}
           </th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
-            {{ __('app.table_actions') }}</th>
+            {{ __('app.table_actions') }}
+          </th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -56,7 +61,8 @@
                 <div>
                   <div class="text-sm font-semibold text-slate-900 dark:text-white">{{ $resident->fullname }}</div>
                   <div class="text-xs text-slate-400">{{ __('app.member_since') }}
-                    {{ $resident->created_at->format('Y') }}</div>
+                    {{ $resident->created_at->format('Y') }}
+                  </div>
                 </div>
               </div>
             </td>
@@ -65,7 +71,7 @@
             <td class="px-6 py-4">
               <span
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                {{ $isBlockA ? 'bg-primary/10 text-primary' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' }}">
+                  {{ $isBlockA ? 'bg-primary/10 text-primary' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' }}">
                 {{ $blockLabel }}
               </span>
             </td>
@@ -178,11 +184,12 @@
 
         @if ($residents->hasMorePages())
           <a href="{{ $residents->nextPageUrl() }}"
-            class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
             <span class="material-icons text-sm">chevron_right</span>
           </a>
         @else
-          <button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-300 cursor-not-allowed"
+          <button
+            class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 cursor-not-allowed"
             disabled>
             <span class="material-icons text-sm">chevron_right</span>
           </button>

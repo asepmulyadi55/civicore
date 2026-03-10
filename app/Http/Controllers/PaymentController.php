@@ -190,7 +190,7 @@ class PaymentController extends Controller
 
         $proofPath = null;
         if ($request->hasFile('proof')) {
-            $proofPath = $request->file('proof')->store('proofs', 'public');
+            $proofPath = $request->file('proof')->store('proofs', 'local');
         }
 
         $baseData = [
@@ -261,9 +261,9 @@ class PaymentController extends Controller
         $proofPath = $payment->proof_path;
         if ($request->hasFile('proof')) {
             if ($proofPath) {
-                \Storage::disk('public')->delete($proofPath);
+                \Storage::disk('local')->delete($proofPath);
             }
-            $proofPath = $request->file('proof')->store('proofs', 'public');
+            $proofPath = $request->file('proof')->store('proofs', 'local');
         }
 
         $status = $request->status;

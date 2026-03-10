@@ -37,7 +37,13 @@ class LoginController extends Controller
     }
 
     if (!$user->is_active) {
-      return back()->with('error', 'Your account is pending admin approval.')
+      // Distinguish pending (never logged in / never approved) from deactivated
+      if ($user->last_login_at) {
+        $msg = 'Your account has been deactivated. Please contact the administrator.';
+      } else {
+        $msg = 'Your account is pending admin approval.';
+      }
+      return back()->with('error', $msg)
         ->withInput($request->only('username', 'remember'));
     }
 
@@ -71,6 +77,7 @@ class LoginController extends Controller
     if ($user) {
       /** @var \App\Models\User $user */
       $user->session_token = null;
+      $user->last_active_at = null;   // mark as offline immediately
       $user->save();
     }
 

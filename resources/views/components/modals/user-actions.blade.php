@@ -31,6 +31,13 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
           {{ __('app.btn_yes_deactivate') }}
         </button>
       </form>
+      <form id="ucm-form-reactivate" method="POST" action="" class="flex-1 hidden">
+        @csrf @method('PATCH')
+        <button type="submit"
+          class="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all">
+          Reactivate
+        </button>
+      </form>
       <form id="ucm-form-delete" method="POST" action="" class="flex-1 hidden">
         @csrf @method('DELETE')
         <button type="submit"
@@ -167,6 +174,15 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
       form: 'ucm-form-deactivate',
       route: id => `/users/${id}/deactivate`,
     },
+    reactivate: {
+      iconWrap: 'bg-emerald-100 dark:bg-emerald-900/30',
+      icon: 'person_add',
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      title: 'Reactivate User',
+      body: name => `Reactivate <strong class="text-slate-800 dark:text-slate-200">${name}</strong>? They will be able to log in again immediately.`,
+      form: 'ucm-form-reactivate',
+      route: id => `/users/${id}/reactivate`,
+    },
     delete: {
       iconWrap: 'bg-red-100 dark:bg-red-900/30',
       icon: 'delete_forever',
@@ -188,7 +204,7 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
     iconEl.className = `material-icons text-3xl ${cfg.iconColor}`;
     document.getElementById('ucm-title').textContent = cfg.title;
     document.getElementById('ucm-body').innerHTML = cfg.body(userName);
-    ['deactivate', 'delete'].forEach(a =>
+    ['deactivate', 'reactivate', 'delete'].forEach(a =>
       document.getElementById(`ucm-form-${a}`).classList.toggle('hidden', a !== action)
     );
     document.getElementById(`ucm-form-${action}`).action = cfg.route(userId);

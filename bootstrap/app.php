@@ -16,9 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'single.session' => \App\Http\Middleware\CheckSingleSession::class,
         ]);
 
+        $middleware->prependToGroup('web', [
+            \App\Http\Middleware\UpdateLastActive::class,
+        ]);
+
         $middleware->appendToGroup('web', [
             \App\Http\Middleware\SetLocale::class,
-            \App\Http\Middleware\UpdateLastActive::class,
             \App\Http\Middleware\CheckSingleSession::class,
         ]);
     })
