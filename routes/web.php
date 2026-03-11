@@ -18,8 +18,11 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SessionConflictController;
 use App\Http\Controllers\PrivateFileController;
 
+// ── Public homepage (React SPA) ───────────────────────────────────────────────
+Route::get('/', fn() => view('spa'))->name('home');
+
 // ── Auth (public) ─────────────────────────────────────────────────────────────
-Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:10,1');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
