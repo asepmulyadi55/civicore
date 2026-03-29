@@ -220,6 +220,13 @@
                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                 placeholder="Short description... (optional)">
             </div>
+            <div class="space-y-1.5">
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Event Image URL</label>
+              <input type="url" name="image_url"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                placeholder="https://example.com/image.jpg (optional)">
+              <p class="text-xs text-slate-400">Shown as the event card image on the frontend. Leave blank to use a default placeholder.</p>
+            </div>
             <div class="flex justify-end">
               <button type="submit"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all">
@@ -307,6 +314,13 @@
                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                 placeholder="Short description... (optional)">
             </div>
+            <div class="space-y-1.5">
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Event Image URL</label>
+              <input type="url" name="image_url"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                placeholder="https://example.com/image.jpg (optional)">
+              <p class="text-xs text-slate-400">Shown in the Past Highlights gallery on the frontend. Leave blank to use a default placeholder.</p>
+            </div>
             <div class="flex justify-end">
               <button type="submit"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm font-bold rounded-xl transition-all">
@@ -372,8 +386,49 @@
             <textarea name="content" rows="6"
               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"
               placeholder="Write about the community, its history, values, and vision..." required>{{ old('content', $about['content'] ?? '') }}</textarea>
-            <p class="text-xs text-slate-400">Max 3,000 characters. Plain text; formatting is handled by the React frontend.</p>
+            <p class="text-xs text-slate-400">Max 3,000 characters. Separate paragraphs with a blank line.</p>
           </div>
+          <div class="space-y-1.5">
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Section Image URL</label>
+            <input type="url" name="image_url" value="{{ old('image_url', $about['image_url'] ?? '') }}"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+              placeholder="https://example.com/community-photo.jpg (optional)">
+            <p class="text-xs text-slate-400">Optional image shown below the about text on the frontend. Leave blank to hide the image.</p>
+          </div>
+
+          {{-- Stats Grid --}}
+          @php
+            $defaultStats = [
+              ['value' => '500+',    'label' => 'Residents'],
+              ['value' => '24/7',    'label' => 'Security'],
+              ['value' => '12',      'label' => 'Parks'],
+              ['value' => 'Monthly', 'label' => 'Events'],
+            ];
+            $savedStats = old('stats', $about['stats'] ?? $defaultStats);
+            // Always ensure 4 rows
+            while (count($savedStats) < 4) { $savedStats[] = ['value' => '', 'label' => '']; }
+          @endphp
+          <div class="space-y-3">
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Stats Cards</label>
+            <p class="text-xs text-slate-400">The 4 stat cards shown in the About section. Edit both the value and label for each.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              @foreach($savedStats as $i => $stat)
+                <div class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                  <div class="flex-1 space-y-1.5">
+                    <input type="text" name="stats[{{ $i }}][value]"
+                      value="{{ $stat['value'] ?? '' }}"
+                      class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                      placeholder="e.g. 500+">
+                    <input type="text" name="stats[{{ $i }}][label]"
+                      value="{{ $stat['label'] ?? '' }}"
+                      class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                      placeholder="e.g. Residents">
+                  </div>
+                </div>
+              @endforeach
+            </div>
+          </div>
+
           <div class="flex justify-end pt-2">
             <button type="submit"
               class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-primary/20">

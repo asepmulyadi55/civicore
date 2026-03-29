@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,27 @@ use Illuminate\Support\Str;
 
 class HomepageController extends Controller
 {
+    // ── Public API — JSON for React frontend ──────────────────────────────────
+
+    public function api(): JsonResponse
+    {
+        $hero          = json_decode(Setting::get('homepage_hero',          '{}'), true) ?? [];
+        $featuredEvent = json_decode(Setting::get('homepage_featured_event','{}'), true) ?? [];
+        $events        = json_decode(Setting::get('homepage_events',        '[]'), true) ?? [];
+        $about         = json_decode(Setting::get('homepage_about',         '{}'), true) ?? [];
+
+        $upcomingEvents = array_values(array_filter($events, fn($e) => ($e['status'] ?? '') === 'upcoming'));
+        $pastEvents     = array_values(array_filter($events, fn($e) => ($e['status'] ?? '') === 'past'));
+
+        return response()->json([
+            'hero'            => $hero,
+            'featured_event'  => $featuredEvent,
+            'upcoming_events' => $upcomingEvents,
+            'past_events'     => $pastEvents,
+            'about'           => $about,
+        ]);
+    }
+
     // ── Index ─────────────────────────────────────────────────────────────────
 
     public function index()
@@ -69,6 +91,7 @@ class HomepageController extends Controller
             'description' => 'nullable|string|max:500',
             'date'        => 'nullable|date',
             'status'      => 'required|string|in:upcoming,past',
+            'image_url'   => 'nullable|url|max:500',
         ]);
 
         $events = json_decode(Setting::get('homepage_events', '[]'), true) ?? [];
@@ -95,8 +118,20 @@ class HomepageController extends Controller
     public function updateAbout(Request $request)
     {
         $data = $request->validate([
-            'content' => 'required|string|max:3000',
+            'content'        => 'required|string|max:3000',
+            'image_url'      => 'nullable|url|max:500',
+            'stats'          => 'nullable|array|max:4',
+            'stats.*.value'  => 'nullable|string|max:50',
+            'stats.*.label'  => 'nullable|string|max:50',
         ]);
+
+        // Clean out empty stat rows
+        if (!empty($data['stats'])) {
+            $data['stats'] = array_values(array_filter(
+                $data['stats'],
+                fn($s) => !empty($s['value']) || !empty($s['label'])
+            ));
+        }
 
         $this->saveSetting('homepage_about', json_encode($data), 'About Section');
 

@@ -22,6 +22,9 @@ use App\Http\Controllers\HomepageController;
 // ── Public homepage (React SPA) ───────────────────────────────────────────────
 Route::get('/', fn() => view('spa'))->name('home');
 
+// ── Public API — Homepage content for React frontend ─────────────────────────
+Route::get('/api/homepage', [HomepageController::class, 'api'])->name('api.homepage');
+
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:10,1');
@@ -51,6 +54,14 @@ Route::middleware('auth')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // ── Homepage CMS ─────────────────────────────────────────────────────────
+    Route::get('/homepage', [HomepageController::class, 'index'])->name('homepage.index');
+    Route::post('/homepage/hero', [HomepageController::class, 'updateHero'])->name('homepage.hero');
+    Route::post('/homepage/featured-event', [HomepageController::class, 'updateFeaturedEvent'])->name('homepage.featured-event');
+    Route::post('/homepage/events', [HomepageController::class, 'storeEvent'])->name('homepage.events.store');
+    Route::delete('/homepage/events/{id}', [HomepageController::class, 'destroyEvent'])->name('homepage.events.destroy');
+    Route::post('/homepage/about', [HomepageController::class, 'updateAbout'])->name('homepage.about');
 
     // ── Private file serving (auth-protected) ─────────────────────────────────
     Route::get('/private/{path}', [PrivateFileController::class, 'serve'])
