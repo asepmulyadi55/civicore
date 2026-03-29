@@ -9,7 +9,7 @@ return [
   'nav_users' => 'User Management',
   'nav_roles' => 'Roles & Permissions',
   'nav_reports' => 'Reports',
-  'nav_events' => 'Events',
+  'nav_homepage' => 'Homepage',
   'nav_settings' => 'Settings',
   'nav_logout' => 'Logout',
 

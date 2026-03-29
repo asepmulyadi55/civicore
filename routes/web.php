@@ -17,6 +17,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SessionConflictController;
 use App\Http\Controllers\PrivateFileController;
+use App\Http\Controllers\HomepageController;
 
 // ── Public homepage (React SPA) ───────────────────────────────────────────────
 Route::get('/', fn() => view('spa'))->name('home');
@@ -136,14 +137,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/roles/{role}', [RoleController::class, 'destroy'])
         ->middleware('permission:roles.delete')->name('roles.destroy');
 
-    // Coming Soon pages
-    Route::get('/events', function () {
-        return view('coming-soon', [
-            'feature' => 'Events',
-            'icon' => 'event',
-            'description' => 'Plan and manage community events, announcements, and schedules. This feature is currently under development.',
-        ]);
-    })->name('events.index');
+    // ── Homepage CMS ───────────────────────────────────────────────────────────
+    Route::get('/homepage', [HomepageController::class, 'index'])->name('homepage.index');
+    Route::post('/homepage/hero', [HomepageController::class, 'updateHero'])->name('homepage.hero');
+    Route::post('/homepage/featured-event', [HomepageController::class, 'updateFeaturedEvent'])->name('homepage.featured-event');
+    Route::post('/homepage/events', [HomepageController::class, 'storeEvent'])->name('homepage.events.store');
+    Route::delete('/homepage/events/{id}', [HomepageController::class, 'destroyEvent'])->name('homepage.events.destroy');
+    Route::post('/homepage/about', [HomepageController::class, 'updateAbout'])->name('homepage.about');
 
     // ── Settings (profile — all roles) ────────────────────────────────────────
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
