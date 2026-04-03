@@ -357,7 +357,7 @@
     document.getElementById('edit-fee_start').value   = '{{ now()->format("Y-m") }}';
     document.getElementById('erm-unit-badge').textContent = data.unit_number;
     document.getElementById('erm-name-sub').textContent   = data.fullname;
-    document.getElementById('form-edit-resident').action  = `/residents/${id}`;
+    document.getElementById('form-edit-resident').action  = `{{ url('/residents') }}/${id}`;
     const el = document.getElementById('edit-resident-modal');
     el.classList.remove('hidden'); el.classList.add('flex');
     document.body.classList.add('overflow-hidden');

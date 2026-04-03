@@ -10,6 +10,7 @@ return [
   'nav_roles' => 'Roles & Permissions',
   'nav_reports' => 'Reports',
   'nav_homepage' => 'Homepage',
+  'nav_media' => 'Media Manager',
   'nav_settings' => 'Settings',
   'nav_logout' => 'Logout',
 
@@ -322,6 +323,27 @@ return [
   'select_all' => 'Select All',
   'deselect_all' => 'Deselect All',
   'btn_save_permissions' => 'Save Permissions',
+  'btn_delete' => 'Delete',
+
+  // Media Manager
+  'media_manager' => 'Media Manager',
+  'media_files' => 'Media Files',
+  'no_media_found' => 'No media files found.',
+  'search_by_filename' => 'Search by filename...',
+  'all_types' => 'All Types',
+  'type_image' => 'Image',
+  'type_document' => 'Document',
+  'btn_delete_selected' => 'Delete Selected',
+  'confirm_delete_file' => 'Delete this file permanently?',
+  'confirm_bulk_delete' => 'Delete all selected files permanently? This cannot be undone.',
+  'upload_image' => 'Upload Image',
+  'current_image' => 'Current Image',
+  'change_image' => 'Change Image',
+  'remove_image' => 'Remove Image',
+  'no_image_uploaded' => 'No image uploaded',
+  'image_hint' => 'JPG, PNG, WEBP or GIF · Max 5 MB',
+  'flash_file_deleted' => 'File deleted successfully.',
+  'flash_files_deleted' => ':count file(s) deleted successfully.',
 
   // Reports
   'financial' => 'Financial',

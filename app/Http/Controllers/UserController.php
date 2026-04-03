@@ -150,6 +150,7 @@ class UserController extends Controller
     $user->email = $validated['email'];
     $user->role_id = $validated['role_id'] ?? null;
     $user->block_id = $validated['block_id'] ?? null;
+    $user->unit_number = $validated['unit_number'] ?? null;
 
     if (!empty($validated['password'])) {
       $user->password = Hash::make($validated['password']);
@@ -185,6 +186,7 @@ class UserController extends Controller
     $user->update([
       'is_active' => true,
       'block_id' => $blockId,
+      'unit_number' => $request->input('unit_number'),
     ]);
 
     // Link matching resident if email found

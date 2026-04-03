@@ -9,7 +9,8 @@
     ['key' => 'users', 'label' => 'User Management', 'icon' => 'manage_accounts', 'route' => 'users.index', 'permission' => 'users.view'],
     ['key' => 'roles', 'label' => 'Roles & Permissions', 'icon' => 'admin_panel_settings', 'route' => 'roles.index', 'permission' => 'roles.view'],
     ['key' => 'reports', 'label' => 'Reports', 'icon' => 'bar_chart', 'route' => 'reports.index', 'permission' => 'reports.view'],
-    ['key' => 'homepage', 'label' => 'Homepage', 'icon' => 'home', 'route' => 'homepage.index', 'permission' => null],
+    ['key' => 'homepage', 'label' => 'Homepage', 'icon' => 'home', 'route' => 'homepage.index', 'permission' => 'homepage.view'],
+    ['key' => 'media', 'label' => 'Media Manager', 'icon' => 'perm_media', 'route' => 'media.index', 'permission' => 'media.view'],
     ['key' => 'settings', 'label' => 'Settings', 'icon' => 'settings', 'route' => 'settings.index', 'permission' => null],
   ];
 

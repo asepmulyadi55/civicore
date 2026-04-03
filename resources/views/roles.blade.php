@@ -107,20 +107,20 @@
                         @if($role->name !== 'admin')
                           {{-- Edit Permissions --}}
                           <button
-                            onclick="openPermissionsModal({{ $role->id }}, '{{ addslashes($role->label) }}', {{ json_encode($role->permissions ?? new stdClass()) }})"
+                            onclick="openPermissionsModal('{{ $role->id }}', '{{ addslashes($role->label) }}', {{ json_encode($role->permissions ?? new stdClass()) }})"
                             class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                             title="{{ __('app.title_edit_permissions') }}">
                             <span class="material-icons text-lg">tune</span>
                           </button>
                           {{-- Edit Role --}}
                           <button
-                            onclick="openEditRoleModal({{ $role->id }}, '{{ addslashes($role->label) }}', '{{ addslashes($role->description ?? '') }}')"
+                            onclick="openEditRoleModal('{{ $role->id }}', '{{ addslashes($role->label) }}', '{{ addslashes($role->description ?? '') }}')"
                             class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                             title="{{ __('app.title_edit_role') }}">
                             <span class="material-icons text-lg">edit</span>
                           </button>
                           {{-- Delete --}}
-                          <button onclick="openDeleteRoleModal({{ $role->id }}, '{{ addslashes($role->label) }}')"
+                          <button onclick="openDeleteRoleModal('{{ $role->id }}', '{{ addslashes($role->label) }}')"
                             class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors"
                             title="{{ __('app.title_delete_role') }}">
                             <span class="material-icons text-lg">delete_outline</span>
@@ -244,7 +244,7 @@
           <form id="delete-role-form" method="POST" action="" class="flex-1">
             @csrf @method('DELETE')
             <button type="submit"
-              class="w-full py-3 bg-rose-500 text-white rounded-xl text-sm font-bold hover:bg-rose-600 transition-all active:scale-95">{{ __('app.btn_delete') ?? 'Delete' }}</button>
+              class="w-full py-3 bg-rose-500 text-white rounded-xl text-sm font-bold hover:bg-rose-600 transition-all active:scale-95">{{ __('app.btn_delete') }}</button>
           </form>
         </div>
       </div>
@@ -272,12 +272,14 @@
             $allActions = ['view', 'create', 'edit', 'delete', 'approve'];
             $moduleLabels = [
               'dashboard' => __('app.nav_dashboard'),
+              'homepage'  => __('app.nav_homepage'),
               'residents' => __('app.nav_residents'),
               'blocks' => __('app.nav_blocks'),
               'payments' => __('app.nav_payments'),
               'reports' => __('app.nav_reports'),
               'users' => __('app.nav_users'),
               'roles' => __('app.nav_roles'),
+              'media' => __('app.nav_media'),
             ];
           @endphp
 

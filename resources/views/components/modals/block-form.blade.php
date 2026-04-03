@@ -186,7 +186,7 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
     document.getElementById('edit-block-description').value = description;
     document.getElementById('edit-block-active').checked = isActive;
     document.getElementById('ebm-name-badge').textContent = name;
-    document.getElementById('form-edit-block').action = `/blocks/${id}`;
+    document.getElementById('form-edit-block').action = `{{ url('/blocks') }}/${id}`;
     const el = document.getElementById('edit-block-modal');
     el.classList.remove('hidden'); el.classList.add('flex');
     document.body.classList.add('overflow-hidden');

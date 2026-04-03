@@ -1,7 +1,7 @@
 <?php
 
+use App\Models\Setting;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration {
   private array $settings = [
@@ -30,7 +30,7 @@ return new class extends Migration {
   public function up(): void
   {
     foreach ($this->settings as $setting) {
-      DB::table('settings')->updateOrInsert(
+      Setting::firstOrCreate(
         ['key' => $setting['key']],
         $setting
       );
@@ -40,6 +40,6 @@ return new class extends Migration {
   public function down(): void
   {
     $keys = array_column($this->settings, 'key');
-    DB::table('settings')->whereIn('key', $keys)->delete();
+    Setting::whereIn('key', $keys)->delete();
   }
 };

@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('settings', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('key')->unique();           // e.g. app_name, support_email, default_due_day
             $table->text('value')->nullable();
             $table->string('label');                   // Human-readable name shown in Settings UI

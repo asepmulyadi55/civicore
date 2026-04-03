@@ -18,12 +18,16 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SessionConflictController;
 use App\Http\Controllers\PrivateFileController;
 use App\Http\Controllers\HomepageController;
+use App\Http\Controllers\MediaController;
 
 // ── Public homepage (React SPA) ───────────────────────────────────────────────
 Route::get('/', fn() => view('spa'))->name('home');
 
-// ── Public API — Homepage content for React frontend ─────────────────────────
-Route::get('/api/homepage', [HomepageController::class, 'api'])->name('api.homepage');
+// ── Internal API — Homepage content for React SPA ───────────────────────────
+// Protected by X-Api-Key header (key injected into SPA via Blade meta tag).
+Route::get('/api/homepage', [HomepageController::class, 'api'])
+    ->middleware('api.key')
+    ->name('api.homepage');
 
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -56,12 +60,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // ── Homepage CMS ─────────────────────────────────────────────────────────
-    Route::get('/homepage', [HomepageController::class, 'index'])->name('homepage.index');
-    Route::post('/homepage/hero', [HomepageController::class, 'updateHero'])->name('homepage.hero');
-    Route::post('/homepage/featured-event', [HomepageController::class, 'updateFeaturedEvent'])->name('homepage.featured-event');
-    Route::post('/homepage/events', [HomepageController::class, 'storeEvent'])->name('homepage.events.store');
-    Route::delete('/homepage/events/{id}', [HomepageController::class, 'destroyEvent'])->name('homepage.events.destroy');
-    Route::post('/homepage/about', [HomepageController::class, 'updateAbout'])->name('homepage.about');
+    Route::get('/homepage', [HomepageController::class, 'index'])
+        ->middleware('permission:homepage.view')->name('homepage.index');
+    Route::post('/homepage/hero', [HomepageController::class, 'updateHero'])
+        ->middleware('permission:homepage.edit')->name('homepage.hero');
+    Route::post('/homepage/featured-event', [HomepageController::class, 'updateFeaturedEvent'])
+        ->middleware('permission:homepage.edit')->name('homepage.featured-event');
+    Route::post('/homepage/events', [HomepageController::class, 'storeEvent'])
+        ->middleware('permission:homepage.create')->name('homepage.events.store');
+    Route::put('/homepage/events/{id}', [HomepageController::class, 'updateEvent'])
+        ->middleware('permission:homepage.edit')->name('homepage.events.update');
+    Route::delete('/homepage/events/{id}', [HomepageController::class, 'destroyEvent'])
+        ->middleware('permission:homepage.delete')->name('homepage.events.destroy');
+    Route::post('/homepage/about', [HomepageController::class, 'updateAbout'])
+        ->middleware('permission:homepage.edit')->name('homepage.about');
 
     // ── Private file serving (auth-protected) ─────────────────────────────────
     Route::get('/private/{path}', [PrivateFileController::class, 'serve'])
@@ -148,13 +160,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/roles/{role}', [RoleController::class, 'destroy'])
         ->middleware('permission:roles.delete')->name('roles.destroy');
 
-    // ── Homepage CMS ───────────────────────────────────────────────────────────
-    Route::get('/homepage', [HomepageController::class, 'index'])->name('homepage.index');
-    Route::post('/homepage/hero', [HomepageController::class, 'updateHero'])->name('homepage.hero');
-    Route::post('/homepage/featured-event', [HomepageController::class, 'updateFeaturedEvent'])->name('homepage.featured-event');
-    Route::post('/homepage/events', [HomepageController::class, 'storeEvent'])->name('homepage.events.store');
-    Route::delete('/homepage/events/{id}', [HomepageController::class, 'destroyEvent'])->name('homepage.events.destroy');
-    Route::post('/homepage/about', [HomepageController::class, 'updateAbout'])->name('homepage.about');
+    // ── Media Manager ─────────────────────────────────────────────────────────
+    Route::get('/media', [MediaController::class, 'index'])
+        ->middleware('permission:media.view')->name('media.index');
+    Route::delete('/media/{mediaFile}', [MediaController::class, 'destroy'])
+        ->middleware('permission:media.delete')->name('media.destroy');
+    Route::delete('/media', [MediaController::class, 'bulkDestroy'])
+        ->middleware('permission:media.delete')->name('media.bulk-destroy');
 
     // ── Settings (profile — all roles) ────────────────────────────────────────
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');

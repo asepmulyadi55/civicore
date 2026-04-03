@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Enums\PaymentStatus;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PaymentRecord extends Model
 {
+    use HasUuids;
     protected $fillable = [
         'resident_id',
         'batch_id',

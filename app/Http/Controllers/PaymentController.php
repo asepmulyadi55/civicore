@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\PaymentStatus;
 use App\Models\Block;
+use App\Models\MediaFile;
 use App\Models\PaymentRecord;
 use App\Models\Resident;
 use App\Models\Setting;
@@ -62,7 +63,7 @@ class PaymentController extends Controller
      * Load residents list and their current fee map for the JS payment modal.
      * Returns ['residents' => Collection, 'residentFees' => Collection].
      */
-    private function buildResidentData(?int $scopeBlockId): array
+    private function buildResidentData(?string $scopeBlockId): array
     {
         $residents = Resident::with(['block', 'feeHistories'])
             ->where('is_active', true)
@@ -121,7 +122,7 @@ class PaymentController extends Controller
      * Build summary stats (counts / totals) for the payments dashboard header.
      * Returns array suitable for merging into view compact().
      */
-    private function buildStats(?int $scopeBlockId): array
+    private function buildStats(?string $scopeBlockId): array
     {
         $statBase = PaymentRecord::when(
             $scopeBlockId,
@@ -190,7 +191,16 @@ class PaymentController extends Controller
 
         $proofPath = null;
         if ($request->hasFile('proof')) {
-            $proofPath = $request->file('proof')->store('proofs', 'local');
+            $proofFile = $request->file('proof');
+            $proofPath = $proofFile->store('proofs', 'local');
+            MediaFile::create([
+                'disk'          => 'local',
+                'path'          => $proofPath,
+                'original_name' => $proofFile->getClientOriginalName(),
+                'mime_type'     => $proofFile->getMimeType(),
+                'size'          => $proofFile->getSize(),
+                'uploaded_by'   => auth()->id(),
+            ]);
         }
 
         $baseData = [
@@ -262,8 +272,18 @@ class PaymentController extends Controller
         if ($request->hasFile('proof')) {
             if ($proofPath) {
                 \Storage::disk('local')->delete($proofPath);
+                MediaFile::where('path', $proofPath)->delete();
             }
-            $proofPath = $request->file('proof')->store('proofs', 'local');
+            $proofFile = $request->file('proof');
+            $proofPath = $proofFile->store('proofs', 'local');
+            MediaFile::create([
+                'disk'          => 'local',
+                'path'          => $proofPath,
+                'original_name' => $proofFile->getClientOriginalName(),
+                'mime_type'     => $proofFile->getMimeType(),
+                'size'          => $proofFile->getSize(),
+                'uploaded_by'   => auth()->id(),
+            ]);
         }
 
         $status = $request->status;

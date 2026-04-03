@@ -72,7 +72,7 @@
             <p class="text-xs text-slate-500">Main banner shown at the top of the public homepage</p>
           </div>
         </div>
-        <form method="POST" action="{{ route('homepage.hero') }}" class="p-6 space-y-5">
+        <form method="POST" action="{{ route('homepage.hero') }}" class="p-6 space-y-5" enctype="multipart/form-data" novalidate>
           @csrf
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div class="space-y-1.5">
@@ -101,11 +101,37 @@
             </div>
           </div>
           <div class="space-y-1.5">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Background Image URL</label>
-            <input type="text" name="bg_image" value="{{ old('bg_image', $hero['bg_image'] ?? '') }}"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-              placeholder="e.g. https://cdn.example.com/hero.jpg">
-            <p class="text-xs text-slate-400">Provide a public image URL. This will be used as the hero background on the React frontend.</p>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Background Image</label>
+            @if(!empty($hero['bg_image']))
+              <div class="flex items-center gap-4 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                <img src="{{ $hero['bg_image'] }}" alt="Current hero background"
+                  class="w-24 h-16 object-cover rounded-lg border border-slate-200 dark:border-slate-700 flex-shrink-0">
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ __('app.current_image') }}</p>
+                  <p class="text-xs text-slate-400 truncate">{{ $hero['bg_image'] }}</p>
+                </div>
+              </div>
+            @endif
+            <label class="flex flex-col items-center justify-center gap-2 w-full h-28 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 hover:border-primary/60 hover:bg-primary/5 transition-all cursor-pointer"
+              id="hero-bg-label">
+              <span class="material-icons text-slate-400 text-3xl">cloud_upload</span>
+              <span class="text-sm font-semibold text-slate-500">{{ __('app.upload_image') }}</span>
+              <span class="text-xs text-slate-400">{{ __('app.image_hint') }}</span>
+              <input type="file" name="bg_image" id="hero-bg-input" accept="image/*" class="sr-only"
+                onchange="previewImage(this, 'hero-bg-preview', 'hero-bg-label')">
+            </label>
+            <div id="hero-bg-preview" class="hidden items-center gap-3 p-3 rounded-xl border border-primary/30 bg-primary/5">
+              <img src="" alt="Preview" class="w-20 h-14 object-cover rounded-lg flex-shrink-0">
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-primary">Ready to upload</p>
+                <p class="text-xs text-slate-400 truncate" id="hero-bg-filename"></p>
+              </div>
+              <button type="button" onclick="clearImageInput('hero-bg-input','hero-bg-preview','hero-bg-label')"
+                class="text-slate-400 hover:text-rose-500 transition-colors">
+                <span class="material-icons text-lg">close</span>
+              </button>
+            </div>
+            <p class="text-xs text-slate-400">Leave empty to keep the current image. Uploading a new file will replace and delete the old one.</p>
           </div>
           <div class="flex justify-end pt-2">
             <button type="submit"
@@ -130,7 +156,7 @@
             <p class="text-xs text-slate-500">Highlighted event shown prominently with a YouTube embed</p>
           </div>
         </div>
-        <form method="POST" action="{{ route('homepage.featured-event') }}" class="p-6 space-y-5">
+        <form method="POST" action="{{ route('homepage.featured-event') }}" class="p-6 space-y-5" novalidate>
           @csrf
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div class="space-y-1.5">
@@ -198,7 +224,7 @@
         {{-- Add Upcoming Event form --}}
         <div class="p-6 border-b border-slate-100 dark:border-slate-800">
           <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Add Upcoming Event</p>
-          <form method="POST" action="{{ route('homepage.events.store') }}" class="space-y-4">
+          <form method="POST" action="{{ route('homepage.events.store') }}" class="space-y-4" novalidate>
             @csrf
             <input type="hidden" name="status" value="upcoming">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -253,15 +279,34 @@
                   @endif
                 </p>
               </div>
-              <form method="POST" action="{{ route('homepage.events.destroy', $event['id']) }}">
-                @csrf @method('DELETE')
-                <button type="submit"
-                  class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors"
-                  title="Remove event"
-                  onclick="return confirm('Remove this event?')">
-                  <span class="material-icons text-[18px]">delete_outline</span>
+              <div class="flex items-center gap-1">
+                @if(auth()->user()->can('homepage.edit'))
+                <button type="button"
+                  data-id="{{ $event['id'] }}"
+                  data-title="{{ $event['title'] }}"
+                  data-date="{{ $event['date'] ?? '' }}"
+                  data-description="{{ $event['description'] ?? '' }}"
+                  data-category="{{ $event['category'] ?? '' }}"
+                  data-image-url="{{ $event['image_url'] ?? '' }}"
+                  data-status="{{ $event['status'] ?? 'upcoming' }}"
+                  onclick="openEventEditModal(this)"
+                  class="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-lg transition-colors"
+                  title="Edit event">
+                  <span class="material-icons text-[18px]">edit</span>
                 </button>
-              </form>
+                @endif
+                @if(auth()->user()->can('homepage.delete'))
+                <form method="POST" action="{{ route('homepage.events.destroy', $event['id']) }}">
+                  @csrf @method('DELETE')
+                  <button type="submit"
+                    class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors"
+                    title="Remove event"
+                    onclick="return confirm('Remove this event?')">
+                    <span class="material-icons text-[18px]">delete_outline</span>
+                  </button>
+                </form>
+                @endif
+              </div>
             </div>
           @empty
             <div class="px-6 py-10 text-center">
@@ -292,7 +337,7 @@
         {{-- Add Past Event form --}}
         <div class="p-6 border-b border-slate-100 dark:border-slate-800">
           <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Add Past Event</p>
-          <form method="POST" action="{{ route('homepage.events.store') }}" class="space-y-4">
+          <form method="POST" action="{{ route('homepage.events.store') }}" class="space-y-4" novalidate>
             @csrf
             <input type="hidden" name="status" value="past">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -347,15 +392,34 @@
                   @endif
                 </p>
               </div>
-              <form method="POST" action="{{ route('homepage.events.destroy', $event['id']) }}">
-                @csrf @method('DELETE')
-                <button type="submit"
-                  class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors"
-                  title="Remove event"
-                  onclick="return confirm('Remove this event?')">
-                  <span class="material-icons text-[18px]">delete_outline</span>
+              <div class="flex items-center gap-1">
+                @if(auth()->user()->can('homepage.edit'))
+                <button type="button"
+                  data-id="{{ $event['id'] }}"
+                  data-title="{{ $event['title'] }}"
+                  data-date="{{ $event['date'] ?? '' }}"
+                  data-description="{{ $event['description'] ?? '' }}"
+                  data-category="{{ $event['category'] ?? '' }}"
+                  data-image-url="{{ $event['image_url'] ?? '' }}"
+                  data-status="{{ $event['status'] ?? 'past' }}"
+                  onclick="openEventEditModal(this)"
+                  class="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-lg transition-colors"
+                  title="Edit event">
+                  <span class="material-icons text-[18px]">edit</span>
                 </button>
-              </form>
+                @endif
+                @if(auth()->user()->can('homepage.delete'))
+                <form method="POST" action="{{ route('homepage.events.destroy', $event['id']) }}">
+                  @csrf @method('DELETE')
+                  <button type="submit"
+                    class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors"
+                    title="Remove event"
+                    onclick="return confirm('Remove this event?')">
+                    <span class="material-icons text-[18px]">delete_outline</span>
+                  </button>
+                </form>
+                @endif
+              </div>
             </div>
           @empty
             <div class="px-6 py-10 text-center">
@@ -379,7 +443,7 @@
             <p class="text-xs text-slate-500">The community description shown in the "About" section of the public homepage</p>
           </div>
         </div>
-        <form method="POST" action="{{ route('homepage.about') }}" class="p-6 space-y-5">
+        <form method="POST" action="{{ route('homepage.about') }}" class="p-6 space-y-5" enctype="multipart/form-data" novalidate>
           @csrf
           <div class="space-y-1.5">
             <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">About Content <span class="text-rose-500">*</span></label>
@@ -389,11 +453,37 @@
             <p class="text-xs text-slate-400">Max 3,000 characters. Separate paragraphs with a blank line.</p>
           </div>
           <div class="space-y-1.5">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Section Image URL</label>
-            <input type="url" name="image_url" value="{{ old('image_url', $about['image_url'] ?? '') }}"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-              placeholder="https://example.com/community-photo.jpg (optional)">
-            <p class="text-xs text-slate-400">Optional image shown below the about text on the frontend. Leave blank to hide the image.</p>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Section Image</label>
+            @if(!empty($about['image_url']))
+              <div class="flex items-center gap-4 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                <img src="{{ $about['image_url'] }}" alt="Current about image"
+                  class="w-24 h-16 object-cover rounded-lg border border-slate-200 dark:border-slate-700 flex-shrink-0">
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ __('app.current_image') }}</p>
+                  <p class="text-xs text-slate-400 truncate">{{ $about['image_url'] }}</p>
+                </div>
+              </div>
+            @endif
+            <label class="flex flex-col items-center justify-center gap-2 w-full h-28 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 hover:border-primary/60 hover:bg-primary/5 transition-all cursor-pointer"
+              id="about-img-label">
+              <span class="material-icons text-slate-400 text-3xl">cloud_upload</span>
+              <span class="text-sm font-semibold text-slate-500">{{ __('app.upload_image') }}</span>
+              <span class="text-xs text-slate-400">{{ __('app.image_hint') }}</span>
+              <input type="file" name="image_url" id="about-img-input" accept="image/*" class="sr-only"
+                onchange="previewImage(this, 'about-img-preview', 'about-img-label')">
+            </label>
+            <div id="about-img-preview" class="hidden items-center gap-3 p-3 rounded-xl border border-primary/30 bg-primary/5">
+              <img src="" alt="Preview" class="w-20 h-14 object-cover rounded-lg flex-shrink-0">
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-primary">Ready to upload</p>
+                <p class="text-xs text-slate-400 truncate" id="about-img-filename"></p>
+              </div>
+              <button type="button" onclick="clearImageInput('about-img-input','about-img-preview','about-img-label')"
+                class="text-slate-400 hover:text-rose-500 transition-colors">
+                <span class="material-icons text-lg">close</span>
+              </button>
+            </div>
+            <p class="text-xs text-slate-400">Optional. Leave empty to keep the current image. Uploading a new file will replace and delete the old one.</p>
           </div>
 
           {{-- Stats Grid --}}
@@ -440,6 +530,142 @@
       </section>
 
     </main>
+  </div>
+
+  <script>
+    function previewImage(input, previewContainerId, labelId) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const container = document.getElementById(previewContainerId);
+        container.querySelector('img').src = e.target.result;
+        const filenameEl = container.querySelector('p.truncate');
+        if (filenameEl) filenameEl.textContent = file.name;
+        container.classList.remove('hidden');
+        container.classList.add('flex');
+        document.getElementById(labelId).classList.add('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearImageInput(inputId, previewContainerId, labelId) {
+      document.getElementById(inputId).value = '';
+      const container = document.getElementById(previewContainerId);
+      container.classList.add('hidden');
+      container.classList.remove('flex');
+      document.getElementById(labelId).classList.remove('hidden');
+    }
+
+    // ── Event Edit Modal ────────────────────────────────────────────────────
+    const eventEditModal    = document.getElementById('event-edit-modal');
+    const eventEditForm     = document.getElementById('event-edit-form');
+    const eventUpdateUrlTpl = '{{ route('homepage.events.update', '__id__') }}';
+
+    function openEventEditModal(btn) {
+      const { id, title, date, description, category, imageUrl, status } = btn.dataset;
+      eventEditForm.action = eventUpdateUrlTpl.replace('__id__', id);
+      document.getElementById('edit-event-title').value       = title       || '';
+      document.getElementById('edit-event-date').value        = date        || '';
+      document.getElementById('edit-event-description').value = description || '';
+      document.getElementById('edit-event-category').value    = category    || '';
+      document.getElementById('edit-event-image-url').value   = imageUrl    || '';
+      document.getElementById('edit-event-status').value      = status      || '';
+      eventEditModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeEventEditModal() {
+      eventEditModal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    eventEditModal.addEventListener('click', function(e) {
+      if (e.target === eventEditModal) closeEventEditModal();
+    });
+  </script>
+
+  {{-- ── Event Edit Modal ──────────────────────────────────────────────────── --}}
+  <div id="event-edit-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px)">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg">
+
+      {{-- Header --}}
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="material-icons text-blue-500 text-[20px]">edit_calendar</span>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Edit Event</h3>
+        </div>
+        <button type="button" onclick="closeEventEditModal()"
+          class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+          <span class="material-icons text-[20px]">close</span>
+        </button>
+      </div>
+
+      {{-- Form --}}
+      <form id="event-edit-form" method="POST" action="" class="p-6 space-y-4" novalidate>
+        @csrf @method('PUT')
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="sm:col-span-2 space-y-1.5">
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Title <span class="text-rose-500">*</span>
+            </label>
+            <input type="text" id="edit-event-title" name="title" required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+          </div>
+          <div class="space-y-1.5">
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Date</label>
+            <input type="date" id="edit-event-date" name="date"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+          </div>
+          <div class="space-y-1.5">
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Status</label>
+            <select id="edit-event-status" name="status"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+              <option value="upcoming">Upcoming</option>
+              <option value="past">Past</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2 space-y-1.5">
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Category</label>
+            <select id="edit-event-category" name="category"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+              <option value="">— None —</option>
+              <option value="wellness">Wellness</option>
+              <option value="meetings">Meetings</option>
+              <option value="education">Education</option>
+              <option value="cultural">Cultural</option>
+              <option value="sports">Sports</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2 space-y-1.5">
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Description</label>
+            <input type="text" id="edit-event-description" name="description"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+              placeholder="Short description... (optional)">
+          </div>
+          <div class="sm:col-span-2 space-y-1.5">
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Image URL</label>
+            <input type="url" id="edit-event-image-url" name="image_url"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+              placeholder="https://example.com/image.jpg (optional)">
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" onclick="closeEventEditModal()"
+            class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">
+            Cancel
+          </button>
+          <button type="submit"
+            class="inline-flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all">
+            <span class="material-icons text-base">save</span>
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
 </x-layouts.app>

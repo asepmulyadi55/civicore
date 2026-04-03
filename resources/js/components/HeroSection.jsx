@@ -15,9 +15,10 @@ export default function HeroSection({ hero = {}, loading }) {
     const bgImage  = hero?.bg_image || DEFAULTS.bg_image;
 
     const heroStyle = {
-        background: `linear-gradient(to bottom, rgba(15,18,33,0.65), rgba(15,18,33,0.45)), url('${bgImage}')`,
+        backgroundImage: `linear-gradient(to bottom, rgba(15,18,33,0.65), rgba(15,18,33,0.45)), url('${bgImage}')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
     };
 
     return (

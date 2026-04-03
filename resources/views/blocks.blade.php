@@ -119,12 +119,12 @@
 
                 <div class="flex gap-1">
                   <button
-                    onclick="openEditBlockDrawer({{ $block->id }}, '{{ addslashes($block->name) }}', '{{ addslashes($block->description ?? '') }}', {{ $block->is_active ? 'true' : 'false' }})"
+                    onclick="openEditBlockDrawer('{{ $block->id }}', '{{ addslashes($block->name) }}', '{{ addslashes($block->description ?? '') }}', {{ $block->is_active ? 'true' : 'false' }})"
                     class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                     title="{{ __('app.title_edit_block') }}">
                     <span class="material-icons text-sm">edit</span>
                   </button>
-                  <button type="button" onclick="openDeleteBlockModal({{ $block->id }}, '{{ addslashes($block->name) }}')"
+                  <button type="button" onclick="openDeleteBlockModal('{{ $block->id }}', '{{ addslashes($block->name) }}')"
                     class="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors"
                     title="{{ __('app.title_delete_block') }}">
                     <span class="material-icons text-sm">delete_outline</span>
@@ -169,9 +169,10 @@
   </div>
 
   <script>
+    const blocksBaseUrl = "{{ url('/blocks') }}";
     function openDeleteBlockModal(id, name) {
       document.getElementById('delete-block-name').textContent = name;
-      document.getElementById('delete-block-form').action = '/blocks/' + id;
+      document.getElementById('delete-block-form').action = blocksBaseUrl + '/' + id;
       document.getElementById('modal-delete-block').classList.remove('hidden');
       document.body.classList.add('overflow-hidden');
     }

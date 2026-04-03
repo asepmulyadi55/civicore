@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Role extends Model
 {
+    use HasUuids;
     protected $fillable = [
         'name',
         'label',
@@ -27,12 +29,14 @@ class Role extends Model
     // ── Available permissions — single source of truth ──────────────
     public static array $availablePermissions = [
         'dashboard' => ['view'],
+        'homepage'  => ['view', 'create', 'edit', 'delete'],
         'residents' => ['view', 'create', 'edit', 'delete'],
-        'blocks' => ['view', 'create', 'edit', 'delete'],
-        'payments' => ['view', 'create', 'edit', 'delete', 'approve'],
-        'reports' => ['view'],
-        'users' => ['view', 'create', 'edit', 'delete', 'approve'],
-        'roles' => ['view', 'create', 'edit', 'delete'],
+        'blocks'    => ['view', 'create', 'edit', 'delete'],
+        'payments'  => ['view', 'create', 'edit', 'delete', 'approve'],
+        'reports'   => ['view'],
+        'users'     => ['view', 'create', 'edit', 'delete', 'approve'],
+        'roles'     => ['view', 'create', 'edit', 'delete'],
+        'media'     => ['view', 'delete'],
     ];
 
     public function users(): HasMany
