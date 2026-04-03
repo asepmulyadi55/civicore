@@ -9,7 +9,7 @@ return [
   'nav_users' => 'Manajemen Pengguna',
   'nav_roles' => 'Peran & Izin',
   'nav_reports' => 'Laporan',
-  'nav_events' => 'Acara',
+  'nav_homepage' => 'Beranda',
   'nav_settings' => 'Pengaturan',
   'nav_logout' => 'Keluar',
 
