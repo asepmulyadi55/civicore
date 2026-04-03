@@ -13,9 +13,9 @@ export default function PastHighlights({ pastEvents = [], loading }) {
     return (
         <section className="py-32" style={{ background: 'linear-gradient(to bottom, #ffffff, #f5f5f5)' }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h2 className="text-3xl font-bold mb-4" style={{ color: '#1A237E' }}>Past Highlights</h2>
+                <h2 className="text-3xl font-bold mb-4" style={{ color: '#1A237E' }}>Past Events</h2>
                 <p className="text-slate-500 max-w-2xl mx-auto mb-16">
-                    Relive the moments that make our community special. Browse our gallery and video archives.
+                    Browse photos and memories from our past community events.
                 </p>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
@@ -31,7 +31,6 @@ export default function PastHighlights({ pastEvents = [], loading }) {
                                 : null;
 
                             return (
-                                // FIX: `relative` is required so the absolute overlay stays inside this card
                                 <div key={event.id || i}
                                     className="relative aspect-square rounded-2xl overflow-hidden shadow-sm group">
                                     <img
@@ -39,48 +38,30 @@ export default function PastHighlights({ pastEvents = [], loading }) {
                                         alt={event.title}
                                         className="w-full h-full object-cover"
                                     />
-                                    {/* Hover overlay — stays within this card because parent is relative */}
                                     <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4">
                                         <p className="text-white font-bold text-sm text-center leading-tight">{event.title}</p>
                                         {dateLabel && (
                                             <p className="text-white/70 text-xs mt-1">{dateLabel}</p>
+                                        )}
+                                        {event.url && (
+                                            <a href={event.url} target="_blank" rel="noopener noreferrer"
+                                                className="mt-3 px-4 py-1.5 bg-white/20 hover:bg-white/30 border border-white/40 text-white text-xs font-semibold rounded-lg transition-colors">
+                                                Learn More
+                                            </a>
                                         )}
                                     </div>
                                 </div>
                             );
                         })
                     ) : (
-                        // Static placeholder cards when no past events in CMS yet
-                        <>
-                            <div className="aspect-square rounded-2xl overflow-hidden shadow-sm">
-                                <img src={PLACEHOLDER_IMAGES[0]} alt="Community gathering" className="w-full h-full object-cover" />
-                            </div>
-                            <div className="aspect-square rounded-2xl overflow-hidden shadow-sm flex items-center justify-center p-8 text-white text-xs leading-tight uppercase font-medium"
-                                style={{ backgroundColor: '#2d5a4c' }}>
-                                <div className="border border-white/30 p-4 text-center">
-                                    <p className="mb-2">Nov 2024</p>
-                                    <p className="text-lg font-bold">Past Event</p>
-                                    <p className="mt-2 text-white/60">Community Day</p>
-                                </div>
-                            </div>
-                            <div className="aspect-square rounded-2xl overflow-hidden shadow-sm">
-                                <img src={PLACEHOLDER_IMAGES[1]} alt="Festival highlights" className="w-full h-full object-cover" />
-                            </div>
-                            <div className="aspect-square rounded-2xl overflow-hidden shadow-sm">
-                                <img src={PLACEHOLDER_IMAGES[2]} alt="Neighborhood event" className="w-full h-full object-cover" />
-                            </div>
-                        </>
+                        <div className="col-span-2 md:col-span-4 py-16 flex flex-col items-center justify-center gap-3">
+                            <svg className="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <p className="text-slate-400 font-semibold">No Past Events</p>
+                        </div>
                     )}
                 </div>
-
-                <button
-                    className="px-8 py-3 rounded-full font-bold transition-all duration-300"
-                    style={{ border: '2px solid #2563eb', color: '#2563eb' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = '#2563eb'; e.currentTarget.style.color = '#fff'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#2563eb'; }}
-                >
-                    View Full Archive
-                </button>
             </div>
         </section>
     );

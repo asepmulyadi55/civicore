@@ -14,7 +14,7 @@
         </button>
         <h1 class="text-xl font-bold text-slate-900 dark:text-white">{{ __('app.nav_roles') }}</h1>
         <span
-          class="hidden sm:inline px-2 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg uppercase">{{ __('app.manage') }}</span>
+          class="hidden sm:inline px-2 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg">{{ count($roles) }} Roles</span>
       </div>
       <div class="flex items-center gap-3">
         @if(auth()->user()->isAdmin())

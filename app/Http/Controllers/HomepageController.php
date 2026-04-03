@@ -21,8 +21,17 @@ class HomepageController extends Controller
         $events        = json_decode(Setting::get('homepage_events',        '[]'), true) ?? [];
         $about         = json_decode(Setting::get('homepage_about',         '{}'), true) ?? [];
 
-        $upcomingEvents = array_values(array_filter($events, fn($e) => ($e['status'] ?? '') === 'upcoming'));
-        $pastEvents     = array_values(array_filter($events, fn($e) => ($e['status'] ?? '') === 'past'));
+        $today          = now()->toDateString();
+        $upcomingEvents = array_slice(array_values(array_filter($events, fn($e) =>
+            ($e['status'] ?? '') === 'ongoing' ||
+            empty($e['date']) ||
+            $e['date'] >= $today
+        )), 0, 3);
+        $pastEvents     = array_slice(array_values(array_filter($events, fn($e) =>
+            ($e['status'] ?? '') !== 'ongoing' &&
+            !empty($e['date']) &&
+            $e['date'] < $today
+        )), 0, 4);
 
         return response()->json([
             'hero'            => $hero,
@@ -35,18 +44,51 @@ class HomepageController extends Controller
 
     // ── Index ─────────────────────────────────────────────────────────────────
 
-    public function index()
+    public function index(Request $request)
     {
         $hero          = json_decode(Setting::get('homepage_hero',          '{}'), true) ?? [];
         $featuredEvent = json_decode(Setting::get('homepage_featured_event','{}'), true) ?? [];
-        $events        = json_decode(Setting::get('homepage_events',        '[]'), true) ?? [];
+        $allEvents     = json_decode(Setting::get('homepage_events',        '[]'), true) ?? [];
         $about         = json_decode(Setting::get('homepage_about',         '{}'), true) ?? [];
 
-        // Split events into upcoming / past by status field
-        $upcomingEvents = array_values(array_filter($events, fn($e) => ($e['status'] ?? '') === 'upcoming'));
-        $pastEvents     = array_values(array_filter($events, fn($e) => ($e['status'] ?? '') === 'past'));
+        // ── Event filters ────────────────────────────────────────────────────
+        $search         = trim($request->input('event_search', ''));
+        $filterCategory = $request->input('event_category', '');
+        $filtered       = $allEvents;
 
-        return view('homepage', compact('hero', 'featuredEvent', 'upcomingEvents', 'pastEvents', 'about'));
+        if ($search !== '') {
+            $s        = mb_strtolower($search);
+            $filtered = array_values(array_filter($filtered, fn($e) =>
+                str_contains(mb_strtolower($e['title'] ?? ''), $s) ||
+                str_contains(mb_strtolower($e['description'] ?? ''), $s)
+            ));
+        }
+        if ($filterCategory !== '') {
+            $filtered = array_values(array_filter($filtered, fn($e) =>
+                ($e['category'] ?? '') === $filterCategory
+            ));
+        }
+
+        // Sort: newest date first, undated events at end
+        usort($filtered, fn($a, $b) => strcmp($b['date'] ?? '', $a['date'] ?? ''));
+
+        // ── Pagination ───────────────────────────────────────────────────────
+        $perPage     = 10;
+        $currentPage = max(1, (int) $request->input('event_page', 1));
+        $total       = count($filtered);
+        $events      = array_slice($filtered, ($currentPage - 1) * $perPage, $perPage);
+        $pagination  = [
+            'total'        => $total,
+            'per_page'     => $perPage,
+            'current_page' => $currentPage,
+            'last_page'    => max(1, (int) ceil($total / $perPage)),
+            'search'       => $search,
+            'category'     => $filterCategory,
+        ];
+
+        $totalEvents = count($allEvents);
+
+        return view('homepage', compact('hero', 'featuredEvent', 'events', 'pagination', 'about', 'totalEvents'));
     }
 
     // ── Hero Section ──────────────────────────────────────────────────────────
@@ -123,14 +165,35 @@ class HomepageController extends Controller
             'title'       => 'required|string|max:200',
             'description' => 'nullable|string|max:500',
             'date'        => 'nullable|date',
-            'status'      => 'required|string|in:upcoming,past',
             'category'    => 'nullable|string|in:wellness,meetings,education,cultural,sports,other',
-            'image_url'   => 'nullable|url|max:500',
+            'url'         => 'nullable|url|max:500',
+            'image_file'  => 'nullable|image|max:5120',
         ]);
 
-        $events = json_decode(Setting::get('homepage_events', '[]'), true) ?? [];
+        // Derive status automatically from date
+        $validated['status'] = (!empty($validated['date']) && $validated['date'] < now()->toDateString())
+            ? 'past' : 'upcoming';
 
-        $events[] = array_merge($validated, ['id' => (string) Str::uuid()]);
+        $imageUrl = null;
+        if ($request->hasFile('image_file')) {
+            $file     = $request->file('image_file');
+            $path     = $file->store('homepage/events', 'public');
+            $imageUrl = Storage::disk('public')->url($path);
+            MediaFile::create([
+                'disk'          => 'public',
+                'path'          => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type'     => $file->getMimeType(),
+                'size'          => $file->getSize(),
+                'uploaded_by'   => auth()->id(),
+            ]);
+        }
+
+        $events = json_decode(Setting::get('homepage_events', '[]'), true) ?? [];
+        $events[] = array_merge(
+            array_diff_key($validated, ['image_file' => null]),
+            ['id' => (string) Str::uuid(), 'image_url' => $imageUrl]
+        );
 
         $this->saveSetting('homepage_events', json_encode(array_values($events)), 'Events List');
 
@@ -143,16 +206,41 @@ class HomepageController extends Controller
             'title'       => 'required|string|max:200',
             'description' => 'nullable|string|max:500',
             'date'        => 'nullable|date',
-            'status'      => 'required|string|in:upcoming,past',
             'category'    => 'nullable|string|in:wellness,meetings,education,cultural,sports,other',
-            'image_url'   => 'nullable|url|max:500',
+            'url'         => 'nullable|url|max:500',
+            'image_file'  => 'nullable|image|max:5120',
         ]);
+
+        // Derive status automatically from date
+        $validated['status'] = (!empty($validated['date']) && $validated['date'] < now()->toDateString())
+            ? 'past' : 'upcoming';
 
         $events = json_decode(Setting::get('homepage_events', '[]'), true) ?? [];
         $found  = false;
         foreach ($events as &$event) {
             if (($event['id'] ?? '') === $id) {
-                $event = array_merge($event, $validated);
+                // Handle image replacement
+                if ($request->hasFile('image_file')) {
+                    // Delete old file if stored
+                    if (!empty($event['image_path'])) {
+                        Storage::disk('public')->delete($event['image_path']);
+                        MediaFile::where('path', $event['image_path'])->delete();
+                    }
+                    $file  = $request->file('image_file');
+                    $path  = $file->store('homepage/events', 'public');
+                    $url   = Storage::disk('public')->url($path);
+                    MediaFile::create([
+                        'disk'          => 'public',
+                        'path'          => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                        'mime_type'     => $file->getMimeType(),
+                        'size'          => $file->getSize(),
+                        'uploaded_by'   => auth()->id(),
+                    ]);
+                    $event['image_url']  = $url;
+                    $event['image_path'] = $path;
+                }
+                $event = array_merge($event, array_diff_key($validated, ['image_file' => null]));
                 $found = true;
                 break;
             }

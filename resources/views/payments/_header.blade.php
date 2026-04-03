@@ -7,7 +7,7 @@
     </button>
     <h1 class="text-xl font-bold text-slate-900 dark:text-white">{{ __('app.payment_management') }}</h1>
     <span
-      class="hidden sm:inline px-2 py-1 text-xs font-semibold bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-lg uppercase">{{ __('app.financial_console') }}</span>
+      class="hidden sm:inline px-2 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg">{{ $payments->total() }} Records</span>
   </div>
   <div class="flex items-center gap-3">
     {{-- Record Payment --}}

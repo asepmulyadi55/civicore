@@ -27,14 +27,6 @@ export default function HeroSection({ hero = {}, loading }) {
             style={heroStyle}
         >
             <div className="max-w-3xl">
-                <div
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-sm font-semibold text-white/90 border border-white/20"
-                    style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)' }}
-                >
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    Live Events This Weekend
-                </div>
-
                 {loading ? (
                     <div className="h-16 w-96 mx-auto bg-white/10 animate-pulse rounded-2xl mb-6" />
                 ) : (
@@ -50,20 +42,6 @@ export default function HeroSection({ hero = {}, loading }) {
                         {subtitle}
                     </p>
                 )}
-
-                <div
-                    className="glass-effect p-4 rounded-2xl inline-flex gap-4 flex-wrap justify-center"
-                >
-                    <button
-                        className="bg-white font-bold px-10 py-4 rounded-xl hover:shadow-xl transition-all shadow-md"
-                        style={{ color: '#1A237E' }}
-                    >
-                        {ctaText}
-                    </button>
-                    <button className="bg-white/10 text-white border border-white/20 backdrop-blur-md px-10 py-4 rounded-xl font-bold hover:bg-white/20 transition-all">
-                        View All Events
-                    </button>
-                </div>
             </div>
         </section>
     );

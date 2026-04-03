@@ -7,7 +7,7 @@
     </button>
     <h1 class="text-xl font-bold text-slate-900 dark:text-white">{{ __('app.resident_directory') }}</h1>
     <span
-      class="hidden sm:inline px-2 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg uppercase">{{ __('app.manage_residents') }}</span>
+      class="hidden sm:inline px-2 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg">{{ $totalCount }} Residents</span>
   </div>
   <div class="flex items-center gap-3">
     {{-- Add Resident --}}

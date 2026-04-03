@@ -204,7 +204,7 @@ Review Modal, and all associated JavaScript.
     {{-- Footer --}}
     <div class="px-8 py-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3 shrink-0">
       <button onclick="closeCreateModal()"
-        class="px-6 py-2.5 rounded-xl font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+        class="px-6 py-2.5 rounded-xl font-bold text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
         {{ __('app.btn_cancel') }}
       </button>
       <button onclick="submitCreateModal()"

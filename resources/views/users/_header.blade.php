@@ -7,7 +7,7 @@
     </button>
     <h1 class="text-xl font-bold text-slate-900 dark:text-white">{{ __('app.user_access_roles') }}</h1>
     <span
-      class="px-2 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg uppercase hidden sm:inline">{{ __('app.civicore_admin') }}</span>
+      class="px-2 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg hidden sm:inline">{{ $totalUsers }} Users</span>
   </div>
   <div class="flex items-center gap-4">
     {{-- Auto-Approval toggle --}}
