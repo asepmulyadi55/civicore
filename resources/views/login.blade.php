@@ -37,7 +37,7 @@
             </div>
           @endif
 
-          <form action="/login" class="space-y-5" method="POST" novalidate>
+          <form action="{{ route('login') }}" class="space-y-5" method="POST" novalidate>
             @csrf
             <div>
               <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5" for="username">

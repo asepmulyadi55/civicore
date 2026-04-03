@@ -79,13 +79,13 @@
                 @if($canEditApproved || $statusValue !== 'approved')
                   <button
                     onclick="openEditModal(
-                      {{ $payment->id }},
-                      {{ $payment->resident_id }},
+                      '{{ $payment->id }}',
+                      '{{ $payment->resident_id }}',
                       '{{ addslashes($payment->resident->fullname) }}',
                       '{{ $payment->resident->unit_number }}',
                       '{{ $monthsForJs }}',
                       {{ $payment->amount }},
-                      {{ $payment->payment_method_id ?? 'null' }},
+                      {{ $payment->payment_method_id ? "'{$payment->payment_method_id}'" : 'null' }},
                       '{{ $payment->status instanceof \App\Enums\PaymentStatus ? $payment->status->value : $payment->status }}',
                       '{{ addslashes($payment->rejection_reason ?? '') }}',
                       '{{ addslashes($payment->notes ?? '') }}',
@@ -105,7 +105,7 @@
                 @if($canApprove)
                   @if($statusValue === 'pending')
                     <button onclick="openReviewModal(
-                        {{ $payment->id }},
+                        '{{ $payment->id }}',
                         '{{ addslashes($payment->resident->fullname) }}',
                         '{{ $payment->resident->unit_number }}',
                         '{{ $currency }} {{ number_format($payment->total_amount ?? $payment->amount) }}',
@@ -134,7 +134,7 @@
                 @if(auth()->user()->isAdmin())
                   @if($statusValue !== 'approved')
                     <button type="button"
-                      onclick="openPaymentDeleteModal({{ $payment->id }}, '{{ addslashes($payment->resident->fullname) }}')"
+                      onclick="openPaymentDeleteModal('{{ $payment->id }}', '{{ addslashes($payment->resident->fullname) }}')"
                       title="Delete payment"
                       class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors">
                       <span class="material-icons text-lg">delete_outline</span>

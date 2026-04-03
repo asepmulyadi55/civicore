@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MediaFile;
 use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class HomepageController extends Controller
@@ -57,8 +58,40 @@ class HomepageController extends Controller
             'subtitle' => 'nullable|string|max:500',
             'cta_text' => 'nullable|string|max:100',
             'cta_url'  => 'nullable|string|max:300',
-            'bg_image' => 'nullable|string|max:500',
+            'bg_image' => 'nullable|image|max:5120', // max 5 MB
         ]);
+
+        // Load existing hero to preserve/replace the stored image
+        $existing = json_decode(Setting::get('homepage_hero', '{}'), true) ?? [];
+
+        if ($request->hasFile('bg_image')) {
+            // Delete old stored file if it exists
+            if (!empty($existing['bg_image_path'])) {
+                Storage::disk('public')->delete($existing['bg_image_path']);
+                MediaFile::where('path', $existing['bg_image_path'])->delete();
+            }
+
+            $file      = $request->file('bg_image');
+            $path      = $file->store('homepage', 'public');
+            $publicUrl = Storage::disk('public')->url($path);
+
+            // Track in media_files
+            MediaFile::create([
+                'disk'          => 'public',
+                'path'          => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type'     => $file->getMimeType(),
+                'size'          => $file->getSize(),
+                'uploaded_by'   => auth()->id(),
+            ]);
+
+            $data['bg_image']      = $publicUrl;
+            $data['bg_image_path'] = $path;
+        } else {
+            // Keep the existing image values
+            $data['bg_image']      = $existing['bg_image'] ?? null;
+            $data['bg_image_path'] = $existing['bg_image_path'] ?? null;
+        }
 
         $this->saveSetting('homepage_hero', json_encode($data), 'Hero Section');
 
@@ -91,6 +124,7 @@ class HomepageController extends Controller
             'description' => 'nullable|string|max:500',
             'date'        => 'nullable|date',
             'status'      => 'required|string|in:upcoming,past',
+            'category'    => 'nullable|string|in:wellness,meetings,education,cultural,sports,other',
             'image_url'   => 'nullable|url|max:500',
         ]);
 
@@ -101,6 +135,37 @@ class HomepageController extends Controller
         $this->saveSetting('homepage_events', json_encode(array_values($events)), 'Events List');
 
         return redirect()->route('homepage.index')->with('success', 'Event added.');
+    }
+
+    public function updateEvent(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'title'       => 'required|string|max:200',
+            'description' => 'nullable|string|max:500',
+            'date'        => 'nullable|date',
+            'status'      => 'required|string|in:upcoming,past',
+            'category'    => 'nullable|string|in:wellness,meetings,education,cultural,sports,other',
+            'image_url'   => 'nullable|url|max:500',
+        ]);
+
+        $events = json_decode(Setting::get('homepage_events', '[]'), true) ?? [];
+        $found  = false;
+        foreach ($events as &$event) {
+            if (($event['id'] ?? '') === $id) {
+                $event = array_merge($event, $validated);
+                $found = true;
+                break;
+            }
+        }
+        unset($event);
+
+        if (!$found) {
+            return redirect()->route('homepage.index')->with('error', 'Event not found.');
+        }
+
+        $this->saveSetting('homepage_events', json_encode(array_values($events)), 'Events List');
+
+        return redirect()->route('homepage.index')->with('success', 'Event updated.');
     }
 
     public function destroyEvent(string $id)
@@ -119,11 +184,41 @@ class HomepageController extends Controller
     {
         $data = $request->validate([
             'content'        => 'required|string|max:3000',
-            'image_url'      => 'nullable|url|max:500',
+            'image_url'      => 'nullable|image|max:5120', // max 5 MB
             'stats'          => 'nullable|array|max:4',
             'stats.*.value'  => 'nullable|string|max:50',
             'stats.*.label'  => 'nullable|string|max:50',
         ]);
+
+        // Load existing about to preserve/replace the stored image
+        $existing = json_decode(Setting::get('homepage_about', '{}'), true) ?? [];
+
+        if ($request->hasFile('image_url')) {
+            // Delete old stored file if it exists
+            if (!empty($existing['image_path'])) {
+                Storage::disk('public')->delete($existing['image_path']);
+                MediaFile::where('path', $existing['image_path'])->delete();
+            }
+
+            $file      = $request->file('image_url');
+            $path      = $file->store('homepage', 'public');
+            $publicUrl = Storage::disk('public')->url($path);
+
+            MediaFile::create([
+                'disk'          => 'public',
+                'path'          => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type'     => $file->getMimeType(),
+                'size'          => $file->getSize(),
+                'uploaded_by'   => auth()->id(),
+            ]);
+
+            $data['image_url']  = $publicUrl;
+            $data['image_path'] = $path;
+        } else {
+            $data['image_url']  = $existing['image_url'] ?? null;
+            $data['image_path'] = $existing['image_path'] ?? null;
+        }
 
         // Clean out empty stat rows
         if (!empty($data['stats'])) {
@@ -146,7 +241,7 @@ class HomepageController extends Controller
      */
     private function saveSetting(string $key, string $value, string $label): void
     {
-        DB::table('settings')->updateOrInsert(
+        Setting::updateOrCreate(
             ['key' => $key],
             ['value' => $value, 'label' => $label, 'group' => 'homepage'],
         );

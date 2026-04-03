@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('payment_methods', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name')->unique();          // cash, bank_transfer, e_wallet
             $table->string('label');                   // Cash, Bank Transfer, E-Wallet
             $table->boolean('is_active')->default(true);

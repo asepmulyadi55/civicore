@@ -25,7 +25,7 @@
             </div>
           @endif
 
-          <form action="/register" class="space-y-4" method="POST" novalidate>
+          <form action="{{ route('register') }}" class="space-y-4" method="POST" novalidate>
             @csrf
 
             {{-- Full Name --}}
@@ -171,7 +171,7 @@
         <div class="p-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 text-center">
           <p class="text-sm text-slate-600 dark:text-slate-400">
             Already have an account?
-            <a class="text-primary font-bold hover:underline" href="{{ url('/') }}">Back to Login</a>
+            <a class="text-primary font-bold hover:underline" href="{{ route('login') }}">Back to Login</a>
           </p>
         </div>
       </div>

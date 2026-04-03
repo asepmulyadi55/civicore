@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MediaFile;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,8 +35,18 @@ class SettingController extends Controller
       // Delete old avatar if exists
       if ($user->avatar) {
         Storage::disk('local')->delete($user->avatar);
+        MediaFile::where('path', $user->avatar)->delete();
       }
-      $data['avatar'] = $request->file('avatar')->store('avatars', 'local');
+      $file = $request->file('avatar');
+      $data['avatar'] = $file->store('avatars', 'local');
+      MediaFile::create([
+        'disk'          => 'local',
+        'path'          => $data['avatar'],
+        'original_name' => $file->getClientOriginalName(),
+        'mime_type'     => $file->getMimeType(),
+        'size'          => $file->getSize(),
+        'uploaded_by'   => $user->id,
+      ]);
     } else {
       unset($data['avatar']);
     }

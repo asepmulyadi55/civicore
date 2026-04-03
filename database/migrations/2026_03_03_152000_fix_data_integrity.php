@@ -14,10 +14,10 @@ return new class extends Migration {
   public function up(): void
   {
     Schema::table('fee_histories', function (Blueprint $table) {
-      // Drop old non-nullable FK
+      // Drop old FK
       $table->dropForeign(['created_by']);
-      // Re-add as nullable with nullOnDelete
-      $table->unsignedBigInteger('created_by')->nullable()->change();
+      // Re-add as nullable char(36) UUID with nullOnDelete
+      $table->char('created_by', 36)->nullable()->change();
       $table->foreign('created_by')->references('id')->on('users')->nullOnDelete();
     });
   }
@@ -26,7 +26,7 @@ return new class extends Migration {
   {
     Schema::table('fee_histories', function (Blueprint $table) {
       $table->dropForeign(['created_by']);
-      $table->unsignedBigInteger('created_by')->nullable(false)->change();
+      $table->char('created_by', 36)->nullable(false)->change();
       $table->foreign('created_by')->references('id')->on('users');
     });
   }

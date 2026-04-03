@@ -12,7 +12,10 @@ export default function HomePage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('/api/homepage')
+        const apiKey = document.querySelector('meta[name="api-key"]')?.content ?? '';
+        fetch('/api/homepage', {
+            headers: { 'X-Api-Key': apiKey },
+        })
             .then(res => res.json())
             .then(json => {
                 setData(json);
