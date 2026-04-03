@@ -25,7 +25,7 @@
             </div>
           @endif
 
-          <form action="{{ route('register') }}" class="space-y-4" method="POST" novalidate>
+          <form action="{{ route('register') }}" id="register-form" class="space-y-4" method="POST" novalidate>
             @csrf
 
             {{-- Full Name --}}
@@ -38,9 +38,10 @@
                   <span class="material-icons text-slate-400 text-sm">person_outline</span>
                 </span>
                 <input
-                  class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('fullname') border-red-500 dark:border-red-500 @enderror"
-                  id="fullname" name="fullname" placeholder="John Doe" type="text" value="{{ old('fullname') }}" />
+                  class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('fullname') border-red-500 dark:border-red-500 @enderror"
+                  id="fullname" name="fullname" placeholder="John Doe" type="text" value="{{ old('fullname') }}" oninput="clearRegErr('err-reg-fullname')" />
               </div>
+              <p id="err-reg-fullname" class="hidden mt-1.5 text-sm text-red-600 dark:text-red-400"></p>
               @error('fullname')
                 <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
               @enderror
@@ -56,9 +57,10 @@
                   <span class="material-icons text-slate-400 text-sm">mail_outline</span>
                 </span>
                 <input
-                  class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('email') border-red-500 dark:border-red-500 @enderror"
-                  id="email" name="email" placeholder="john@example.com" type="email" value="{{ old('email') }}" />
+                  class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('email') border-red-500 dark:border-red-500 @enderror"
+                  id="email" name="email" placeholder="john@example.com" type="email" value="{{ old('email') }}" oninput="clearRegErr('err-reg-email')" />
               </div>
+              <p id="err-reg-email" class="hidden mt-1.5 text-sm text-red-600 dark:text-red-400"></p>
               @error('email')
                 <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
               @enderror
@@ -74,9 +76,10 @@
                   <span class="material-icons text-slate-400 text-sm">alternate_email</span>
                 </span>
                 <input
-                  class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('username') border-red-500 dark:border-red-500 @enderror"
-                  id="username" name="username" placeholder="johndoe_admin" type="text" value="{{ old('username') }}" />
+                  class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('username') border-red-500 dark:border-red-500 @enderror"
+                  id="username" name="username" placeholder="johndoe_admin" type="text" value="{{ old('username') }}" oninput="clearRegErr('err-reg-username')" />
               </div>
+              <p id="err-reg-username" class="hidden mt-1.5 text-sm text-red-600 dark:text-red-400"></p>
               @error('username')
                 <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
               @enderror
@@ -92,14 +95,15 @@
                   <span class="material-icons text-slate-400 text-sm">lock_outline</span>
                 </span>
                 <input
-                  class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('password') border-red-500 dark:border-red-500 @enderror"
-                  id="password" name="password" placeholder="••••••••" type="password" />
+                  class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('password') border-red-500 dark:border-red-500 @enderror"
+                  id="password" name="password" placeholder="••••••••" type="password" oninput="clearRegErr('err-reg-password')" />
                 <button
                   class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   type="button" onclick="togglePassword()">
                   <span class="material-icons text-sm" id="toggleIcon">visibility</span>
                 </button>
               </div>
+              <p id="err-reg-password" class="hidden mt-1.5 text-sm text-red-600 dark:text-red-400"></p>
               @error('password')
                 <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
               @enderror
@@ -116,9 +120,10 @@
                   <span class="material-icons text-slate-400 text-sm">lock_outline</span>
                 </span>
                 <input
-                  class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none"
-                  id="password_confirmation" name="password_confirmation" placeholder="••••••••" type="password" />
+                  class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none"
+                  id="password_confirmation" name="password_confirmation" placeholder="••••••••" type="password" oninput="clearRegErr('err-reg-confirm')" />
               </div>
+              <p id="err-reg-confirm" class="hidden mt-1.5 text-sm text-red-600 dark:text-red-400"></p>
             </div>
 
             <button
@@ -207,6 +212,60 @@
         toggleIcon.textContent = 'visibility';
       }
     }
+
+    function clearRegErr(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
+    function showRegErr(id, msg) {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+    }
+
+    document.getElementById('register-form').addEventListener('submit', function (e) {
+      let valid = true;
+      const fullname = document.getElementById('fullname').value.trim();
+      const email    = document.getElementById('email').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm  = document.getElementById('password_confirmation').value;
+
+      if (!fullname) {
+        showRegErr('err-reg-fullname', 'Please enter your full name.');
+        valid = false;
+      } else clearRegErr('err-reg-fullname');
+
+      if (!email) {
+        showRegErr('err-reg-email', 'Please enter your email address.');
+        valid = false;
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showRegErr('err-reg-email', 'Please enter a valid email address.');
+        valid = false;
+      } else clearRegErr('err-reg-email');
+
+      if (!username) {
+        showRegErr('err-reg-username', 'Please choose a username.');
+        valid = false;
+      } else clearRegErr('err-reg-username');
+
+      if (!password) {
+        showRegErr('err-reg-password', 'Please enter a password.');
+        valid = false;
+      } else if (password.length < 8) {
+        showRegErr('err-reg-password', 'Password must be at least 8 characters.');
+        valid = false;
+      } else clearRegErr('err-reg-password');
+
+      if (!confirm) {
+        showRegErr('err-reg-confirm', 'Please confirm your password.');
+        valid = false;
+      } else if (confirm !== password) {
+        showRegErr('err-reg-confirm', 'Passwords do not match.');
+        valid = false;
+      } else clearRegErr('err-reg-confirm');
+
+      if (!valid) e.preventDefault();
+    });
   </script>
 
 </x-layouts.app>

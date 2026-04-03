@@ -37,9 +37,7 @@ export default function UpcomingEvents({ events = [], loading }) {
                     <h2 className="text-3xl font-bold mb-2" style={{ color: '#1A237E' }}>Upcoming Events</h2>
                     <p className="text-slate-500">Don't miss out on what's happening next.</p>
                 </div>
-                <span className="text-blue-600 font-semibold mt-4 md:mt-0">
-                    {events.length > 0 ? `${events.length} event${events.length !== 1 ? 's' : ''}` : ''}
-                </span>
+
             </div>
 
             {loading ? (
@@ -51,8 +49,7 @@ export default function UpcomingEvents({ events = [], loading }) {
                     <svg className="w-12 h-12 mx-auto text-slate-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <p className="text-slate-400 font-medium">No upcoming events at the moment.</p>
-                    <p className="text-slate-300 text-sm mt-1">Check back soon!</p>
+                    <p className="text-slate-400 font-semibold">No Upcoming Events</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -86,9 +83,16 @@ export default function UpcomingEvents({ events = [], loading }) {
                                         {event.title}
                                     </h3>
                                     <p className="text-slate-500 text-sm mb-6">{formattedDate}</p>
-                                    <button className="w-full py-2.5 bg-slate-50 text-slate-600 rounded-lg font-semibold text-sm hover:bg-slate-100 transition-colors">
-                                        Learn More
-                                    </button>
+                                    {event.url ? (
+                                        <a href={event.url} target="_blank" rel="noopener noreferrer"
+                                            className="block w-full py-2.5 bg-slate-50 text-slate-600 rounded-lg font-semibold text-sm hover:bg-slate-100 transition-colors text-center">
+                                            Learn More
+                                        </a>
+                                    ) : (
+                                        <button disabled className="w-full py-2.5 bg-slate-50/50 text-slate-300 rounded-lg font-semibold text-sm cursor-default">
+                                            Learn More
+                                        </button>
+                                    )}
                                 </div>
                             </article>
                         );
