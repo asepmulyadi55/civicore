@@ -34,7 +34,7 @@ class MyOverviewController extends Controller
         }
 
         if (!$resident) {
-            return view('my-overview', [
+            return view('overview', [
                 'resident' => null,
                 'currentFee' => 0,
                 'currentYear' => now()->year,
@@ -75,7 +75,7 @@ class MyOverviewController extends Controller
         $totalPaidYear = $currentRecords->where('status', 'approved')->sum('amount');
         $paidMonthsYear = $currentRecords->where('status', 'approved')->count();
 
-        return view('my-overview', compact(
+        return view('overview', compact(
             'resident',
             'currentFee',
             'currentYear',

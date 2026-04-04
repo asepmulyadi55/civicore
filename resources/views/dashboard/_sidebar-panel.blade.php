@@ -28,41 +28,16 @@
     @endif
   </div>
 
-  {{-- Community Status: admin/treasurer only --}}
-  @if(auth()->user()->isAdmin() || auth()->user()->isTreasurer())
-    <hr class="border-slate-100 dark:border-slate-800" />
-    <div class="space-y-4">
-      <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">{{ __('app.community_status') }}</h3>
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium">Block A ({{ __('app.full') }})</span>
-          <div class="w-32 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-            <div class="bg-primary h-full w-full"></div>
-          </div>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium">Block B</span>
-          <div class="w-32 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-            <div class="bg-primary h-full w-3/4"></div>
-          </div>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium">Block C</span>
-          <div class="w-32 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-            <div class="bg-primary h-full w-[45%]"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  @endif
-
   <div class="p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-lg">
     <div class="flex items-center space-x-2 text-amber-700 dark:text-amber-400 mb-2">
       <span class="material-icons text-sm">sticky_note_2</span>
       <span class="text-xs font-bold uppercase tracking-wider">{{ __('app.admin_memo') }}</span>
     </div>
-    <p class="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-      Upcoming maintenance for the Block A elevator scheduled for Oct 28. Notify all residents by tomorrow noon.
-    </p>
+    @php $adminMemo = \App\Models\Setting::get('admin_memo', ''); @endphp
+    @if($adminMemo)
+      <p class="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">{{ $adminMemo }}</p>
+    @else
+      <p class="text-xs text-amber-400 italic">No memo set. Add one in Settings → Admin Memo.</p>
+    @endif
   </div>
 </div>

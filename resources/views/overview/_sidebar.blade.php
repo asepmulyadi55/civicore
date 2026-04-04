@@ -18,6 +18,7 @@
     @php
       $residentNav = [
         ['route' => 'my-overview', 'icon' => 'dashboard', 'label' => 'Overview'],
+        ['route' => 'settings.index', 'icon' => 'settings', 'label' => 'Settings'],
       ];
     @endphp
     @foreach($residentNav as $item)

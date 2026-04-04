@@ -28,7 +28,6 @@ class Role extends Model
 
     // ── Available permissions — single source of truth ──────────────
     public static array $availablePermissions = [
-        'dashboard' => ['view'],
         'homepage'  => ['view', 'create', 'edit', 'delete'],
         'residents' => ['view', 'create', 'edit', 'delete'],
         'blocks'    => ['view', 'create', 'edit', 'delete'],

@@ -2,7 +2,7 @@
 
 @php
   $navItems = [
-    ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'dashboard', 'permission' => 'dashboard.view'],
+    ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'dashboard', 'permission' => null],
     ['key' => 'payments', 'label' => 'Payments', 'icon' => 'payments', 'route' => 'payments.index', 'permission' => 'payments.view'],
     ['key' => 'residents', 'label' => 'Residents', 'icon' => 'people', 'route' => 'residents.index', 'permission' => 'residents.view'],
     ['key' => 'blocks', 'label' => 'Blocks', 'icon' => 'domain', 'route' => 'blocks.index', 'permission' => 'blocks.view'],
@@ -15,6 +15,15 @@
   ];
 
   $user = Auth::user();
+
+  // For residents, replace the entire nav with just Overview + Settings
+  if ($user->isResident()) {
+    $navItems = [
+      ['key' => 'my-overview', 'label_raw' => 'Overview', 'icon' => 'dashboard', 'route' => 'my-overview', 'permission' => null],
+      ['key' => 'settings', 'label_raw' => 'Settings', 'icon' => 'settings', 'route' => 'settings.index', 'permission' => null],
+    ];
+  }
+
   $navItems = array_filter($navItems, function ($item) use ($user) {
     if ($item['permission'] === null)
       return true;
@@ -43,13 +52,14 @@
       @php
         $isActive = $active === $item['key'];
         $href = $item['route'] === '#' ? '#' : route($item['route']);
+        $label = isset($item['label_raw']) ? $item['label_raw'] : __('app.nav_' . $item['key']);
       @endphp
       <a href="{{ $href }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg font-{{ $isActive ? 'semibold' : 'medium' }} transition-all group
                                   {{ $isActive
       ? 'bg-primary/10 text-primary'
       : 'text-slate-500 hover:text-primary hover:bg-primary/5' }}">
         <span class="material-icons text-[20px]">{{ $item['icon'] }}</span>
-        <span>{{ __('app.nav_' . $item['key']) }}</span>
+        <span>{{ $label }}</span>
       </a>
     @endforeach
   </nav>

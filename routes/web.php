@@ -81,7 +81,7 @@ Route::middleware('auth')->group(function () {
         ->name('private.file');
 
     // Resident personal overview (residents only, no secondary permission needed)
-    Route::get('/my-overview', [MyOverviewController::class, 'index'])->name('my-overview');
+    Route::get('/overview', [MyOverviewController::class, 'index'])->name('my-overview');
 
     // ── Residents ─────────────────────────────────────────────────────────────
     Route::get('/residents', [ResidentController::class, 'index'])
@@ -174,4 +174,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/password', [SettingController::class, 'updatePassword'])->name('settings.password');
     Route::post('/settings/reset-link', [SettingController::class, 'sendResetLink'])->name('settings.reset-link');
     Route::post('/settings/security', [SettingController::class, 'updateSecurity'])->middleware('permission:settings.edit')->name('settings.security');
+    Route::post('/settings/memo', [SettingController::class, 'updateMemo'])->middleware('permission:settings.edit')->name('settings.memo');
 });
