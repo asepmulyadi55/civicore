@@ -19,6 +19,7 @@ use App\Http\Controllers\SessionConflictController;
 use App\Http\Controllers\PrivateFileController;
 use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\FamilyMemberController;
 
 // ── Public homepage (React SPA) ───────────────────────────────────────────────
 Route::get('/', fn() => view('spa'))->name('home');
@@ -88,12 +89,24 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:residents.view')->name('residents.index');
     Route::post('/residents', [ResidentController::class, 'store'])
         ->middleware('permission:residents.create')->name('residents.store');
+    Route::get('/residents/{resident}/edit', [ResidentController::class, 'edit'])
+        ->middleware('permission:residents.edit')->name('residents.edit');
     Route::match(['PUT', 'PATCH'], '/residents/{resident}', [ResidentController::class, 'update'])
         ->middleware('permission:residents.edit')->name('residents.update');
     Route::patch('/residents/{resident}/deactivate', [ResidentController::class, 'deactivate'])
         ->middleware('permission:residents.edit')->name('residents.deactivate');
     Route::delete('/residents/{resident}', [ResidentController::class, 'destroy'])
         ->middleware('permission:residents.delete')->name('residents.destroy');
+
+    // Family Members (nested under resident)
+    Route::post('/residents/{resident}/family-members', [FamilyMemberController::class, 'store'])
+        ->middleware('permission:residents.edit')->name('residents.family-members.store');
+    Route::match(['PUT', 'PATCH'], '/residents/{resident}/family-members/{familyMember}', [FamilyMemberController::class, 'update'])
+        ->middleware('permission:residents.edit')->name('residents.family-members.update');
+    Route::delete('/residents/{resident}/family-members/{familyMember}', [FamilyMemberController::class, 'destroy'])
+        ->middleware('permission:residents.edit')->name('residents.family-members.destroy');
+    Route::patch('/residents/{resident}/family-members/{familyMember}/set-head', [FamilyMemberController::class, 'setHead'])
+        ->middleware('permission:residents.edit')->name('residents.family-members.set-head');
 
     // ── Blocks ────────────────────────────────────────────────────────────────
     Route::get('/blocks', [BlockController::class, 'index'])

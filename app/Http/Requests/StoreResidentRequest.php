@@ -15,18 +15,20 @@ class StoreResidentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'fullname' => ['required', 'string', 'max:100'],
-            'phone' => ['nullable', 'string', 'max:25'],
-            'email' => ['nullable', 'email', 'max:255', 'unique:residents,email'],
-            'block_id' => ['required', 'exists:blocks,id'],
-            'unit_number' => [
+            'fullname'           => ['required', 'string', 'max:100'],
+            'phone'              => ['nullable', 'string', 'max:25'],
+            'email'              => ['nullable', 'email', 'max:255', 'unique:residents,email'],
+            'block_id'           => ['required', 'exists:blocks,id'],
+            'unit_number'        => [
                 'required',
                 'string',
                 'max:20',
                 Rule::unique('residents')->where('block_id', $this->block_id),
             ],
-            'monthly_fee' => ['required', 'numeric', 'min:0'],
-            'fee_start' => ['required', 'date_format:Y-m'],
+            'monthly_fee'        => ['required', 'numeric', 'min:0'],
+            'fee_start'          => ['required', 'date_format:Y-m'],
+            'family_card_number' => ['nullable', 'string', 'max:20'],
+            'house_status'       => ['required', 'in:owner_occupied,vacant,rented'],
         ];
     }
 
