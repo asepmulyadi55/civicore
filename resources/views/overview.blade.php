@@ -2,11 +2,11 @@
 <x-layouts.app title="Overview"
   class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 antialiased min-h-screen">
 
-  @include('my-overview._sidebar')
+  @include('overview._sidebar')
 
   <main class="lg:ml-64 flex flex-col min-h-screen">
 
-    @include('my-overview._header')
+    @include('overview._header')
 
     <div class="p-4 lg:p-8 space-y-8">
 
@@ -28,8 +28,8 @@
           </p>
         </div>
       @else
-        @include('my-overview._cards')
-        @include('my-overview._history')
+        @include('overview._cards')
+        @include('overview._history')
       @endif
 
     </div>

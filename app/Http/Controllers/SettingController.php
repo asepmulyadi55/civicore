@@ -108,4 +108,17 @@ class SettingController extends Controller
     return redirect()->route('settings.index')
       ->with('success', __('app.flash_security_saved'));
   }
+
+  /** Save admin memo — admin only. */
+  public function updateMemo(Request $request)
+  {
+    $request->validate([
+      'admin_memo' => ['nullable', 'string', 'max:1000'],
+    ]);
+
+    Setting::set('admin_memo', $request->input('admin_memo', ''));
+
+    return redirect()->route('settings.index')
+      ->with('success', 'Admin memo updated successfully.');
+  }
 }

@@ -271,7 +271,6 @@
             $allPerms = \App\Models\Role::$availablePermissions;
             $allActions = ['view', 'create', 'edit', 'delete', 'approve'];
             $moduleLabels = [
-              'dashboard' => __('app.nav_dashboard'),
               'homepage'  => __('app.nav_homepage'),
               'residents' => __('app.nav_residents'),
               'blocks' => __('app.nav_blocks'),
