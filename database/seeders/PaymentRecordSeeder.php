@@ -25,6 +25,7 @@ class PaymentRecordSeeder extends Seeder
     $startDate = Carbon::create(2023, 1, 1);
     $endDate = Carbon::create(2024, 12, 1);
 
+    $residentIndex = 0;
     foreach ($residents as $resident) {
       $feeAmount = $resident->feeHistories->first()?->amount ?? 500000;
 
@@ -36,7 +37,7 @@ class PaymentRecordSeeder extends Seeder
 
         // Skip some months to create realistic unpaid gaps
         // Every 7th month is unpaid for odd-indexed residents
-        if ($resident->id % 2 !== 0 && $monthIndex % 7 === 0) {
+        if ($residentIndex % 2 !== 0 && $monthIndex % 7 === 0) {
           $current->addMonth();
           continue;
         }
@@ -49,10 +50,10 @@ class PaymentRecordSeeder extends Seeder
         };
 
         // Recent months (last 2) are pending for about half residents
-        $isPending = $current->gte(Carbon::create(2024, 11, 1)) && $resident->id % 3 === 0;
+        $isPending = $current->gte(Carbon::create(2024, 11, 1)) && $residentIndex % 3 === 0;
 
-        // One rejected record as example
-        $isRejected = $current->isSameMonth(Carbon::create(2024, 6, 1)) && $resident->id === 3;
+        // One rejected record as example (second resident, June 2024)
+        $isRejected = $current->isSameMonth(Carbon::create(2024, 6, 1)) && $residentIndex === 1;
 
         $status = match (true) {
           $isRejected => 'rejected',
@@ -79,6 +80,7 @@ class PaymentRecordSeeder extends Seeder
 
         $current->addMonth();
       }
+      $residentIndex++;
     }
   }
 }

@@ -9,7 +9,8 @@ return [
   'nav_users' => 'Manajemen Pengguna',
   'nav_roles' => 'Peran & Izin',
   'nav_reports' => 'Laporan',
-  'nav_events' => 'Acara',
+  'nav_homepage' => 'Beranda',
+  'nav_media' => 'Manajer Media',
   'nav_settings' => 'Pengaturan',
   'nav_logout' => 'Keluar',
 
@@ -322,6 +323,27 @@ return [
   'select_all' => 'Pilih Semua',
   'deselect_all' => 'Hapus Pilihan Semua',
   'btn_save_permissions' => 'Simpan Izin Akses',
+  'btn_delete' => 'Hapus',
+
+  // Media Manager
+  'media_manager' => 'Manajer Media',
+  'media_files' => 'Berkas Media',
+  'no_media_found' => 'Tidak ada berkas media ditemukan.',
+  'search_by_filename' => 'Cari berdasarkan nama berkas...',
+  'all_types' => 'Semua Jenis',
+  'type_image' => 'Gambar',
+  'type_document' => 'Dokumen',
+  'btn_delete_selected' => 'Hapus yang Dipilih',
+  'confirm_delete_file' => 'Hapus berkas ini secara permanen?',
+  'confirm_bulk_delete' => 'Hapus semua berkas yang dipilih secara permanen? Ini tidak dapat dikembalikan.',
+  'upload_image' => 'Unggah Gambar',
+  'current_image' => 'Gambar Saat Ini',
+  'change_image' => 'Ganti Gambar',
+  'remove_image' => 'Hapus Gambar',
+  'no_image_uploaded' => 'Belum ada gambar',
+  'image_hint' => 'JPG, PNG, WEBP atau GIF · Maks 5 MB',
+  'flash_file_deleted' => 'Berkas berhasil dihapus.',
+  'flash_files_deleted' => ':count berkas berhasil dihapus.',
 
   // Reports
   'financial' => 'Keuangan',

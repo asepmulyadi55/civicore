@@ -37,7 +37,7 @@
             </div>
           @endif
 
-          <form action="/login" class="space-y-5" method="POST" novalidate>
+          <form action="{{ route('login') }}" id="login-form" class="space-y-5" method="POST" novalidate>
             @csrf
             <div>
               <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5" for="username">
@@ -48,10 +48,11 @@
                   <span class="material-icons text-slate-400 text-sm">alternate_email</span>
                 </span>
                 <input
-                  class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('username') border-red-500 dark:border-red-500 @enderror"
+                  class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('username') border-red-500 dark:border-red-500 @enderror"
                   id="username" name="username" placeholder="admin@civicore.com" type="text"
-                  value="{{ old('username') }}" />
+                  value="{{ old('username') }}" oninput="clearLoginErr('err-username')" />
               </div>
+              <p id="err-username" class="hidden mt-1.5 text-sm text-red-600 dark:text-red-400"></p>
             </div>
             <div>
               <div class="flex justify-between items-center mb-1.5">
@@ -68,14 +69,15 @@
                   <span class="material-icons text-slate-400 text-sm">lock_outline</span>
                 </span>
                 <input
-                  class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('password') border-red-500 dark:border-red-500 @enderror"
-                  id="password" name="password" placeholder="••••••••" type="password" />
+                  class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('password') border-red-500 dark:border-red-500 @enderror"
+                  id="password" name="password" placeholder="••••••••" type="password" oninput="clearLoginErr('err-password')" />
                 <button
                   class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   type="button" onclick="togglePassword()">
                   <span class="material-icons text-sm" id="toggleIcon">visibility</span>
                 </button>
               </div>
+              <p id="err-password" class="hidden mt-1.5 text-sm text-red-600 dark:text-red-400"></p>
             </div>
             <div class="flex items-center">
               <input
@@ -155,6 +157,30 @@
         toggleIcon.textContent = 'visibility';
       }
     }
+
+    function clearLoginErr(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
+    function showLoginErr(id, msg) {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+    }
+
+    document.getElementById('login-form').addEventListener('submit', function (e) {
+      let valid = true;
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      if (!username) {
+        showLoginErr('err-username', 'Please enter your username or email.');
+        valid = false;
+      } else clearLoginErr('err-username');
+      if (!password) {
+        showLoginErr('err-password', 'Please enter your password.');
+        valid = false;
+      } else clearLoginErr('err-password');
+      if (!valid) e.preventDefault();
+    });
   </script>
 
 </x-layouts.app>

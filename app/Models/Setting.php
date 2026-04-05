@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
 class Setting extends Model
 {
+    use HasUuids;
     protected $fillable = ['key', 'value', 'label', 'group'];
 
     /**
@@ -24,9 +26,9 @@ class Setting extends Model
     /**
      * Upsert a setting value by key and invalidate the cache.
      */
-    public static function set(string $key, mixed $value): void
+    public static function set(string $key, mixed $value, string $label = ''): void
     {
-        static::updateOrInsert(['key' => $key], ['value' => $value]);
+        static::updateOrCreate(['key' => $key], ['value' => $value, 'label' => $label ?: $key]);
         Cache::forget("setting:{$key}");
     }
 

@@ -8,9 +8,9 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('payment_records', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
 
-            $table->foreignId('resident_id')->constrained('residents')->cascadeOnDelete();
+            $table->foreignUuid('resident_id')->constrained('residents')->cascadeOnDelete();
 
             // Stored as first day of month: 2024-01-01, 2024-02-01, etc.
             $table->date('payment_month');
@@ -18,7 +18,7 @@ return new class extends Migration {
             // Snapshot of the fee amount at time of payment (immutable)
             $table->decimal('amount', 12, 2);
 
-            $table->foreignId('payment_method_id')
+            $table->foreignUuid('payment_method_id')
                 ->nullable()
                 ->constrained('payment_methods')
                 ->nullOnDelete();
@@ -34,8 +34,8 @@ return new class extends Migration {
             $table->text('notes')->nullable();
 
             // Audit trail
-            $table->foreignId('submitted_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('submitted_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('approved_at')->nullable();
 
             $table->timestamps();

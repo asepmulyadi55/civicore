@@ -85,11 +85,11 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
     document.getElementById('edit-email').value = email;
     document.getElementById('edit-password').value = '';
     document.querySelectorAll('.edit-role-radio').forEach(radio => {
-      radio.checked = (radio.value !== '' && parseInt(radio.value) === roleId) ||
+      radio.checked = (radio.value !== '' && radio.value === roleId) ||
         (radio.value === '' && !roleId);
     });
     document.getElementById('edit-user-id-field').value = id;
-    document.getElementById('form-edit-user').action = `/users/${id}`;
+    document.getElementById('form-edit-user').action = `${usersBaseUrl}/${id}`;
 
     // Set block and unit from current user data, then lookup resident
     const blockSel = document.getElementById('edit-block-id');
@@ -112,12 +112,13 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
   }
 
   // ── Approve modal helper ──────────────────────────────────────────
+  const usersBaseUrl    = "{{ url('/users') }}";
   const CHECK_URL_APPROVE = '{{ route('users.check-resident-email') }}';
   const CSRF_APPROVE = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
 
   function openApproveModal(userId, userName, userEmail) {
     document.getElementById('approve-subtitle').textContent = userName + ' — ' + userEmail;
-    document.getElementById('form-approve-user').action = `/users/${userId}/approve`;
+    document.getElementById('form-approve-user').action = `${usersBaseUrl}/${userId}/approve`;
 
     const blockSel = document.getElementById('approve-block-id');
     const unitInp = document.getElementById('approve-unit-number');
@@ -172,7 +173,7 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
       title: '{{ __('app.deactivate_user_title') }}',
       body: name => `<strong class="text-slate-800 dark:text-slate-200">${name}</strong> {{ __('app.deactivate_user_body') }}`,
       form: 'ucm-form-deactivate',
-      route: id => `/users/${id}/deactivate`,
+      route: id => `${usersBaseUrl}/${id}/deactivate`,
     },
     reactivate: {
       iconWrap: 'bg-emerald-100 dark:bg-emerald-900/30',
@@ -181,7 +182,7 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
       title: 'Reactivate User',
       body: name => `Reactivate <strong class="text-slate-800 dark:text-slate-200">${name}</strong>? They will be able to log in again immediately.`,
       form: 'ucm-form-reactivate',
-      route: id => `/users/${id}/reactivate`,
+      route: id => `${usersBaseUrl}/${id}/reactivate`,
     },
     delete: {
       iconWrap: 'bg-red-100 dark:bg-red-900/30',
@@ -190,7 +191,7 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
       title: '{{ __('app.delete_user_title') }}',
       body: name => `<strong class="text-slate-800 dark:text-slate-200">${name}</strong> {{ __('app.delete_user_body') }}`,
       form: 'ucm-form-delete',
-      route: id => `/users/${id}`,
+      route: id => `${usersBaseUrl}/${id}`,
     },
   };
 

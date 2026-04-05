@@ -19,9 +19,10 @@
 
     {{-- Header --}}
     <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center shrink-0">
+      {{-- Add New Resident (Header label update) --}}
       <div>
         <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ __('app.add_new_resident') }}</h2>
-        <p class="text-sm text-slate-400 mt-0.5">{{ __('app.add_resident_desc') }}</p>
+        <p class="text-sm text-slate-400 mt-0.5">Register a new household unit.</p>
       </div>
       <button onclick="closeAddResidentModal()"
         class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1">
@@ -115,6 +116,35 @@
             <p id="js-rm-unit_number" class="hidden text-xs text-red-500 items-center gap-1">
               <span class="material-icons text-xs">error_outline</span> {{ __('app.err_unit') }}
             </p>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-100 dark:border-slate-800"></div>
+
+        {{-- House Status + Family Card Number --}}
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              House Status <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <select name="house_status"
+                class="w-full appearance-none pl-4 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('house_status') border-red-500 @enderror">
+                <option value="owner_occupied" {{ old('house_status', 'owner_occupied') === 'owner_occupied' ? 'selected' : '' }}>Owner Occupied</option>
+                <option value="vacant"         {{ old('house_status') === 'vacant'  ? 'selected' : '' }}>Vacant</option>
+                <option value="rented"         {{ old('house_status') === 'rented'  ? 'selected' : '' }}>Rented</option>
+              </select>
+              <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
+            </div>
+            @error('house_status') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+          </div>
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              No. KK <span class="font-normal normal-case text-slate-400">(optional)</span>
+            </label>
+            <input type="text" name="family_card_number" value="{{ old('family_card_number') }}"
+              placeholder="16-digit No. KK" maxlength="20"
+              class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white">
           </div>
         </div>
 
@@ -357,7 +387,7 @@
     document.getElementById('edit-fee_start').value   = '{{ now()->format("Y-m") }}';
     document.getElementById('erm-unit-badge').textContent = data.unit_number;
     document.getElementById('erm-name-sub').textContent   = data.fullname;
-    document.getElementById('form-edit-resident').action  = `/residents/${id}`;
+    document.getElementById('form-edit-resident').action  = `{{ url('/residents') }}/${id}`;
     const el = document.getElementById('edit-resident-modal');
     el.classList.remove('hidden'); el.classList.add('flex');
     document.body.classList.add('overflow-hidden');

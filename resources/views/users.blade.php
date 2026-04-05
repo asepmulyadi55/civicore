@@ -56,7 +56,7 @@
           const roleId = @json(old('role_id'));
           const blockId = @json(old('block_id'));
           const unitNum = @json(old('unit_number'));
-          openEditModal(id, name, username, email, roleId ? parseInt(roleId) : null, blockId ? parseInt(blockId) : null, unitNum);
+          openEditModal(id, name, username, email, roleId || null, blockId || null, unitNum);
         }
       });
     </script>

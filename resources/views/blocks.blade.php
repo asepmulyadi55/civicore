@@ -18,14 +18,16 @@
           <span class="material-icons text-slate-500">menu</span>
         </button>
         <h1 class="text-xl font-bold text-slate-900 dark:text-white">{{ __('app.block_management') }}</h1>
-        <span {{ __('app.blocks_count') }}</span>
+        <span class="hidden sm:inline px-2.5 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg">{{ $blocks->count() }} Blocks</span>
       </div>
       <div class="flex items-center gap-3">
+        @if(auth()->user()->can('blocks.create'))
         <button onclick="openAddBlockModal()"
           class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-sm shadow-primary/20 text-sm">
           <span class="material-icons text-sm">add</span>
           <span class="hidden sm:inline">{{ __('app.btn_add_block') }}</span>
         </button>
+        @endif
         <button
           class="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-primary/50 transition-all"
           onclick="toggleDark()" title="Toggle dark mode">
@@ -118,17 +120,21 @@
                 @endif
 
                 <div class="flex gap-1">
+                  @if(auth()->user()->can('blocks.edit'))
                   <button
-                    onclick="openEditBlockDrawer({{ $block->id }}, '{{ addslashes($block->name) }}', '{{ addslashes($block->description ?? '') }}', {{ $block->is_active ? 'true' : 'false' }})"
+                    onclick="openEditBlockDrawer('{{ $block->id }}', '{{ addslashes($block->name) }}', '{{ addslashes($block->description ?? '') }}', {{ $block->is_active ? 'true' : 'false' }})"
                     class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                     title="{{ __('app.title_edit_block') }}">
                     <span class="material-icons text-sm">edit</span>
                   </button>
-                  <button type="button" onclick="openDeleteBlockModal({{ $block->id }}, '{{ addslashes($block->name) }}')"
+                  @endif
+                  @if(auth()->user()->can('blocks.delete'))
+                  <button type="button" onclick="openDeleteBlockModal('{{ $block->id }}', '{{ addslashes($block->name) }}')"
                     class="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors"
                     title="{{ __('app.title_delete_block') }}">
                     <span class="material-icons text-sm">delete_outline</span>
                   </button>
+                  @endif
                 </div>
               </div>
             </div>
@@ -169,9 +175,10 @@
   </div>
 
   <script>
+    const blocksBaseUrl = "{{ url('/blocks') }}";
     function openDeleteBlockModal(id, name) {
       document.getElementById('delete-block-name').textContent = name;
-      document.getElementById('delete-block-form').action = '/blocks/' + id;
+      document.getElementById('delete-block-form').action = blocksBaseUrl + '/' + id;
       document.getElementById('modal-delete-block').classList.remove('hidden');
       document.body.classList.add('overflow-hidden');
     }

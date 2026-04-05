@@ -53,3 +53,15 @@
   </div>
 
 </div>
+
+{{-- Admin Memo / Community Notice --}}
+@php $adminMemo = \App\Models\Setting::get('admin_memo', ''); @endphp
+@if($adminMemo)
+  <div class="p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl">
+    <div class="flex items-center space-x-2 text-amber-700 dark:text-amber-400 mb-2">
+      <span class="material-icons text-sm">sticky_note_2</span>
+      <span class="text-xs font-bold uppercase tracking-wider">Notice</span>
+    </div>
+    <p class="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">{{ $adminMemo }}</p>
+  </div>
+@endif
