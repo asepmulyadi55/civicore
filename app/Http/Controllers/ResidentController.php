@@ -112,7 +112,20 @@ class ResidentController extends Controller
         $blocks   = Block::active()->orderBy('name')->get();
         $currency = Setting::get('currency_symbol', 'Rp');
 
-        return view('residents.edit', compact('resident', 'blocks', 'currency'));
+        $canManageInfo        = true;
+        $canManageFamilyMembers = true;
+        $updateRoute          = route('residents.update', $resident);
+        $familyMembersBase    = url("/residents/{$resident->id}/family-members");
+        $backRoute            = route('residents.index');
+        $showRevealButtons    = auth()->user()->isAdmin();
+        $isOwnHousehold       = false;
+
+        return view('residents.edit', compact(
+            'resident', 'blocks', 'currency',
+            'canManageInfo', 'canManageFamilyMembers',
+            'updateRoute', 'familyMembersBase',
+            'backRoute', 'showRevealButtons', 'isOwnHousehold'
+        ));
     }
 
     public function update(UpdateResidentRequest $request, Resident $resident)

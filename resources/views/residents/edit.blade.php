@@ -1,7 +1,11 @@
 {{-- Household Edit Page — Section A: Household Info | Section B: Family Members --}}
 <x-layouts.app :title="'Edit Household — ' . $resident->block->name . ' · ' . $resident->unit_number">
 
-  <x-nav.sidebar active="residents" />
+  @if($isOwnHousehold)
+    @include('overview._sidebar')
+  @else
+    <x-nav.sidebar active="residents" />
+  @endif
 
   <div class="lg:pl-64 min-h-screen bg-background-light dark:bg-background-dark flex flex-col">
 
@@ -11,7 +15,7 @@
         <button class="lg:hidden p-2 rounded-lg border border-slate-200 dark:border-slate-800" onclick="toggleSidebar()">
           <span class="material-icons text-slate-500">menu</span>
         </button>
-        <a href="{{ route('residents.index') }}"
+        <a href="{{ $backRoute }}"
           class="p-2 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-all">
           <span class="material-icons">arrow_back</span>
         </a>
@@ -69,7 +73,20 @@
           $ie = 'border-rose-400';
         @endphp
 
-        <form method="POST" action="{{ route('residents.update', $resident) }}" class="space-y-5">
+        @if($canManageInfo)
+
+        {{-- Read-only unit info banner (resident self-service only) --}}
+        @if($isOwnHousehold)
+          <div class="bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 px-5 py-4 flex items-center gap-4 mb-1">
+            <span class="material-icons text-primary text-2xl">home</span>
+            <div>
+              <p class="font-bold text-slate-900 dark:text-white">{{ $resident->block->name }} &middot; Unit {{ $resident->unit_number }}</p>
+              <p class="text-xs text-slate-500 capitalize">{{ str_replace('_', ' ', $resident->house_status) }}</p>
+            </div>
+          </div>
+        @endif
+
+        <form method="POST" action="{{ $updateRoute }}" class="space-y-5">
           @csrf @method('PATCH')
 
           {{-- Unit Details --}}
@@ -77,7 +94,8 @@
             <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Unit Details</h3>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              {{-- Block --}}
+              {{-- Block (admin-only) --}}
+              @if(!$isOwnHousehold)
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                   Block <span class="text-rose-500">*</span>
@@ -95,7 +113,7 @@
                 @error('block_id') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
               </div>
 
-              {{-- Unit Number --}}
+              {{-- Unit Number (admin-only) --}}
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                   Unit Number <span class="text-rose-500">*</span>
@@ -106,6 +124,7 @@
                   class="{{ $ib }} {{ $errors->has('unit_number') ? $ie : $in }}">
                 @error('unit_number') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
               </div>
+              @endif {{-- /!$isOwnHousehold block+unit --}}
 
               {{-- Owner / Contact Name --}}
               <div>
@@ -125,11 +144,21 @@
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                   Family Card Number <span class="text-xs font-normal text-slate-400">(No. KK)</span>
                 </label>
-                <input type="text" name="family_card_number"
-                  value="{{ old('family_card_number') }}"
-                  placeholder="{{ $resident->family_card_number ? $resident->maskedFamilyCardNumber() : 'e.g. 3174012345678901' }}"
-                  maxlength="20"
-                  class="{{ $ib }} {{ $errors->has('family_card_number') ? $ie : $in }}">
+                <div class="relative">
+                  <input type="text" id="fcn-input" name="family_card_number"
+                    value="{{ old('family_card_number') }}"
+                    placeholder="{{ $resident->family_card_number ? $resident->maskedFamilyCardNumber() : 'e.g. 3174012345678901' }}"
+                    maxlength="20"
+                    class="{{ $ib }} {{ $errors->has('family_card_number') ? $ie : $in }} {{ $showRevealButtons && $resident->family_card_number ? 'pr-10' : '' }}">
+                  @if($showRevealButtons && $resident->family_card_number)
+                    <button type="button"
+                      onclick="revealFCN('{{ route('residents.reveal-fcn', $resident) }}', this)"
+                      class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-primary transition-colors"
+                      title="Reveal full number (admin only)">
+                      <span class="material-icons text-[18px]">visibility</span>
+                    </button>
+                  @endif
+                </div>
                 @if($resident->family_card_number)
                   <p class="text-xs text-slate-400 mt-1">Leave blank to keep existing value.</p>
                 @endif
@@ -166,7 +195,8 @@
             <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Classification</h3>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              {{-- House Status --}}
+              {{-- House Status (admin-only) --}}
+              @if(!$isOwnHousehold)
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                   House Status <span class="text-rose-500">*</span>
@@ -184,7 +214,7 @@
                 @error('house_status') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
               </div>
 
-              {{-- Active Status toggle --}}
+              {{-- Active Status toggle (admin-only) --}}
               <div class="flex items-center">
                 <label class="flex items-center gap-3 cursor-pointer p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors w-full border border-slate-200 dark:border-slate-700">
                   <input type="checkbox" name="is_active" value="1"
@@ -196,6 +226,7 @@
                   </div>
                 </label>
               </div>
+              @endif {{-- /!$isOwnHousehold house_status+is_active --}}
             </div>
 
             {{-- Notes --}}
@@ -211,7 +242,8 @@
             </div>
           </div>
 
-          {{-- Fee Management --}}
+          {{-- Fee Management (admin-only) --}}
+          @if(!$isOwnHousehold)
           <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
             <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Fee Management</h3>
 
@@ -259,6 +291,7 @@
               </div>
             </div>
           </div>
+          @endif {{-- /!$isOwnHousehold fee management --}}
 
           {{-- Save Button --}}
           <div class="flex justify-end">
@@ -269,6 +302,21 @@
             </button>
           </div>
         </form>
+
+        @else
+        {{-- Locked notice for tenants --}}
+        <div class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/30 rounded-xl p-5 flex items-start gap-3">
+          <span class="material-icons text-amber-500 mt-0.5 shrink-0">lock</span>
+          <div>
+            <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">Household Information is locked</p>
+            <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
+              This unit is <strong>rented</strong>. Only an administrator can modify household details, block/unit assignment, fees, and classification.
+              You can still manage family members below.
+            </p>
+          </div>
+        </div>
+        @endif {{-- /$canManageInfo --}}
+
       </section>
 
       {{-- ════════════════════════════════════════════════════════════════ --}}
@@ -292,7 +340,7 @@
               <p class="text-xs text-slate-400">People living in this household.</p>
             </div>
           </div>
-          @if(auth()->user()->can('residents.edit'))
+          @if($canManageFamilyMembers)
             <button onclick="openMemberModal()"
               class="flex items-center gap-2 text-sm font-semibold px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all shadow-sm">
               <span class="material-icons text-sm">person_add</span>
@@ -315,7 +363,7 @@
             <div class="flex flex-col items-center gap-3 py-16 text-slate-400">
               <span class="material-icons text-5xl">group_off</span>
               <p class="text-sm font-medium">No family members added yet.</p>
-              @if(auth()->user()->can('residents.edit'))
+                @if($canManageFamilyMembers)
                 <button onclick="openMemberModal()"
                   class="text-primary text-sm hover:underline font-semibold">
                   + Add the first member
@@ -334,7 +382,7 @@
                     <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Gender</th>
                     <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden xl:table-cell">Education</th>
                     <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden xl:table-cell">Occupation</th>
-                    @if(auth()->user()->can('residents.edit'))
+                    @if($canManageFamilyMembers)
                       <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Actions</th>
                     @endif
                   </tr>
@@ -351,14 +399,24 @@
                         </div>
                       </td>
                       <td class="px-5 py-4 text-slate-600 dark:text-slate-400">{{ $member->relationshipLabel() }}</td>
-                      <td class="px-5 py-4 text-slate-500 font-mono text-xs hidden md:table-cell">{{ $member->maskedNik() }}</td>
+                      <td class="px-5 py-4 text-slate-500 font-mono text-xs hidden md:table-cell">
+                        <span id="nik-{{ $member->id }}">{{ $member->maskedNik() }}</span>
+                        @if($showRevealButtons && $member->nik)
+                          <button type="button"
+                            onclick="revealNIK('{{ route('residents.family-members.reveal-nik', [$resident, $member]) }}', '{{ $member->id }}', this)"
+                            class="ml-1 text-slate-400 hover:text-primary transition-colors align-middle"
+                            title="Reveal full NIK (admin only)">
+                            <span class="material-icons text-[14px]">visibility</span>
+                          </button>
+                        @endif
+                      </td>
                       <td class="px-5 py-4 text-slate-500 hidden lg:table-cell">
                         {{ $member->birth_date ? $member->birth_date->format('d M Y') . ' (' . $member->birth_date->age . ' yrs)' : '—' }}
                       </td>
                       <td class="px-5 py-4 text-slate-500 hidden lg:table-cell capitalize">{{ $member->gender ?? '—' }}</td>
                       <td class="px-5 py-4 text-slate-500 text-xs hidden xl:table-cell">{{ $member->educationLabel() }}</td>
                       <td class="px-5 py-4 text-slate-500 hidden xl:table-cell">{{ $member->occupation ?? '—' }}</td>
-                      @if(auth()->user()->can('residents.edit'))
+                      @if($canManageFamilyMembers)
                         <td class="px-5 py-4">
                           <div class="flex items-center justify-center gap-1">
                             {{-- Edit --}}
@@ -370,7 +428,7 @@
                             </button>
                             {{-- Set as Head --}}
                             @if(!$member->is_head)
-                              <form method="POST" action="{{ route('residents.family-members.set-head', [$resident, $member]) }}">
+                              <form method="POST" action="{{ $familyMembersBase . '/' . $member->id . '/set-head' }}">
                                 @csrf @method('PATCH')
                                 <button type="submit"
                                   class="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
@@ -565,7 +623,48 @@
 
   <script>
     const residentId   = '{{ $resident->id }}';
-    const membersBase  = '{{ url("/residents/{$resident->id}/family-members") }}';
+    const membersBase  = '{{ $familyMembersBase }}';
+
+    // ── Sensitive Data Reveal (admin-only) ──────────────────────────────────
+    function revealFCN(url, btn) {
+      const input = document.getElementById('fcn-input');
+      const icon  = btn.querySelector('.material-icons');
+      if (btn.dataset.revealed) {
+        input.value = '';
+        icon.textContent = 'visibility';
+        delete btn.dataset.revealed;
+        return;
+      }
+      fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
+        .then(r => r.json())
+        .then(d => {
+          input.value = d.value;
+          input.placeholder = '';
+          icon.textContent  = 'visibility_off';
+          btn.dataset.revealed = '1';
+        })
+        .catch(() => alert('Could not reveal value. Please try again.'));
+    }
+
+    function revealNIK(url, memberId, btn) {
+      const span  = document.getElementById('nik-' + memberId);
+      const icon  = btn.querySelector('.material-icons');
+      if (btn.dataset.revealed) {
+        span.textContent = btn.dataset.masked;
+        icon.textContent = 'visibility';
+        delete btn.dataset.revealed;
+        return;
+      }
+      btn.dataset.masked = span.textContent;
+      fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
+        .then(r => r.json())
+        .then(d => {
+          span.textContent = d.value || '—';
+          icon.textContent = 'visibility_off';
+          btn.dataset.revealed = '1';
+        })
+        .catch(() => alert('Could not reveal value. Please try again.'));
+    }
 
     // ── Member Modal ─────────────────────────────────────────────────
     function openMemberModal(data) {

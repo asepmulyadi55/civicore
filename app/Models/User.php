@@ -94,7 +94,7 @@ class User extends Authenticatable
    */
   public function homeUrl(): string
   {
-    return $this->isResident() ? '/my-overview' : '/dashboard';
+    return $this->isResident() ? '/overview' : '/dashboard';
   }
 
   /**

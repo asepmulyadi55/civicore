@@ -18,19 +18,23 @@ $badgeClass = $badgeColors[$badgeStyle] ?? $badgeColors['emerald'];
 @endphp
 
 <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-  <div class="flex justify-between items-start mb-4">
+  <div class="flex justify-between items-start">
+    {{-- Icon --}}
     <div class="p-3 {{ $iconBg }} rounded-lg">
       <span class="material-icons {{ $iconText }}">{{ $icon }}</span>
     </div>
-    @if ($badge)
-      <span class="flex items-center text-xs font-bold {{ $badgeClass }} px-2 py-1 rounded-full">
-        @if ($badgeStyle === 'emerald')
-          <span class="material-icons text-[12px] mr-1">trending_up</span>
-        @endif
-        {{ $badge }}
-      </span>
-    @endif
+    {{-- Value + badge (right side) --}}
+    <div class="text-right">
+      @if ($badge)
+        <span class="inline-flex items-center text-xs font-bold {{ $badgeClass }} px-2 py-1 rounded-full mb-1">
+          @if ($badgeStyle === 'emerald')
+            <span class="material-icons text-[12px] mr-1">trending_up</span>
+          @endif
+          {{ $badge }}
+        </span>
+      @endif
+      <p class="text-2xl font-extrabold text-slate-900 dark:text-white leading-tight">{{ $value }}</p>
+    </div>
   </div>
-  <h3 class="text-slate-500 text-sm font-medium">{{ $label }}</h3>
-  <p class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">{{ $value }}</p>
+  <h3 class="text-slate-500 text-sm font-medium mt-4">{{ $label }}</h3>
 </div>

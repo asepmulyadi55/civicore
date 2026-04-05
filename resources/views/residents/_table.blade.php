@@ -107,13 +107,16 @@
               <div class="flex items-center justify-center gap-1">
 
                 {{-- Edit — navigate to full edit page --}}
+                @if(auth()->user()->can('residents.edit'))
                 <a href="{{ route('residents.edit', $resident) }}"
                   class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                   title="{{ __('app.title_edit_resident') }}">
                   <span class="material-icons text-lg">edit</span>
                 </a>
+                @endif
 
                 {{-- Deactivate / Reactivate --}}
+                @if(auth()->user()->can('residents.edit'))
                 @if($resident->is_active)
                   <button
                     onclick="openResidentConfirmModal('deactivate', '{{ $resident->id }}', '{{ addslashes($resident->fullname) }}')"
@@ -127,14 +130,17 @@
                     <span class="material-icons text-lg">person_off</span>
                   </button>
                 @endif
+                @endif
 
                 {{-- Delete permanently --}}
+                @if(auth()->user()->can('residents.delete'))
                 <button
                   onclick="openResidentConfirmModal('delete', '{{ $resident->id }}', '{{ addslashes($resident->fullname) }}')"
                   class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                   title="{{ __('app.title_delete_permanently') }}">
                   <span class="material-icons text-lg">delete_forever</span>
                 </button>
+                @endif
 
               </div>
             </td>
