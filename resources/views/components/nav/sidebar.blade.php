@@ -55,7 +55,7 @@
     ];
 
     // Add Household link for non-resident roles that are also linked to a resident record
-    if ($user->resident) {
+    if ($user->resolveResident()) {
       array_splice($allGroups, 1, 0, [[
         'label' => null,
         'items' => [

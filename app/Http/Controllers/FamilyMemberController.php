@@ -6,6 +6,7 @@ use App\Models\FamilyMember;
 use App\Models\Resident;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class FamilyMemberController extends Controller
 {
@@ -19,7 +20,17 @@ class FamilyMemberController extends Controller
             'gender'       => ['nullable', 'in:male,female'],
             'education'    => ['nullable', 'in:none,elementary,junior_high,senior_high,associate,bachelor,master,doctorate,other'],
             'occupation'   => ['nullable', 'string', 'max:100'],
+            'photo'        => ['nullable', 'image', 'max:5120'],
         ];
+    }
+
+    private function handlePhoto(Request $request, FamilyMember $member = null): ?string
+    {
+        if (!$request->hasFile('photo')) return null;
+        if ($member?->photo_path) {
+            Storage::disk('local')->delete($member->photo_path);
+        }
+        return $request->file('photo')->store('members', 'local');
     }
 
     public function store(Request $request, Resident $resident)
@@ -27,6 +38,9 @@ class FamilyMemberController extends Controller
         $data = $request->validate($this->rules());
         $data['resident_id'] = $resident->id;
         $data['is_head']     = $data['relationship'] === 'head';
+        $photoPath = $this->handlePhoto($request);
+        if ($photoPath) $data['photo_path'] = $photoPath;
+        unset($data['photo']);
 
         DB::transaction(function () use ($data, $resident) {
             if ($data['is_head']) {
@@ -50,6 +64,10 @@ class FamilyMemberController extends Controller
             unset($data['nik']);
         }
 
+        $photoPath = $this->handlePhoto($request, $familyMember);
+        if ($photoPath) $data['photo_path'] = $photoPath;
+        unset($data['photo']);
+
         DB::transaction(function () use ($data, $resident, $familyMember, $becomingHead) {
             if ($becomingHead) {
                 $resident->familyMembers()
@@ -67,6 +85,9 @@ class FamilyMemberController extends Controller
     public function destroy(Resident $resident, FamilyMember $familyMember)
     {
         $name = $familyMember->fullname;
+        if ($familyMember->photo_path) {
+            Storage::disk('local')->delete($familyMember->photo_path);
+        }
         $familyMember->delete();
 
         return redirect()->route('residents.edit', $resident)

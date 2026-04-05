@@ -86,10 +86,34 @@
           </div>
         @endif
 
-        <form method="POST" action="{{ $updateRoute }}" class="space-y-5">
+        <form method="POST" action="{{ $updateRoute }}" enctype="multipart/form-data" class="space-y-5">
           @csrf @method('PATCH')
 
-          {{-- Unit Details --}}
+          {{-- Household Photo --}}
+          <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Household Photo</h3>
+            <div class="flex items-center gap-5">
+              <div class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-center">
+                @if($resident->photoUrl())
+                  <img id="resident-photo-preview" src="{{ $resident->photoUrl() }}" alt="{{ $resident->fullname }}"
+                    class="w-full h-full object-cover">
+                @else
+                  <img id="resident-photo-preview" src="" alt="" class="w-full h-full object-cover hidden">
+                  <span id="resident-photo-icon" class="material-icons text-slate-400 text-3xl">home</span>
+                @endif
+              </div>
+              <div>
+                <label for="resident-photo-upload"
+                  class="inline-flex items-center gap-2 cursor-pointer px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold transition-all border border-slate-200 dark:border-slate-700">
+                  <span class="material-icons text-sm">upload</span> Upload Photo
+                </label>
+                <input id="resident-photo-upload" type="file" name="photo" accept="image/*" class="hidden"
+                  onchange="previewResidentPhoto(event)">
+                <p class="text-xs text-slate-400 mt-2">JPG, PNG, WebP. Auto-compressed if oversized.</p>
+                @error('photo') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
+              </div>
+            </div>
+          </div>
           <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 space-y-5">
             <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Unit Details</h3>
 
@@ -376,12 +400,11 @@
                 <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
                   <tr>
                     <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider">Name</th>
+                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">Photo</th>
                     <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider">Relationship</th>
                     <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">NIK</th>
-                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Birth Date</th>
                     <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Gender</th>
                     <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden xl:table-cell">Education</th>
-                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden xl:table-cell">Occupation</th>
                     @if($canManageFamilyMembers)
                       <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Actions</th>
                     @endif
@@ -398,6 +421,17 @@
                           @endif
                         </div>
                       </td>
+                      <td class="px-5 py-4 hidden sm:table-cell">
+                        @if($member->photoUrl())
+                          <img src="{{ $member->photoUrl() }}" alt="{{ $member->fullname }}"
+                            class="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 cursor-pointer"
+                            onclick="openPhotoLightbox('{{ $member->photoUrl() }}', '{{ addslashes($member->fullname) }}')">
+                        @else
+                          <div class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                            <span class="material-icons text-slate-400 text-lg">person</span>
+                          </div>
+                        @endif
+                      </td>
                       <td class="px-5 py-4 text-slate-600 dark:text-slate-400">{{ $member->relationshipLabel() }}</td>
                       <td class="px-5 py-4 text-slate-500 font-mono text-xs hidden md:table-cell">
                         <span id="nik-{{ $member->id }}">{{ $member->maskedNik() }}</span>
@@ -410,18 +444,14 @@
                           </button>
                         @endif
                       </td>
-                      <td class="px-5 py-4 text-slate-500 hidden lg:table-cell">
-                        {{ $member->birth_date ? $member->birth_date->format('d M Y') . ' (' . $member->birth_date->age . ' yrs)' : '—' }}
-                      </td>
                       <td class="px-5 py-4 text-slate-500 hidden lg:table-cell capitalize">{{ $member->gender ?? '—' }}</td>
                       <td class="px-5 py-4 text-slate-500 text-xs hidden xl:table-cell">{{ $member->educationLabel() }}</td>
-                      <td class="px-5 py-4 text-slate-500 hidden xl:table-cell">{{ $member->occupation ?? '—' }}</td>
                       @if($canManageFamilyMembers)
                         <td class="px-5 py-4">
                           <div class="flex items-center justify-center gap-1">
                             {{-- Edit --}}
                             <button type="button"
-                              onclick="openMemberModal({{ json_encode(['id' => $member->id, 'fullname' => $member->fullname, 'relationship' => $member->relationship, 'nik_masked' => $member->maskedNik(), 'birth_date' => $member->birth_date?->format('Y-m-d'), 'gender' => $member->gender, 'education' => $member->education, 'occupation' => $member->occupation]) }})"
+                              onclick="openMemberModal({{ json_encode(['id' => $member->id, 'fullname' => $member->fullname, 'relationship' => $member->relationship, 'nik_masked' => $member->maskedNik(), 'birth_date' => $member->birth_date?->format('Y-m-d'), 'gender' => $member->gender, 'education' => $member->education, 'occupation' => $member->occupation, 'photo_url' => $member->photoUrl()]) }})"
                               class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                               title="Edit member">
                               <span class="material-icons text-lg">edit</span>
@@ -488,7 +518,7 @@
 
       {{-- Body --}}
       <div class="flex-1 overflow-y-auto px-8 py-6">
-        <form id="member-form" method="POST" action="{{ route('residents.family-members.store', $resident) }}" class="space-y-4">
+        <form id="member-form" method="POST" action="{{ route('residents.family-members.store', $resident) }}" enctype="multipart/form-data" class="space-y-4">
           @csrf
           <input type="hidden" name="_method" id="member-method" value="POST">
           <input type="hidden" name="_member_form" value="1">
@@ -505,6 +535,25 @@
             <input type="text" name="fullname" id="mf-fullname" placeholder="Enter full name"
               class="{{ $ib }} @error('fullname') border-rose-400 @enderror">
             @error('fullname') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
+          </div>
+
+          {{-- Photo --}}
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Photo</label>
+            <div class="flex items-center gap-4">
+              <div id="mf-photo-preview-wrap" class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center">
+                <img id="mf-photo-preview" src="" alt="" class="w-full h-full object-cover hidden">
+                <span id="mf-photo-icon" class="material-icons text-slate-400 text-2xl">person</span>
+              </div>
+              <div>
+                <label for="mf-photo" class="inline-flex items-center gap-2 cursor-pointer px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold transition-all border border-slate-200 dark:border-slate-700">
+                  <span class="material-icons text-sm">upload</span> Upload Photo
+                </label>
+                <input id="mf-photo" type="file" name="photo" accept="image/*" class="hidden"
+                  onchange="previewMemberPhoto(event)">
+                <p class="text-xs text-slate-400 mt-1">JPG, PNG, WebP. Auto-compressed if oversized.</p>
+              </div>
+            </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
@@ -595,6 +644,19 @@
     </div>
   </div>
 
+  {{-- Photo Lightbox --}}
+  <div id="photo-lightbox"
+    class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-4"
+    onclick="if(event.target===this) closePhotoLightbox()">
+    <div class="relative max-w-sm w-full">
+      <button onclick="closePhotoLightbox()" class="absolute -top-3 -right-3 z-10 bg-white dark:bg-slate-800 rounded-full p-1.5 shadow-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors">
+        <span class="material-icons text-lg">close</span>
+      </button>
+      <img id="photo-lightbox-img" src="" alt="" class="w-full rounded-2xl shadow-2xl object-contain max-h-[70vh]">
+      <p id="photo-lightbox-name" class="mt-3 text-center text-sm font-semibold text-white"></p>
+    </div>
+  </div>
+
   {{-- Delete Member Confirm --}}
   <div id="delete-member-modal"
     class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4"
@@ -624,6 +686,21 @@
   <script>
     const residentId   = '{{ $resident->id }}';
     const membersBase  = '{{ $familyMembersBase }}';
+
+    // ── Resident photo preview ───────────────────────────────────────────────
+    function previewResidentPhoto(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const preview = document.getElementById('resident-photo-preview');
+      const icon    = document.getElementById('resident-photo-icon');
+      const reader  = new FileReader();
+      reader.onload = e => {
+        preview.src = e.target.result;
+        preview.classList.remove('hidden');
+        if (icon) icon.classList.add('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
 
     // ── Sensitive Data Reveal (admin-only) ──────────────────────────────────
     function revealFCN(url, btn) {
@@ -667,12 +744,35 @@
     }
 
     // ── Member Modal ─────────────────────────────────────────────────
+    function resetMemberPhotoPreview(photoUrl) {
+      const img  = document.getElementById('mf-photo-preview');
+      const icon = document.getElementById('mf-photo-icon');
+      if (photoUrl) {
+        img.src = photoUrl;
+        img.classList.remove('hidden');
+        icon.classList.add('hidden');
+      } else {
+        img.src = '';
+        img.classList.add('hidden');
+        icon.classList.remove('hidden');
+      }
+    }
+
+    function previewMemberPhoto(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => resetMemberPhotoPreview(e.target.result);
+      reader.readAsDataURL(file);
+    }
+
     function openMemberModal(data) {
       const modal = document.getElementById('member-modal');
       const form  = document.getElementById('member-form');
 
       // Reset
       form.reset();
+      resetMemberPhotoPreview(null);
       document.getElementById('member-method').value = 'POST';
       form.action = membersBase;
       document.getElementById('member-modal-title').textContent  = 'Add Family Member';
@@ -687,7 +787,7 @@
         document.getElementById('member-modal-title').textContent  = 'Edit Family Member';
         document.getElementById('member-submit-label').textContent = 'Save Changes';
 
-        document.getElementById('mf-fullname').value      = data.fullname   || '';
+        document.getElementById('mf-fullname').value      = data.fullname    || '';
         document.getElementById('mf-relationship').value  = data.relationship || '';
         document.getElementById('mf-nik').value           = '';
         document.getElementById('mf-nik').placeholder     = data.nik_masked && data.nik_masked !== '—' ? data.nik_masked : '16-digit NIK';
@@ -696,6 +796,7 @@
         document.getElementById('mf-gender').value        = data.gender      || '';
         document.getElementById('mf-education').value     = data.education   || '';
         document.getElementById('mf-occupation').value    = data.occupation  || '';
+        resetMemberPhotoPreview(data.photo_url || null);
       }
 
       modal.classList.remove('hidden'); modal.classList.add('flex');
@@ -705,6 +806,20 @@
     function closeMemberModal() {
       const modal = document.getElementById('member-modal');
       modal.classList.add('hidden'); modal.classList.remove('flex');
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    // ── Photo Lightbox ───────────────────────────────────────────────
+    function openPhotoLightbox(url, name) {
+      document.getElementById('photo-lightbox-img').src  = url;
+      document.getElementById('photo-lightbox-name').textContent = name;
+      const lb = document.getElementById('photo-lightbox');
+      lb.classList.remove('hidden'); lb.classList.add('flex');
+      document.body.classList.add('overflow-hidden');
+    }
+    function closePhotoLightbox() {
+      const lb = document.getElementById('photo-lightbox');
+      lb.classList.add('hidden'); lb.classList.remove('flex');
       document.body.classList.remove('overflow-hidden');
     }
 
@@ -725,7 +840,34 @@
     }
 
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { closeMemberModal(); closeDeleteMemberModal(); }
+      if (e.key === 'Escape') { closeMemberModal(); closeDeleteMemberModal(); closePhotoLightbox(); }
+    });
+
+    // ── Fetch-based member form submission ───────────────────────────────────
+    // Using fetch instead of native form submission avoids the browser navigating
+    // to the action URL (which would allow a refresh to re-send GET to a POST-only
+    // route and cause a 405). Fetch also handles multipart/file uploads correctly.
+    document.getElementById('member-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const form = this;
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalLabel = document.getElementById('member-submit-label').textContent;
+
+      submitBtn.disabled = true;
+      document.getElementById('member-submit-label').textContent = 'Saving…';
+
+      fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        credentials: 'same-origin',
+      }).then(function (response) {
+        // response.url is the final URL after any redirects (success → edit page, error → back to edit page)
+        window.location.href = response.url;
+      }).catch(function () {
+        submitBtn.disabled = false;
+        document.getElementById('member-submit-label').textContent = originalLabel;
+        alert('Submission failed. Please check your connection and try again.');
+      });
     });
 
     // Re-open member modal on validation failure

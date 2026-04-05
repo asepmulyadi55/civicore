@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ResidentController extends Controller
 {
@@ -139,6 +140,14 @@ class ResidentController extends Controller
             // Don't clobber an existing encrypted Family Card Number if the user left the field blank.
             if (!$request->filled('family_card_number')) {
                 unset($data['family_card_number']);
+            }
+
+            // Handle optional photo upload
+            if ($request->hasFile('photo')) {
+                if ($resident->photo_path) {
+                    Storage::disk('local')->delete($resident->photo_path);
+                }
+                $data['photo_path'] = $request->file('photo')->store('residents', 'local');
             }
 
             $resident->update($data);

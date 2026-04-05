@@ -9,6 +9,7 @@ use App\Models\Resident;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class HouseholdController extends Controller
 {
@@ -21,7 +22,7 @@ class HouseholdController extends Controller
      */
     private function getOwnResident(): Resident
     {
-        $resident = auth()->user()->resident;
+        $resident = auth()->user()->resolveResident();
 
         if (!$resident) {
             abort(403, 'No household record is linked to your account. Please contact your administrator.');
@@ -53,7 +54,17 @@ class HouseholdController extends Controller
             'gender'       => ['nullable', 'in:male,female'],
             'education'    => ['nullable', 'in:none,elementary,junior_high,senior_high,associate,bachelor,master,doctorate,other'],
             'occupation'   => ['nullable', 'string', 'max:100'],
+            'photo'        => ['nullable', 'image', 'max:5120'],
         ];
+    }
+
+    private function handleMemberPhoto(Request $request, FamilyMember $member = null): ?string
+    {
+        if (!$request->hasFile('photo')) return null;
+        if ($member?->photo_path) {
+            Storage::disk('local')->delete($member->photo_path);
+        }
+        return $request->file('photo')->store('members', 'local');
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -102,6 +113,14 @@ class HouseholdController extends Controller
                 unset($data['family_card_number']);
             }
 
+            // Handle optional photo upload
+            if ($request->hasFile('photo')) {
+                if ($resident->photo_path) {
+                    Storage::disk('local')->delete($resident->photo_path);
+                }
+                $data['photo_path'] = $request->file('photo')->store('residents', 'local');
+            }
+
             // Residents may not change block / unit / is_active / house_status / fee
             $resident->update($data);
         });
@@ -121,6 +140,9 @@ class HouseholdController extends Controller
 
         $data['resident_id'] = $resident->id;
         $data['is_head']     = $data['relationship'] === 'head';
+        $photoPath = $this->handleMemberPhoto($request);
+        if ($photoPath) $data['photo_path'] = $photoPath;
+        unset($data['photo']);
 
         DB::transaction(function () use ($data, $resident) {
             if ($data['is_head']) {
@@ -147,6 +169,10 @@ class HouseholdController extends Controller
             unset($data['nik']);
         }
 
+        $photoPath = $this->handleMemberPhoto($request, $familyMember);
+        if ($photoPath) $data['photo_path'] = $photoPath;
+        unset($data['photo']);
+
         DB::transaction(function () use ($data, $resident, $familyMember, $becomingHead) {
             if ($becomingHead) {
                 $resident->familyMembers()
@@ -167,6 +193,9 @@ class HouseholdController extends Controller
         $this->authorizeOwnMember($resident, $familyMember);
 
         $name = $familyMember->fullname;
+        if ($familyMember->photo_path) {
+            Storage::disk('local')->delete($familyMember->photo_path);
+        }
         $familyMember->delete();
 
         return redirect()->route('household.show')

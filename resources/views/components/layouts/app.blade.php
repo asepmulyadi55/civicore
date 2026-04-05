@@ -72,6 +72,66 @@
   </script>
 
   @auth
+    {{-- ── Auto Image Compression ────────────────────────────────────────── --}}
+    {{-- Automatically compresses any image file selected in an image input   --}}
+    {{-- before it is submitted. Max 1920px width, JPEG 0.85 quality.         --}}
+    {{-- Files already under 300 KB or non-image types (PDF) are skipped.     --}}
+    <script>
+      (function () {
+        var MAX_SIDE = 1920;
+        var QUALITY  = 0.85;
+        var SIZE_THRESHOLD = 300 * 1024; // 300 KB — skip if smaller
+
+        function compressFile(file, callback) {
+          if (!file.type.startsWith('image/') || file.size <= SIZE_THRESHOLD) {
+            callback(file);
+            return;
+          }
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            var img = new Image();
+            img.onload = function () {
+              var w = img.width, h = img.height;
+              if (w <= MAX_SIDE && h <= MAX_SIDE) { callback(file); return; }
+              var ratio = Math.min(MAX_SIDE / w, MAX_SIDE / h);
+              var canvas = document.createElement('canvas');
+              canvas.width  = Math.round(w * ratio);
+              canvas.height = Math.round(h * ratio);
+              canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+              canvas.toBlob(function (blob) {
+                if (!blob || blob.size >= file.size) { callback(file); return; }
+                var compressed = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg', lastModified: Date.now() });
+                callback(compressed);
+              }, 'image/jpeg', QUALITY);
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+
+        function replaceFileInInput(input, file) {
+          try {
+            var dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+          } catch (err) {
+            // DataTransfer not supported (very old browsers) — skip silently
+          }
+        }
+
+        document.addEventListener('change', function (e) {
+          var input = e.target;
+          if (input.tagName !== 'INPUT' || input.type !== 'file') return;
+          var accept = (input.getAttribute('accept') || '');
+          if (!accept.includes('image/') && !accept.includes('image/*')) return;
+          var file = input.files[0];
+          if (!file) return;
+          compressFile(file, function (result) {
+            if (result !== file) replaceFileInInput(input, result);
+          });
+        });
+      })();
+    </script>
     {{-- ── Idle Session Timeout ──────────────────────────────────────────── --}}
     @php $timeoutMinutes = (int) \App\Models\Setting::get('session_timeout_minutes', 30); @endphp
     <div id="idle-warning" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">

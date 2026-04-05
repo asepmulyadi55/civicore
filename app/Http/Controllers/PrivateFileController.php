@@ -19,7 +19,7 @@ class PrivateFileController extends Controller
   public function serve(string $path): Response
   {
     // Whitelist: only private module directories are allowed
-    $allowed = ['proofs/', 'avatars/'];
+    $allowed = ['proofs/', 'avatars/', 'members/', 'residents/'];
     $allowed_match = false;
     foreach ($allowed as $prefix) {
       if (str_starts_with($path, $prefix)) {

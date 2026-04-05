@@ -7,7 +7,7 @@
     <div class="space-y-1.5">
       <label class="text-xs font-bold text-slate-400 uppercase tracking-tight">{{ __('app.filter_year') }}</label>
       <div class="relative">
-        <select name="year" onchange="this.form.submit()"
+        <select name="year"
           class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none px-4 py-2.5 pr-9 text-slate-700 dark:text-slate-200 outline-none">
           @foreach($years as $y)
             <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>{{ $y }}</option>
@@ -23,7 +23,7 @@
       <div class="space-y-1.5">
         <label class="text-xs font-bold text-slate-400 uppercase tracking-tight">{{ __('app.filter_block') }}</label>
         <div class="relative">
-          <select name="block_id" onchange="this.form.submit()"
+          <select name="block_id"
             class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none px-4 py-2.5 pr-9 text-slate-700 dark:text-slate-200 outline-none">
             <option value="">{{ __('app.all_blocks') }}</option>
             @foreach($blocks as $block)
