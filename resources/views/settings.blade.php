@@ -188,7 +188,15 @@
               {{ __('app.settings_new_password') }}
             </label>
             <input type="password" name="password" id="new_password" autocomplete="new-password"
-              class="{{ $inputBase }} {{ $errors->has('password') ? $inputError : $inputNormal }}">
+              class="{{ $inputBase }} {{ $errors->has('password') ? $inputError : $inputNormal }}"
+              oninput="checkPasswordStrengthSettings(this.value)">
+            <div id="sp-requirements" class="hidden mt-2 space-y-1">
+              <p id="sp-req-length" class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> At least 8 characters</p>
+              <p id="sp-req-upper"  class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One uppercase letter</p>
+              <p id="sp-req-lower"  class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One lowercase letter</p>
+              <p id="sp-req-number" class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One number</p>
+              <p id="sp-req-symbol" class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One special character</p>
+            </div>
             @error('password') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
             <p class="text-xs text-slate-400 mt-1">{{ __('app.settings_password_hint') }}</p>
           </div>
@@ -372,6 +380,22 @@
           }
         }
       });
+    }
+    function checkPasswordStrengthSettings(pw) {
+      const box = document.getElementById('sp-requirements');
+      if (!pw) { box.classList.add('hidden'); return; }
+      box.classList.remove('hidden');
+      function setReq(id, passed) {
+        const el = document.getElementById(id);
+        const icon = el.querySelector('.material-icons');
+        if (passed) { el.classList.replace('text-slate-400','text-emerald-500'); icon.textContent='check_circle'; }
+        else { el.classList.replace('text-emerald-500','text-slate-400'); icon.textContent='radio_button_unchecked'; }
+      }
+      setReq('sp-req-length', pw.length >= 8);
+      setReq('sp-req-upper',  /[A-Z]/.test(pw));
+      setReq('sp-req-lower',  /[a-z]/.test(pw));
+      setReq('sp-req-number', /[0-9]/.test(pw));
+      setReq('sp-req-symbol', /[^A-Za-z0-9]/.test(pw));
     }
   </script>
 

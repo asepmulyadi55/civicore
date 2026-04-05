@@ -87,11 +87,18 @@ Trigger: openModal('modal-create')
         <div class="relative">
           <input name="password" id="create-pw" type="password"
             class="w-full px-4 py-2.5 pr-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('password') border-red-500 @enderror"
-            placeholder="{{ __('app.min_8_chars') }}" oninput="clearUErr('js-cu-password')" />
+            placeholder="{{ __('app.min_8_chars') }}" oninput="clearUErr('js-cu-password'); checkPwStrength(this.value, 'cu')" />
           <button type="button" onclick="togglePw('create-pw','create-pw-icon')"
             class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
             <span id="create-pw-icon" class="material-icons text-lg">visibility_off</span>
           </button>
+        </div>
+        <div id="pw-req-cu" class="hidden mt-2 space-y-1">
+          <p id="cu-req-length" class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> At least 8 characters</p>
+          <p id="cu-req-upper"  class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One uppercase letter</p>
+          <p id="cu-req-lower"  class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One lowercase letter</p>
+          <p id="cu-req-number" class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One number</p>
+          <p id="cu-req-symbol" class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One special character</p>
         </div>
         @error('password')
           <p class="text-xs text-red-500 flex items-center gap-1 mt-1">

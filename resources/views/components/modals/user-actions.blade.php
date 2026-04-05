@@ -35,7 +35,7 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
         @csrf @method('PATCH')
         <button type="submit"
           class="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all">
-          Reactivate
+          {{ __('app.btn_reactivate') }}
         </button>
       </form>
       <form id="ucm-form-delete" method="POST" action="" class="flex-1 hidden">
@@ -116,14 +116,15 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
   const CHECK_URL_APPROVE = '{{ route('users.check-resident-email') }}';
   const CSRF_APPROVE = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
 
-  function openApproveModal(userId, userName, userEmail) {
+  function openApproveModal(userId, userName, userEmail, currentBlockId, currentUnitNumber) {
     document.getElementById('approve-subtitle').textContent = userName + ' — ' + userEmail;
     document.getElementById('form-approve-user').action = `${usersBaseUrl}/${userId}/approve`;
 
     const blockSel = document.getElementById('approve-block-id');
     const unitInp = document.getElementById('approve-unit-number');
-    if (blockSel) { blockSel.value = ''; blockSel.disabled = false; }
-    if (unitInp) { unitInp.value = ''; unitInp.readOnly = false; }
+    // Pre-fill with the values already saved on the user record
+    if (blockSel) { blockSel.value = currentBlockId ?? ''; blockSel.disabled = false; }
+    if (unitInp) { unitInp.value = currentUnitNumber ?? ''; unitInp.readOnly = false; unitInp.classList.remove('bg-slate-100', 'cursor-not-allowed'); }
 
     // Reset badges
     ['found', 'notfound'].forEach(s => {
@@ -179,8 +180,8 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
       iconWrap: 'bg-emerald-100 dark:bg-emerald-900/30',
       icon: 'person_add',
       iconColor: 'text-emerald-600 dark:text-emerald-400',
-      title: 'Reactivate User',
-      body: name => `Reactivate <strong class="text-slate-800 dark:text-slate-200">${name}</strong>? They will be able to log in again immediately.`,
+      title: '{{ __('app.reactivate_user_title') }}',
+      body: name => `{{ __('app.reactivate_user_body_before') }} <strong class="text-slate-800 dark:text-slate-200">${name}</strong>{{ __('app.reactivate_user_body_after') }}`,
       form: 'ucm-form-reactivate',
       route: id => `${usersBaseUrl}/${id}/reactivate`,
     },
