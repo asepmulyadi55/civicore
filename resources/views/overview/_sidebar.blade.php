@@ -17,9 +17,12 @@
     @php $currentRoute = Route::currentRouteName(); @endphp
     @php
       $residentNav = [
-        ['route' => 'my-overview', 'icon' => 'dashboard', 'label' => 'Overview'],
-        ['route' => 'settings.index', 'icon' => 'settings', 'label' => 'Settings'],
+        ['route' => 'overview', 'icon' => 'dashboard', 'label' => 'Overview'],
       ];
+      if (auth()->user()->resident) {
+        $residentNav[] = ['route' => 'household.show', 'icon' => 'home', 'label' => 'Household'];
+      }
+      $residentNav[] = ['route' => 'settings.index', 'icon' => 'settings', 'label' => 'Settings'];
     @endphp
     @foreach($residentNav as $item)
       @php $isActive = $currentRoute === $item['route']; @endphp

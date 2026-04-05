@@ -42,10 +42,10 @@
         }
       @endphp
 
-      <div class="flex gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl mb-6">
+      <div class="grid grid-cols-2 sm:flex gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl mb-6">
         @foreach($tabs as $tab)
           <button type="button" id="tab-btn-{{ $tab['id'] }}" onclick="switchTab('{{ $tab['id'] }}')"
-            class="settings-tab-btn flex items-center gap-1.5 px-5 py-2 rounded-lg text-sm font-semibold transition-all text-slate-500 dark:text-slate-400">
+            class="settings-tab-btn flex items-center justify-center gap-1.5 px-3 sm:px-5 py-2 rounded-lg text-sm font-semibold transition-all text-slate-500 dark:text-slate-400">
             <span class="material-icons text-base">{{ $tab['icon'] }}</span>
             {{ $tab['label'] }}
           </button>

@@ -18,18 +18,13 @@
       <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
         <tr>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {{ __('app.table_resident_name') }}
+            Household
           </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {{ __('app.table_block_unit') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_phone') }}
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">
+            House Status
           </th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
             {{ __('app.table_monthly_fee') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {{ __('app.table_fee_since') }}
           </th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}
           </th>
@@ -41,53 +36,56 @@
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
         @forelse ($residents as $resident)
           @php
-            $fee = $resident->feeHistories->first();
-            $feeAmount = $fee?->amount ?? 0;
-            $feeSince = $fee?->effective_from?->format('M Y') ?? '—';
-            $initials = collect(explode(' ', $resident->fullname))->map(fn($w) => strtoupper($w[0]))->take(2)->implode('');
+            $fee        = $resident->feeHistories->first();
+            $feeAmount  = $fee?->amount ?? 0;
+            $headMember = $resident->familyMembers->first(); // only head is eager-loaded in index
+            $displayName = $headMember?->fullname ?? $resident->fullname;
+            $initials   = collect(explode(' ', $displayName))->map(fn($w) => strtoupper($w[0] ?? ''))->take(2)->implode('');
             $blockLabel = $resident->block?->name . ' · ' . $resident->unit_number;
-            $isBlockA = $resident->block?->name === 'Block A';
+            $isBlockA   = $resident->block?->name === 'Block A';
+            $houseStatusMap = ['owner_occupied' => ['label' => 'Owner Occupied', 'class' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'], 'vacant' => ['label' => 'Vacant', 'class' => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'], 'rented' => ['label' => 'Rented', 'class' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400']];
+            $houseStatus = $houseStatusMap[$resident->house_status ?? 'owner_occupied'] ?? $houseStatusMap['owner_occupied'];
           @endphp
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group"
             id="resident-row-{{ $resident->id }}">
 
-            {{-- Name + Initials Avatar --}}
+            {{-- Household: head name + block/unit + member count --}}
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
-                <div
-                  class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
+                <div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
                   {{ $initials }}
                 </div>
                 <div>
-                  <div class="text-sm font-semibold text-slate-900 dark:text-white">{{ $resident->fullname }}</div>
-                  <div class="text-xs text-slate-400">{{ __('app.member_since') }}
-                    {{ $resident->created_at->format('Y') }}
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ $displayName }}</span>
+                    @if($headMember)
+                      <span class="hidden sm:inline text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full uppercase">Head</span>
+                    @endif
+                  </div>
+                  <div class="flex items-center gap-2 mt-0.5">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium
+                      {{ $isBlockA ? 'bg-primary/10 text-primary' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' }}">
+                      {{ $blockLabel }}
+                    </span>
+                    @if(($resident->family_members_count ?? 0) > 0)
+                      <span class="text-[10px] text-slate-400">{{ $resident->family_members_count }} member{{ $resident->family_members_count > 1 ? 's' : '' }}</span>
+                    @endif
                   </div>
                 </div>
               </div>
             </td>
 
-            {{-- Block / Unit --}}
-            <td class="px-6 py-4">
-              <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                  {{ $isBlockA ? 'bg-primary/10 text-primary' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' }}">
-                {{ $blockLabel }}
+            {{-- House Status --}}
+            <td class="px-6 py-4 hidden sm:table-cell">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold {{ $houseStatus['class'] }}">
+                {{ $houseStatus['label'] }}
               </span>
-            </td>
-
-            {{-- Phone --}}
-            <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
-              {{ $resident->phone ?? '—' }}
             </td>
 
             {{-- Monthly Fee --}}
             <td class="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white text-right">
               {{ $currency }} {{ number_format($feeAmount, 0, ',', '.') }}
             </td>
-
-            {{-- Fee Since --}}
-            <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{{ $feeSince }}</td>
 
             {{-- Status badge --}}
             <td class="px-6 py-4">
@@ -108,15 +106,17 @@
             <td class="px-6 py-4">
               <div class="flex items-center justify-center gap-1">
 
-                {{-- Edit --}}
-                <button
-                  onclick="openEditDrawer('{{ $resident->id }}', {{ json_encode(['fullname' => $resident->fullname, 'phone' => $resident->phone, 'email' => $resident->email, 'block_id' => $resident->block_id, 'unit_number' => $resident->unit_number, 'is_active' => $resident->is_active]) }})"
+                {{-- Edit — navigate to full edit page --}}
+                @if(auth()->user()->can('residents.edit'))
+                <a href="{{ route('residents.edit', $resident) }}"
                   class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                   title="{{ __('app.title_edit_resident') }}">
                   <span class="material-icons text-lg">edit</span>
-                </button>
+                </a>
+                @endif
 
                 {{-- Deactivate / Reactivate --}}
+                @if(auth()->user()->can('residents.edit'))
                 @if($resident->is_active)
                   <button
                     onclick="openResidentConfirmModal('deactivate', '{{ $resident->id }}', '{{ addslashes($resident->fullname) }}')"
@@ -130,21 +130,24 @@
                     <span class="material-icons text-lg">person_off</span>
                   </button>
                 @endif
+                @endif
 
                 {{-- Delete permanently --}}
+                @if(auth()->user()->can('residents.delete'))
                 <button
                   onclick="openResidentConfirmModal('delete', '{{ $resident->id }}', '{{ addslashes($resident->fullname) }}')"
                   class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                   title="{{ __('app.title_delete_permanently') }}">
                   <span class="material-icons text-lg">delete_forever</span>
                 </button>
+                @endif
 
               </div>
             </td>
           </tr>
         @empty
           <tr>
-            <td colspan="7" class="px-6 py-16 text-center">
+            <td colspan="5" class="px-6 py-16 text-center">
               <div class="flex flex-col items-center gap-3 text-slate-400">
                 <span class="material-icons text-5xl">people_outline</span>
                 <p class="text-sm font-medium">{{ __('app.no_residents_found') }}</p>

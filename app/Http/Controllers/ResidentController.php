@@ -25,21 +25,24 @@ class ResidentController extends Controller
             'block',
             'feeHistories' => function ($q) {
                 $q->orderByDesc('effective_from')->limit(1);
-            }
-        ])->orderBy('block_id')->orderBy('unit_number');
+            },
+            'familyMembers' => fn($q) => $q->where('is_head', true)->select('id', 'resident_id', 'fullname'),
+        ])->withCount('familyMembers')
+          ->orderBy('block_id')->orderBy('unit_number');
 
         // Scope to coordinator's block
         if ($scopeBlockId) {
             $query->where('block_id', $scopeBlockId);
         }
 
-        // Live search
+        // Live search — includes family member names
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('fullname', 'like', "%{$search}%")
                     ->orWhere('unit_number', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%")
-                    ->orWhereHas('block', fn($b) => $b->where('name', 'like', "%{$search}%"));
+                    ->orWhereHas('block', fn($b) => $b->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('familyMembers', fn($f) => $f->where('fullname', 'like', "%{$search}%"));
             });
         }
 
@@ -58,6 +61,7 @@ class ResidentController extends Controller
         $residents = $query->paginate(15)->withQueryString();
         $blocks = Block::active()->orderBy('name')->get();
 
+
         $baseCount = Resident::when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId));
         $totalCount = (clone $baseCount)->count();
         $activeCount = (clone $baseCount)->where('is_active', true)->count();
@@ -70,12 +74,15 @@ class ResidentController extends Controller
     {
         DB::transaction(function () use ($request) {
             $resident = Resident::create([
-                'block_id' => $request->block_id,
-                'unit_number' => $request->unit_number,
-                'fullname' => $request->fullname,
-                'phone' => $request->phone,
-                'email' => $request->email,
-                'is_active' => true,
+                'block_id'           => $request->block_id,
+                'unit_number'        => $request->unit_number,
+                'fullname'           => $request->fullname,
+                'phone'              => $request->phone,
+                'email'              => $request->email,
+                'family_card_number' => $request->family_card_number,
+                'house_status'       => $request->house_status ?? 'owner_occupied',
+                'notes'              => $request->notes,
+                'is_active'          => true,
             ]);
 
             // Create the initial fee history entry
@@ -95,10 +102,46 @@ class ResidentController extends Controller
             ->with('success', 'Resident added successfully.');
     }
 
+    public function edit(Resident $resident)
+    {
+        $resident->load([
+            'block',
+            'familyMembers',
+            'feeHistories' => fn($q) => $q->orderByDesc('effective_from'),
+        ]);
+        $blocks   = Block::active()->orderBy('name')->get();
+        $currency = Setting::get('currency_symbol', 'Rp');
+
+        $canManageInfo        = true;
+        $canManageFamilyMembers = true;
+        $updateRoute          = route('residents.update', $resident);
+        $familyMembersBase    = url("/residents/{$resident->id}/family-members");
+        $backRoute            = route('residents.index');
+        $showRevealButtons    = auth()->user()->isAdmin();
+        $isOwnHousehold       = false;
+
+        return view('residents.edit', compact(
+            'resident', 'blocks', 'currency',
+            'canManageInfo', 'canManageFamilyMembers',
+            'updateRoute', 'familyMembersBase',
+            'backRoute', 'showRevealButtons', 'isOwnHousehold'
+        ));
+    }
+
     public function update(UpdateResidentRequest $request, Resident $resident)
     {
         DB::transaction(function () use ($request, $resident) {
-            $resident->update($request->only(['fullname', 'phone', 'email', 'block_id', 'unit_number', 'is_active']));
+            $data = $request->only([
+                'fullname', 'phone', 'email', 'block_id', 'unit_number', 'is_active',
+                'family_card_number', 'house_status', 'notes',
+            ]);
+
+            // Don't clobber an existing encrypted Family Card Number if the user left the field blank.
+            if (!$request->filled('family_card_number')) {
+                unset($data['family_card_number']);
+            }
+
+            $resident->update($data);
 
             // Optional: create a new FeeHistory entry if a new fee is provided
             if ($request->filled('new_monthly_fee')) {
@@ -115,8 +158,8 @@ class ResidentController extends Controller
             $this->linkUserToResident($resident->fresh());
         });
 
-        return redirect()->route('residents.index')
-            ->with('success', 'Resident updated successfully.');
+        return redirect()->route('residents.edit', $resident)
+            ->with('success', 'Household updated successfully.');
     }
 
     /**

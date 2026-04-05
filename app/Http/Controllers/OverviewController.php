@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class MyOverviewController extends Controller
+class OverviewController extends Controller
 {
     public function index()
     {
