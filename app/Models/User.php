@@ -67,6 +67,34 @@ class User extends Authenticatable
     return $this->hasOne(Resident::class);
   }
 
+  /**
+   * Resolve the linked resident with a three-level fallback:
+   * 1. By user_id (fast path, already linked)
+   * 2. By email (if emails match)
+   * 3. By block_id + unit_number (if neither user_id nor email matched)
+   * Auto-repairs residents.user_id on match so future lookups use the fast path.
+   */
+  public function resolveResident(): ?Resident
+  {
+    $resident = $this->hasOne(Resident::class)->first();
+
+    if (!$resident && $this->email) {
+      $resident = Resident::where('email', $this->email)->first();
+    }
+
+    if (!$resident && $this->block_id && $this->unit_number) {
+      $resident = Resident::where('block_id', $this->block_id)
+        ->where('unit_number', $this->unit_number)
+        ->first();
+    }
+
+    if ($resident && !$resident->user_id) {
+      $resident->update(['user_id' => $this->id]);
+    }
+
+    return $resident;
+  }
+
   // ── Role Helpers ────────────────────────────────────────────
 
   public function isAdmin(): bool

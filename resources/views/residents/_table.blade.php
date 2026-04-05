@@ -52,9 +52,14 @@
             {{-- Household: head name + block/unit + member count --}}
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
-                  {{ $initials }}
-                </div>
+                @if($resident->photoUrl())
+                  <img src="{{ $resident->photoUrl() }}" alt="{{ $displayName }}"
+                    class="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0">
+                @else
+                  <div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
+                    {{ $initials }}
+                  </div>
+                @endif
                 <div>
                   <div class="flex items-center gap-2">
                     <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ $displayName }}</span>

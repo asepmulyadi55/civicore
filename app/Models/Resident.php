@@ -22,6 +22,7 @@ class Resident extends Model
         'family_card_number',
         'house_status',
         'notes',
+        'photo_path',
     ];
 
     protected $casts = [
@@ -62,6 +63,12 @@ class Resident extends Model
     public function displayName(): string
     {
         return $this->headOfFamily()?->fullname ?? $this->fullname;
+    }
+
+    public function photoUrl(): ?string
+    {
+        if (!$this->photo_path) return null;
+        return route('private.file', ['path' => $this->photo_path]);
     }
 
     public function paymentRecords(): HasMany

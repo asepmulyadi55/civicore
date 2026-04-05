@@ -12,7 +12,7 @@ class FamilyMember extends Model
 
     protected $fillable = [
         'resident_id', 'fullname', 'relationship', 'nik',
-        'birth_date', 'gender', 'education', 'occupation', 'is_head',
+        'birth_date', 'gender', 'education', 'occupation', 'is_head', 'photo_path',
     ];
 
     protected $casts = [
@@ -62,5 +62,11 @@ class FamilyMember extends Model
         if (!$this->nik) return '—';
         $val = $this->nik;
         return str_repeat('•', max(0, strlen($val) - 4)) . substr($val, -4);
+    }
+
+    public function photoUrl(): ?string
+    {
+        if (!$this->photo_path) return null;
+        return route('private.file', ['path' => $this->photo_path]);
     }
 }

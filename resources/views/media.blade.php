@@ -149,14 +149,14 @@
           <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
             @if($file->is_image)
               <a href="{{ $file->url }}" target="_blank"
-                class="p-2 bg-white rounded-full shadow-md hover:bg-primary hover:text-white transition-all"
+                class="p-2 bg-white rounded-full shadow-md text-slate-700 hover:bg-primary hover:text-white transition-all"
                 title="View">
                 <span class="material-icons text-lg">open_in_new</span>
               </a>
             @endif
             @if(auth()->user()->can('media.delete'))
               <button onclick="confirmDelete('{{ $file->id }}', '{{ addslashes($file->original_name) }}')"
-                class="p-2 bg-white rounded-full shadow-md hover:bg-rose-500 hover:text-white transition-all"
+                class="p-2 bg-white rounded-full shadow-md text-slate-700 hover:bg-rose-500 hover:text-white transition-all"
                 title="{{ __('app.btn_delete') }}">
                 <span class="material-icons text-lg">delete_outline</span>
               </button>

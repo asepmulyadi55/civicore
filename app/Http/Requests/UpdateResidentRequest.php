@@ -33,6 +33,7 @@ class UpdateResidentRequest extends FormRequest
             'family_card_number' => ['nullable', 'string', 'max:20'],
             'house_status'       => ['required', 'in:owner_occupied,vacant,rented'],
             'notes'              => ['nullable', 'string', 'max:1000'],
+            'photo'              => ['nullable', 'image', 'max:5120'],
         ];
     }
 
