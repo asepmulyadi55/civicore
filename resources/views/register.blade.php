@@ -95,13 +95,21 @@
                   <span class="material-icons text-slate-400 text-sm">lock_outline</span>
                 </span>
                 <input
-                  class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('password') border-red-500 dark:border-red-500 @enderror"
-                  id="password" name="password" placeholder="••••••••" type="password" oninput="clearRegErr('err-reg-password')" />
+                  class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none [&::-ms-reveal]:hidden [&::-webkit-contacts-auto-fill-button]:hidden @error('password') border-red-500 dark:border-red-500 @enderror"
+                  id="password" name="password" placeholder="••••••••" type="password" oninput="clearRegErr('err-reg-password'); checkPasswordStrength(this.value)" />
                 <button
                   class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   type="button" onclick="togglePassword()">
                   <span class="material-icons text-sm" id="toggleIcon">visibility</span>
                 </button>
+              </div>
+              {{-- Live password requirements --}}
+              <div id="pw-requirements" class="hidden mt-2 space-y-1">
+                <p id="req-length"  class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> At least 8 characters</p>
+                <p id="req-upper"   class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One uppercase letter</p>
+                <p id="req-lower"   class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One lowercase letter</p>
+                <p id="req-number"  class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One number</p>
+                <p id="req-symbol"  class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One special character</p>
               </div>
               <p id="err-reg-password" class="hidden mt-1.5 text-sm text-red-600 dark:text-red-400"></p>
               @error('password')
@@ -120,8 +128,13 @@
                   <span class="material-icons text-slate-400 text-sm">lock_outline</span>
                 </span>
                 <input
-                  class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none"
+                  class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none [&::-ms-reveal]:hidden [&::-webkit-contacts-auto-fill-button]:hidden"
                   id="password_confirmation" name="password_confirmation" placeholder="••••••••" type="password" oninput="clearRegErr('err-reg-confirm')" />
+                <button
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  type="button" onclick="toggleConfirmPassword()">
+                  <span class="material-icons text-sm" id="toggleConfirmIcon">visibility</span>
+                </button>
               </div>
               <p id="err-reg-confirm" class="hidden mt-1.5 text-sm text-red-600 dark:text-red-400"></p>
             </div>
@@ -212,6 +225,43 @@
         toggleIcon.textContent = 'visibility';
       }
     }
+    function toggleConfirmPassword() {
+      const field = document.getElementById('password_confirmation');
+      const icon = document.getElementById('toggleConfirmIcon');
+      if (field.type === 'password') {
+        field.type = 'text';
+        icon.textContent = 'visibility_off';
+      } else {
+        field.type = 'password';
+        icon.textContent = 'visibility';
+      }
+    }
+
+    function isPasswordValid(pw) {
+      return pw.length >= 8 && /[A-Z]/.test(pw) && /[a-z]/.test(pw) && /[0-9]/.test(pw) && /[^A-Za-z0-9]/.test(pw);
+    }
+
+    function checkPasswordStrength(pw) {
+      const box = document.getElementById('pw-requirements');
+      if (!pw) { box.classList.add('hidden'); return; }
+      box.classList.remove('hidden');
+      function setReq(id, passed) {
+        const el = document.getElementById(id);
+        const icon = el.querySelector('.material-icons');
+        if (passed) {
+          el.classList.replace('text-slate-400', 'text-emerald-500');
+          icon.textContent = 'check_circle';
+        } else {
+          el.classList.replace('text-emerald-500', 'text-slate-400');
+          icon.textContent = 'radio_button_unchecked';
+        }
+      }
+      setReq('req-length', pw.length >= 8);
+      setReq('req-upper',  /[A-Z]/.test(pw));
+      setReq('req-lower',  /[a-z]/.test(pw));
+      setReq('req-number', /[0-9]/.test(pw));
+      setReq('req-symbol', /[^A-Za-z0-9]/.test(pw));
+    }
 
     function clearRegErr(id) {
       const el = document.getElementById(id);
@@ -251,8 +301,8 @@
       if (!password) {
         showRegErr('err-reg-password', 'Please enter a password.');
         valid = false;
-      } else if (password.length < 8) {
-        showRegErr('err-reg-password', 'Password must be at least 8 characters.');
+      } else if (!isPasswordValid(password)) {
+        showRegErr('err-reg-password', 'Password does not meet all requirements.');
         valid = false;
       } else clearRegErr('err-reg-password');
 

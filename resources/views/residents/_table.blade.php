@@ -18,10 +18,10 @@
       <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
         <tr>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            Household
+            {{ __('app.table_household') }}
           </th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">
-            House Status
+            {{ __('app.table_house_status') }}
           </th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
             {{ __('app.table_monthly_fee') }}
@@ -43,7 +43,7 @@
             $initials   = collect(explode(' ', $displayName))->map(fn($w) => strtoupper($w[0] ?? ''))->take(2)->implode('');
             $blockLabel = $resident->block?->name . ' · ' . $resident->unit_number;
             $isBlockA   = $resident->block?->name === 'Block A';
-            $houseStatusMap = ['owner_occupied' => ['label' => 'Owner Occupied', 'class' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'], 'vacant' => ['label' => 'Vacant', 'class' => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'], 'rented' => ['label' => 'Rented', 'class' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400']];
+            $houseStatusMap = ['owner_occupied' => ['label' => __('app.house_owner_occupied'), 'class' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'], 'vacant' => ['label' => __('app.house_vacant'), 'class' => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'], 'rented' => ['label' => __('app.house_rented'), 'class' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400']];
             $houseStatus = $houseStatusMap[$resident->house_status ?? 'owner_occupied'] ?? $houseStatusMap['owner_occupied'];
           @endphp
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group"

@@ -93,11 +93,18 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId, unitNumber)
         <div class="relative">
           <input id="edit-password" name="password" type="password" autocomplete="new-password"
             class="w-full px-4 py-2.5 pr-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('password') border-red-500 @enderror"
-            placeholder="{{ __('app.min_8_chars') }}" />
+            placeholder="{{ __('app.min_8_chars') }}" oninput="checkPwStrength(this.value, 'eu')" />
           <button type="button" onclick="togglePw('edit-password','edit-pw-icon')"
             class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
             <span id="edit-pw-icon" class="material-icons text-lg">visibility_off</span>
           </button>
+        </div>
+        <div id="pw-req-eu" class="hidden mt-2 space-y-1">
+          <p id="eu-req-length" class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> At least 8 characters</p>
+          <p id="eu-req-upper"  class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One uppercase letter</p>
+          <p id="eu-req-lower"  class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One lowercase letter</p>
+          <p id="eu-req-number" class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One number</p>
+          <p id="eu-req-symbol" class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One special character</p>
         </div>
         @error('password')
           <p class="text-xs text-red-500 flex items-center gap-1 mt-1">
@@ -156,20 +163,20 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId, unitNumber)
       {{-- Household Assignment ──────────────────────────────── --}}
       <div class="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div class="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-          <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Household Assignment</p>
-          <p class="text-[11px] text-slate-400 mt-0.5">Auto-filled if email matches a resident record.</p>
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">{{ __('app.household_assignment') }}</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">{{ __('app.household_assignment_autofill_desc') }}</p>
         </div>
         <div class="p-4 space-y-4">
 
           <div id="edit-resident-badge-found"
             class="hidden items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800">
             <span class="material-icons text-sm">check_circle</span>
-            Resident record found — block &amp; unit locked.
+            {{ __('app.resident_record_found_locked') }}
           </div>
           <div id="edit-resident-badge-notfound"
             class="hidden items-center gap-2 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800">
             <span class="material-icons text-sm">info</span>
-            No resident record — assign manually (optional).
+            {{ __('app.no_resident_record_short') }}
           </div>
           <div id="edit-resident-badge-loading"
             class="hidden items-center gap-2 text-xs text-slate-500 px-3 py-2 rounded-lg">
@@ -177,19 +184,19 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId, unitNumber)
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
             </svg>
-            Looking up resident…
+            {{ __('app.looking_up_resident') }}
           </div>
 
           {{-- Block Select --}}
           <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase">Block</label>
+            <label class="text-xs font-bold text-slate-500 uppercase">{{ __('app.table_block') }}</label>
             <div class="relative">
               <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <span class="material-icons text-slate-400 text-sm">location_city</span>
               </span>
               <select id="edit-block-id" name="block_id"
                 class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none">
-                <option value="">— No block assigned —</option>
+                <option value="">{{ __('app.no_block_assigned') }}</option>
                 @foreach ($blocks as $block)
                   <option value="{{ $block->id }}">{{ $block->name }}</option>
                 @endforeach
@@ -199,14 +206,14 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId, unitNumber)
 
           {{-- Unit Number --}}
           <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase">Unit Number</label>
+            <label class="text-xs font-bold text-slate-500 uppercase">{{ __('app.unit_no') }}</label>
             <div class="relative">
               <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <span class="material-icons text-slate-400 text-sm">home</span>
               </span>
               <input id="edit-unit-number" name="unit_number" type="text"
                 class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                placeholder="e.g. A-01" />
+                placeholder="{{ __('app.eg_unit') }}" />
             </div>
           </div>
 

@@ -45,12 +45,19 @@
                   <span class="material-icons text-slate-400 text-sm">lock_outline</span>
                 </span>
                 <input id="password" name="password" type="password" placeholder="••••••••" minlength="8"
-                  class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none @error('password') border-red-500 @enderror"
-                  required />
+                  class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none [&::-ms-reveal]:hidden @error('password') border-red-500 @enderror"
+                  oninput="checkPasswordStrengthReset(this.value)" required />
                 <button type="button" onclick="toggleField('password','toggleIcon1')"
                   class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
                   <span class="material-icons text-sm" id="toggleIcon1">visibility</span>
                 </button>
+              </div>
+              <div id="rp-requirements" class="hidden mt-2 space-y-1">
+                <p id="rp-req-length" class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> At least 8 characters</p>
+                <p id="rp-req-upper"  class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One uppercase letter</p>
+                <p id="rp-req-lower"  class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One lowercase letter</p>
+                <p id="rp-req-number" class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One number</p>
+                <p id="rp-req-symbol" class="flex items-center gap-1.5 text-xs text-slate-400"><span class="material-icons text-sm">radio_button_unchecked</span> One special character</p>
               </div>
             </div>
 
@@ -64,7 +71,7 @@
                   <span class="material-icons text-slate-400 text-sm">lock_outline</span>
                 </span>
                 <input id="password_confirmation" name="password_confirmation" type="password" placeholder="••••••••"
-                  class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                  class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none [&::-ms-reveal]:hidden"
                   required />
                 <button type="button" onclick="toggleField('password_confirmation','toggleIcon2')"
                   class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
@@ -111,6 +118,22 @@
         field.type = 'password';
         icon.textContent = 'visibility';
       }
+    }
+    function checkPasswordStrengthReset(pw) {
+      const box = document.getElementById('rp-requirements');
+      if (!pw) { box.classList.add('hidden'); return; }
+      box.classList.remove('hidden');
+      function setReq(id, passed) {
+        const el = document.getElementById(id);
+        const icon = el.querySelector('.material-icons');
+        if (passed) { el.classList.replace('text-slate-400','text-emerald-500'); icon.textContent='check_circle'; }
+        else { el.classList.replace('text-emerald-500','text-slate-400'); icon.textContent='radio_button_unchecked'; }
+      }
+      setReq('rp-req-length', pw.length >= 8);
+      setReq('rp-req-upper',  /[A-Z]/.test(pw));
+      setReq('rp-req-lower',  /[a-z]/.test(pw));
+      setReq('rp-req-number', /[0-9]/.test(pw));
+      setReq('rp-req-symbol', /[^A-Za-z0-9]/.test(pw));
     }
   </script>
 

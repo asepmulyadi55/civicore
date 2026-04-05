@@ -22,7 +22,7 @@
       {{-- Add New Resident (Header label update) --}}
       <div>
         <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ __('app.add_new_resident') }}</h2>
-        <p class="text-sm text-slate-400 mt-0.5">Register a new household unit.</p>
+        <p class="text-sm text-slate-400 mt-0.5">{{ __('app.add_resident_desc') }}</p>
       </div>
       <button onclick="closeAddResidentModal()"
         class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1">
@@ -125,14 +125,14 @@
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col gap-2">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-              House Status <span class="text-red-500">*</span>
+              {{ __('app.house_status') }} <span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <select name="house_status"
                 class="w-full appearance-none pl-4 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('house_status') border-red-500 @enderror">
-                <option value="owner_occupied" {{ old('house_status', 'owner_occupied') === 'owner_occupied' ? 'selected' : '' }}>Owner Occupied</option>
-                <option value="vacant"         {{ old('house_status') === 'vacant'  ? 'selected' : '' }}>Vacant</option>
-                <option value="rented"         {{ old('house_status') === 'rented'  ? 'selected' : '' }}>Rented</option>
+                <option value="owner_occupied" {{ old('house_status', 'owner_occupied') === 'owner_occupied' ? 'selected' : '' }}>{{ __('app.house_owner_occupied') }}</option>
+                <option value="vacant"         {{ old('house_status') === 'vacant'  ? 'selected' : '' }}>{{ __('app.house_vacant') }}</option>
+                <option value="rented"         {{ old('house_status') === 'rented'  ? 'selected' : '' }}>{{ __('app.house_rented') }}</option>
               </select>
               <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
             </div>
@@ -140,10 +140,10 @@
           </div>
           <div class="flex flex-col gap-2">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-              No. KK <span class="font-normal normal-case text-slate-400">(optional)</span>
+              {{ __('app.no_kk') }} <span class="font-normal normal-case text-slate-400">{{ __('app.optional') }}</span>
             </label>
             <input type="text" name="family_card_number" value="{{ old('family_card_number') }}"
-              placeholder="16-digit No. KK" maxlength="20"
+              placeholder="{{ __('app.kk_placeholder') }}" maxlength="20"
               class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white">
           </div>
         </div>

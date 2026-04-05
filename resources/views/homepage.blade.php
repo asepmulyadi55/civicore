@@ -14,8 +14,8 @@
           onclick="toggleSidebar()">
           <span class="material-icons text-slate-500">menu</span>
         </button>
-        <h1 class="text-xl font-bold text-slate-900 dark:text-white">Homepage</h1>
-        <span class="hidden sm:inline px-2.5 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg">{{ $totalEvents }} Events</span>
+        <h1 class="text-xl font-bold text-slate-900 dark:text-white">{{ __('app.nav_homepage') }}</h1>
+        <span class="hidden sm:inline px-2.5 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg">{{ $totalEvents }} {{ __('app.hp_section_events') }}</span>
       </div>
       <button class="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-primary/50 transition-all"
         onclick="toggleDark()" title="Toggle dark mode">
@@ -64,8 +64,8 @@
             <span class="material-icons text-primary text-[20px]">image</span>
           </div>
           <div>
-            <h2 class="font-bold text-slate-900 dark:text-white text-base">Hero Section</h2>
-            <p class="text-xs text-slate-500">Main banner shown at the top of the public homepage</p>
+            <h2 class="font-bold text-slate-900 dark:text-white text-base">{{ __('app.hp_section_hero') }}</h2>
+            <p class="text-xs text-slate-500">{{ __('app.hp_section_hero_desc') }}</p>
           </div>
         </div>
         <form id="form-hp-hero" method="POST" action="{{ route('homepage.hero') }}" class="p-6 space-y-5" enctype="multipart/form-data" novalidate>
@@ -79,26 +79,26 @@
               <p id="err-hp-hero-title" class="hidden mt-1 text-sm text-rose-500"></p>
             </div>
             <div class="space-y-1.5">
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Subtitle</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_subtitle_label') }}</label>
               <input type="text" name="subtitle" value="{{ old('subtitle', $hero['subtitle'] ?? '') }}"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                 placeholder="e.g. A vibrant community hub">
             </div>
             <div class="space-y-1.5">
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">CTA Button Text</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_cta_text') }}</label>
               <input type="text" name="cta_text" value="{{ old('cta_text', $hero['cta_text'] ?? '') }}"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                 placeholder="e.g. Explore Events">
             </div>
             <div class="space-y-1.5">
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">CTA Button URL</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_cta_url') }}</label>
               <input type="text" name="cta_url" value="{{ old('cta_url', $hero['cta_url'] ?? '') }}"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                 placeholder="e.g. /events or https://...">
             </div>
           </div>
           <div class="space-y-1.5">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Background Image</label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_bg_image') }}</label>
             @if(!empty($hero['bg_image']))
               <div class="flex items-center gap-4 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
                 <img src="{{ $hero['bg_image'] }}" alt="Current hero background"
@@ -120,7 +120,7 @@
             <div id="hero-bg-preview" class="hidden items-center gap-3 p-3 rounded-xl border border-primary/30 bg-primary/5">
               <img src="" alt="Preview" class="w-20 h-14 object-cover rounded-lg flex-shrink-0">
               <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold text-primary">Ready to upload</p>
+                <p class="text-xs font-semibold text-primary">{{ __('app.hp_ready_to_upload') }}</p>
                 <p class="text-xs text-slate-400 truncate" id="hero-bg-filename"></p>
               </div>
               <button type="button" onclick="clearImageInput('hero-bg-input','hero-bg-preview','hero-bg-label')"
@@ -128,13 +128,13 @@
                 <span class="material-icons text-lg">close</span>
               </button>
             </div>
-            <p class="text-xs text-slate-400">Leave empty to keep the current image. Uploading a new file will replace and delete the old one.</p>
+            <p class="text-xs text-slate-400">{{ __('app.hp_image_keep_hint') }}</p>
           </div>
           <div class="flex justify-end pt-2">
             <button type="submit"
               class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-primary/20">
               <span class="material-icons text-base">save</span>
-              Save Hero Section
+              {{ __('app.hp_save_hero') }}
             </button>
           </div>
         </form>
@@ -149,54 +149,54 @@
             <span class="material-icons text-amber-500 text-[20px]">star</span>
           </div>
           <div>
-            <h2 class="font-bold text-slate-900 dark:text-white text-base">Featured Event</h2>
-            <p class="text-xs text-slate-500">Highlighted event shown prominently with a YouTube embed</p>
+            <h2 class="font-bold text-slate-900 dark:text-white text-base">{{ __('app.hp_section_featured') }}</h2>
+            <p class="text-xs text-slate-500">{{ __('app.hp_section_featured_desc') }}</p>
           </div>
         </div>
         <form id="form-hp-featured" method="POST" action="{{ route('homepage.featured-event') }}" class="p-6 space-y-5" novalidate>
           @csrf
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div class="space-y-1.5">
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Event Title <span class="text-rose-500">*</span></label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_event_title_label') }} <span class="text-rose-500">*</span></label>
               <input type="text" id="hp-featured-title" name="title" value="{{ old('title', $featuredEvent['title'] ?? '') }}"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                 placeholder="e.g. Dwipapuri Anniversary Gala" oninput="clearHpErr('err-hp-featured-title')">
               <p id="err-hp-featured-title" class="hidden mt-1 text-sm text-rose-500"></p>
             </div>
             <div class="space-y-1.5">
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">YouTube Video ID</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_youtube_id') }}</label>
               <input type="text" name="youtube_id" value="{{ old('youtube_id', $featuredEvent['youtube_id'] ?? '') }}"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                 placeholder="e.g. dQw4w9WgXcQ">
-              <p class="text-xs text-slate-400">The ID portion from a YouTube URL: youtube.com/watch?v=<strong>ID</strong></p>
+              <p class="text-xs text-slate-400">{{ __('app.hp_youtube_hint') }} youtube.com/watch?v=<strong>ID</strong></p>
             </div>
             <div class="space-y-1.5">
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Event Date</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_event_date_label') }}</label>
               <input type="date" name="date" value="{{ old('date', $featuredEvent['date'] ?? '') }}"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all dark:[color-scheme:dark]">
             </div>
             <div class="space-y-1.5">
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Status</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.status') }}</label>
               <select name="status"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
-                <option value="">— Select status —</option>
-                @foreach(['upcoming' => 'Upcoming', 'ongoing' => 'Ongoing', 'past' => 'Past'] as $val => $label)
+                <option value="">{{ __('app.hp_select_status') }}</option>
+                @foreach(['upcoming' => __('app.hp_status_upcoming'), 'ongoing' => __('app.hp_status_ongoing'), 'past' => __('app.hp_status_past')] as $val => $label)
                   <option value="{{ $val }}" {{ old('status', $featuredEvent['status'] ?? '') === $val ? 'selected' : '' }}>{{ $label }}</option>
                 @endforeach
               </select>
             </div>
           </div>
           <div class="space-y-1.5">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Description</label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_desc_label') }}</label>
             <textarea name="description" rows="3"
               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"
-              placeholder="Brief description of the featured event...">{{ old('description', $featuredEvent['description'] ?? '') }}</textarea>
+              placeholder="{{ __('app.hp_desc_label') }}...">{{ old('description', $featuredEvent['description'] ?? '') }}</textarea>
           </div>
           <div class="flex justify-end pt-2">
             <button type="submit"
               class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-primary/20">
               <span class="material-icons text-base">save</span>
-              Save Featured Event
+              {{ __('app.hp_save_featured') }}
             </button>
           </div>
         </form>
@@ -211,8 +211,8 @@
             <span class="material-icons text-emerald-500 text-[20px]">event</span>
           </div>
           <div class="flex-1">
-            <h2 class="font-bold text-slate-900 dark:text-white text-base">Events</h2>
-            <p class="text-xs text-slate-500">All events displayed on the public homepage</p>
+            <h2 class="font-bold text-slate-900 dark:text-white text-base">{{ __('app.hp_section_events') }}</h2>
+            <p class="text-xs text-slate-500">{{ __('app.hp_section_events_desc') }}</p>
           </div>
           <span class="px-2.5 py-1 text-xs font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full">
             {{ $totalEvents }}
@@ -221,7 +221,7 @@
 
         {{-- Add Event form --}}
         <div class="p-6 border-b border-slate-100 dark:border-slate-800">
-          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Add Event</p>
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">{{ __('app.hp_add_event') }}</p>
           <form id="form-hp-event-add" method="POST" action="{{ route('homepage.events.store') }}" class="space-y-4" enctype="multipart/form-data" novalidate>
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -238,40 +238,40 @@
                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all dark:[color-scheme:dark]">
               </div>
               <div class="space-y-1.5">
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Category</label>
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_event_cat_label') }}</label>
                 <select name="category"
                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
-                  <option value="">— Select category —</option>
-                  @foreach(['wellness' => 'Wellness', 'meetings' => 'Meetings', 'education' => 'Education', 'cultural' => 'Cultural', 'sports' => 'Sports', 'other' => 'Other'] as $val => $label)
+                  <option value="">{{ __('app.hp_none_option') }}</option>
+                  @foreach(['wellness' => __('app.hp_cat_wellness'), 'meetings' => __('app.hp_cat_meetings'), 'education' => __('app.hp_cat_education'), 'cultural' => __('app.hp_cat_cultural'), 'sports' => __('app.hp_cat_sports'), 'other' => __('app.hp_cat_other')] as $val => $label)
                     <option value="{{ $val }}">{{ $label }}</option>
                   @endforeach
                 </select>
               </div>
             </div>
             <div class="space-y-1.5">
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Description</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_desc_label') }}</label>
               <input type="text" name="description"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                placeholder="Short description... (optional)">
+                placeholder="{{ __('app.hp_desc_label') }}... ({{ trim(__('app.optional'), '()') }})">
             </div>
             <div class="space-y-1.5">
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">URL <span class="text-slate-400 font-normal text-xs">(Learn More link)</span></label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_url_label') }} <span class="text-slate-400 font-normal text-xs">{{ __('app.hp_url_hint') }}</span></label>
               <input type="url" name="url"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                placeholder="https://... (optional)">
+                placeholder="https://... {{ __('app.optional') }}">
             </div>
             <div class="space-y-1.5">
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Event Image</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_event_image') }}</label>
               <label id="hp-event-img-label" class="flex flex-col items-center justify-center gap-2 w-full h-24 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 hover:border-primary/60 hover:bg-primary/5 transition-all cursor-pointer">
                 <span class="material-icons text-slate-400 text-2xl">cloud_upload</span>
-                <span class="text-xs font-semibold text-slate-500">Upload Image <span class="text-slate-400 font-normal">(optional · max 5 MB)</span></span>
+                <span class="text-xs font-semibold text-slate-500">{{ __('app.upload_image') }} <span class="text-slate-400 font-normal">{{ __('app.hp_upload_optional_hint') }}</span></span>
                 <input type="file" name="image_file" id="hp-event-img-input" accept="image/*" class="sr-only"
                   onchange="previewImage(this,'hp-event-img-preview','hp-event-img-label')">
               </label>
               <div id="hp-event-img-preview" class="hidden items-center gap-3 p-3 rounded-xl border border-primary/30 bg-primary/5">
                 <img src="" alt="Preview" class="w-16 h-12 object-cover rounded-lg flex-shrink-0">
                 <div class="flex-1 min-w-0">
-                  <p class="text-xs font-semibold text-primary">Ready to upload</p>
+                  <p class="text-xs font-semibold text-primary">{{ __('app.hp_ready_to_upload') }}</p>
                   <p class="text-xs text-slate-400 truncate"></p>
                 </div>
                 <button type="button" onclick="clearImageInput('hp-event-img-input','hp-event-img-preview','hp-event-img-label')" class="text-slate-400 hover:text-rose-500 transition-colors">
@@ -283,7 +283,7 @@
               <button type="submit"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all">
                 <span class="material-icons text-base">add</span>
-                Add Event
+                {{ __('app.hp_add_event') }}
               </button>
             </div>
           </form>
@@ -295,13 +295,13 @@
             <div class="relative flex-1 min-w-48">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
               <input type="text" name="event_search" value="{{ $pagination['search'] }}"
-                placeholder="Search events..."
+                placeholder="{{ __('app.hp_search_events') }}"
                 class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
             </div>
             <select name="event_category"
               class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
-              <option value="">All Categories</option>
-              @foreach(['wellness' => 'Wellness', 'meetings' => 'Meetings', 'education' => 'Education', 'cultural' => 'Cultural', 'sports' => 'Sports', 'other' => 'Other'] as $val => $label)
+              <option value="">{{ __('app.hp_all_categories') }}</option>
+              @foreach(['wellness' => __('app.hp_cat_wellness'), 'meetings' => __('app.hp_cat_meetings'), 'education' => __('app.hp_cat_education'), 'cultural' => __('app.hp_cat_cultural'), 'sports' => __('app.hp_cat_sports'), 'other' => __('app.hp_cat_other')] as $val => $label)
                 <option value="{{ $val }}" {{ $pagination['category'] === $val ? 'selected' : '' }}>{{ $label }}</option>
               @endforeach
             </select>
@@ -323,11 +323,11 @@
           <table class="w-full text-sm">
             <thead>
               <tr class="bg-slate-50 dark:bg-slate-800/50">
-                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Title</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Category</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
-                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ __('app.hp_col_title') }}</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ __('app.hp_event_cat_label') }}</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ __('app.hp_col_date') }}</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ __('app.status') }}</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ __('app.table_actions') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -368,11 +368,11 @@
                   </td>
                   <td class="px-4 py-3.5">
                     @if($autoStatus === 'past')
-                      <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">Past</span>
+                      <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">{{ __('app.hp_status_past') }}</span>
                     @elseif($autoStatus === 'ongoing')
-                      <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">Ongoing</span>
+                      <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">{{ __('app.hp_status_ongoing') }}</span>
                     @else
-                      <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">Upcoming</span>
+                      <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">{{ __('app.hp_status_upcoming') }}</span>
                     @endif
                   </td>
                   <td class="px-4 py-3.5">
@@ -409,7 +409,7 @@
                   <td colspan="5" class="px-6 py-10 text-center">
                     <span class="material-icons text-3xl text-slate-300 dark:text-slate-600 block mb-2">event_busy</span>
                     <p class="text-sm text-slate-400">
-                      {{ ($pagination['search'] !== '' || $pagination['category'] !== '') ? 'No events match your search.' : 'No events yet. Add one above.' }}
+                      {{ ($pagination['search'] !== '' || $pagination['category'] !== '') ? __('app.hp_no_events_search') : __('app.hp_no_events_yet') }}
                     </p>
                   </td>
                 </tr>
@@ -428,8 +428,8 @@
           @endphp
           <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <p class="text-xs text-slate-500">
-              Showing {{ ($pagination['current_page'] - 1) * $pagination['per_page'] + 1 }}–{{ min($pagination['current_page'] * $pagination['per_page'], $pagination['total']) }}
-              of {{ $pagination['total'] }} events
+              {{ __('app.showing') }} {{ ($pagination['current_page'] - 1) * $pagination['per_page'] + 1 }}–3{{ min($pagination['current_page'] * $pagination['per_page'], $pagination['total']) }}
+              {{ __('app.of') }} {{ $pagination['total'] }} {{ __('app.hp_events_count') }}
             </p>
             <div class="flex items-center gap-1">
               @if($pagination['current_page'] > 1)
@@ -474,22 +474,22 @@
             <span class="material-icons text-violet-500 text-[20px]">info</span>
           </div>
           <div>
-            <h2 class="font-bold text-slate-900 dark:text-white text-base">About Section</h2>
-            <p class="text-xs text-slate-500">The community description shown in the "About" section of the public homepage</p>
+            <h2 class="font-bold text-slate-900 dark:text-white text-base">{{ __('app.hp_section_about') }}</h2>
+            <p class="text-xs text-slate-500">{{ __('app.hp_section_about_desc') }}</p>
           </div>
         </div>
         <form id="form-hp-about" method="POST" action="{{ route('homepage.about') }}" class="p-6 space-y-5" enctype="multipart/form-data" novalidate>
           @csrf
           <div class="space-y-1.5">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">About Content <span class="text-rose-500">*</span></label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_about_content') }} <span class="text-rose-500">*</span></label>
             <textarea id="hp-about-content" name="content" rows="6"
               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"
               placeholder="Write about the community, its history, values, and vision..." oninput="clearHpErr('err-hp-about-content')">{{ old('content', $about['content'] ?? '') }}</textarea>
             <p id="err-hp-about-content" class="hidden mt-1 text-sm text-rose-500"></p>
-            <p class="text-xs text-slate-400">Max 3,000 characters. Separate paragraphs with a blank line.</p>
+            <p class="text-xs text-slate-400">{{ __('app.hp_about_hint') }}</p>
           </div>
           <div class="space-y-1.5">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Section Image</label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_about_image') }}</label>
             @if(!empty($about['image_url']))
               <div class="flex items-center gap-4 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
                 <img src="{{ $about['image_url'] }}" alt="Current about image"
@@ -511,7 +511,7 @@
             <div id="about-img-preview" class="hidden items-center gap-3 p-3 rounded-xl border border-primary/30 bg-primary/5">
               <img src="" alt="Preview" class="w-20 h-14 object-cover rounded-lg flex-shrink-0">
               <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold text-primary">Ready to upload</p>
+                <p class="text-xs font-semibold text-primary">{{ __('app.hp_ready_to_upload') }}</p>
                 <p class="text-xs text-slate-400 truncate" id="about-img-filename"></p>
               </div>
               <button type="button" onclick="clearImageInput('about-img-input','about-img-preview','about-img-label')"
@@ -519,7 +519,7 @@
                 <span class="material-icons text-lg">close</span>
               </button>
             </div>
-            <p class="text-xs text-slate-400">Optional. Leave empty to keep the current image. Uploading a new file will replace and delete the old one.</p>
+            <p class="text-xs text-slate-400">{{ __('app.hp_about_image_hint') }}</p>
           </div>
 
           {{-- Stats Grid --}}
@@ -535,8 +535,8 @@
             while (count($savedStats) < 4) { $savedStats[] = ['value' => '', 'label' => '']; }
           @endphp
           <div class="space-y-3">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Stats Cards</label>
-            <p class="text-xs text-slate-400">The 4 stat cards shown in the About section. Edit both the value and label for each.</p>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_stats_cards') }}</label>
+            <p class="text-xs text-slate-400">{{ __('app.hp_stats_hint') }}</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               @foreach($savedStats as $i => $stat)
                 <div class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
@@ -559,7 +559,7 @@
             <button type="submit"
               class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-primary/20">
               <span class="material-icons text-base">save</span>
-              Save About Section
+              {{ __('app.hp_save_about') }}
             </button>
           </div>
         </form>
@@ -669,7 +669,7 @@
 
     function openEventDeleteModal(id, title) {
       const modal = document.getElementById('event-delete-modal');
-      document.getElementById('event-delete-body').textContent = 'Remove "' + title + '" from the events list? This cannot be undone.';
+      document.getElementById('event-delete-body').textContent = '{{ __('app.hp_event_delete_body_before') }} "' + title + '" {{ __('app.hp_event_delete_body_after') }}';
       document.getElementById('event-delete-form').action = eventDeleteUrlTpl.replace('__id__', id);
       modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
@@ -691,7 +691,7 @@
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
         <div class="flex items-center gap-2">
           <span class="material-icons text-blue-500 text-[20px]">edit_calendar</span>
-          <h3 class="font-bold text-slate-900 dark:text-white text-base">Edit Event</h3>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">{{ __('app.hp_edit_event_title') }}</h3>
         </div>
         <button type="button" onclick="closeEventEditModal()"
           class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
@@ -705,61 +705,61 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="sm:col-span-2 space-y-1.5">
             <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Title <span class="text-rose-500">*</span>
+              {{ __('app.hp_col_title') }} <span class="text-rose-500">*</span>
             </label>
             <input type="text" id="edit-event-title" name="title"
               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" oninput="clearHpErr('err-hp-edit-title')">
             <p id="err-hp-edit-title" class="hidden mt-1 text-sm text-rose-500"></p>
           </div>
           <div class="space-y-1.5">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Date</label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_col_date') }}</label>
             <input type="date" id="edit-event-date" name="date"
               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all dark:[color-scheme:dark]">
           </div>
           <div class="space-y-1.5">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Category</label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_event_cat_label') }}</label>
             <select id="edit-event-category" name="category"
               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
-              <option value="">— None —</option>
-              <option value="wellness">Wellness</option>
-              <option value="meetings">Meetings</option>
-              <option value="education">Education</option>
-              <option value="cultural">Cultural</option>
-              <option value="sports">Sports</option>
-              <option value="other">Other</option>
+              <option value="">{{ __('app.hp_none_option') }}</option>
+              <option value="wellness">{{ __('app.hp_cat_wellness') }}</option>
+              <option value="meetings">{{ __('app.hp_cat_meetings') }}</option>
+              <option value="education">{{ __('app.hp_cat_education') }}</option>
+              <option value="cultural">{{ __('app.hp_cat_cultural') }}</option>
+              <option value="sports">{{ __('app.hp_cat_sports') }}</option>
+              <option value="other">{{ __('app.hp_cat_other') }}</option>
             </select>
           </div>
           <div class="sm:col-span-2 space-y-1.5">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Description</label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_desc_label') }}</label>
             <input type="text" id="edit-event-description" name="description"
               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
               placeholder="Short description... (optional)">
           </div>
           <div class="sm:col-span-2 space-y-1.5">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">URL <span class="text-slate-400 font-normal text-xs">(Learn More link)</span></label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_url_label') }} <span class="text-slate-400 font-normal text-xs">{{ __('app.hp_url_hint') }}</span></label>
             <input type="url" id="edit-event-url" name="url"
               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
               placeholder="https://... (optional)">
           </div>
           <div class="sm:col-span-2 space-y-1.5">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Event Image</label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_event_image') }}</label>
             <div id="edit-event-img-current" class="hidden items-center gap-4 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 mb-2">
               <img id="edit-event-img-current-thumb" src="" alt="Current" class="w-20 h-14 object-cover rounded-lg border border-slate-200 dark:border-slate-700 flex-shrink-0">
               <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">Current Image</p>
+                <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ __('app.hp_current_image') }}</p>
                 <p class="text-xs text-slate-400 truncate" id="edit-event-img-current-url"></p>
               </div>
             </div>
             <label id="edit-event-img-label" class="flex flex-col items-center justify-center gap-2 w-full h-24 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 hover:border-primary/60 hover:bg-primary/5 transition-all cursor-pointer">
               <span class="material-icons text-slate-400 text-2xl">cloud_upload</span>
-              <span class="text-xs font-semibold text-slate-500">Upload New Image <span class="text-slate-400 font-normal">(optional · max 5 MB)</span></span>
+              <span class="text-xs font-semibold text-slate-500">{{ __('app.hp_upload_new_image') }} <span class="text-slate-400 font-normal">{{ __('app.hp_upload_optional_hint') }}</span></span>
               <input type="file" name="image_file" id="edit-event-img-input" accept="image/*" class="sr-only"
                 onchange="previewImage(this,'edit-event-img-preview','edit-event-img-label')">
             </label>
             <div id="edit-event-img-preview" class="hidden items-center gap-3 p-3 rounded-xl border border-primary/30 bg-primary/5">
               <img src="" alt="Preview" class="w-16 h-12 object-cover rounded-lg flex-shrink-0">
               <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold text-primary">Ready to upload</p>
+                <p class="text-xs font-semibold text-primary">{{ __('app.hp_ready_to_upload') }}</p>
                 <p class="text-xs text-slate-400 truncate"></p>
               </div>
               <button type="button" onclick="clearImageInput('edit-event-img-input','edit-event-img-preview','edit-event-img-label')" class="text-slate-400 hover:text-rose-500 transition-colors">
@@ -771,12 +771,12 @@
         <div class="flex justify-end gap-3 pt-2">
           <button type="button" onclick="closeEventEditModal()"
             class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">
-            Cancel
+            {{ __('app.btn_cancel') }}
           </button>
           <button type="submit"
             class="inline-flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all">
             <span class="material-icons text-base">save</span>
-            Save Changes
+            {{ __('app.btn_save_changes') }}
           </button>
         </div>
       </form>
@@ -792,21 +792,21 @@
         <div class="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mb-4">
           <span class="material-icons text-3xl text-rose-600">delete_outline</span>
         </div>
-        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Remove Event</h3>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">{{ __('app.hp_remove_event_title') }}</h3>
         <p id="event-delete-body" class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed"></p>
       </div>
       <div class="flex gap-3 px-6 pb-6">
         <button onclick="closeEventDeleteModal()"
           class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold
             text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-150">
-          Cancel
+          {{ __('app.btn_cancel') }}
         </button>
         <form id="event-delete-form" method="POST" action="" class="flex-1">
           @csrf @method('DELETE')
           <button type="submit"
             class="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white
               bg-rose-600 hover:bg-rose-700 active:bg-rose-800 transition-all duration-150">
-            Yes, Remove
+            {{ __('app.hp_btn_yes_remove') }}
           </button>
         </form>
       </div>

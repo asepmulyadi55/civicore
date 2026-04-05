@@ -352,11 +352,16 @@
       updateBulkBar();
     }
 
+    const i18nBulkBefore = '{{ __('app.bulk_delete_about_to_delete') }}';
+    const i18nBulkFile   = '{{ __('app.bulk_delete_file') }}';
+    const i18nBulkFiles  = '{{ __('app.bulk_delete_files') }}';
+    const i18nBulkAfter  = '{{ __('app.bulk_delete_cannot_undo') }}';
+
     function submitBulkDelete() {
       const checked = document.querySelectorAll('.file-checkbox:checked');
       if (checked.length === 0) return;
       document.getElementById('bulk-delete-body').textContent =
-        'You are about to permanently delete ' + checked.length + ' file' + (checked.length > 1 ? 's' : '') + '. This cannot be undone.';
+        i18nBulkBefore + ' ' + checked.length + ' ' + (checked.length > 1 ? i18nBulkFiles : i18nBulkFile) + '. ' + i18nBulkAfter;
       showOverlay('bulk-delete-overlay');
     }
 

@@ -157,7 +157,7 @@
                   {{-- Approve button --}}
                   @if(auth()->user()->can('users.approve'))
                   <button
-                    onclick="openApproveModal('{{ $user->id }}', {{ json_encode($user->name) }}, {{ json_encode($user->email) }})"
+                    onclick="openApproveModal('{{ $user->id }}', {{ json_encode($user->name) }}, {{ json_encode($user->email) }}, {{ $user->block_id ? "'{$user->block_id}'" : 'null' }}, {{ json_encode($user->unit_number) }})"
                     class="bg-primary text-white text-[10px] px-3 py-1.5 rounded font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors flex items-center gap-1">
                     <span class="material-icons text-xs">verified</span>
                     {{ __('app.btn_approve') }}

@@ -62,8 +62,8 @@
             <span class="material-icons text-primary text-lg">home</span>
           </div>
           <div>
-            <h2 class="text-lg font-bold text-slate-900 dark:text-white">Household Information</h2>
-            <p class="text-xs text-slate-400">Unit details, contact, classification and billing.</p>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('app.household_info') }}</h2>
+            <p class="text-xs text-slate-400">{{ __('app.household_info_desc') }}</p>
           </div>
         </div>
 
@@ -91,7 +91,7 @@
 
           {{-- Household Photo --}}
           <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Household Photo</h3>
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">{{ __('app.section_household_photo') }}</h3>
             <div class="flex items-center gap-5">
               <div class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-center">
                 @if($resident->photoUrl())
@@ -109,20 +109,20 @@
                 </label>
                 <input id="resident-photo-upload" type="file" name="photo" accept="image/*" class="hidden"
                   onchange="previewResidentPhoto(event)">
-                <p class="text-xs text-slate-400 mt-2">JPG, PNG, WebP. Auto-compressed if oversized.</p>
+                <p class="text-xs text-slate-400 mt-2">{{ __('app.photo_compress_hint') }}</p>
                 @error('photo') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
               </div>
             </div>
           </div>
           <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 space-y-5">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Unit Details</h3>
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ __('app.section_unit_details') }}</h3>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {{-- Block (admin-only) --}}
               @if(!$isOwnHousehold)
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Block <span class="text-rose-500">*</span>
+                  {{ __('app.table_block') }} <span class="text-rose-500">*</span>
                 </label>
                 <div class="relative">
                   <select name="block_id" class="{{ $ib }} {{ $errors->has('block_id') ? $ie : $in }} appearance-none pl-3 pr-9">
@@ -140,11 +140,11 @@
               {{-- Unit Number (admin-only) --}}
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Unit Number <span class="text-rose-500">*</span>
+                  {{ __('app.unit_no') }} <span class="text-rose-500">*</span>
                 </label>
                 <input type="text" name="unit_number"
                   value="{{ old('unit_number', $resident->unit_number) }}"
-                  placeholder="e.g. A-101"
+                  placeholder="{{ __('app.eg_unit') }}"
                   class="{{ $ib }} {{ $errors->has('unit_number') ? $ie : $in }}">
                 @error('unit_number') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
               </div>
@@ -153,20 +153,20 @@
               {{-- Owner / Contact Name --}}
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Owner / Contact Name <span class="text-rose-500">*</span>
+                  {{ __('app.owner_contact_name') }} <span class="text-rose-500">*</span>
                 </label>
                 <input type="text" name="fullname"
                   value="{{ old('fullname', $resident->fullname) }}"
-                  placeholder="Full name of owner or primary contact"
+                  placeholder="{{ __('app.owner_contact_placeholder') }}"
                   class="{{ $ib }} {{ $errors->has('fullname') ? $ie : $in }}">
-                <p class="text-xs text-slate-400 mt-1">Used as fallback when no Head of Family is set.</p>
+                <p class="text-xs text-slate-400 mt-1">{{ __('app.owner_contact_hint') }}</p>
                 @error('fullname') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
               </div>
 
               {{-- Family Card Number --}}
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Family Card Number <span class="text-xs font-normal text-slate-400">(No. KK)</span>
+                  {{ __('app.fcn_label') }} <span class="text-xs font-normal text-slate-400">{{ __('app.fcn_abbrev') }}</span>
                 </label>
                 <div class="relative">
                   <input type="text" id="fcn-input" name="family_card_number"
@@ -184,14 +184,14 @@
                   @endif
                 </div>
                 @if($resident->family_card_number)
-                  <p class="text-xs text-slate-400 mt-1">Leave blank to keep existing value.</p>
+                  <p class="text-xs text-slate-400 mt-1">{{ __('app.fcn_leave_blank') }}</p>
                 @endif
                 @error('family_card_number') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
               </div>
 
               {{-- Phone --}}
               <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Phone Number</label>
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ __('app.phone_number') }}</label>
                 <input type="tel" name="phone"
                   value="{{ old('phone', $resident->phone) }}"
                   placeholder="+62 812 xxxx xxxx"
@@ -202,8 +202,8 @@
               {{-- Email --}}
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Email Address
-                  <span class="text-xs font-normal text-slate-400">(links to user account)</span>
+                  {{ __('app.email_address') }}
+                  <span class="text-xs font-normal text-slate-400">{{ __('app.email_links_user') }}</span>
                 </label>
                 <input type="email" name="email"
                   value="{{ old('email', $resident->email) }}"
@@ -216,18 +216,18 @@
 
           {{-- Classification --}}
           <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 space-y-5">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Classification</h3>
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ __('app.section_classification') }}</h3>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {{-- House Status (admin-only) --}}
               @if(!$isOwnHousehold)
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  House Status <span class="text-rose-500">*</span>
+                  {{ __('app.house_status') }} <span class="text-rose-500">*</span>
                 </label>
                 <div class="relative">
                   <select name="house_status" class="{{ $ib }} {{ $errors->has('house_status') ? $ie : $in }} appearance-none pl-3 pr-9">
-                    @foreach(['owner_occupied' => 'Owner Occupied', 'vacant' => 'Vacant', 'rented' => 'Rented'] as $val => $label)
+                    @foreach(['owner_occupied' => __('app.house_owner_occupied'), 'vacant' => __('app.house_vacant'), 'rented' => __('app.house_rented')] as $val => $label)
                       <option value="{{ $val }}" {{ old('house_status', $resident->house_status ?? 'owner_occupied') === $val ? 'selected' : '' }}>
                         {{ $label }}
                       </option>
@@ -245,8 +245,8 @@
                     {{ old('is_active', $resident->is_active) ? 'checked' : '' }}
                     class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary/20">
                   <div>
-                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Active Household</span>
-                    <p class="text-xs text-slate-400">Uncheck to deactivate this unit.</p>
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.active_household') }}</span>
+                    <p class="text-xs text-slate-400">{{ __('app.active_household_hint') }}</p>
                   </div>
                 </label>
               </div>
@@ -256,10 +256,10 @@
             {{-- Notes --}}
             <div>
               <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                Notes <span class="text-xs font-normal text-slate-400">(optional)</span>
+                {{ __('app.notes') }} <span class="text-xs font-normal text-slate-400">{{ __('app.optional') }}</span>
               </label>
               <textarea name="notes" rows="3"
-                placeholder="Any additional notes about this household or unit..."
+                placeholder="{{ __('app.resident_notes_placeholder') }}"
                 class="{{ $ib }} {{ $errors->has('notes') ? $ie : $in }} resize-y"
               >{{ old('notes', $resident->notes) }}</textarea>
               @error('notes') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
@@ -269,7 +269,7 @@
           {{-- Fee Management (admin-only) --}}
           @if(!$isOwnHousehold)
           <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Fee Management</h3>
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ __('app.section_fee_management') }}</h3>
 
             @php $currentFeeRecord = $resident->feeHistories->first(); @endphp
             @if($currentFeeRecord)
@@ -277,36 +277,36 @@
                 <span class="material-icons text-primary">payments</span>
                 <div>
                   <p class="text-sm font-bold text-slate-900 dark:text-white">
-                    {{ $currency }} {{ number_format($currentFeeRecord->amount, 0, ',', '.') }} / month
+                    {{ $currency }} {{ number_format($currentFeeRecord->amount, 0, ',', '.') }} {{ __('app.month_suffix') }}
                   </p>
                   <p class="text-xs text-slate-500">
-                    Effective from {{ $currentFeeRecord->effective_from->format('F Y') }}
+                    {{ __('app.fee_effective_from') }} {{ $currentFeeRecord->effective_from->format('F Y') }}
                     @if($currentFeeRecord->notes) &middot; {{ $currentFeeRecord->notes }} @endif
                   </p>
                 </div>
               </div>
             @else
-              <p class="text-sm text-slate-400 italic">No fee history yet.</p>
+              <p class="text-sm text-slate-400 italic">{{ __('app.no_fee_history') }}</p>
             @endif
 
             <div class="rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/30 p-4 space-y-4">
               <p class="text-xs font-semibold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
                 <span class="material-icons text-sm">info</span>
-                To update the fee, fill the fields below. Leave blank to keep the current fee.
+                {{ __('app.fee_update_hint') }}
               </p>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                    New Monthly Fee ({{ $currency }})
+                    {{ __('app.new_monthly_fee') }} ({{ $currency }})
                   </label>
                   <input type="number" name="new_monthly_fee" min="0" step="1000"
                     value="{{ old('new_monthly_fee') }}"
-                    placeholder="Leave blank to keep current"
+                    placeholder="{{ __('app.leave_blank_keep_current') }}"
                     class="{{ $ib }} {{ $in }}">
                 </div>
                 <div>
                   <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                    Effective From
+                    {{ __('app.effective_from') }}
                   </label>
                   <input type="month" name="new_fee_start"
                     value="{{ old('new_fee_start', now()->format('Y-m')) }}"
@@ -322,7 +322,7 @@
             <button type="submit"
               class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-lg font-semibold transition-all shadow-sm shadow-primary/20 text-sm">
               <span class="material-icons text-sm">save</span>
-              Save Household
+              {{ __('app.save_household') }}
             </button>
           </div>
         </form>
@@ -332,10 +332,10 @@
         <div class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/30 rounded-xl p-5 flex items-start gap-3">
           <span class="material-icons text-amber-500 mt-0.5 shrink-0">lock</span>
           <div>
-            <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">Household Information is locked</p>
+            <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">{{ __('app.household_locked_title') }}</p>
             <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
-              This unit is <strong>rented</strong>. Only an administrator can modify household details, block/unit assignment, fees, and classification.
-              You can still manage family members below.
+              {!! __('app.household_locked_body') !!}
+              {{ __('app.household_locked_you_can') }}
             </p>
           </div>
         </div>
@@ -354,21 +354,21 @@
             </div>
             <div>
               <h2 class="text-lg font-bold text-slate-900 dark:text-white">
-                Family Members
+                {{ __('app.family_members') }}
                 @if($resident->familyMembers->count() > 0)
                   <span class="ml-2 px-2 py-0.5 text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full">
                     {{ $resident->familyMembers->count() }}
                   </span>
                 @endif
               </h2>
-              <p class="text-xs text-slate-400">People living in this household.</p>
+              <p class="text-xs text-slate-400">{{ __('app.people_living_hint') }}</p>
             </div>
           </div>
           @if($canManageFamilyMembers)
             <button onclick="openMemberModal()"
               class="flex items-center gap-2 text-sm font-semibold px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all shadow-sm">
               <span class="material-icons text-sm">person_add</span>
-              <span class="hidden sm:inline">Add Member</span>
+              <span class="hidden sm:inline">{{ __('app.btn_add_member') }}</span>
             </button>
           @endif
         </div>
@@ -386,11 +386,11 @@
           @if($resident->familyMembers->isEmpty())
             <div class="flex flex-col items-center gap-3 py-16 text-slate-400">
               <span class="material-icons text-5xl">group_off</span>
-              <p class="text-sm font-medium">No family members added yet.</p>
+              <p class="text-sm font-medium">{{ __('app.no_family_members') }}</p>
                 @if($canManageFamilyMembers)
                 <button onclick="openMemberModal()"
                   class="text-primary text-sm hover:underline font-semibold">
-                  + Add the first member
+                  {{ __('app.add_first_member') }}
                 </button>
               @endif
             </div>
@@ -399,14 +399,14 @@
               <table class="w-full text-left text-sm">
                 <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
                   <tr>
-                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider">Name</th>
-                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">Photo</th>
-                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider">Relationship</th>
-                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">NIK</th>
-                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Gender</th>
-                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden xl:table-cell">Education</th>
+                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.col_name') }}</th>
+                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">{{ __('app.col_photo') }}</th>
+                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.col_relationship') }}</th>
+                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">{{ __('app.col_nik') }}</th>
+                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">{{ __('app.col_gender') }}</th>
+                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden xl:table-cell">{{ __('app.col_education') }}</th>
                     @if($canManageFamilyMembers)
-                      <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Actions</th>
+                      <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">{{ __('app.table_actions') }}</th>
                     @endif
                   </tr>
                 </thead>
@@ -492,7 +492,7 @@
         @if($resident->house_status === 'rented')
           <p class="mt-3 text-xs text-amber-600 dark:text-amber-400 flex items-start gap-1.5">
             <span class="material-icons text-sm shrink-0 mt-0.5">info</span>
-            <span>This unit is <strong>Rented</strong>. The owner's data is preserved. Use the <strong>Set as Head (★)</strong> button to assign the current tenant as Head of Family.</span>
+            <span>{!! __('app.rented_info_note') !!}</span>
           </p>
         @endif
       </section>
@@ -510,7 +510,7 @@
 
       {{-- Header --}}
       <div class="px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center shrink-0">
-        <h2 id="member-modal-title" class="text-xl font-extrabold text-slate-900 dark:text-white">Add Family Member</h2>
+        <h2 id="member-modal-title" class="text-xl font-extrabold text-slate-900 dark:text-white">{{ __('app.add_family_member') }}</h2>
         <button onclick="closeMemberModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
           <span class="material-icons">close</span>
         </button>
@@ -576,7 +576,7 @@
             {{-- NIK --}}
             <div>
               <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">NIK / KTP</label>
-              <input type="text" name="nik" id="mf-nik" placeholder="16-digit NIK" maxlength="20"
+              <input type="text" name="nik" id="mf-nik" placeholder="{{ __('app.nik_placeholder') }}" maxlength="20"
                 class="{{ $ib }}">
               <p id="mf-nik-hint" class="text-xs text-slate-400 mt-1 hidden">Leave blank to keep existing value.</p>
             </div>
@@ -636,7 +636,7 @@
             <button type="submit"
               class="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 shadow-sm transition-all flex items-center justify-center gap-2">
               <span class="material-icons text-sm">save</span>
-              <span id="member-submit-label">Add Member</span>
+              <span id="member-submit-label">{{ __('app.btn_add_member') }}</span>
             </button>
           </div>
         </form>
@@ -686,6 +686,11 @@
   <script>
     const residentId   = '{{ $resident->id }}';
     const membersBase  = '{{ $familyMembersBase }}';
+    const i18nAddFamilyMember  = '{{ __('app.add_family_member') }}';
+    const i18nEditFamilyMember = '{{ __('app.edit_family_member') }}';
+    const i18nAddMember        = '{{ __('app.btn_add_member') }}';
+    const i18nSaveChanges      = '{{ __('app.btn_save_changes') }}';
+    const i18nNikPlaceholder   = '{{ __('app.nik_placeholder') }}';
 
     // ── Resident photo preview ───────────────────────────────────────────────
     function previewResidentPhoto(event) {
@@ -775,22 +780,22 @@
       resetMemberPhotoPreview(null);
       document.getElementById('member-method').value = 'POST';
       form.action = membersBase;
-      document.getElementById('member-modal-title').textContent  = 'Add Family Member';
-      document.getElementById('member-submit-label').textContent = 'Add Member';
-      document.getElementById('mf-nik').placeholder = '16-digit NIK';
+      document.getElementById('member-modal-title').textContent  = i18nAddFamilyMember;
+      document.getElementById('member-submit-label').textContent = i18nAddMember;
+      document.getElementById('mf-nik').placeholder = i18nNikPlaceholder;
       document.getElementById('mf-nik-hint').classList.add('hidden');
 
       if (data) {
         // Edit mode
         document.getElementById('member-method').value = 'PUT';
         form.action = membersBase + '/' + data.id;
-        document.getElementById('member-modal-title').textContent  = 'Edit Family Member';
-        document.getElementById('member-submit-label').textContent = 'Save Changes';
+        document.getElementById('member-modal-title').textContent  = i18nEditFamilyMember;
+        document.getElementById('member-submit-label').textContent = i18nSaveChanges;
 
         document.getElementById('mf-fullname').value      = data.fullname    || '';
         document.getElementById('mf-relationship').value  = data.relationship || '';
         document.getElementById('mf-nik').value           = '';
-        document.getElementById('mf-nik').placeholder     = data.nik_masked && data.nik_masked !== '—' ? data.nik_masked : '16-digit NIK';
+        document.getElementById('mf-nik').placeholder     = data.nik_masked && data.nik_masked !== '—' ? data.nik_masked : i18nNikPlaceholder;
         document.getElementById('mf-nik-hint').classList.toggle('hidden', !data.nik_masked || data.nik_masked === '—');
         document.getElementById('mf-birth_date').value    = data.birth_date  || '';
         document.getElementById('mf-gender').value        = data.gender      || '';
