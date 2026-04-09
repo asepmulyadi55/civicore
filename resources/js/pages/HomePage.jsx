@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
-import HeroSection from '../components/HeroSection';
 import FeaturedEvent from '../components/FeaturedEvent';
 import UpcomingEvents from '../components/UpcomingEvents';
-import PastHighlights from '../components/PastHighlights';
+import MemorableMoments from '../components/MemorableMoments';
 import AboutSection from '../components/AboutSection';
 import Footer from '../components/Footer';
 
@@ -25,13 +24,12 @@ export default function HomePage() {
     }, []);
 
     return (
-        <div className="font-sans text-slate-800" style={{ backgroundColor: '#fdfcfb' }}>
+        <div className="font-sans text-slate-800" style={{ backgroundColor: '#f8f9fa' }}>
             <Header />
-            <main>
-                <HeroSection hero={data?.hero} loading={loading} />
+            <main className="pt-20">
                 <FeaturedEvent featuredEvent={data?.featured_event} loading={loading} />
                 <UpcomingEvents events={data?.upcoming_events ?? []} loading={loading} />
-                <PastHighlights pastEvents={data?.past_events ?? []} loading={loading} />
+                <MemorableMoments moments={data?.memorable_moments} pastEvents={data?.past_events ?? []} loading={loading} />
                 <AboutSection about={data?.about} loading={loading} />
             </main>
             <Footer />

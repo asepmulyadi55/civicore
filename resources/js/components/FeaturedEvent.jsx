@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 
 export default function FeaturedEvent({ featuredEvent = {}, loading }) {
     const title       = featuredEvent?.title       || 'Dwipapuri Summer Carnival';
@@ -14,9 +14,13 @@ export default function FeaturedEvent({ featuredEvent = {}, loading }) {
     const isLive = status === 'ongoing';
 
     const youtubeUrl = youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : null;
+    const bgImage    = youtubeId
+        ? `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`
+        : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1920&q=80&auto=format';
     const shareUrl   = youtubeUrl || window.location.href;
 
     // ── Dropdown state ──────────────────────────────────────────────────────
+    const [playing,  setPlaying]  = useState(false);
     const [calOpen,   setCalOpen]   = useState(false);
     const [shareOpen, setShareOpen] = useState(false);
     const [copied,    setCopied]    = useState(false);
@@ -126,195 +130,238 @@ export default function FeaturedEvent({ featuredEvent = {}, loading }) {
     }
 
     return (
-        <section id="events" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pb-20 -mt-12">
-            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
-                {/* Video / YouTube Embed */}
-                <div
-                    className="lg:w-2/3 relative flex items-center justify-center aspect-video lg:aspect-auto min-h-[340px]"
-                    style={{ background: '#1A237E' }}
-                >
-                    {isLive && (
-                        <span
-                            className="absolute top-6 left-6 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase text-white animate-pulse z-10"
-                            style={{ backgroundColor: '#FF7043' }}
-                        >
-                            <span className="w-2 h-2 rounded-full bg-white mr-2"></span>
-                            LIVE NOW
-                        </span>
-                    )}
-
-                    {/* Decorative rings */}
-                    <div className="absolute inset-0 opacity-5">
-                        <div className="absolute top-10 left-10 w-40 h-40 rounded-full border-4 border-white"></div>
-                        <div className="absolute bottom-10 right-10 w-60 h-60 rounded-full border-4 border-white"></div>
-                    </div>
-
-                    {youtubeId ? (
-                        <iframe
-                            className="w-full h-full absolute inset-0"
-                            src={`https://www.youtube.com/embed/${youtubeId}`}
-                            title={title}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
+        <section id="featured" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20" style={{ scrollMarginTop: '80px' }}>
+            <div className="relative rounded-3xl overflow-hidden group h-[480px] sm:h-[580px] md:h-[700px]">
+                {/* Background — YouTube embed or fallback image */}
+                {youtubeId ? (
+                    <>
+                        {/* Poster: shown when not playing */}
+                        <img
+                            src={bgImage}
+                            alt={title}
+                            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+                                playing ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                            }`}
                         />
-                    ) : (
-                        <div className="text-center relative z-10">
-                            <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mx-auto hover:bg-white/30 transition-all duration-300">
-                                <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M8 5v14l11-7z" />
-                                </svg>
-                            </div>
-                            <p className="text-white/40 mt-4 text-sm font-medium">YouTube Video Stream Placeholder</p>
-                        </div>
-                    )}
-                </div>
 
-                {/* Event Details */}
-                <div className="lg:w-1/3 p-8 md:p-12 flex flex-col justify-center">
+                        {/* iframe: mounted only after first play to avoid autoplay */}
+                        {playing && (
+                            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                                <iframe
+                                    className="absolute"
+                                    style={{
+                                        top: '50%',
+                                        left: '50%',
+                                        transform: 'translate(-50%, -50%)',
+                                        width: 'max(100%, 177.78vh)',
+                                        height: 'max(56.25vw, 100%)',
+                                        border: 'none',
+                                    }}
+                                    src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&loop=1&playlist=${youtubeId}&controls=0&rel=0&modestbranding=1&playsinline=1`}
+                                    title={title}
+                                    allow="autoplay; encrypted-media"
+                                />
+                            </div>
+                        )}
+
+                        {/* Play / Pause button */}
+                        <button
+                            onClick={() => setPlaying(p => !p)}
+                            className="absolute top-4 left-4 z-10 flex items-center gap-2 px-4 py-2 rounded-full text-white text-xs font-bold uppercase tracking-widest transition-all hover:scale-105 active:scale-95"
+                            style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+                        >
+                            {playing ? (
+                                <>
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                                    </svg>
+                                    Pause
+                                </>
+                            ) : (
+                                <>
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                    Play Video
+                                </>
+                            )}
+                        </button>
+                    </>
+                ) : (
+                    <img
+                        src={bgImage}
+                        alt={title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                )}
+
+                {/* Dark gradient overlay */}
+                <div className="absolute inset-0"
+                    style={{ background: 'linear-gradient(to top, rgba(0,6,102,0.85) 0%, transparent 55%)' }} />
+
+                {/* Live indicator */}
+                {isLive && (
+                    <div className="absolute top-8 left-8 flex items-center gap-2 px-4 py-2 rounded-full animate-pulse"
+                        style={{ backgroundColor: '#ffdad6', color: '#93000a' }}>
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#ba1a1a' }} />
+                        <span className="text-xs font-bold uppercase tracking-widest">Live Now</span>
+                    </div>
+                )}
+
+                {/* Glassmorphic card — bottom right */}
+                <div
+                    className="absolute inset-x-3 bottom-3 md:inset-auto md:bottom-10 md:right-10 md:max-w-xl p-5 sm:p-7 md:p-10 rounded-2xl shadow-2xl"
+                    style={{
+                        background: 'rgba(248,249,250,0.10)',
+                        backdropFilter: 'blur(20px)',
+                        WebkitBackdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255,255,255,0.10)',
+                    }}
+                >
                     {loading ? (
-                        <div className="space-y-3">
-                            <div className="h-4 bg-slate-100 rounded animate-pulse w-1/2" />
-                            <div className="h-8 bg-slate-100 rounded animate-pulse" />
-                            <div className="h-4 bg-slate-100 rounded animate-pulse w-3/4" />
-                            <div className="h-16 bg-slate-100 rounded animate-pulse" />
+                        <div className="space-y-4">
+                            <div className="h-12 bg-white/20 rounded-2xl animate-pulse" />
+                            <div className="h-4 bg-white/20 rounded-xl animate-pulse w-2/3" />
+                            <div className="flex gap-3 pt-2">
+                                <div className="h-12 flex-1 bg-white/20 rounded-xl animate-pulse" />
+                                <div className="h-12 flex-1 bg-white/20 rounded-xl animate-pulse" />
+                                <div className="h-12 w-12 bg-white/20 rounded-xl animate-pulse" />
+                            </div>
                         </div>
                     ) : (
                         <>
-                            <p className="uppercase tracking-widest text-xs font-bold mb-2" style={{ color: 'rgba(26,35,126,0.6)' }}>
-                                Annual Festival 2025
-                            </p>
-                            <h2 className="text-3xl font-bold mb-4" style={{ color: '#1A237E' }}>
+                            <h1 className="text-xl sm:text-2xl md:text-4xl font-extrabold text-white tracking-tight leading-tight mb-2 md:mb-4"
+                                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                                 {title}
-                            </h2>
-                            <div className="flex items-center text-slate-500 mb-6 text-sm">
-                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                        strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-                                </svg>
-                                {formattedDate}
+                            </h1>
+
+                            {/* Date row */}
+                            <div className="flex flex-wrap items-center gap-4 mb-4 md:mb-8" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                                <div className="flex items-center gap-2">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span className="font-medium text-sm">{formattedDate}</span>
+                                </div>
                             </div>
-                            <p className="text-slate-600 mb-8 leading-relaxed">{description}</p>
+
+                            {/* Buttons */}
+                            {/* Buttons */}
+                            <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:gap-3">
+                                {/* Watch Now */}
+                                <button
+                                    onClick={handleWatchNow}
+                                    disabled={!youtubeUrl}
+                                    className="col-span-2 flex items-center justify-center gap-2 px-4 py-2.5 md:px-7 md:py-3.5 rounded-xl font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:opacity-90"
+                                    style={{
+                                        background: 'linear-gradient(45deg, #000666, #5f00e3)',
+                                        color: '#fff',
+                                        fontFamily: "'Plus Jakarta Sans', sans-serif",
+                                    }}
+                                >
+                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                    Watch Now
+                                </button>
+
+                                {/* Add to Calendar */}
+                                <div className="relative" ref={calRef}>
+                                    <button
+                                        onClick={() => { setCalOpen(o => !o); setShareOpen(false); }}
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 md:px-7 md:py-3.5 rounded-xl font-bold text-sm transition-all"
+                                        style={{
+                                            background: 'rgba(255,255,255,0.12)',
+                                            backdropFilter: 'blur(8px)',
+                                            color: '#fff',
+                                            fontFamily: "'Plus Jakarta Sans', sans-serif",
+                                        }}
+                                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.22)'}
+                                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.12)'}
+                                    >
+                                        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <span className="hidden sm:inline">Add to Calendar</span>
+                                        <span className="sm:hidden">Calendar</span>
+                                    </button>
+                                    {calOpen && (
+                                        <div className="absolute bottom-full mb-2 left-0 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
+                                            <a href={buildGoogleCalUrl()} target="_blank" rel="noopener noreferrer"
+                                                onClick={() => setCalOpen(false)}
+                                                className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                                <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="" />
+                                                Google Calendar
+                                            </a>
+                                            <button onClick={downloadIcs}
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-50">
+                                                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                Apple / Outlook (.ics)
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Share */}
+                                <div className="relative" ref={shareRef}>
+                                    <button
+                                        onClick={() => { setShareOpen(o => !o); setCalOpen(false); }}
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 md:p-3.5 rounded-xl font-bold text-sm transition-all"
+                                        style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', color: '#fff',
+                                            fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.22)'}
+                                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.12)'}
+                                        title="Share"
+                                    >
+                                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                        </svg>
+                                        <span className="md:hidden">Share</span>
+                                    </button>
+                                    {shareOpen && (
+                                        <div className="absolute bottom-full mb-2 right-0 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
+                                            <p className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Share via</p>
+                                            {shareOptions.map(opt => opt.copyOnly ? (
+                                                <button key={opt.label} onClick={() => handleCopyLink(opt.label)}
+                                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                                    <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" style={{ color: opt.color }}>
+                                                        <path d={opt.icon} />
+                                                    </svg>
+                                                    <span className="flex-1 text-left">{opt.label}</span>
+                                                    <span className="text-[10px] text-slate-300 font-medium">
+                                                        {copiedPlatform === opt.label ? '✓ Copied!' : 'Copy link'}
+                                                    </span>
+                                                </button>
+                                            ) : (
+                                                <a key={opt.label} href={opt.url} target="_blank" rel="noopener noreferrer"
+                                                    onClick={() => setShareOpen(false)}
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                                    <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" style={{ color: opt.color }}>
+                                                        <path d={opt.icon} />
+                                                    </svg>
+                                                    {opt.label}
+                                                </a>
+                                            ))}
+                                            <button onClick={handleCopyLink}
+                                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-50">
+                                                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                </svg>
+                                                {copied ? 'Copied!' : 'Copy Link'}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </>
                     )}
-
-                    <div className="space-y-3">
-                        {/* Watch Now */}
-                        <button
-                            onClick={handleWatchNow}
-                            disabled={!youtubeUrl}
-                            className="w-full text-white font-bold py-3 px-6 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            style={{ background: 'linear-gradient(135deg, #3b82f6, #3b5bdb)' }}
-                        >
-                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z" />
-                            </svg>
-                            Watch Now
-                        </button>
-
-                        <div className="flex gap-3">
-                            {/* Add to Calendar */}
-                            <div className="flex-1 relative" ref={calRef}>
-                                <button
-                                    onClick={() => { setCalOpen(o => !o); setShareOpen(false); }}
-                                    className="w-full h-11 font-semibold px-4 rounded-xl text-sm flex items-center justify-center gap-1.5 whitespace-nowrap transition-all duration-150 border"
-                                    style={calOpen
-                                        ? { background: '#1A237E', color: '#fff', borderColor: '#1A237E' }
-                                        : { background: 'rgba(26,35,126,0.06)', color: '#1A237E', borderColor: 'rgba(26,35,126,0.2)' }}
-                                    onMouseEnter={e => { if (!calOpen) { e.currentTarget.style.background='rgba(26,35,126,0.12)'; } }}
-                                    onMouseLeave={e => { if (!calOpen) { e.currentTarget.style.background='rgba(26,35,126,0.06)'; } }}
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    Add to Calendar
-                                </button>
-                                {calOpen && (
-                                    <div className="absolute bottom-full mb-2 left-0 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
-                                        <a
-                                            href={buildGoogleCalUrl()}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            onClick={() => setCalOpen(false)}
-                                            className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                                        >
-                                            <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="" />
-                                            Google Calendar
-                                        </a>
-                                        <button
-                                            onClick={downloadIcs}
-                                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-50"
-                                        >
-                                            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                            Apple / Outlook (.ics)
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Share */}
-                            <div className="flex-1 relative" ref={shareRef}>
-                                <button
-                                    onClick={() => { setShareOpen(o => !o); setCalOpen(false); }}
-                                    className="w-full h-11 font-semibold px-4 rounded-xl text-sm flex items-center justify-center gap-1.5 whitespace-nowrap transition-all duration-150 border"
-                                    style={shareOpen
-                                        ? { background: '#059669', color: '#fff', borderColor: '#059669' }
-                                        : { background: 'rgba(5,150,105,0.06)', color: '#059669', borderColor: 'rgba(5,150,105,0.25)' }}
-                                    onMouseEnter={e => { if (!shareOpen) { e.currentTarget.style.background='rgba(5,150,105,0.12)'; } }}
-                                    onMouseLeave={e => { if (!shareOpen) { e.currentTarget.style.background='rgba(5,150,105,0.06)'; } }}
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                                    </svg>
-                                    Share
-                                </button>
-                                {shareOpen && (
-                                    <div className="absolute bottom-full mb-2 right-0 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
-                                        <p className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Share via</p>
-                                        {shareOptions.map(opt => opt.copyOnly ? (
-                                            <button
-                                                key={opt.label}
-                                                onClick={() => handleCopyLink(opt.label)}
-                                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                                            >
-                                                <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" style={{ color: opt.color }}>
-                                                    <path d={opt.icon} />
-                                                </svg>
-                                                <span className="flex-1 text-left">{opt.label}</span>
-                                                <span className="text-[10px] text-slate-300 font-medium">
-                                                    {copiedPlatform === opt.label ? '✓ Copied!' : 'Copy link'}
-                                                </span>
-                                            </button>
-                                        ) : (
-                                            <a
-                                                key={opt.label}
-                                                href={opt.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                onClick={() => setShareOpen(false)}
-                                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                                            >
-                                                <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" style={{ color: opt.color }}>
-                                                    <path d={opt.icon} />
-                                                </svg>
-                                                {opt.label}
-                                            </a>
-                                        ))}
-                                        <button
-                                            onClick={handleCopyLink}
-                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-50"
-                                        >
-                                            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                            </svg>
-                                            {copied ? 'Copied!' : 'Copy Link'}
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </section>

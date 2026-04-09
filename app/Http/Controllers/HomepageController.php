@@ -15,10 +15,11 @@ class HomepageController extends Controller
 
     public function index(Request $request)
     {
-        $hero          = json_decode(Setting::get('homepage_hero',          '{}'), true) ?? [];
-        $featuredEvent = json_decode(Setting::get('homepage_featured_event','{}'), true) ?? [];
-        $allEvents     = json_decode(Setting::get('homepage_events',        '[]'), true) ?? [];
-        $about         = json_decode(Setting::get('homepage_about',         '{}'), true) ?? [];
+        $hero             = json_decode(Setting::get('homepage_hero',              '{}'), true) ?? [];
+        $featuredEvent    = json_decode(Setting::get('homepage_featured_event',    '{}'), true) ?? [];
+        $allEvents        = json_decode(Setting::get('homepage_events',            '[]'), true) ?? [];
+        $about            = json_decode(Setting::get('homepage_about',             '{}'), true) ?? [];
+        $memorableMoments = json_decode(Setting::get('homepage_memorable_moments', '{}'), true) ?? [];
 
         // ── Event filters ────────────────────────────────────────────────────
         $search         = trim($request->input('event_search', ''));
@@ -57,7 +58,7 @@ class HomepageController extends Controller
 
         $totalEvents = count($allEvents);
 
-        return view('homepage', compact('hero', 'featuredEvent', 'events', 'pagination', 'about', 'totalEvents'));
+        return view('homepage', compact('hero', 'featuredEvent', 'events', 'pagination', 'about', 'totalEvents', 'memorableMoments'));
     }
 
     // ── Hero Section ──────────────────────────────────────────────────────────
@@ -288,6 +289,62 @@ class HomepageController extends Controller
         $this->saveSetting('homepage_about', json_encode($data), 'About Section');
 
         return redirect()->route('homepage.index')->with('success', 'About section saved.');
+    }
+
+    // ── Memorable Moments ─────────────────────────────────────────────────────
+
+    public function updateMemorableMoments(Request $request)
+    {
+        $request->validate([
+            'title'       => 'nullable|string|max:200',
+            'subtitle'    => 'nullable|string|max:500',
+            'archive_url' => 'nullable|url|max:500',
+            'images.*'    => 'nullable|image|max:5120',
+            'captions.*'  => 'nullable|string|max:200',
+        ]);
+
+        $existing = json_decode(Setting::get('homepage_memorable_moments', '{}'), true) ?? [];
+        $existingImages = $existing['images'] ?? [];
+
+        $images = [];
+        for ($i = 0; $i < 4; $i++) {
+            $slot = $existingImages[$i] ?? ['url' => null, 'path' => null, 'caption' => null];
+
+            if ($request->hasFile("images.{$i}")) {
+                // Delete old file if present
+                if (!empty($slot['path'])) {
+                    Storage::disk('public')->delete($slot['path']);
+                    MediaFile::where('path', $slot['path'])->delete();
+                }
+                $file = $request->file("images.{$i}");
+                $path = $file->store('homepage/moments', 'public');
+                $url  = Storage::disk('public')->url($path);
+                MediaFile::create([
+                    'disk'          => 'public',
+                    'path'          => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type'     => $file->getMimeType(),
+                    'size'          => $file->getSize(),
+                    'uploaded_by'   => auth()->id(),
+                ]);
+                $slot['url']  = $url;
+                $slot['path'] = $path;
+            }
+
+            $slot['caption'] = $request->input("captions.{$i}") ?? $slot['caption'];
+            $images[]        = $slot;
+        }
+
+        $data = [
+            'title'       => $request->input('title',       $existing['title']       ?? ''),
+            'subtitle'    => $request->input('subtitle',    $existing['subtitle']    ?? ''),
+            'archive_url' => $request->input('archive_url', $existing['archive_url'] ?? null),
+            'images'      => $images,
+        ];
+
+        $this->saveSetting('homepage_memorable_moments', json_encode($data), 'Memorable Moments');
+
+        return redirect()->route('homepage.index')->with('success', 'Memorable Moments saved.');
     }
 
     // ── Private helper ────────────────────────────────────────────────────────

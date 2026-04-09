@@ -81,6 +81,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:homepage.delete')->name('homepage.events.destroy');
     Route::post('/homepage/about', [HomepageController::class, 'updateAbout'])
         ->middleware('permission:homepage.edit')->name('homepage.about');
+    Route::post('/homepage/memorable-moments', [HomepageController::class, 'updateMemorableMoments'])
+        ->middleware('permission:homepage.edit')->name('homepage.memorable-moments');
 
     // ── Private file serving (auth-protected) ─────────────────────────────────
     Route::get('/private/{path}', [PrivateFileController::class, 'serve'])

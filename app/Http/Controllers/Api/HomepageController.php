@@ -15,10 +15,11 @@ class HomepageController extends Controller
      */
     public function index(): JsonResponse
     {
-        $hero          = json_decode(Setting::get('homepage_hero',           '{}'), true) ?? [];
-        $featuredEvent = json_decode(Setting::get('homepage_featured_event', '{}'), true) ?? [];
-        $events        = json_decode(Setting::get('homepage_events',         '[]'), true) ?? [];
-        $about         = json_decode(Setting::get('homepage_about',          '{}'), true) ?? [];
+        $hero             = json_decode(Setting::get('homepage_hero',                '{}'), true) ?? [];
+        $featuredEvent    = json_decode(Setting::get('homepage_featured_event',      '{}'), true) ?? [];
+        $events           = json_decode(Setting::get('homepage_events',              '[]'), true) ?? [];
+        $about            = json_decode(Setting::get('homepage_about',               '{}'), true) ?? [];
+        $memorableMoments = json_decode(Setting::get('homepage_memorable_moments',   '{}'), true) ?? [];
 
         $today          = now()->toDateString();
         $upcomingEvents = array_slice(array_values(array_filter($events, fn($e) =>
@@ -33,11 +34,12 @@ class HomepageController extends Controller
         )), 0, 4);
 
         return response()->json([
-            'hero'            => $hero,
-            'featured_event'  => $featuredEvent,
-            'upcoming_events' => $upcomingEvents,
-            'past_events'     => $pastEvents,
-            'about'           => $about,
+            'hero'              => $hero,
+            'featured_event'    => $featuredEvent,
+            'upcoming_events'   => $upcomingEvents,
+            'past_events'       => $pastEvents,
+            'memorable_moments' => $memorableMoments,
+            'about'             => $about,
         ]);
     }
 }
