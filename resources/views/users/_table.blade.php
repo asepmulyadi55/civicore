@@ -136,7 +136,8 @@
             <td class="px-6 py-4 text-right">
               <div class="flex justify-end gap-1.5 items-center">
 
-                {{-- Edit (always shown) --}}
+                {{-- Edit --}}
+                @if(auth()->user()->can('users.edit'))
                 <button onclick="openEditModal(
                                       '{{ $user->id }}',
                                       {{ json_encode($user->name) }},
@@ -150,18 +151,21 @@
                   title="{{ __('app.title_edit_user') }}">
                   <span class="material-icons text-lg">edit</span>
                 </button>
+                @endif
 
                 @if($isPending)
-                  {{-- Approve button → triggers approve modal with block/unit assignment --}}
+                  {{-- Approve button --}}
+                  @if(auth()->user()->can('users.approve'))
                   <button
-                    onclick="openApproveModal('{{ $user->id }}', {{ json_encode($user->name) }}, {{ json_encode($user->email) }})"
+                    onclick="openApproveModal('{{ $user->id }}', {{ json_encode($user->name) }}, {{ json_encode($user->email) }}, {{ $user->block_id ? "'{$user->block_id}'" : 'null' }}, {{ json_encode($user->unit_number) }})"
                     class="bg-primary text-white text-[10px] px-3 py-1.5 rounded font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors flex items-center gap-1">
                     <span class="material-icons text-xs">verified</span>
                     {{ __('app.btn_approve') }}
                   </button>
+                  @endif
                 @elseif($isInactive)
-                  @if(!$isSelf)
-                    {{-- Reactivate button → uses confirm modal --}}
+                  @if(!$isSelf && auth()->user()->can('users.edit'))
+                    {{-- Reactivate button --}}
                     <button onclick="openUserConfirmModal('reactivate', '{{ $user->id }}', {{ json_encode($user->name) }})"
                       class="p-1.5 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
                       title="Reactivate user">
@@ -169,8 +173,8 @@
                     </button>
                   @endif
                 @else
-                  @if(!$isSelf)
-                    {{-- Deactivate button → triggers modal --}}
+                  @if(!$isSelf && auth()->user()->can('users.edit'))
+                    {{-- Deactivate button --}}
                     <button onclick="openUserConfirmModal('deactivate', '{{ $user->id }}', {{ json_encode($user->name) }})"
                       class="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
                       title="{{ __('app.title_deactivate_user') }}">
@@ -179,8 +183,8 @@
                   @endif
                 @endif
 
-                {{-- Delete button → triggers modal --}}
-                @if(!$isSelf)
+                {{-- Delete button --}}
+                @if(!$isSelf && auth()->user()->can('users.delete'))
                   <button onclick="openUserConfirmModal('delete', '{{ $user->id }}', {{ json_encode($user->name) }})"
                     class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     title="{{ __('app.title_delete_user') }}">

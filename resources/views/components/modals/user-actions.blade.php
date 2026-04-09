@@ -35,7 +35,7 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
         @csrf @method('PATCH')
         <button type="submit"
           class="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all">
-          Reactivate
+          {{ __('app.btn_reactivate') }}
         </button>
       </form>
       <form id="ucm-form-delete" method="POST" action="" class="flex-1 hidden">
@@ -91,11 +91,12 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
     document.getElementById('edit-user-id-field').value = id;
     document.getElementById('form-edit-user').action = `${usersBaseUrl}/${id}`;
 
-    // Set block and unit from current user data, then lookup resident
+    // Set block and load units for current user data, then lookup resident
     const blockSel = document.getElementById('edit-block-id');
-    const unitInp = document.getElementById('edit-unit-number');
     if (blockSel) blockSel.value = blockId ?? '';
-    if (unitInp) unitInp.value = unitNumber ?? '';
+    if (typeof loadUnitsForUserModal === 'function') {
+      loadUnitsForUserModal(blockId ?? '', 'edit-unit-number', unitNumber ?? '');
+    }
 
     // Reset badges
     ['found', 'notfound', 'loading'].forEach(s => {
@@ -116,14 +117,16 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
   const CHECK_URL_APPROVE = '{{ route('users.check-resident-email') }}';
   const CSRF_APPROVE = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
 
-  function openApproveModal(userId, userName, userEmail) {
+  function openApproveModal(userId, userName, userEmail, currentBlockId, currentUnitNumber) {
     document.getElementById('approve-subtitle').textContent = userName + ' — ' + userEmail;
     document.getElementById('form-approve-user').action = `${usersBaseUrl}/${userId}/approve`;
 
     const blockSel = document.getElementById('approve-block-id');
-    const unitInp = document.getElementById('approve-unit-number');
-    if (blockSel) { blockSel.value = ''; blockSel.disabled = false; }
-    if (unitInp) { unitInp.value = ''; unitInp.readOnly = false; }
+    // Pre-fill with the values already saved on the user record
+    if (blockSel) { blockSel.value = currentBlockId ?? ''; blockSel.disabled = false; }
+    if (typeof loadUnitsForUserModal === 'function') {
+      loadUnitsForUserModal(currentBlockId ?? '', 'approve-unit-number', currentUnitNumber ?? '');
+    }
 
     // Reset badges
     ['found', 'notfound'].forEach(s => {
@@ -149,10 +152,11 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
             badgeFound?.classList.add('flex');
             badgeNot?.classList.add('hidden');
             if (blockSel) { blockSel.value = data.block_id ?? ''; blockSel.disabled = true; }
-            if (unitInp) {
-              unitInp.value = data.unit_number ?? '';
-              unitInp.readOnly = true;
-              unitInp.classList.add('bg-slate-100', 'cursor-not-allowed');
+            if (typeof loadUnitsForUserModal === 'function') {
+              loadUnitsForUserModal(data.block_id, 'approve-unit-number', data.unit_number ?? '').then(() => {
+                const apprSel = document.getElementById('approve-unit-number');
+                if (apprSel) { apprSel.disabled = true; apprSel.classList.add('opacity-60', 'cursor-not-allowed'); }
+              });
             }
           } else {
             badgeNot?.classList.remove('hidden');
@@ -179,8 +183,8 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
       iconWrap: 'bg-emerald-100 dark:bg-emerald-900/30',
       icon: 'person_add',
       iconColor: 'text-emerald-600 dark:text-emerald-400',
-      title: 'Reactivate User',
-      body: name => `Reactivate <strong class="text-slate-800 dark:text-slate-200">${name}</strong>? They will be able to log in again immediately.`,
+      title: '{{ __('app.reactivate_user_title') }}',
+      body: name => `{{ __('app.reactivate_user_body_before') }} <strong class="text-slate-800 dark:text-slate-200">${name}</strong>{{ __('app.reactivate_user_body_after') }}`,
       form: 'ucm-form-reactivate',
       route: id => `${usersBaseUrl}/${id}/reactivate`,
     },
@@ -224,6 +228,13 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
       closeModal('modal-edit');
       closeModal('modal-approve');
       closeUserConfirmModal();
+    }
+  });
+
+  // Block change in approve modal → reload unit dropdown
+  document.getElementById('approve-block-id')?.addEventListener('change', function () {
+    if (typeof loadUnitsForUserModal === 'function') {
+      loadUnitsForUserModal(this.value, 'approve-unit-number', null);
     }
   });
 </script>

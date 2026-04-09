@@ -9,9 +9,10 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\BlockController;
+use App\Http\Controllers\UnitController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\MyOverviewController;
+use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
@@ -19,13 +20,19 @@ use App\Http\Controllers\SessionConflictController;
 use App\Http\Controllers\PrivateFileController;
 use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\FamilyMemberController;
+use App\Http\Controllers\HouseholdController;
+use App\Http\Controllers\SensitiveDataController;
+use App\Http\Controllers\Api\BlockController as ApiBlockController;
+use App\Http\Controllers\Api\ResidentController as ApiResidentController;
+use App\Http\Controllers\Api\HomepageController as ApiHomepageController;
 
 // ── Public homepage (React SPA) ───────────────────────────────────────────────
 Route::get('/', fn() => view('spa'))->name('home');
 
 // ── Internal API — Homepage content for React SPA ───────────────────────────
 // Protected by X-Api-Key header (key injected into SPA via Blade meta tag).
-Route::get('/api/homepage', [HomepageController::class, 'api'])
+Route::get('/api/homepage', [ApiHomepageController::class, 'index'])
     ->middleware('api.key')
     ->name('api.homepage');
 
@@ -81,19 +88,31 @@ Route::middleware('auth')->group(function () {
         ->name('private.file');
 
     // Resident personal overview (residents only, no secondary permission needed)
-    Route::get('/overview', [MyOverviewController::class, 'index'])->name('my-overview');
+    Route::get('/overview', [OverviewController::class, 'index'])->name('overview');
 
     // ── Residents ─────────────────────────────────────────────────────────────
     Route::get('/residents', [ResidentController::class, 'index'])
         ->middleware('permission:residents.view')->name('residents.index');
     Route::post('/residents', [ResidentController::class, 'store'])
         ->middleware('permission:residents.create')->name('residents.store');
+    Route::get('/residents/{resident}/edit', [ResidentController::class, 'edit'])
+        ->middleware('permission:residents.edit')->name('residents.edit');
     Route::match(['PUT', 'PATCH'], '/residents/{resident}', [ResidentController::class, 'update'])
         ->middleware('permission:residents.edit')->name('residents.update');
     Route::patch('/residents/{resident}/deactivate', [ResidentController::class, 'deactivate'])
         ->middleware('permission:residents.edit')->name('residents.deactivate');
     Route::delete('/residents/{resident}', [ResidentController::class, 'destroy'])
         ->middleware('permission:residents.delete')->name('residents.destroy');
+
+    // Family Members (nested under resident)
+    Route::post('/residents/{resident}/family-members', [FamilyMemberController::class, 'store'])
+        ->middleware('permission:residents.edit')->name('residents.family-members.store');
+    Route::match(['PUT', 'PATCH'], '/residents/{resident}/family-members/{familyMember}', [FamilyMemberController::class, 'update'])
+        ->middleware('permission:residents.edit')->name('residents.family-members.update');
+    Route::delete('/residents/{resident}/family-members/{familyMember}', [FamilyMemberController::class, 'destroy'])
+        ->middleware('permission:residents.edit')->name('residents.family-members.destroy');
+    Route::patch('/residents/{resident}/family-members/{familyMember}/set-head', [FamilyMemberController::class, 'setHead'])
+        ->middleware('permission:residents.edit')->name('residents.family-members.set-head');
 
     // ── Blocks ────────────────────────────────────────────────────────────────
     Route::get('/blocks', [BlockController::class, 'index'])
@@ -104,6 +123,20 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:blocks.edit')->name('blocks.update');
     Route::delete('/blocks/{block}', [BlockController::class, 'destroy'])
         ->middleware('permission:blocks.delete')->name('blocks.destroy');
+
+    // ── Units (nested under Block) ─────────────────────────────────────────────
+    Route::get('/blocks/{block}/units', [UnitController::class, 'index'])
+        ->middleware('permission:blocks.view')->name('blocks.units.index');
+    Route::post('/blocks/{block}/units', [UnitController::class, 'store'])
+        ->middleware('permission:blocks.edit')->name('blocks.units.store');
+    Route::match(['PUT', 'PATCH'], '/blocks/{block}/units/{unit}', [UnitController::class, 'update'])
+        ->middleware('permission:blocks.edit')->name('blocks.units.update');
+    Route::delete('/blocks/{block}/units/{unit}', [UnitController::class, 'destroy'])
+        ->middleware('permission:blocks.edit')->name('blocks.units.destroy');
+
+    // ── API: units by block (for resident/user form AJAX dropdown) ──────────────
+    Route::get('/api/blocks/{block}/units', [ApiBlockController::class, 'units'])
+        ->name('api.blocks.units');
 
     // ── Payments ──────────────────────────────────────────────────────────────
     Route::get('/payments', [PaymentController::class, 'index'])
@@ -138,7 +171,7 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:users.edit')->name('users.update');
     Route::post('/users/{user}/approve', [UserController::class, 'approve'])
         ->middleware('permission:users.approve')->name('users.approve');
-    Route::post('/users/check-resident-email', [UserController::class, 'checkResidentEmail'])
+    Route::post('/users/check-resident-email', [ApiResidentController::class, 'checkEmail'])
         ->middleware('throttle:30,1')->name('users.check-resident-email');
     Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate'])
         ->middleware('permission:users.edit')->name('users.deactivate');
@@ -167,6 +200,26 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:media.delete')->name('media.destroy');
     Route::delete('/media', [MediaController::class, 'bulkDestroy'])
         ->middleware('permission:media.delete')->name('media.bulk-destroy');
+
+    // ── Sensitive data reveal (admin-only AJAX) ──────────────────────────────
+    Route::get('/residents/{resident}/reveal-fcn', [SensitiveDataController::class, 'revealFCN'])
+        ->name('residents.reveal-fcn');
+    Route::get('/residents/{resident}/family-members/{familyMember}/reveal-nik', [SensitiveDataController::class, 'revealNIK'])
+        ->name('residents.family-members.reveal-nik');
+
+    // ── Household (resident self-service) ─────────────────────────────────
+    Route::get('/household', [HouseholdController::class, 'show'])
+        ->name('household.show');
+    Route::match(['PUT', 'PATCH'], '/household', [HouseholdController::class, 'update'])
+        ->name('household.update');
+    Route::post('/household/family-members', [HouseholdController::class, 'storeFamilyMember'])
+        ->name('household.family-members.store');
+    Route::match(['PUT', 'PATCH'], '/household/family-members/{familyMember}', [HouseholdController::class, 'updateFamilyMember'])
+        ->name('household.family-members.update');
+    Route::delete('/household/family-members/{familyMember}', [HouseholdController::class, 'destroyFamilyMember'])
+        ->name('household.family-members.destroy');
+    Route::patch('/household/family-members/{familyMember}/set-head', [HouseholdController::class, 'setFamilyMemberHead'])
+        ->name('household.family-members.set-head');
 
     // ── Settings (profile — all roles) ────────────────────────────────────────
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');

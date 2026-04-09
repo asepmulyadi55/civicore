@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
@@ -50,28 +51,6 @@ class UserController extends Controller
   }
 
   /**
-   * AJAX: check if an email exists in the residents table.
-   * Returns JSON: { found, block_id, block_name, unit_number }
-   */
-  public function checkResidentEmail(Request $request)
-  {
-    $request->validate(['email' => ['required', 'email']]);
-
-    $resident = Resident::where('email', $request->email)->with('block')->first();
-
-    if (!$resident) {
-      return response()->json(['found' => false]);
-    }
-
-    return response()->json([
-      'found' => true,
-      'block_id' => $resident->block_id,
-      'block_name' => $resident->block?->name ?? '—',
-      'unit_number' => $resident->unit_number,
-    ]);
-  }
-
-  /**
    * Create a new user from the admin form.
    */
   public function store(Request $request)
@@ -80,7 +59,7 @@ class UserController extends Controller
       'name' => ['required', 'string', 'max:100'],
       'username' => ['required', 'string', 'max:50', 'unique:users,username'],
       'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-      'password' => ['required', 'string', 'min:8'],
+      'password' => ['required', 'string', Password::min(8)->mixedCase()->numbers()->symbols()],
       'role_id' => ['nullable', 'exists:roles,id'],
       'is_active' => ['nullable', 'boolean'],
     ], [
@@ -129,7 +108,7 @@ class UserController extends Controller
       'role_id' => ['nullable', 'exists:roles,id'],
       'block_id' => ['nullable', 'exists:blocks,id'],
       'unit_number' => ['nullable', 'string', 'max:50'],
-      'password' => ['nullable', 'string', 'min:8'],
+      'password' => ['nullable', 'string', Password::min(8)->mixedCase()->numbers()->symbols()],
     ], [
       'name.required' => 'Please enter the user\'s full name.',
       'name.max' => 'Full name must not exceed 100 characters.',

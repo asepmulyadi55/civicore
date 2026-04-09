@@ -14,16 +14,34 @@ class Resident extends Model
     protected $fillable = [
         'user_id',
         'block_id',
-        'unit_number',
+        'unit_id',
         'fullname',
         'phone',
         'email',
         'is_active',
+        'family_card_number',
+        'notes',
+        'photo_path',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
+        'is_active'          => 'boolean',
+        'family_card_number' => 'encrypted',
     ];
+
+    // ── Backward-compat virtual accessors ────────────────────────────────────
+
+    /** Returns the unit_number from the linked unit (read-only). */
+    public function getUnitNumberAttribute(): ?string
+    {
+        return $this->unit?->unit_number;
+    }
+
+    /** Returns house_status from the linked unit (read-only). */
+    public function getHouseStatusAttribute(): ?string
+    {
+        return $this->unit?->house_status ?? 'owner_occupied';
+    }
 
     // Optional linked user account
     public function user(): BelongsTo
@@ -34,6 +52,41 @@ class Resident extends Model
     public function block(): BelongsTo
     {
         return $this->belongsTo(Block::class);
+    }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
+    }
+
+    public function familyMembers(): HasMany
+    {
+        return $this->hasMany(FamilyMember::class)->orderByDesc('is_head')->orderBy('fullname');
+    }
+
+    /**
+     * Returns the head-of-family member.
+     * Uses the in-memory collection when already eager-loaded to avoid extra queries.
+     */
+    public function headOfFamily(): ?FamilyMember
+    {
+        return $this->relationLoaded('familyMembers')
+            ? $this->familyMembers->firstWhere('is_head', true)
+            : $this->familyMembers()->where('is_head', true)->first();
+    }
+
+    /**
+     * Display name: head of family name, or fallback to fullname.
+     */
+    public function displayName(): string
+    {
+        return $this->headOfFamily()?->fullname ?? $this->fullname;
+    }
+
+    public function photoUrl(): ?string
+    {
+        if (!$this->photo_path) return null;
+        return route('private.file', ['path' => $this->photo_path]);
     }
 
     public function paymentRecords(): HasMany
@@ -60,5 +113,12 @@ class Resident extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    public function maskedFamilyCardNumber(): string
+    {
+        if (!$this->family_card_number) return '—';
+        $val = $this->family_card_number;
+        return str_repeat('•', max(0, strlen($val) - 4)) . substr($val, -4);
     }
 }

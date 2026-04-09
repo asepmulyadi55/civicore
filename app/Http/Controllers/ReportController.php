@@ -32,18 +32,21 @@ class ReportController extends Controller
         // Build resident query
         $residentQuery = Resident::with([
             'block',
+            'unit',
             'paymentRecords' => fn($q) => $q->whereYear('payment_month', $year)->orderBy('payment_month'),
         ])->where('is_active', true)
-            ->orderBy('block_id')
-            ->orderBy('unit_number');
+            ->leftJoin('units', 'units.id', '=', 'residents.unit_id')
+            ->orderBy('residents.block_id')
+            ->orderBy('units.unit_number')
+            ->select('residents.*');
 
         if ($blockId) {
-            $residentQuery->where('block_id', $blockId);
+            $residentQuery->where('residents.block_id', $blockId);
         }
         if ($search) {
             $residentQuery->where(function ($q) use ($search) {
-                $q->where('fullname', 'like', "%{$search}%")
-                    ->orWhere('unit_number', 'like', "%{$search}%");
+                $q->where('residents.fullname', 'like', "%{$search}%")
+                    ->orWhere('units.unit_number', 'like', "%{$search}%");
             });
         }
 
