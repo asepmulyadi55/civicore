@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\BlockController;
+use App\Http\Controllers\UnitController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\OverviewController;
@@ -22,6 +23,8 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\FamilyMemberController;
 use App\Http\Controllers\HouseholdController;
 use App\Http\Controllers\SensitiveDataController;
+use App\Http\Controllers\Api\BlockController as ApiBlockController;
+use App\Http\Controllers\Api\ResidentController as ApiResidentController;
 
 // ── Public homepage (React SPA) ───────────────────────────────────────────────
 Route::get('/', fn() => view('spa'))->name('home');
@@ -120,6 +123,20 @@ Route::middleware('auth')->group(function () {
     Route::delete('/blocks/{block}', [BlockController::class, 'destroy'])
         ->middleware('permission:blocks.delete')->name('blocks.destroy');
 
+    // ── Units (nested under Block) ─────────────────────────────────────────────
+    Route::get('/blocks/{block}/units', [UnitController::class, 'index'])
+        ->middleware('permission:blocks.view')->name('blocks.units.index');
+    Route::post('/blocks/{block}/units', [UnitController::class, 'store'])
+        ->middleware('permission:blocks.edit')->name('blocks.units.store');
+    Route::match(['PUT', 'PATCH'], '/blocks/{block}/units/{unit}', [UnitController::class, 'update'])
+        ->middleware('permission:blocks.edit')->name('blocks.units.update');
+    Route::delete('/blocks/{block}/units/{unit}', [UnitController::class, 'destroy'])
+        ->middleware('permission:blocks.edit')->name('blocks.units.destroy');
+
+    // ── API: units by block (for resident/user form AJAX dropdown) ──────────────
+    Route::get('/api/blocks/{block}/units', [ApiBlockController::class, 'units'])
+        ->name('api.blocks.units');
+
     // ── Payments ──────────────────────────────────────────────────────────────
     Route::get('/payments', [PaymentController::class, 'index'])
         ->middleware('permission:payments.view')->name('payments.index');
@@ -153,7 +170,7 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:users.edit')->name('users.update');
     Route::post('/users/{user}/approve', [UserController::class, 'approve'])
         ->middleware('permission:users.approve')->name('users.approve');
-    Route::post('/users/check-resident-email', [UserController::class, 'checkResidentEmail'])
+    Route::post('/users/check-resident-email', [ApiResidentController::class, 'checkEmail'])
         ->middleware('throttle:30,1')->name('users.check-resident-email');
     Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate'])
         ->middleware('permission:users.edit')->name('users.deactivate');

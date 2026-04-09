@@ -125,7 +125,7 @@
                   {{ __('app.table_block') }} <span class="text-rose-500">*</span>
                 </label>
                 <div class="relative">
-                  <select name="block_id" class="{{ $ib }} {{ $errors->has('block_id') ? $ie : $in }} appearance-none pl-3 pr-9">
+                  <select name="block_id" id="edit-page-block_id" onchange="loadUnitsOnEdit(this.value, null)" class="{{ $ib }} {{ $errors->has('block_id') ? $ie : $in }} appearance-none pl-3 pr-9">
                     @foreach($blocks as $block)
                       <option value="{{ $block->id }}" {{ old('block_id', $resident->block_id) == $block->id ? 'selected' : '' }}>
                         {{ $block->name }}
@@ -137,16 +137,19 @@
                 @error('block_id') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
               </div>
 
-              {{-- Unit Number (admin-only) --}}
+              {{-- Unit (admin-only) - AJAX-loaded select --}}
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                   {{ __('app.unit_no') }} <span class="text-rose-500">*</span>
                 </label>
-                <input type="text" name="unit_number"
-                  value="{{ old('unit_number', $resident->unit_number) }}"
-                  placeholder="{{ __('app.eg_unit') }}"
-                  class="{{ $ib }} {{ $errors->has('unit_number') ? $ie : $in }}">
-                @error('unit_number') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
+                <div class="relative">
+                  <select id="edit-page-unit_id" name="unit_id"
+                    class="{{ $ib }} {{ $errors->has('unit_id') ? $ie : $in }} appearance-none pl-3 pr-9">
+                    <option value="{{ $resident->unit_id }}">{{ $resident->unit_number }}</option>
+                  </select>
+                  <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
+                </div>
+                @error('unit_id') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
               </div>
               @endif {{-- /!$isOwnHousehold block+unit --}}
 
@@ -219,26 +222,30 @@
             <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ __('app.section_classification') }}</h3>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              {{-- House Status (admin-only) --}}
-              @if(!$isOwnHousehold)
+              {{-- House Status read-only (managed on Unit) --}}
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  {{ __('app.house_status') }} <span class="text-rose-500">*</span>
+                  {{ __('app.house_status') }}
                 </label>
-                <div class="relative">
-                  <select name="house_status" class="{{ $ib }} {{ $errors->has('house_status') ? $ie : $in }} appearance-none pl-3 pr-9">
-                    @foreach(['owner_occupied' => __('app.house_owner_occupied'), 'vacant' => __('app.house_vacant'), 'rented' => __('app.house_rented')] as $val => $label)
-                      <option value="{{ $val }}" {{ old('house_status', $resident->house_status ?? 'owner_occupied') === $val ? 'selected' : '' }}>
-                        {{ $label }}
-                      </option>
-                    @endforeach
-                  </select>
-                  <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
+                @php
+                  $hsBadgeColors = ['owner_occupied'=>'bg-primary/10 text-primary','rented'=>'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400','vacant'=>'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'];
+                  $hsColor = $hsBadgeColors[$resident->house_status ?? 'owner_occupied'] ?? $hsBadgeColors['owner_occupied'];
+                  $hsLabel = __('app.house_status_' . ($resident->house_status ?? 'owner_occupied'));
+                @endphp
+                <div class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                  <span class="px-2.5 py-1 rounded-lg text-xs font-bold {{ $hsColor }}">{{ $hsLabel }}</span>
+                  @if($resident->unit)
+                  <a href="{{ route('blocks.units.index', $resident->unit->block_id) }}"
+                    class="text-xs text-primary hover:underline flex items-center gap-1">
+                    <span class="material-icons text-xs">open_in_new</span>{{ __('app.btn_go_unit_mgmt') }}
+                  </a>
+                  @endif
                 </div>
-                @error('house_status') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
+                <p class="text-[11px] text-slate-400 mt-1">{{ __('app.unit_house_status_hint') }}</p>
               </div>
 
               {{-- Active Status toggle (admin-only) --}}
+              @if(!$isOwnHousehold)
               <div class="flex items-center">
                 <label class="flex items-center gap-3 cursor-pointer p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors w-full border border-slate-200 dark:border-slate-700">
                   <input type="checkbox" name="is_active" value="1"
@@ -250,7 +257,7 @@
                   </div>
                 </label>
               </div>
-              @endif {{-- /!$isOwnHousehold house_status+is_active --}}
+              @endif {{-- /!$isOwnHousehold is_active --}}
             </div>
 
             {{-- Notes --}}
@@ -692,7 +699,46 @@
     const i18nSaveChanges      = '{{ __('app.btn_save_changes') }}';
     const i18nNikPlaceholder   = '{{ __('app.nik_placeholder') }}';
 
-    // ── Resident photo preview ───────────────────────────────────────────────
+    // ── Unit AJAX loader ─────────────────────────────────────────────────────
+    const editPageApiBlocksUrl = "{{ url('/api/blocks') }}";
+    const editPageCurrentUnitId = "{{ $resident->unit_id }}";
+
+    async function loadUnitsOnEdit(blockId, selectedUnitId) {
+      const sel = document.getElementById('edit-page-unit_id');
+      if (!sel) return;
+      const currentUnit = selectedUnitId ?? editPageCurrentUnitId;
+      if (!blockId) {
+        sel.innerHTML = '<option value="">{{ __('app.select_block') }}</option>';
+        return;
+      }
+      sel.innerHTML = '<option value="">{{ __('app.units_loading') }}</option>';
+      try {
+        const qs = currentUnit ? '?current_unit_id=' + currentUnit : '';
+        const res = await fetch(`${editPageApiBlocksUrl}/${blockId}/units${qs}`);
+        const units = await res.json();
+        if (!units.length) {
+          sel.innerHTML = '<option value="">{{ __('app.no_units_in_block') }}</option>';
+          return;
+        }
+        sel.innerHTML = '<option value="">{{ __('app.select_unit') }}</option>';
+        units.forEach(u => {
+          const opt = document.createElement('option');
+          opt.value = u.id;
+          opt.textContent = u.unit_number + (u.is_occupied ? ' ({{ __('app.occupied_count') }})' : '');
+          opt.disabled = u.is_occupied;
+          if (u.id === currentUnit) opt.selected = true;
+          sel.appendChild(opt);
+        });
+      } catch {
+        sel.innerHTML = '<option value="">{{ __('app.select_unit') }}</option>';
+      }
+    }
+
+    // Load units on page ready (pre-select current unit)
+    document.addEventListener('DOMContentLoaded', function () {
+      const blockId = document.getElementById('edit-page-block_id')?.value;
+      if (blockId) loadUnitsOnEdit(blockId, editPageCurrentUnitId);
+    });
     function previewResidentPhoto(event) {
       const file = event.target.files[0];
       if (!file) return;

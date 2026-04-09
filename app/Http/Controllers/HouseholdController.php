@@ -7,6 +7,7 @@ use App\Models\Block;
 use App\Models\FamilyMember;
 use App\Models\Resident;
 use App\Models\Setting;
+use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -78,23 +79,25 @@ class HouseholdController extends Controller
 
         $resident->load([
             'block',
+            'unit',
             'familyMembers',
             'feeHistories' => fn($q) => $q->orderByDesc('effective_from'),
         ]);
 
-        $canManageInfo        = $resident->house_status === 'owner_occupied';
+        $canManageInfo        = $resident->unit?->house_status === 'owner_occupied';
         $canManageFamilyMembers = true;
 
         $blocks             = Block::active()->orderBy('name')->get();
+        $units              = collect(); // residents cannot change their unit
         $currency           = Setting::get('currency_symbol', 'Rp');
         $updateRoute        = route('household.update');
         $familyMembersBase  = url('/household/family-members');
         $backRoute          = route('overview');
-        $showRevealButtons  = false;   // residents never see full sensitive data
+        $showRevealButtons  = false;
         $isOwnHousehold     = true;
 
         return view('residents.edit', compact(
-            'resident', 'blocks', 'currency',
+            'resident', 'blocks', 'units', 'currency',
             'canManageInfo', 'canManageFamilyMembers',
             'updateRoute', 'familyMembersBase',
             'backRoute', 'showRevealButtons', 'isOwnHousehold'

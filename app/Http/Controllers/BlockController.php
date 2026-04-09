@@ -10,7 +10,12 @@ class BlockController extends Controller
 {
     public function index(Request $request)
     {
-        $blocks = Block::withCount(['residents', 'residents as active_residents_count' => fn($q) => $q->where('is_active', true)])
+        $blocks = Block::withCount([
+            'residents',
+            'residents as active_residents_count' => fn($q) => $q->where('is_active', true),
+            'units',
+            'units as occupied_units_count' => fn($q) => $q->whereHas('resident'),
+        ])
             ->with([
                 'coordinators' => fn($q) => $q->select('id', 'name', 'block_id', 'role_id')
                     ->whereHas('role', fn($r) => $r->where('name', 'block_coordinator'))

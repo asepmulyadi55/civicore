@@ -13,7 +13,7 @@ class UpdateHouseholdRequest extends FormRequest
         $linked = $user->resolveResident();
 
         // Only the linked resident can update, and only if owner-occupied
-        return $linked && $linked->house_status === 'owner_occupied';
+        return $linked && $linked->unit?->house_status === 'owner_occupied';
     }
 
     public function rules(): array

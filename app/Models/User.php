@@ -83,9 +83,10 @@ class User extends Authenticatable
     }
 
     if (!$resident && $this->block_id && $this->unit_number) {
-      $resident = Resident::where('block_id', $this->block_id)
-        ->where('unit_number', $this->unit_number)
-        ->first();
+      $resident = Resident::whereHas('unit', fn($q) =>
+          $q->where('block_id', $this->block_id)
+            ->where('unit_number', $this->unit_number)
+      )->first();
     }
 
     if ($resident && !$resident->user_id) {

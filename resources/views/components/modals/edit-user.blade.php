@@ -211,9 +211,10 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId, unitNumber)
               <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <span class="material-icons text-slate-400 text-sm">home</span>
               </span>
-              <input id="edit-unit-number" name="unit_number" type="text"
-                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                placeholder="{{ __('app.eg_unit') }}" />
+              <select id="edit-unit-number" name="unit_number"
+                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none">
+                <option value="">— {{ __('app.select_block_first') }} —</option>
+              </select>
             </div>
           </div>
 
@@ -256,6 +257,38 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId, unitNumber)
     if (!valid) e.preventDefault();
   });
 
+  // ── Unit dropdown loader (shared by edit + approve modals) ──────────
+  const USER_MODAL_UNITS_URL = '{{ url('/api/blocks') }}';
+
+  function loadUnitsForUserModal(blockId, selectId, currentUnitNum) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return Promise.resolve();
+    sel.innerHTML = '<option value="">Loading…</option>';
+    sel.disabled = true;
+    if (!blockId) {
+      sel.innerHTML = '<option value="">— {{ __('app.select_block_first') }} —</option>';
+      sel.disabled = false;
+      return Promise.resolve();
+    }
+    return fetch(`${USER_MODAL_UNITS_URL}/${blockId}/units`)
+      .then(r => r.json())
+      .then(units => {
+        sel.innerHTML = '<option value="">— {{ __('app.select_unit') }} —</option>';
+        units.forEach(u => {
+          const opt = document.createElement('option');
+          opt.value = u.unit_number;
+          opt.textContent = u.unit_number;
+          if (currentUnitNum && u.unit_number === currentUnitNum) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        sel.disabled = false;
+      })
+      .catch(() => {
+        sel.innerHTML = '<option value="">— {{ __('app.failed_to_load') }} —</option>';
+        sel.disabled = false;
+      });
+  }
+
   // ── Resident lookup helpers ───────────────────────────────────────
   const CHECK_EMAIL_URL = '{{ route('users.check-resident-email') }}';
   const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.content
@@ -271,22 +304,30 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId, unitNumber)
 
   function lockEditHousehold(blockId, unitNumber) {
     const blockSel = document.getElementById('edit-block-id');
-    const unitInp = document.getElementById('edit-unit-number');
     blockSel.value = blockId ?? '';
-    unitInp.value = unitNumber ?? '';
     blockSel.disabled = true;
-    unitInp.readOnly = true;
-    unitInp.classList.add('bg-slate-100', 'dark:bg-slate-700/50', 'cursor-not-allowed');
     blockSel.classList.add('opacity-60', 'cursor-not-allowed');
+    loadUnitsForUserModal(blockId, 'edit-unit-number', unitNumber ?? '').then(() => {
+      const unitSel = document.getElementById('edit-unit-number');
+      if (unitSel) {
+        unitSel.disabled = true;
+        unitSel.classList.add('opacity-60', 'cursor-not-allowed');
+      }
+    });
   }
 
   function unlockEditHousehold() {
     const blockSel = document.getElementById('edit-block-id');
-    const unitInp = document.getElementById('edit-unit-number');
     blockSel.disabled = false;
-    unitInp.readOnly = false;
-    unitInp.classList.remove('bg-slate-100', 'dark:bg-slate-700/50', 'cursor-not-allowed');
     blockSel.classList.remove('opacity-60', 'cursor-not-allowed');
+    const unitSel = document.getElementById('edit-unit-number');
+    if (unitSel) {
+      unitSel.disabled = false;
+      unitSel.classList.remove('opacity-60', 'cursor-not-allowed');
+    }
+    // Do NOT reload units here — the initial loadUnitsForUserModal call in
+    // openEditModal already populated the dropdown with the correct selection.
+    // Reloading here (with currentUnitNum=null) would clear the selection.
   }
 
   function lookupResidentForEdit(email) {
@@ -320,5 +361,10 @@ Trigger: openEditModal(id, name, username, email, roleId, blockId, unitNumber)
   // Trigger on email change
   document.getElementById('edit-email')?.addEventListener('change', function () {
     lookupResidentForEdit(this.value.trim());
+  });
+
+  // Block change → reload unit dropdown
+  document.getElementById('edit-block-id')?.addEventListener('change', function () {
+    loadUnitsForUserModal(this.value, 'edit-unit-number', null);
   });
 </script>

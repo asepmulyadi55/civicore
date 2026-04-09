@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Block;
 use App\Models\FeeHistory;
 use App\Models\Resident;
+use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -31,8 +32,10 @@ class ResidentSeeder extends Seeder
     ];
 
     // Remove any residents NOT in the seed list (cleans up old larger seeds).
-    $wantedUnits = array_merge(...array_values(array_map(fn($r) => array_column($r, 0), $data)));
-    Resident::whereNotIn('unit_number', $wantedUnits)->delete();
+    $wantedUnitNumbers = array_merge(...array_values(array_map(fn($r) => array_column($r, 0), $data)));
+    // Find Unit IDs corresponding to wanted unit numbers, then delete residents not linked to them
+    $wantedUnitIds = Unit::whereIn('unit_number', $wantedUnitNumbers)->pluck('id');
+    Resident::whereNotIn('unit_id', $wantedUnitIds)->delete();
 
     $residentUser = User::where('username', 'resident')->first();
 
@@ -41,13 +44,20 @@ class ResidentSeeder extends Seeder
       if (!$block)
         continue;
 
-      foreach ($residents as [$unit, $fullname, $phone, $fee]) {
+      foreach ($residents as [$unitNum, $fullname, $phone, $fee]) {
+        // Ensure the Unit record exists
+        $unit = Unit::updateOrCreate(
+          ['block_id' => $block->id, 'unit_number' => $unitNum],
+          ['house_status' => 'owner_occupied', 'is_active' => true]
+        );
+
         // Link the first resident of Block A to the resident user account
-        $userId = ($blockName === 'Block A' && $unit === 'A-101') ? $residentUser?->id : null;
+        $userId = ($blockName === 'Block A' && $unitNum === 'A-101') ? $residentUser?->id : null;
 
         $resident = Resident::updateOrCreate(
-          ['block_id' => $block->id, 'unit_number' => $unit],
+          ['unit_id' => $unit->id],
           [
+            'block_id' => $block->id,
             'fullname' => $fullname,
             'phone' => $phone,
             'is_active' => true,

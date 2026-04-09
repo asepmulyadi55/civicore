@@ -8,6 +8,7 @@ use App\Models\Block;
 use App\Models\FeeHistory;
 use App\Models\Resident;
 use App\Models\Setting;
+use App\Models\Unit;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -24,12 +25,15 @@ class ResidentController extends Controller
 
         $query = Resident::with([
             'block',
+            'unit',
             'feeHistories' => function ($q) {
                 $q->orderByDesc('effective_from')->limit(1);
             },
             'familyMembers' => fn($q) => $q->where('is_head', true)->select('id', 'resident_id', 'fullname'),
         ])->withCount('familyMembers')
-          ->orderBy('block_id')->orderBy('unit_number');
+          ->leftJoin('units', 'units.id', '=', 'residents.unit_id')
+          ->orderBy('residents.block_id')->orderBy('units.unit_number')
+          ->select('residents.*');
 
         // Scope to coordinator's block
         if ($scopeBlockId) {
@@ -39,9 +43,9 @@ class ResidentController extends Controller
         // Live search — includes family member names
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('fullname', 'like', "%{$search}%")
-                    ->orWhere('unit_number', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%")
+                $q->where('residents.fullname', 'like', "%{$search}%")
+                    ->orWhere('units.unit_number', 'like', "%{$search}%")
+                    ->orWhere('residents.phone', 'like', "%{$search}%")
                     ->orWhereHas('block', fn($b) => $b->where('name', 'like', "%{$search}%"))
                     ->orWhereHas('familyMembers', fn($f) => $f->where('fullname', 'like', "%{$search}%"));
             });
@@ -49,14 +53,14 @@ class ResidentController extends Controller
 
         // Block filter (hidden for coordinators, but harmless if still sent)
         if (!$scopeBlockId && $blockId = $request->get('block_id')) {
-            $query->where('block_id', $blockId);
+            $query->where('residents.block_id', $blockId);
         }
 
         // Status filter
         if ($request->get('status') === 'active') {
-            $query->where('is_active', true);
+            $query->where('residents.is_active', true);
         } elseif ($request->get('status') === 'inactive') {
-            $query->where('is_active', false);
+            $query->where('residents.is_active', false);
         }
 
         $residents = $query->paginate(15)->withQueryString();
@@ -74,14 +78,15 @@ class ResidentController extends Controller
     public function store(StoreResidentRequest $request)
     {
         DB::transaction(function () use ($request) {
+            $unit = Unit::findOrFail($request->unit_id);
+
             $resident = Resident::create([
-                'block_id'           => $request->block_id,
-                'unit_number'        => $request->unit_number,
+                'block_id'           => $unit->block_id,
+                'unit_id'            => $unit->id,
                 'fullname'           => $request->fullname,
                 'phone'              => $request->phone,
                 'email'              => $request->email,
                 'family_card_number' => $request->family_card_number,
-                'house_status'       => $request->house_status ?? 'owner_occupied',
                 'notes'              => $request->notes,
                 'is_active'          => true,
             ]);
@@ -107,10 +112,12 @@ class ResidentController extends Controller
     {
         $resident->load([
             'block',
+            'unit',
             'familyMembers',
             'feeHistories' => fn($q) => $q->orderByDesc('effective_from'),
         ]);
         $blocks   = Block::active()->orderBy('name')->get();
+        $units    = $resident->block ? $resident->block->units()->active()->orderBy('unit_number')->with('resident:id,unit_id')->get() : collect();
         $currency = Setting::get('currency_symbol', 'Rp');
 
         $canManageInfo        = true;
@@ -122,7 +129,7 @@ class ResidentController extends Controller
         $isOwnHousehold       = false;
 
         return view('residents.edit', compact(
-            'resident', 'blocks', 'currency',
+            'resident', 'blocks', 'units', 'currency',
             'canManageInfo', 'canManageFamilyMembers',
             'updateRoute', 'familyMembersBase',
             'backRoute', 'showRevealButtons', 'isOwnHousehold'
@@ -133,9 +140,17 @@ class ResidentController extends Controller
     {
         DB::transaction(function () use ($request, $resident) {
             $data = $request->only([
-                'fullname', 'phone', 'email', 'block_id', 'unit_number', 'is_active',
-                'family_card_number', 'house_status', 'notes',
+                'fullname', 'phone', 'email', 'block_id', 'unit_id', 'is_active',
+                'family_card_number', 'notes',
             ]);
+
+            // Keep block_id in sync with the selected unit
+            if ($request->filled('unit_id')) {
+                $unit = Unit::find($request->unit_id);
+                if ($unit) {
+                    $data['block_id'] = $unit->block_id;
+                }
+            }
 
             // Don't clobber an existing encrypted Family Card Number if the user left the field blank.
             if (!$request->filled('family_card_number')) {
