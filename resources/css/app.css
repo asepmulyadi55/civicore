@@ -18,6 +18,11 @@
 }
 
 /* ── SPA Base ────────────────────────────────────────────────────────────── */
+html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -25,6 +30,7 @@
 body {
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
 }
 
 /* ── Hero Background ─────────────────────────────────────────────────────── */
@@ -48,6 +54,17 @@ body {
 .premium-card {
     background: #1A1F36;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(26, 31, 54, 0.3);
+}
+
+/* ── Memorable Moments Bento Grid ───────────────────────────────────────── */
+@media (min-width: 768px) {
+    .memorable-bento__large {
+        grid-column: span 2;
+        grid-row: span 2;
+    }
+    .memorable-bento__wide {
+        grid-column: span 2;
+    }
 }
 
 /* ── Hover Lift ──────────────────────────────────────────────────────────── */

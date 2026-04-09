@@ -1,12 +1,12 @@
 import React from 'react';
 
-const CATEGORY_COLORS = {
-    wellness:  { text: '#10b981', border: '#10b981' },
-    meetings:  { text: '#4f46e5', border: '#4f46e5' },
-    education: { text: '#f97316', border: '#f97316' },
-    cultural:  { text: '#8b5cf6', border: '#8b5cf6' },
-    sports:    { text: '#0ea5e9', border: '#0ea5e9' },
-    other:     { text: '#64748b', border: '#64748b' },
+const CATEGORY_BADGE_STYLES = {
+    wellness:  { background: '#000666', color: '#ffffff' },
+    meetings:  { background: '#5f00e3', color: '#ffffff' },
+    education: { background: '#5c1800', color: '#ffb59d' },
+    cultural:  { background: '#1a237e', color: '#bdc2ff' },
+    sports:    { background: '#000666', color: '#ffffff' },
+    other:     { background: '#454652', color: '#ffffff' },
 };
 
 const PLACEHOLDER_IMAGES = [
@@ -17,13 +17,14 @@ const PLACEHOLDER_IMAGES = [
 
 function SkeletonCard() {
     return (
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border-t-4 border-slate-200 animate-pulse">
-            <div className="w-full aspect-[4/3] bg-slate-100" />
-            <div className="p-6 space-y-3">
-                <div className="h-3 bg-slate-100 rounded w-1/3" />
+        <div className="bg-white rounded-2xl overflow-hidden animate-pulse" style={{ border: '1px solid rgba(198,197,212,0.10)' }}>
+            <div className="w-full h-64 bg-slate-100" />
+            <div className="p-8 space-y-4">
+                <div className="h-3 bg-slate-100 rounded w-1/4" />
                 <div className="h-5 bg-slate-100 rounded w-3/4" />
-                <div className="h-3 bg-slate-100 rounded w-1/2" />
-                <div className="h-10 bg-slate-100 rounded mt-4" />
+                <div className="h-3 bg-slate-100 rounded w-full" />
+                <div className="h-3 bg-slate-100 rounded w-5/6" />
+                <div className="h-8 bg-slate-100 rounded w-1/3 mt-4" />
             </div>
         </div>
     );
@@ -31,13 +32,18 @@ function SkeletonCard() {
 
 export default function UpcomingEvents({ events = [], loading }) {
     return (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 -mt-12">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
-                <div>
-                    <h2 className="text-3xl font-bold mb-2" style={{ color: '#1A237E' }}>Upcoming Events</h2>
-                    <p className="text-slate-500">Don't miss out on what's happening next.</p>
+        <section id="events" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20" style={{ scrollMarginTop: '80px' }}>
+            <div className="flex items-end justify-between mb-12">
+                <div className="max-w-2xl">
+                    <span className="font-bold tracking-widest uppercase text-xs mb-3 block"
+                        style={{ color: '#5f00e3', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                        Discover More
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight"
+                        style={{ color: '#1a237e', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                        Upcoming Community Events
+                    </h2>
                 </div>
-
             </div>
 
             {loading ? (
@@ -45,54 +51,69 @@ export default function UpcomingEvents({ events = [], loading }) {
                     <SkeletonCard /><SkeletonCard /><SkeletonCard />
                 </div>
             ) : events.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                <div className="text-center py-16 bg-white rounded-2xl shadow-sm" style={{ border: '1px solid rgba(198,197,212,0.10)' }}>
                     <svg className="w-12 h-12 mx-auto text-slate-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <p className="text-slate-400 font-semibold">No Upcoming Events</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {events.map((event, i) => {
-                        const category = (event.category || 'other').toLowerCase();
-                        const colors   = CATEGORY_COLORS[category] || CATEGORY_COLORS.other;
-                        // Use CMS image_url if provided, else fallback to placeholder
-                        const image    = event.image_url || PLACEHOLDER_IMAGES[i % PLACEHOLDER_IMAGES.length];
-                        const formattedDate = event.date
-                            ? new Date(event.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-                            : 'Date TBD';
+                        const category   = (event.category || 'other').toLowerCase();
+                        const badgeStyle = CATEGORY_BADGE_STYLES[category] || CATEGORY_BADGE_STYLES.other;
+                        const image      = event.image_url || PLACEHOLDER_IMAGES[i % PLACEHOLDER_IMAGES.length];
 
                         return (
-                            <article
-                                key={event.id || i}
-                                className="bg-white rounded-2xl overflow-hidden shadow-sm lift-on-hover"
-                                style={{ borderTop: `4px solid ${colors.border}` }}
-                            >
-                                <img
-                                    src={image}
-                                    alt={event.title}
-                                    className="w-full object-cover"
-                                    style={{ aspectRatio: '4/3' }}
-                                />
-                                <div className="p-6">
-                                    <span className="text-xs font-bold uppercase tracking-widest mb-2 block"
-                                        style={{ color: colors.text }}>
+                            <article key={event.id || i}
+                                className="bg-white rounded-2xl overflow-hidden group flex flex-col h-full lift-on-hover transition-all duration-500"
+                                style={{ border: '1px solid rgba(198,197,212,0.10)' }}>
+
+                                {/* Image with category badge overlay */}
+                                <div className="relative h-64 overflow-hidden flex-shrink-0">
+                                    <img src={image} alt={event.title}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                    <div className="absolute top-4 left-4 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-widest"
+                                        style={{
+                                            ...badgeStyle,
+                                            fontFamily: "'Plus Jakarta Sans', sans-serif",
+                                        }}>
                                         {category}
-                                    </span>
-                                    <h3 className="text-xl font-bold mb-2" style={{ color: '#1A237E' }}>
+                                    </div>
+                                </div>
+
+                                {/* Card body */}
+                                <div className="p-8 flex flex-col flex-grow">
+                                    <h3 className="text-xl font-bold mb-4"
+                                        style={{ color: '#191c1d', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                                         {event.title}
                                     </h3>
-                                    <p className="text-slate-500 text-sm mb-6">{formattedDate}</p>
-                                    {event.url ? (
-                                        <a href={event.url} target="_blank" rel="noopener noreferrer"
-                                            className="block w-full py-2.5 bg-slate-50 text-slate-600 rounded-lg font-semibold text-sm hover:bg-slate-100 transition-colors text-center">
-                                            Learn More
-                                        </a>
-                                    ) : (
-                                        <button disabled className="w-full py-2.5 bg-slate-50/50 text-slate-300 rounded-lg font-semibold text-sm cursor-default">
-                                            Learn More
-                                        </button>
+                                    {event.description && (
+                                        <p className="text-sm leading-relaxed mb-6 flex-grow italic"
+                                            style={{ color: '#454652' }}>
+                                            &ldquo;{event.description}&rdquo;
+                                        </p>
                                     )}
+
+                                    {/* Action row */}
+                                    <div className="flex items-center justify-between mt-auto">
+                                        {event.url ? (
+                                            <a href={event.url} target="_blank" rel="noopener noreferrer"
+                                                className="group/btn font-bold text-sm flex items-center gap-2 transition-all hover:gap-3"
+                                                style={{ color: '#5f00e3', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                                RSVP Now
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                </svg>
+                                            </a>
+                                        ) : (
+                                            <span className="font-bold text-sm"
+                                                style={{ color: '#767683', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                                Details TBA
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </article>
                         );

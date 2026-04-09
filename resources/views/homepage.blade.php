@@ -1,4 +1,4 @@
-{{-- Homepage CMS Page — Orchestrator --}}
+{{-- Homepage CMS Page ï¿½ Orchestrator --}}
 <x-layouts.app :title="__('app.nav_homepage')"
   class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 antialiased min-h-screen">
 
@@ -37,9 +37,9 @@
         </div>
       @endif
 
-      @include('homepage._hero')
       @include('homepage._featured')
       @include('homepage._events')
+      @include('homepage._memorable_moments')
       @include('homepage._about')
 
     </main>

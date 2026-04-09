@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dwipapuri | Modern Residential Living</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-on-surface": "#f0f1f2",
+                      "primary-container": "#1a237e",
+                      "tertiary": "#380b00",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-container": "#e17c5a",
+                      "on-secondary-fixed": "#22005d",
+                      "on-surface-variant": "#454652",
+                      "inverse-primary": "#bdc2ff",
+                      "on-secondary-fixed-variant": "#5400cc",
+                      "on-primary-fixed-variant": "#343d96",
+                      "on-tertiary-fixed": "#390c00",
+                      "primary": "#000666",
+                      "surface": "#f8f9fa",
+                      "secondary": "#5f00e3",
+                      "on-background": "#191c1d",
+                      "tertiary-container": "#5c1800",
+                      "on-surface": "#191c1d",
+                      "surface-dim": "#d9dadb",
+                      "inverse-surface": "#2e3132",
+                      "tertiary-fixed-dim": "#ffb59d",
+                      "on-primary-fixed": "#000767",
+                      "surface-bright": "#f8f9fa",
+                      "surface-tint": "#4c56af",
+                      "on-error": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "surface-container-highest": "#e1e3e4",
+                      "secondary-fixed-dim": "#cfbcff",
+                      "surface-variant": "#e1e3e4",
+                      "primary-fixed-dim": "#bdc2ff",
+                      "surface-container": "#edeeef",
+                      "primary-fixed": "#e0e0ff",
+                      "on-secondary": "#ffffff",
+                      "on-primary-container": "#8690ee",
+                      "outline": "#767683",
+                      "surface-container-low": "#f3f4f5",
+                      "on-tertiary-fixed-variant": "#7b2e12",
+                      "surface-container-high": "#e7e8e9",
+                      "error": "#ba1a1a",
+                      "on-primary": "#ffffff",
+                      "on-secondary-container": "#eee4ff",
+                      "background": "#f8f9fa",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-fixed": "#e9ddff",
+                      "secondary-container": "#7836ff",
+                      "tertiary-fixed": "#ffdbd0",
+                      "outline-variant": "#c6c5d4",
+                      "on-tertiary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Plus Jakarta Sans"],
+                      "body": ["Inter"],
+                      "label": ["Inter"]
+              }
+            },
+          }
+        }
+      </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .tonal-shift { transition: background-color 0.3s ease; }
+        .feature-gradient { background: linear-gradient(45deg, #000666, #5f00e3); }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-secondary/30">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-slate-950/80 backdrop-blur-xl">
+<div class="flex justify-between items-center max-w-7xl mx-auto px-8 py-4">
+<div class="text-2xl font-bold tracking-tighter text-indigo-900 dark:text-indigo-100 font-headline">
+                Dwipapuri
+            </div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 pb-1 font-headline font-medium tracking-tight" href="#">Events</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-indigo-900 dark:hover:text-indigo-200 transition-colors font-headline font-medium tracking-tight" href="#">Resident Portal</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-indigo-900 dark:hover:text-indigo-200 transition-colors font-headline font-medium tracking-tight" href="#">Amenities</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-indigo-900 dark:hover:text-indigo-200 transition-colors font-headline font-medium tracking-tight" href="#">About</a>
+</div>
+<button class="bg-primary text-on-primary px-6 py-2.5 rounded-lg font-headline font-semibold text-sm transition-transform active:scale-95 duration-150">
+                Login
+            </button>
+</div>
+</nav>
+<main class="pt-24 pb-20">
+<!-- Hero: Featured Glass -->
+<section class="max-w-7xl mx-auto px-8 mb-24">
+<div class="relative h-[700px] rounded-3xl overflow-hidden group">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="vibrant outdoor summer carnival at dusk with colorful ferris wheel lights and crowds of people under strings of warm fairy lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTsDOQOagUCyaYuGSQvBhBXqYyrviKQO_ZYEZC_y88ZWxoIzHaUNpx1mRRTTCvPXq381qU1g1yNpe58khIAJ-YtKP6uveZFt2sMZLHEz_P4k82eSgne3lGQxHt0yW20JKtcFP7qz8C6-8mACmDFDHsdD4N53JvMQxBrDTfqE39O4gtogenS-EZ0eNI6WFxr8HV-Ia0QzYaT0qpmnchUrfERIqVZHopjEr64DlI_AyGZ7usDx1epwDMGFi_3jo_X27dHxS0xg-esf7o"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<!-- Live Indicator -->
+<div class="absolute top-8 left-8 flex items-center gap-3 px-4 py-2 bg-error-container text-on-error-container rounded-full animate-pulse">
+<span class="w-2 h-2 bg-error rounded-full"></span>
+<span class="text-xs font-bold uppercase tracking-widest">Live Now</span>
+</div>
+<!-- Glassmorphic Content Card (Asymmetric) -->
+<div class="absolute bottom-12 right-12 glass-panel bg-surface/10 border border-white/10 p-10 rounded-2xl max-w-xl shadow-2xl">
+<h1 class="text-5xl font-headline font-extrabold text-white tracking-tighter mb-4 leading-tight">
+                        Dwipapuri Summer Carnival 2024
+                    </h1>
+<div class="flex items-center gap-6 mb-8 text-white/80">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span class="font-medium">August 15, 2024</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span class="font-medium">4:00 PM - 10:00 PM</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-4">
+<button class="feature-gradient text-on-primary px-8 py-4 rounded-xl font-headline font-bold flex items-center gap-3 transition-all hover:shadow-lg hover:shadow-primary/30">
+<span class="material-symbols-outlined" data-weight="fill">play_circle</span>
+                            Watch Now
+                        </button>
+<button class="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-xl font-headline font-bold backdrop-blur-md transition-all">
+                            Add to Calendar
+                        </button>
+<button class="p-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 1: Upcoming Events -->
+<section class="max-w-7xl mx-auto px-8 mb-32">
+<div class="flex items-end justify-between mb-12">
+<div class="max-w-2xl">
+<span class="text-secondary font-headline font-bold tracking-widest uppercase text-xs mb-3 block">Discover More</span>
+<h2 class="text-4xl font-headline font-bold text-indigo-900 tracking-tight">Upcoming Community Events</h2>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Event Card 1 -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-500 flex flex-col h-full border border-outline-variant/10">
+<div class="relative h-64 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="serene morning yoga session on a manicured lawn with sunlight filtering through oak trees in a luxury residential community" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaL8h5VA5v2vNkwvHzMsZ1oxSc2p6f3SeKot9LwgYYefFhFaklP16yJVpdNBWk6XEGfFvygUHOdcT0guFjjaT7TrkkinZO7oTRN4u90xQJ2jKYNGeLtT3l0AGWlVEvvszwa1dGr_SUTBWnxGCmf2NIAH0atA1_q8nQWbhWu2LsPAl5jScniNdkIQ_LpodTz7navOgUBV2x3KUumpsBId-n-8H4rvTfXuREIBTkpF-IcoCpjNeytsPIlj_1jIO2k9ljOR5F2UhY6HRy"/>
+<div class="absolute top-4 left-4 bg-primary text-on-primary px-3 py-1 rounded-lg text-xs font-bold font-headline uppercase tracking-widest">Wellness</div>
+</div>
+<div class="p-8 flex flex-col flex-grow">
+<h3 class="text-xl font-headline font-bold mb-4 text-on-surface">Sunrise Vinyasa Yoga</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6 flex-grow italic">"Reconnect with your center in the fresh morning air at West Park."</p>
+<div class="flex items-center justify-between mt-auto">
+<button class="text-secondary font-bold text-sm flex items-center gap-2 hover:gap-3 transition-all">
+                                RSVP Now <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<button class="p-2 text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Event Card 2 -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-500 flex flex-col h-full border border-outline-variant/10">
+<div class="relative h-64 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="modern professional meeting space with residents discussing community development in a sleek, tech-enabled clubhouse" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZfJEgpQ-mZi4rYAZPNfGZwXDK80UxfIIzASWlIYsBx-wfbMSaT90BBWoLf4MBVTsmwNmfcqEOS5sXurkQDLids4qHQ4Nim-tI9SUTf_ks1kk4FdRHBzm2srGRyP0ZUWsNGoWL9n2z6rM8mXPav3Zu9P9lHjpV4W17sYzAkGJBoLMho-Q7pmhrX6Iz_Gbu6Td1H5tp_sbqFGzTkn024OphZ1NYs_3dvwG4TFewtqJ9L3VTvbK45dVJSNjZfpig0twnEQSlMoSuoak7"/>
+<div class="absolute top-4 left-4 bg-secondary text-on-secondary px-3 py-1 rounded-lg text-xs font-bold font-headline uppercase tracking-widest">Meetings</div>
+</div>
+<div class="p-8 flex flex-col flex-grow">
+<h3 class="text-xl font-headline font-bold mb-4 text-on-surface">Monthly Town Hall</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6 flex-grow italic">"Shape the future of Dwipapuri. Join the board for our quarterly roadmap discussion."</p>
+<div class="flex items-center justify-between mt-auto">
+<button class="bg-surface-container-high text-on-surface px-6 py-2 rounded-xl font-bold text-sm hover:bg-surface-container-highest transition-colors">
+                                Remind Me
+                            </button>
+<span class="text-xs text-outline font-medium">Clubhouse Hall B</span>
+</div>
+</div>
+</div>
+<!-- Event Card 3 -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-500 flex flex-col h-full border border-outline-variant/10">
+<div class="relative h-64 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="hands of people learning digital photography techniques with professional cameras in a bright airy studio classroom" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpa19LEIuTFI8k-PsiiDGfqyYiblbPL9iZT_COX7VmvqTaNVL646Gxc1mlJLKc_xsQ0yHoC87kDjgsvH9E-5J9IppJ5cfKA4c13vz7TfXvO8Rj4IPOmCer-ehS-a0l0NZWWT4HyW1DUG6KDo3bVk-dmVyOW66AvQfzP6ZOAaMWYyLDmivaHy61wHUDHJjWr7K6X2B46VSdpL_dX9ZFy1lkQOi4Ek0VztPquXfCnyDX3Hi4zNlZft1i17dZlsfwRY_Nh7JIUe3ZwWX-"/>
+<div class="absolute top-4 left-4 bg-tertiary-container text-on-tertiary-container px-3 py-1 rounded-lg text-xs font-bold font-headline uppercase tracking-widest">Education</div>
+</div>
+<div class="p-8 flex flex-col flex-grow">
+<h3 class="text-xl font-headline font-bold mb-4 text-on-surface">Creative Workshop</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6 flex-grow italic">"Digital Photography for Beginners: Master your DSLR in a single afternoon session."</p>
+<div class="flex items-center justify-between mt-auto">
+<button class="text-error font-bold text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">lock</span> Join Waitlist
+                            </button>
+<span class="text-xs text-error font-bold">12 Slots Left</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Past Highlights (Bento Grid) -->
+<section class="bg-surface-container-low py-32">
+<div class="max-w-7xl mx-auto px-8">
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-16 gap-6">
+<div>
+<h2 class="text-4xl font-headline font-bold text-indigo-900 tracking-tight">Memorable Moments</h2>
+<p class="text-on-surface-variant mt-2">A look back at the experiences that define our community.</p>
+</div>
+<button class="group bg-surface-container-lowest text-primary px-8 py-4 rounded-xl font-headline font-bold flex items-center gap-2 hover:bg-primary hover:text-white transition-all">
+                        View Full Archive
+                        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[250px]">
+<div class="md:col-span-2 md:row-span-2 rounded-2xl overflow-hidden group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="elegant evening garden party with atmospheric lighting and musicians performing on a small stage" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARxHVEaGirquMi6yM909TX2BSPRTyVg9JCSfLiRqkDHg2edKu3tN3mtKe4pswe6mBNScWptGDMOmB55JbRwRG8qR0bSkqHf6Crll3rdN2HqkvwMaj6hmgQ1Aw7vB576gt_pZ0UBJq48Z2JmYILvQSwae-_RLVwgPKWmWGkFISfQZpXTXO7eaig5o-YGpErFLfqcWGzFtebLnZwFyoVQI6vCbdg3UYZu3kYiX8KPxBqhmNFzw1t1Ghtx3Sv5Nrzi4Z3XgUvcFfSf3LX"/>
+</div>
+<div class="md:col-span-2 rounded-2xl overflow-hidden group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="aerial shot of a large community swimming pool complex with luxury loungers and blue water" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACWHwWzwe3QJlDt2KTULwubHxC1aNsdbFfPXDTz2Vjqgdjjn_sVgNGOVpOUJ-gY8wvuwiuzEvZhPEbN0XMXEyBn9v4SZyQ0OBLkt-lPPOY6pv33pqgWvfoVXy085T662FROHIchx_UYQzSOY39fnGbEPBpZL9FFgPL0N1qLnPpfCny7noNetVtPF4Iqy5DPHAq4MiHNtIk-j7xIB1Mxd7EtMf7ejCLLbwTtykCIv_WvG0jMBucbfZ4GWaVM2g1aPtwMwlrmxUYQsX1"/>
+</div>
+<div class="rounded-2xl overflow-hidden group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="colorful variety of fresh vegetables at a local organic farmer's market held within the residential complex" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBk-H6jmE5jKFOfPV75r-Oa_YVWAxkWdjmY1j4XXCweYg3PTGbD9E-O8fbjtzZjjp44IBDea-VJp4GSpvgcbmAfjiZ5_PCe90c4_NcuSdjVv2MSCac9gZpTqTZw2591SCqxoSQUFRXTiUvLHB9ezooYWSZu6ukhV9eKpYKmZknEL2_9pZxVznFQCr0b8ON09NG0rWc158Ks6-Nkr6tTEuSa6IZYI2EjKyCJpAdoCuWvcxjV9Kr7zn4Kt2X_DJOwDy_1dMLZU7ZG-pGU"/>
+</div>
+<div class="rounded-2xl overflow-hidden group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="modern outdoor fire pit area with residents socializing and toasting marshmallows at night" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmg31N0R06gsdnz2--pt1PENYa6FsIclOfKOqbAF12qyAWqS93GkICJrTisV5gydZakWsUC-4uCy41T-Lzd3T9aABLFdD7GmrUitNaXrnLLcdgDIBnwKJui6wh1K9Px0CFPTQqGiR3Vvq_MTjcDji1RXZNT9X438MqxX9OkTLW6yNFdhJKGoC3lW7MachavBo77-jvgim3ZoR4p3GLEbDoyKOthMh18MzEwa_onHtSrVFHEquzBqF0z6AkSlblxPa423BqUPOqYRz-"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 3: About & Stats -->
+<section class="max-w-7xl mx-auto px-8 py-32">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+<div class="space-y-8">
+<div>
+<span class="text-secondary font-headline font-bold tracking-widest uppercase text-xs mb-3 block">Our Identity</span>
+<h2 class="text-5xl font-headline font-extrabold text-indigo-900 tracking-tighter leading-tight mb-8">Elevating Residential Living at Dwipapuri</h2>
+<p class="text-on-surface-variant text-lg leading-relaxed font-light">
+                            Dwipapuri isn't just a location; it's a curated ecosystem where modern technology meets soulful living. We prioritize seamless experiences, professional management, and a vibrant community spirit that turns neighbors into lifelong friends.
+                        </p>
+</div>
+<div class="flex flex-col sm:flex-row gap-6">
+<button class="bg-primary text-on-primary px-8 py-4 rounded-xl font-headline font-bold">Explore Amenities</button>
+<button class="border border-outline-variant hover:border-primary px-8 py-4 rounded-xl font-headline font-bold transition-colors">Our History</button>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-primary-container text-on-primary-container p-8 rounded-3xl flex flex-col justify-between h-48 hover:-translate-y-1 transition-transform">
+<span class="material-symbols-outlined text-4xl opacity-50">group</span>
+<div>
+<div class="text-3xl font-headline font-extrabold">500+</div>
+<div class="text-sm opacity-80 uppercase tracking-widest font-bold">Residents</div>
+</div>
+</div>
+<div class="bg-surface-container-highest text-indigo-900 p-8 rounded-3xl flex flex-col justify-between h-48 mt-8 hover:-translate-y-1 transition-transform">
+<span class="material-symbols-outlined text-4xl opacity-50">shield</span>
+<div>
+<div class="text-3xl font-headline font-extrabold">24/7</div>
+<div class="text-sm opacity-80 uppercase tracking-widest font-bold">Security</div>
+</div>
+</div>
+<div class="bg-surface-container-highest text-indigo-900 p-8 rounded-3xl flex flex-col justify-between h-48 hover:-translate-y-1 transition-transform">
+<span class="material-symbols-outlined text-4xl opacity-50">park</span>
+<div>
+<div class="text-3xl font-headline font-extrabold">12</div>
+<div class="text-sm opacity-80 uppercase tracking-widest font-bold">Parks</div>
+</div>
+</div>
+<div class="bg-secondary text-on-secondary p-8 rounded-3xl flex flex-col justify-between h-48 mt-8 hover:-translate-y-1 transition-transform">
+<span class="material-symbols-outlined text-4xl opacity-50">event_repeat</span>
+<div>
+<div class="text-3xl font-headline font-extrabold">Monthly</div>
+<div class="text-sm opacity-80 uppercase tracking-widest font-bold">Events</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-slate-100 dark:bg-slate-900 w-full rounded-t-none">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 max-w-7xl mx-auto px-8 py-16">
+<div class="space-y-6">
+<div class="text-xl font-bold text-indigo-900 dark:text-indigo-100 font-headline">Dwipapuri</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Defining the gold standard of modern residential living through curation, security, and community.</p>
+</div>
+<div>
+<h4 class="text-indigo-900 dark:text-indigo-400 font-headline font-bold mb-6">Quick Links</h4>
+<ul class="space-y-4 text-sm text-slate-500 dark:text-slate-400">
+<li><a class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" href="#">Resident Portal</a></li>
+<li><a class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" href="#">Amenities Map</a></li>
+<li><a class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" href="#">Community Rules</a></li>
+<li><a class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" href="#">Maintenance Request</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-indigo-900 dark:text-indigo-400 font-headline font-bold mb-6">Contact Info</h4>
+<ul class="space-y-4 text-sm text-slate-500 dark:text-slate-400">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-base">location_on</span>
+                        101 Dwipapuri Blvd, Serene Valley
+                    </li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-base">call</span>
+                        +1 (555) 012-3456
+                    </li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-base">mail</span>
+                        hello@dwipapuri.res
+                    </li>
+</ul>
+</div>
+<div>
+<h4 class="text-indigo-900 dark:text-indigo-400 font-headline font-bold mb-6">Stay Updated</h4>
+<div class="flex gap-2">
+<input class="bg-white border-none rounded-lg px-4 py-2 text-sm w-full focus:ring-2 focus:ring-secondary" placeholder="Email address" type="email"/>
+<button class="bg-secondary text-on-secondary p-2 rounded-lg">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+<div class="mt-6 flex gap-4 text-slate-400">
+<span class="material-symbols-outlined cursor-pointer hover:text-indigo-600">brand_awareness</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-indigo-600">groups</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-indigo-600">public</span>
+</div>
+</div>
+</div>
+<div class="border-t border-slate-200 dark:border-slate-800 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+            © 2024 Dwipapuri Residential. All rights reserved. 
+            <span class="mx-4">|</span>
+<a class="hover:text-indigo-600" href="#">Privacy Policy</a>
+<span class="mx-4">|</span>
+<a class="hover:text-indigo-600" href="#">Terms of Service</a>
+</div>
+</footer>
+</body></html>
