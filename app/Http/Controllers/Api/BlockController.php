@@ -30,7 +30,7 @@ class BlockController extends Controller
                     'id'                 => $unit->id,
                     'unit_number'        => $unit->unit_number,
                     'house_status'       => $unit->house_status,
-                    'house_status_label' => __('app.house_' . $unit->house_status),
+                    'house_status_label' => __('app.house_status_' . $unit->house_status),
                     'is_occupied'        => $isOccupied && !$isCurrent,
                     'occupied_by'        => ($isOccupied && !$isCurrent) ? $unit->resident->fullname : null,
                 ];

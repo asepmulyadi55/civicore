@@ -144,6 +144,7 @@
                 </label>
                 <div class="relative">
                   <select id="edit-page-unit_id" name="unit_id"
+                    onchange="updateHouseStatusBadge(this.value)"
                     class="{{ $ib }} {{ $errors->has('unit_id') ? $ie : $in }} appearance-none pl-3 pr-9">
                     <option value="{{ $resident->unit_id }}">{{ $resident->unit_number }}</option>
                   </select>
@@ -233,7 +234,7 @@
                   $hsLabel = __('app.house_status_' . ($resident->house_status ?? 'owner_occupied'));
                 @endphp
                 <div class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-                  <span class="px-2.5 py-1 rounded-lg text-xs font-bold {{ $hsColor }}">{{ $hsLabel }}</span>
+                  <span id="hs-badge-span" class="px-2.5 py-1 rounded-lg text-xs font-bold {{ $hsColor }}">{{ $hsLabel }}</span>
                   @if($resident->unit)
                   <a href="{{ route('blocks.units.index', $resident->unit->block_id) }}"
                     class="text-xs text-primary hover:underline flex items-center gap-1">
@@ -703,6 +704,27 @@
     const editPageApiBlocksUrl = "{{ url('/api/blocks') }}";
     const editPageCurrentUnitId = "{{ $resident->unit_id }}";
 
+    // unit id → { house_status, house_status_label } — populated by loadUnitsOnEdit
+    let editPageUnitStatusMap = {};
+
+    const hsBadgeClasses = {
+      owner_occupied: 'bg-primary/10 text-primary',
+      rented:         'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+      vacant:         'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+    };
+
+    function updateHouseStatusBadge(unitId) {
+      const badge = document.getElementById('hs-badge-span');
+      if (!badge) return;
+      const info = editPageUnitStatusMap[unitId];
+      if (!info) return;
+      // Swap colour classes
+      Object.values(hsBadgeClasses).forEach(cls => cls.split(' ').forEach(c => badge.classList.remove(c)));
+      (hsBadgeClasses[info.house_status] ?? hsBadgeClasses.owner_occupied)
+        .split(' ').forEach(c => badge.classList.add(c));
+      badge.textContent = info.house_status_label;
+    }
+
     async function loadUnitsOnEdit(blockId, selectedUnitId) {
       const sel = document.getElementById('edit-page-unit_id');
       if (!sel) return;
@@ -720,6 +742,9 @@
           sel.innerHTML = '<option value="">{{ __('app.no_units_in_block') }}</option>';
           return;
         }
+        // Build status map for badge updates
+        editPageUnitStatusMap = {};
+        units.forEach(u => { editPageUnitStatusMap[u.id] = { house_status: u.house_status, house_status_label: u.house_status_label }; });
         sel.innerHTML = '<option value="">{{ __('app.select_unit') }}</option>';
         units.forEach(u => {
           const opt = document.createElement('option');
@@ -729,6 +754,8 @@
           if (u.id === currentUnit) opt.selected = true;
           sel.appendChild(opt);
         });
+        // Update badge for the pre-selected unit
+        updateHouseStatusBadge(sel.value);
       } catch {
         sel.innerHTML = '<option value="">{{ __('app.select_unit') }}</option>';
       }

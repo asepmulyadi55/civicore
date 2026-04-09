@@ -25,13 +25,14 @@ use App\Http\Controllers\HouseholdController;
 use App\Http\Controllers\SensitiveDataController;
 use App\Http\Controllers\Api\BlockController as ApiBlockController;
 use App\Http\Controllers\Api\ResidentController as ApiResidentController;
+use App\Http\Controllers\Api\HomepageController as ApiHomepageController;
 
 // ── Public homepage (React SPA) ───────────────────────────────────────────────
 Route::get('/', fn() => view('spa'))->name('home');
 
 // ── Internal API — Homepage content for React SPA ───────────────────────────
 // Protected by X-Api-Key header (key injected into SPA via Blade meta tag).
-Route::get('/api/homepage', [HomepageController::class, 'api'])
+Route::get('/api/homepage', [ApiHomepageController::class, 'index'])
     ->middleware('api.key')
     ->name('api.homepage');
 
