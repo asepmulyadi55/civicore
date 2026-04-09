@@ -51,28 +51,6 @@ class UserController extends Controller
   }
 
   /**
-   * AJAX: check if an email exists in the residents table.
-   * Returns JSON: { found, block_id, block_name, unit_number }
-   */
-  public function checkResidentEmail(Request $request)
-  {
-    $request->validate(['email' => ['required', 'email']]);
-
-    $resident = Resident::where('email', $request->email)->with('block')->first();
-
-    if (!$resident) {
-      return response()->json(['found' => false]);
-    }
-
-    return response()->json([
-      'found' => true,
-      'block_id' => $resident->block_id,
-      'block_name' => $resident->block?->name ?? '—',
-      'unit_number' => $resident->unit_number,
-    ]);
-  }
-
-  /**
    * Create a new user from the admin form.
    */
   public function store(Request $request)

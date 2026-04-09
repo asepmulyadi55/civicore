@@ -65,13 +65,16 @@ class ReportExport implements
   {
     $query = Resident::with([
       'block',
+      'unit',
       'paymentRecords' => fn($q) => $q->whereYear('payment_month', $this->year),
     ])->where('is_active', true)
-      ->orderBy('block_id')
-      ->orderBy('unit_number');
+      ->leftJoin('units', 'units.id', '=', 'residents.unit_id')
+      ->orderBy('residents.block_id')
+      ->orderBy('units.unit_number')
+      ->select('residents.*');
 
     if ($this->blockId) {
-      $query->where('block_id', $this->blockId);
+      $query->where('residents.block_id', $this->blockId);
     }
 
     $rows = collect();

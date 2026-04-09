@@ -14,13 +14,12 @@ class Resident extends Model
     protected $fillable = [
         'user_id',
         'block_id',
-        'unit_number',
+        'unit_id',
         'fullname',
         'phone',
         'email',
         'is_active',
         'family_card_number',
-        'house_status',
         'notes',
         'photo_path',
     ];
@@ -29,6 +28,20 @@ class Resident extends Model
         'is_active'          => 'boolean',
         'family_card_number' => 'encrypted',
     ];
+
+    // ── Backward-compat virtual accessors ────────────────────────────────────
+
+    /** Returns the unit_number from the linked unit (read-only). */
+    public function getUnitNumberAttribute(): ?string
+    {
+        return $this->unit?->unit_number;
+    }
+
+    /** Returns house_status from the linked unit (read-only). */
+    public function getHouseStatusAttribute(): ?string
+    {
+        return $this->unit?->house_status ?? 'owner_occupied';
+    }
 
     // Optional linked user account
     public function user(): BelongsTo
@@ -39,6 +52,11 @@ class Resident extends Model
     public function block(): BelongsTo
     {
         return $this->belongsTo(Block::class);
+    }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
     }
 
     public function familyMembers(): HasMany

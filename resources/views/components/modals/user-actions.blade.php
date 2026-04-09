@@ -91,11 +91,12 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
     document.getElementById('edit-user-id-field').value = id;
     document.getElementById('form-edit-user').action = `${usersBaseUrl}/${id}`;
 
-    // Set block and unit from current user data, then lookup resident
+    // Set block and load units for current user data, then lookup resident
     const blockSel = document.getElementById('edit-block-id');
-    const unitInp = document.getElementById('edit-unit-number');
     if (blockSel) blockSel.value = blockId ?? '';
-    if (unitInp) unitInp.value = unitNumber ?? '';
+    if (typeof loadUnitsForUserModal === 'function') {
+      loadUnitsForUserModal(blockId ?? '', 'edit-unit-number', unitNumber ?? '');
+    }
 
     // Reset badges
     ['found', 'notfound', 'loading'].forEach(s => {
@@ -121,10 +122,11 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
     document.getElementById('form-approve-user').action = `${usersBaseUrl}/${userId}/approve`;
 
     const blockSel = document.getElementById('approve-block-id');
-    const unitInp = document.getElementById('approve-unit-number');
     // Pre-fill with the values already saved on the user record
     if (blockSel) { blockSel.value = currentBlockId ?? ''; blockSel.disabled = false; }
-    if (unitInp) { unitInp.value = currentUnitNumber ?? ''; unitInp.readOnly = false; unitInp.classList.remove('bg-slate-100', 'cursor-not-allowed'); }
+    if (typeof loadUnitsForUserModal === 'function') {
+      loadUnitsForUserModal(currentBlockId ?? '', 'approve-unit-number', currentUnitNumber ?? '');
+    }
 
     // Reset badges
     ['found', 'notfound'].forEach(s => {
@@ -150,10 +152,11 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
             badgeFound?.classList.add('flex');
             badgeNot?.classList.add('hidden');
             if (blockSel) { blockSel.value = data.block_id ?? ''; blockSel.disabled = true; }
-            if (unitInp) {
-              unitInp.value = data.unit_number ?? '';
-              unitInp.readOnly = true;
-              unitInp.classList.add('bg-slate-100', 'cursor-not-allowed');
+            if (typeof loadUnitsForUserModal === 'function') {
+              loadUnitsForUserModal(data.block_id, 'approve-unit-number', data.unit_number ?? '').then(() => {
+                const apprSel = document.getElementById('approve-unit-number');
+                if (apprSel) { apprSel.disabled = true; apprSel.classList.add('opacity-60', 'cursor-not-allowed'); }
+              });
             }
           } else {
             badgeNot?.classList.remove('hidden');
@@ -225,6 +228,13 @@ closeModalOnBackdrop, togglePw, openEditModal, openApproveModal.
       closeModal('modal-edit');
       closeModal('modal-approve');
       closeUserConfirmModal();
+    }
+  });
+
+  // Block change in approve modal → reload unit dropdown
+  document.getElementById('approve-block-id')?.addEventListener('change', function () {
+    if (typeof loadUnitsForUserModal === 'function') {
+      loadUnitsForUserModal(this.value, 'approve-unit-number', null);
     }
   });
 </script>

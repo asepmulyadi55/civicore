@@ -16,7 +16,13 @@ class Block extends Model
         'is_active' => 'boolean',
     ];
 
-    // Residents who live in this block
+    // Units that belong to this block
+    public function units(): HasMany
+    {
+        return $this->hasMany(Unit::class)->orderBy('unit_number');
+    }
+
+    // Residents who live in this block (denormalized FK)
     public function residents(): HasMany
     {
         return $this->hasMany(Resident::class);

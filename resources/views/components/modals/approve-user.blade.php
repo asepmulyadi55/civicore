@@ -79,9 +79,10 @@ Trigger: openApproveModal(userId, userName, userEmail, currentBlockId, currentUn
               <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <span class="material-icons text-slate-400 text-sm">home</span>
               </span>
-              <input id="approve-unit-number" name="unit_number" type="text"
-                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                placeholder="{{ __('app.eg_unit') }}" />
+              <select id="approve-unit-number" name="unit_number"
+                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none">
+                <option value="">— {{ __('app.select_block_first') }} —</option>
+              </select>
             </div>
           </div>
 
