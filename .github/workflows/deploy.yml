@@ -21,8 +21,9 @@ jobs:
 
             git pull origin main
 
-            composer install --no-dev --optimize-autoloader
+            composer install --no-dev --optimize-autoloader --ignore-platform-req=ext-gd
 
+            rm -rf node_modules
             npm install
             npm run build
 
@@ -32,6 +33,4 @@ jobs:
             php artisan route:cache
             php artisan view:cache
 
-            sudo chown -R www-data:www-data /var/www/civicore
-            sudo chmod -R 775 /var/www/civicore/storage
-            sudo chmod -R 775 /var/www/civicore/bootstrap/cache
+            sudo chown -R www-data:www-data storage bootstrap/cache
