@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 
 export default function FeaturedEvent({ featuredEvent = {}, loading }) {
-    const title       = featuredEvent?.title       || 'Dwipapuri Summer Carnival';
+    const title       = featuredEvent?.title       || 'Dwipapuri Summer Carnival 2026';
     const description = featuredEvent?.description || 'Join us for the most anticipated event of the year! Live music, local food stalls, and community activities for all ages.';
     const date        = featuredEvent?.date        || null;
     const youtubeId   = featuredEvent?.youtube_id  || null;
