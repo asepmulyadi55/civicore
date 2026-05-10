@@ -21,6 +21,9 @@ jobs:
 
             cd /var/www/civicore
 
+            echo "Fix ownership before git pull..."
+            sudo chown -R ubuntu:ubuntu .
+
             echo "Pull latest code..."
             git fetch origin main
             git reset --hard origin/main
@@ -29,7 +32,7 @@ jobs:
             composer install --no-dev --optimize-autoloader
 
             echo "Install Node dependencies..."
-            npm install
+            npm ci
 
             echo "Build Vite..."
             npm run build
@@ -42,7 +45,7 @@ jobs:
             echo "Run migration..."
             php artisan migrate --force
 
-            echo "Fix permissions..."
+            echo "Set Laravel permissions..."
             sudo chown -R www-data:www-data storage bootstrap/cache
             sudo chmod -R 775 storage bootstrap/cache
 
