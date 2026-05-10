@@ -17,18 +17,37 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e
+
             cd /var/www/civicore
 
-            sudo chown -R ubuntu:ubuntu .
-
+            echo "Pull latest code..."
             git fetch origin main
             git reset --hard origin/main
 
-            composer install --no-dev --optimize-autoloader --ignore-platform-req=ext-gd
+            echo "Install PHP dependencies..."
+            composer install --no-dev --optimize-autoloader
 
+            echo "Install Node dependencies..."
             npm install
+
+            echo "Build Vite..."
             npm run build
 
+            echo "Laravel optimize..."
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            echo "Run migration..."
             php artisan migrate --force
 
-            sudo chown -R www-data:www-data storage bootstrap/cache
+            echo "Fix permissions..."
+            sudo chown -R www-data:www-data /var/www/civicore
+            sudo chmod -R 775 storage bootstrap/cache
+
+            echo "Restart services..."
+            sudo systemctl restart php8.2-fpm
+            sudo systemctl restart nginx
+
+            echo "Deploy complete!"
