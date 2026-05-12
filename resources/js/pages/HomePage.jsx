@@ -11,8 +11,9 @@ export default function HomePage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const basePath = import.meta.env.VITE_APP_BASE ?? '';
         const apiKey = document.querySelector('meta[name="api-key"]')?.content ?? '';
-        fetch('/api/homepage', {
+        fetch(`${basePath}/api/homepage`, {
             headers: { 'X-Api-Key': apiKey },
         })
             .then(res => res.json())

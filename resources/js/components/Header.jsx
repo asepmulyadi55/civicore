@@ -4,6 +4,9 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const basePath = import.meta.env.VITE_APP_BASE ?? '';
+  const loginUrl = `${basePath}/login`;
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
@@ -47,7 +50,7 @@ export default function Header() {
               {link.label}
             </a>
           ))}
-          <a href="/login"
+          <a href={loginUrl}
             className="ml-2 px-6 py-2.5 rounded-lg text-white font-semibold text-sm transition-all hover:opacity-90 active:scale-95"
             style={{ background: '#000666', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             Login
@@ -85,7 +88,7 @@ export default function Header() {
               {link.label}
             </a>
           ))}
-          <a href="/login"
+          <a href={loginUrl}
             className="block w-full text-center px-5 py-2.5 rounded-lg text-white font-semibold text-sm mt-2"
             style={{ background: '#000666', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             Login

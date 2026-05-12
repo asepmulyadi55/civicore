@@ -4,8 +4,10 @@ import HomePage from './pages/HomePage';
 import AdminRedirect from './pages/AdminRedirect';
 
 export default function Router() {
+  const basePath = import.meta.env.VITE_APP_BASE ?? '';
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basePath}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/admin" element={<AdminRedirect />} />
