@@ -9,7 +9,11 @@
     <h1 class="text-xl font-bold text-slate-900 dark:text-white">{{ __('app.media_manager') }}</h1>
     <span
       class="hidden sm:inline px-2.5 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg uppercase">
-      {{ $files->total() }} {{ __('app.media_files') }}
+      @if($folder && isset(\App\Http\Controllers\MediaController::folders()[$folder]))
+        {{ \App\Http\Controllers\MediaController::folders()[$folder]['label'] }}
+      @else
+        {{ $files->total() }} {{ __('app.media_files') }}
+      @endif
     </span>
   </div>
   <button

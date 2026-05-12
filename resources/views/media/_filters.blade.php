@@ -14,6 +14,10 @@
 {{-- Search & Filters --}}
 <form method="GET" action="{{ route('media.index') }}"
   class="flex flex-col sm:flex-row gap-3">
+  {{-- Preserve active folder across filter submissions --}}
+  @if($folder)
+    <input type="hidden" name="folder" value="{{ $folder }}">
+  @endif
   <div class="relative flex-1">
     <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
     <input type="text" name="search" value="{{ request('search') }}"
@@ -31,7 +35,7 @@
     {{ __('app.btn_search') }}
   </button>
   @if(request('search') || request('type'))
-    <a href="{{ route('media.index') }}"
+    <a href="{{ route('media.index', $folder ? ['folder' => $folder] : []) }}"
       class="px-5 py-2.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
       {{ __('app.btn_clear') }}
     </a>
