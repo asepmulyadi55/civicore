@@ -42,5 +42,13 @@ class RolePermissionSeeder extends Seeder
         Role::where('name', 'resident')->update([
             'permissions' => [],
         ]);
+
+        // ── Posyandu ──────────────────────────────────────────────────────────
+        // Read-only: community health data view only.
+        Role::where('name', 'posyandu')->update([
+            'permissions' => [
+                'posyandu.view' => true,
+            ],
+        ]);
     }
 }

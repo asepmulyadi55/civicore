@@ -538,16 +538,16 @@
           {{-- Full Name --}}
           <div>
             <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Full Name <span class="text-rose-500">*</span>
+              {{ __('app.mf_full_name') }} <span class="text-rose-500">*</span>
             </label>
-            <input type="text" name="fullname" id="mf-fullname" placeholder="Enter full name"
+            <input type="text" name="fullname" id="mf-fullname" placeholder="{{ __('app.mf_full_name') }}"
               class="{{ $ib }} @error('fullname') border-rose-400 @enderror">
             @error('fullname') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
           </div>
 
           {{-- Photo --}}
           <div>
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Photo</label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ __('app.mf_photo') }}</label>
             <div class="flex items-center gap-4">
               <div id="mf-photo-preview-wrap" class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center">
                 <img id="mf-photo-preview" src="" alt="" class="w-full h-full object-cover hidden">
@@ -555,11 +555,11 @@
               </div>
               <div>
                 <label for="mf-photo" class="inline-flex items-center gap-2 cursor-pointer px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold transition-all border border-slate-200 dark:border-slate-700">
-                  <span class="material-icons text-sm">upload</span> Upload Photo
+                  <span class="material-icons text-sm">upload</span> {{ __('app.mf_upload_photo') }}
                 </label>
                 <input id="mf-photo" type="file" name="photo" accept="image/*" class="hidden"
                   onchange="previewMemberPhoto(event)">
-                <p class="text-xs text-slate-400 mt-1">JPG, PNG, WebP. Auto-compressed if oversized.</p>
+                <p class="text-xs text-slate-400 mt-1">{{ __('app.mf_photo_hint') }}</p>
               </div>
             </div>
           </div>
@@ -568,13 +568,16 @@
             {{-- Relationship --}}
             <div>
               <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                Relationship <span class="text-rose-500">*</span>
+                {{ __('app.mf_relationship') }} <span class="text-rose-500">*</span>
               </label>
               <div class="relative">
                 <select name="relationship" id="mf-relationship" class="{{ $ib }} appearance-none pr-9">
-                  @foreach(\App\Models\FamilyMember::$relationships as $val => $label)
-                    <option value="{{ $val }}">{{ $label }}</option>
-                  @endforeach
+                  <option value="head">{{ __('app.rel_head') }}</option>
+                  <option value="spouse">{{ __('app.rel_spouse') }}</option>
+                  <option value="child">{{ __('app.rel_child') }}</option>
+                  <option value="parent">{{ __('app.rel_parent') }}</option>
+                  <option value="tenant">{{ __('app.rel_tenant') }}</option>
+                  <option value="other">{{ __('app.rel_other') }}</option>
                 </select>
                 <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
               </div>
@@ -583,29 +586,29 @@
 
             {{-- NIK --}}
             <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">NIK / KTP</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ __('app.mf_nik') }}</label>
               <input type="text" name="nik" id="mf-nik" placeholder="{{ __('app.nik_placeholder') }}" maxlength="20"
                 class="{{ $ib }}">
-              <p id="mf-nik-hint" class="text-xs text-slate-400 mt-1 hidden">Leave blank to keep existing value.</p>
+              <p id="mf-nik-hint" class="text-xs text-slate-400 mt-1 hidden">{{ __('app.mf_nik_blank_hint') }}</p>
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             {{-- Birth Date --}}
             <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Birth Date</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ __('app.mf_birth_date') }}</label>
               <input type="date" name="birth_date" id="mf-birth_date" max="{{ now()->format('Y-m-d') }}"
                 class="{{ $ib }} dark:[color-scheme:dark]">
             </div>
 
             {{-- Gender --}}
             <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Gender</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ __('app.mf_gender') }}</label>
               <div class="relative">
                 <select name="gender" id="mf-gender" class="{{ $ib }} appearance-none pr-9">
-                  <option value="">— Select —</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
+                  <option value="">{{ __('app.mf_gender_select') }}</option>
+                  <option value="male">{{ __('app.mf_gender_male') }}</option>
+                  <option value="female">{{ __('app.mf_gender_female') }}</option>
                 </select>
                 <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
               </div>
@@ -615,13 +618,19 @@
           <div class="grid grid-cols-2 gap-4">
             {{-- Education --}}
             <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Education</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ __('app.mf_education') }}</label>
               <div class="relative">
                 <select name="education" id="mf-education" class="{{ $ib }} appearance-none pr-9">
-                  <option value="">— Select —</option>
-                  @foreach(\App\Models\FamilyMember::$educationLevels as $val => $label)
-                    <option value="{{ $val }}">{{ $label }}</option>
-                  @endforeach
+                  <option value="">{{ __('app.mf_gender_select') }}</option>
+                  <option value="none">{{ __('app.edu_none') }}</option>
+                  <option value="elementary">{{ __('app.edu_elementary') }}</option>
+                  <option value="junior_high">{{ __('app.edu_junior_high') }}</option>
+                  <option value="senior_high">{{ __('app.edu_senior_high') }}</option>
+                  <option value="associate">{{ __('app.edu_associate') }}</option>
+                  <option value="bachelor">{{ __('app.edu_bachelor') }}</option>
+                  <option value="master">{{ __('app.edu_master') }}</option>
+                  <option value="doctorate">{{ __('app.edu_doctorate') }}</option>
+                  <option value="other">{{ __('app.edu_other') }}</option>
                 </select>
                 <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
               </div>
@@ -629,8 +638,8 @@
 
             {{-- Occupation --}}
             <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Occupation</label>
-              <input type="text" name="occupation" id="mf-occupation" placeholder="e.g. Teacher, Engineer"
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ __('app.mf_occupation') }}</label>
+              <input type="text" name="occupation" id="mf-occupation" placeholder="{{ __('app.mf_occupation_ph') }}"
                 class="{{ $ib }}">
             </div>
           </div>
@@ -639,7 +648,7 @@
           <div class="flex gap-3 pt-3">
             <button type="button" onclick="closeMemberModal()"
               class="flex-1 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-              Cancel
+              {{ __('app.mf_cancel') }}
             </button>
             <button type="submit"
               class="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 shadow-sm transition-all flex items-center justify-center gap-2">
@@ -673,18 +682,18 @@
       <div class="w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mx-auto mb-4">
         <span class="material-icons text-2xl text-rose-600">delete_forever</span>
       </div>
-      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Remove Member?</h3>
+      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">{{ __('app.mf_remove_member_title') }}</h3>
       <p id="delete-member-body" class="text-sm text-slate-500 mb-6 leading-relaxed"></p>
       <div class="flex gap-3">
         <button onclick="closeDeleteMemberModal()"
           class="flex-1 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-          Cancel
+          {{ __('app.mf_cancel') }}
         </button>
         <form id="delete-member-form" method="POST" action="" class="flex-1">
           @csrf @method('DELETE')
           <button type="submit"
             class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-bold transition-all">
-            Remove
+            {{ __('app.mf_remove') }}
           </button>
         </form>
       </div>
@@ -762,9 +771,23 @@
     }
 
     // Load units on page ready (pre-select current unit)
+    // The static <option> already shows the correct unit immediately.
+    // We trigger an AJAX load so the user can switch units, but we
+    // set the selected value AFTER the units load to avoid a flash.
     document.addEventListener('DOMContentLoaded', function () {
-      const blockId = document.getElementById('edit-page-block_id')?.value;
-      if (blockId) loadUnitsOnEdit(blockId, editPageCurrentUnitId);
+      const blockSel = document.getElementById('edit-page-block_id');
+      const unitSel  = document.getElementById('edit-page-unit_id');
+      if (blockSel && unitSel && blockSel.value) {
+        // Keep current option visible while loading
+        const currentUnitOption = unitSel.querySelector('option');
+        const savedUnitId = editPageCurrentUnitId;
+        loadUnitsOnEdit(blockSel.value, savedUnitId).then(() => {
+          // Ensure the saved unit is selected after load completes
+          if (savedUnitId && unitSel.querySelector(`option[value="${savedUnitId}"]`)) {
+            unitSel.value = savedUnitId;
+          }
+        });
+      }
     });
     function previewResidentPhoto(event) {
       const file = event.target.files[0];

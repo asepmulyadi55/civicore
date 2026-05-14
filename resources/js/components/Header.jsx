@@ -15,16 +15,15 @@ export default function Header() {
 
   const navLinks = [
     { label: 'Featured Event', href: '#featured' },
-    { label: 'Events',         href: '#events'   },
-    { label: 'Gallery',        href: '#gallery'  },
-    { label: 'About',          href: '#about'    },
+    { label: 'Events', href: '#events' },
+    { label: 'Gallery', href: '#gallery' },
+    { label: 'About', href: '#about' },
   ];
 
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? 'shadow-md' : ''
-      }`}
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'shadow-md' : ''
+        }`}
       style={{
         background: scrolled ? 'rgba(248,249,250,0.88)' : 'rgba(248,249,250,0.80)',
         backdropFilter: 'blur(20px)',
@@ -50,11 +49,11 @@ export default function Header() {
               {link.label}
             </a>
           ))}
-          <a href={loginUrl}
+          {/* <a href={loginUrl}
             className="ml-2 px-6 py-2.5 rounded-lg text-white font-semibold text-sm transition-all hover:opacity-90 active:scale-95"
             style={{ background: '#000666', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             Login
-          </a>
+          </a> */}
         </div>
 
         {/* Mobile menu button */}

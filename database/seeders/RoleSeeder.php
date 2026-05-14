@@ -42,6 +42,14 @@ class RoleSeeder extends Seeder
         'bg_class' => 'bg-sky-100 dark:bg-sky-500/10',
         'text_class' => 'text-sky-600',
       ],
+      [
+        'name'        => 'posyandu',
+        'label'       => 'Posyandu',
+        'description' => 'Read-only access to community health data grouped by age category.',
+        'icon'        => 'health_and_safety',
+        'bg_class'    => 'bg-teal-100 dark:bg-teal-500/10',
+        'text_class'  => 'text-teal-600',
+      ],
     ];
 
     foreach ($roles as $role) {

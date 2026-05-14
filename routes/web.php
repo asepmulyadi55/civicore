@@ -106,6 +106,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/residents/{resident}', [ResidentController::class, 'destroy'])
         ->middleware('permission:residents.delete')->name('residents.destroy');
 
+    // ── Posyandu ───────────────────────────────────────────────────────────────
+    Route::get('/posyandu', [\App\Http\Controllers\PosyanduController::class, 'index'])
+        ->middleware('permission:posyandu.view')->name('posyandu.index');
+
     // Family Members (nested under resident)
     Route::post('/residents/{resident}/family-members', [FamilyMemberController::class, 'store'])
         ->middleware('permission:residents.edit')->name('residents.family-members.store');
@@ -230,4 +234,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/reset-link', [SettingController::class, 'sendResetLink'])->name('settings.reset-link');
     Route::post('/settings/security', [SettingController::class, 'updateSecurity'])->middleware('permission:settings.edit')->name('settings.security');
     Route::post('/settings/memo', [SettingController::class, 'updateMemo'])->middleware('permission:settings.edit')->name('settings.memo');
+    Route::post('/settings/posyandu', [SettingController::class, 'updatePosyandu'])->middleware('permission:settings.edit')->name('settings.posyandu');
 });
