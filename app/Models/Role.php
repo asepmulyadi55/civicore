@@ -33,6 +33,7 @@ class Role extends Model
         'blocks'    => ['view', 'create', 'edit', 'delete'],
         'payments'  => ['view', 'create', 'edit', 'delete', 'approve'],
         'reports'   => ['view'],
+        'posyandu'  => ['view'],
         'users'     => ['view', 'create', 'edit', 'delete', 'approve'],
         'roles'     => ['view', 'create', 'edit', 'delete'],
         'media'     => ['view', 'delete'],

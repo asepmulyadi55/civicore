@@ -38,26 +38,45 @@ class ReportExport implements
 
   public function __construct(int $year, ?int $blockId)
   {
-    $this->year = $year;
-    $this->blockId = $blockId;
+    $this->year     = $year;
+    $this->blockId  = $blockId;
     $this->currency = Setting::get('currency_symbol', 'Rp');
+
+    // Detect active language from session or default app locale
+    $locale = session('app_locale', config('app.locale', 'en'));
+    app()->setLocale($locale);
+
+    // Build month labels in the active locale
     $this->monthLabels = [];
     for ($m = 1; $m <= 12; $m++) {
-      $this->monthLabels[$m] = Carbon::create($year, $m, 1)->format('M');
+      $carbon = Carbon::create($year, $m, 1);
+      // Use translated month names when Indonesian
+      $this->monthLabels[$m] = $locale === 'id'
+        ? $this->idMonth($m)
+        : $carbon->format('M');
     }
   }
 
   public function title(): string
   {
-    return "Report {$this->year}";
+    $locale = session('app_locale', config('app.locale', 'en'));
+    $label  = $locale === 'id' ? 'Laporan Pembayaran' : 'Payment Report';
+    return "{$label} {$this->year}";
   }
 
   public function headings(): array
   {
+    $locale = session('app_locale', config('app.locale', 'en'));
+    $isId   = $locale === 'id';
     return array_merge(
-      ['No', 'Unit', 'Resident Name', 'Block'],
+      [
+        'No',
+        $isId ? 'Unit'          : 'Unit',
+        $isId ? 'Nama Penghuni' : 'Resident Name',
+        $isId ? 'Blok'         : 'Block',
+      ],
       array_values($this->monthLabels),
-      ['Annual Total']
+      [$isId ? 'Total Tahunan' : 'Annual Total']
     );
   }
 
@@ -67,7 +86,7 @@ class ReportExport implements
       'block',
       'unit',
       'paymentRecords' => fn($q) => $q->whereYear('payment_month', $this->year),
-    ])->where('is_active', true)
+    ])->where('residents.is_active', true)
       ->leftJoin('units', 'units.id', '=', 'residents.unit_id')
       ->orderBy('residents.block_id')
       ->orderBy('units.unit_number')
@@ -103,11 +122,13 @@ class ReportExport implements
           $row[] = '—';
         } else {
           $status = $this->statusValue($record->status);
+          $locale = session('app_locale', config('app.locale', 'en'));
+          $isId   = $locale === 'id';
           $row[] = match ($status) {
-            'approved' => '✓ Paid',
-            'pending' => '⏳ Pending',
-            'rejected' => '✗ Rejected',
-            default => ucfirst($status),
+            'approved' => $isId ? '✓ Lunas'    : '✓ Paid',
+            'pending'  => $isId ? '⏳ Menunggu' : '⏳ Pending',
+            'rejected' => $isId ? '✗ Ditolak'  : '✗ Rejected',
+            default    => ucfirst($status),
           };
         }
       }
@@ -145,16 +166,20 @@ class ReportExport implements
         $sheet->insertNewRowBefore(1, 2);
 
         $sheet->mergeCells("A1:{$lastCol}1");
-        $sheet->setCellValue('A1', "PAYMENT REPORT — {$this->year}");
+        $locale = session('app_locale', config('app.locale', 'en'));
+        $isId   = $locale === 'id';
+        $label  = $isId ? 'LAPORAN PEMBAYARAN' : 'PAYMENT REPORT';
+        $sheet->setCellValue('A1', "{$label} — {$this->year}");
         $sheet->getStyle('A1')->applyFromArray([
-          'font' => ['bold' => true, 'size' => 14, 'color' => ['argb' => 'FF4F46E5']],
+          'font'      => ['bold' => true, 'size' => 14, 'color' => ['argb' => 'FF4F46E5']],
           'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
+        $genLabel = $isId ? 'Dibuat: ' : 'Generated: ';
         $sheet->mergeCells("A2:{$lastCol}2");
-        $sheet->setCellValue('A2', 'Generated: ' . now()->format('d M Y H:i'));
+        $sheet->setCellValue('A2', $genLabel . now()->format('d M Y H:i'));
         $sheet->getStyle('A2')->applyFromArray([
-          'font' => ['italic' => true, 'size' => 9, 'color' => ['argb' => 'FF64748B']],
+          'font'      => ['italic' => true, 'size' => 9, 'color' => ['argb' => 'FF64748B']],
           'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
@@ -189,6 +214,12 @@ class ReportExport implements
         }
       },
     ];
+  }
+
+  /** Indonesian short month names. */
+  private function idMonth(int $m): string
+  {
+    return ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'][$m - 1];
   }
 
   private function statusValue(mixed $status): string

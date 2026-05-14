@@ -11,11 +11,11 @@ class SettingSeeder extends Seeder
   {
     $settings = [
       // General
-      ['key' => 'app_name', 'value' => 'CiviCore', 'label' => 'Application Name', 'group' => 'general'],
+      ['key' => 'app_name', 'value' => 'Dwipapuri', 'label' => 'Application Name', 'group' => 'general'],
       ['key' => 'support_email', 'value' => 'support@civicore-community.com', 'label' => 'Support Email', 'group' => 'general'],
 
       // Community
-      ['key' => 'community_name', 'value' => 'CiviCore Residential Community', 'label' => 'Community Name', 'group' => 'community'],
+      ['key' => 'community_name', 'value' => 'Dwipapuri Residential Community', 'label' => 'Community Name', 'group' => 'community'],
       ['key' => 'community_address', 'value' => '', 'label' => 'Community Address', 'group' => 'community'],
       ['key' => 'community_phone', 'value' => '', 'label' => 'Community Phone', 'group' => 'community'],
 
@@ -28,7 +28,7 @@ class SettingSeeder extends Seeder
       // Financial
       ['key' => 'default_fee_amount', 'value' => '0', 'label' => 'Default Monthly Fee Amount', 'group' => 'financial'],
       ['key' => 'late_payment_grace_days', 'value' => '7', 'label' => 'Late Payment Grace Period (days)', 'group' => 'financial'],
-      ['key' => 'default_due_day', 'value' => '5', 'label' => 'Payment Due Day (1–28)', 'group' => 'financial'],
+      ['key' => 'default_due_day', 'value' => '5', 'label' => 'Payment Due Day (1â€“28)', 'group' => 'financial'],
 
       // Notifications
       ['key' => 'notify_payment_approved', 'value' => '1', 'label' => 'Email on Payment Approved', 'group' => 'notifications'],

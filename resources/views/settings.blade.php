@@ -1,4 +1,4 @@
-{{-- Settings Page � Orchestrator --}}
+{{-- Settings Page â€” Orchestrator --}}
 <x-layouts.app :title="__('app.settings_title')"
   class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 antialiased min-h-screen">
 
@@ -26,7 +26,8 @@
         ];
         if (auth()->user()->isAdmin()) {
           $tabs[] = ['id' => 'security', 'icon' => 'security',      'label' => __('app.settings_tab_security')];
-          $tabs[] = ['id' => 'memo',     'icon' => 'sticky_note_2', 'label' => 'Admin Memo'];
+          $tabs[] = ['id' => 'memo',     'icon' => 'sticky_note_2',    'label' => 'Admin Memo'];
+          $tabs[] = ['id' => 'posyandu', 'icon' => 'health_and_safety','label' => 'Posyandu'];
         }
       @endphp
 
@@ -45,13 +46,14 @@
       @if(auth()->user()->isAdmin())
         @include('settings._security')
         @include('settings._memo')
+        @include('settings._posyandu')
       @endif
 
     </main>
   </div>
 
   <script>
-    const tabIds = ['profile', 'password', 'security', 'memo'];
+    const tabIds = ['profile', 'password', 'security', 'memo', 'posyandu'];
 
     function switchTab(active) {
       tabIds.forEach(function(id) {

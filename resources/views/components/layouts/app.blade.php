@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>CiviCore | {{ $title ?? 'Dashboard' }}</title>
+  <title>Dwipapuri | {{ $title ?? 'Dashboard' }}</title>
 
   {{-- Dark mode: restore saved preference BEFORE paint to avoid flash of wrong theme --}}
   <script>
@@ -27,7 +27,7 @@
     rel="stylesheet" />
 
   {{--
-  Tailwind config — defined once here for all pages.
+  Tailwind config â€” defined once here for all pages.
   NOTE: This must be an inline
   <script> when using the CDN.
       If you switch to Tailwind CLI / Vite, move this to tailwind.config.js at the project root.
@@ -63,7 +63,7 @@
 <body {{ $attributes->merge(['class' => 'font-display antialiased']) }}>
   {{ $slot }}
 
-  {{-- Global dark mode toggle — saves preference in localStorage so it persists across navigations --}}
+  {{-- Global dark mode toggle â€” saves preference in localStorage so it persists across navigations --}}
   <script>
     function toggleDark() {
       var isDark = document.documentElement.classList.toggle('dark');
@@ -72,7 +72,7 @@
   </script>
 
   @auth
-    {{-- ── Auto Image Compression ────────────────────────────────────────── --}}
+    {{-- â”€â”€ Auto Image Compression â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
     {{-- Automatically compresses any image file selected in an image input   --}}
     {{-- before it is submitted. Max 1920px width, JPEG 0.85 quality.         --}}
     {{-- Files already under 300 KB or non-image types (PDF) are skipped.     --}}
@@ -80,7 +80,7 @@
       (function () {
         var MAX_SIDE = 1920;
         var QUALITY  = 0.85;
-        var SIZE_THRESHOLD = 300 * 1024; // 300 KB — skip if smaller
+        var SIZE_THRESHOLD = 300 * 1024; // 300 KB â€” skip if smaller
 
         function compressFile(file, callback) {
           if (!file.type.startsWith('image/') || file.size <= SIZE_THRESHOLD) {
@@ -115,7 +115,7 @@
             dt.items.add(file);
             input.files = dt.files;
           } catch (err) {
-            // DataTransfer not supported (very old browsers) — skip silently
+            // DataTransfer not supported (very old browsers) â€” skip silently
           }
         }
 
@@ -132,7 +132,7 @@
         });
       })();
     </script>
-    {{-- ── Idle Session Timeout ──────────────────────────────────────────── --}}
+    {{-- â”€â”€ Idle Session Timeout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
     @php $timeoutMinutes = (int) \App\Models\Setting::get('session_timeout_minutes', 30); @endphp
     <div id="idle-warning" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
       <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-8 max-w-sm w-full text-center space-y-4">

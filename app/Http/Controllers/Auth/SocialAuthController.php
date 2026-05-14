@@ -46,7 +46,7 @@ class SocialAuthController extends Controller
       if ($user) {
         // Existing user with Google ID - check if active
         if (!$user->is_active) {
-          return redirect('/')->with('error', 'Your account is pending admin approval.');
+          return redirect()->route('login')->with('error', 'Your account is pending admin approval.');
         }
 
         Auth::login($user, true);
@@ -60,13 +60,13 @@ class SocialAuthController extends Controller
         // User exists but no Google ID linked
         if ($intent === 'login') {
           // LOGIN flow: Don't auto-link, show clear instructions
-          return redirect('/')
+          return redirect()->route('login')
             ->with('error', 'This email is already registered without Google. Please log in with your password, then link Google from your profile. Or use "Register with Google" to connect your account.');
         }
 
         // REGISTER flow: Link Google to existing account
         if (!$user->is_active) {
-          return redirect('/')->with('error', 'Your account is pending admin approval.');
+          return redirect()->route('login')->with('error', 'Your account is pending admin approval.');
         }
 
         $user->update(['google_id' => $googleUser->id]);
@@ -77,7 +77,7 @@ class SocialAuthController extends Controller
       // No existing user
       if ($intent === 'login') {
         // LOGIN flow: Don't create account
-        return redirect('/')
+        return redirect()->route('login')
           ->with('error', 'No account found. Please register first.');
       }
 
@@ -95,8 +95,8 @@ class SocialAuthController extends Controller
         'email_verified_at' => now(),
       ]);
 
-      // Don't login yet — redirect to login with message
-      return redirect('/')
+      // Don't login yet — redirect to login page with message
+      return redirect()->route('login')
         ->with('success', 'Account created! Please wait for admin approval before logging in.');
 
     } catch (\Exception $e) {
@@ -105,7 +105,7 @@ class SocialAuthController extends Controller
         'file' => $e->getFile(),
         'line' => $e->getLine(),
       ]);
-      return redirect('/')->with('error', 'Failed to authenticate with Google. Please try again.');
+      return redirect()->route('login')->with('error', 'Failed to authenticate with Google. Please try again.');
     }
   }
 
