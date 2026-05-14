@@ -9,10 +9,11 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // ── Treasurer ─────────────────────────────────────────────────────────
+        // ── Treasurer ────────────────────────────────────────────────────────
         // Can view most modules; full access to payments including approve.
         Role::where('name', 'treasurer')->update([
             'permissions' => [
+                'dashboard.view'    => true,
                 'residents.view'    => true,
                 'blocks.view'       => true,
                 'payments.view'     => true,
@@ -28,6 +29,7 @@ class RolePermissionSeeder extends Seeder
         // Can view residents, manage payments (no approve), view reports.
         Role::where('name', 'block_coordinator')->update([
             'permissions' => [
+                'dashboard.view'    => true,
                 'residents.view'    => true,
                 'payments.view'     => true,
                 'payments.create'   => true,
@@ -38,15 +40,18 @@ class RolePermissionSeeder extends Seeder
         ]);
 
         // ── Resident ──────────────────────────────────────────────────────────
-        // Read-only: dashboard only.
+        // Overview only — no admin modules.
         Role::where('name', 'resident')->update([
-            'permissions' => [],
+            'permissions' => [
+                'overview.view' => true,
+            ],
         ]);
 
         // ── Posyandu ──────────────────────────────────────────────────────────
-        // Read-only: community health data view only.
+        // Overview + community health data.
         Role::where('name', 'posyandu')->update([
             'permissions' => [
+                'overview.view' => true,
                 'posyandu.view' => true,
             ],
         ]);

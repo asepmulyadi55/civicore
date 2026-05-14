@@ -87,11 +87,11 @@ export default function Header() {
               {link.label}
             </a>
           ))}
-          <a href={loginUrl}
+          {/* <a href={loginUrl}
             className="block w-full text-center px-5 py-2.5 rounded-lg text-white font-semibold text-sm mt-2"
             style={{ background: '#000666', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             Login
-          </a>
+          </a> */}
         </div>
       )}
     </header>

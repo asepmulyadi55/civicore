@@ -63,8 +63,8 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name(
 // ── Auth-protected pages ──────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware('permission:dashboard.view')->name('dashboard');
 
     // ── Homepage CMS ─────────────────────────────────────────────────────────
     Route::get('/homepage', [HomepageController::class, 'index'])
@@ -89,8 +89,9 @@ Route::middleware('auth')->group(function () {
         ->where('path', '.+')
         ->name('private.file');
 
-    // Resident personal overview (residents only, no secondary permission needed)
-    Route::get('/overview', [OverviewController::class, 'index'])->name('overview');
+    // Overview (residents, posyandu, and any role with overview.view permission)
+    Route::get('/overview', [OverviewController::class, 'index'])
+        ->middleware('permission:overview.view')->name('overview');
 
     // ── Residents ─────────────────────────────────────────────────────────────
     Route::get('/residents', [ResidentController::class, 'index'])

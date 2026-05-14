@@ -128,7 +128,10 @@ class User extends Authenticatable
    */
   public function homeUrl(): string
   {
-    return ($this->isResident() || $this->isPosyandu()) ? '/overview' : '/dashboard';
+    if ($this->can('overview.view') && !$this->can('dashboard.view')) {
+      return '/overview';
+    }
+    return '/dashboard';
   }
 
   /**
