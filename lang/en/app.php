@@ -607,6 +607,14 @@ return [
   'posyandu_cat_unknown_label' => 'Unknown',
   'posyandu_cat_unknown_desc'  => 'No birth date',
 
+  // Posyandu gender filter
+  'posyandu_all_genders'  => 'All Genders',
+  'posyandu_gender_male'  => 'Male',
+  'posyandu_gender_female'=> 'Female',
+  'posyandu_stat_total'   => 'Total Members',
+  'posyandu_stat_male'    => 'Male',
+  'posyandu_stat_female'  => 'Female',
+  'posyandu_export'       => 'Export Excel',
   // Family member modal — field labels
   'mf_full_name'           => 'Full Name',
   'mf_photo'               => 'Photo',

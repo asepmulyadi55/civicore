@@ -22,11 +22,14 @@ class UnitController extends Controller
             ->orderBy('unit_number')
             ->get();
 
-        $totalCount    = $units->count();
-        $occupiedCount = $units->filter(fn($u) => $u->resident !== null)->count();
-        $vacantCount   = $totalCount - $occupiedCount;
+        $totalCount         = $units->count();
+        $ownerOccupiedCount = $units->where('house_status', 'owner_occupied')->count();
+        $rentedCount        = $units->where('house_status', 'rented')->count();
+        $vacantCount        = $units->where('house_status', 'vacant')->count();
 
-        return view('blocks.units', compact('block', 'units', 'totalCount', 'occupiedCount', 'vacantCount'));
+        return view('blocks.units', compact(
+            'block', 'units', 'totalCount', 'ownerOccupiedCount', 'rentedCount', 'vacantCount'
+        ));
     }
 
     /**

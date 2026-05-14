@@ -593,20 +593,28 @@ return [
 
   // Label kategori Posyandu
   'posyandu_cat_baby_label'    => 'Bayi',
-  'posyandu_cat_baby_desc'     => '0\u201311 bln',
+  'posyandu_cat_baby_desc'     => '0–11 bln',
   'posyandu_cat_toddler_label' => 'Balita',
-  'posyandu_cat_toddler_desc'  => '1\u20134 thn',
+  'posyandu_cat_toddler_desc'  => '1–4 thn',
   'posyandu_cat_child_label'   => 'Anak',
-  'posyandu_cat_child_desc'    => '5\u201311 thn',
+  'posyandu_cat_child_desc'    => '5–11 thn',
   'posyandu_cat_teen_label'    => 'Remaja',
-  'posyandu_cat_teen_desc'     => '12\u201317 thn',
+  'posyandu_cat_teen_desc'     => '12–17 thn',
   'posyandu_cat_adult_label'   => 'Dewasa',
-  'posyandu_cat_adult_desc'    => '18\u201359 thn',
+  'posyandu_cat_adult_desc'    => '18–59 thn',
   'posyandu_cat_elderly_label' => 'Lansia',
   'posyandu_cat_elderly_desc'  => '60+ thn',
   'posyandu_cat_unknown_label' => 'Tidak Diketahui',
   'posyandu_cat_unknown_desc'  => 'Tgl lahir tidak ada',
 
+  // Filter jenis kelamin Posyandu
+  'posyandu_all_genders'  => 'Semua Jenis Kelamin',
+  'posyandu_gender_male'  => 'Laki-laki',
+  'posyandu_gender_female'=> 'Perempuan',
+  'posyandu_stat_total'   => 'Total Anggota',
+  'posyandu_stat_male'    => 'Laki-laki',
+  'posyandu_stat_female'  => 'Perempuan',
+  'posyandu_export'       => 'Ekspor Excel',
   // Family member modal — field labels
   'mf_full_name'           => 'Nama Lengkap',
   'mf_photo'               => 'Foto',
