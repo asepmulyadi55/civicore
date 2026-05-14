@@ -37,7 +37,7 @@ class ResidentController extends Controller
 
         // Scope to coordinator's block
         if ($scopeBlockId) {
-            $query->where('block_id', $scopeBlockId);
+            $query->where('residents.block_id', $scopeBlockId);
         }
 
         // Live search — includes family member names
@@ -67,7 +67,7 @@ class ResidentController extends Controller
         $blocks = Block::active()->orderBy('name')->get();
 
 
-        $baseCount = Resident::when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId));
+        $baseCount   = Resident::when($scopeBlockId, fn($q) => $q->where('residents.block_id', $scopeBlockId));
         $totalCount = (clone $baseCount)->count();
         $activeCount = (clone $baseCount)->where('is_active', true)->count();
         $currency = Setting::get('currency_symbol', 'Rp');
