@@ -127,11 +127,14 @@
           $allPerms = \App\Models\Role::$availablePermissions;
           $allActions = ['view', 'create', 'edit', 'delete', 'approve'];
           $moduleLabels = [
+            'overview'  => __('app.nav_overview'),
+            'dashboard' => __('app.nav_dashboard'),
             'homepage'  => __('app.nav_homepage'),
             'residents' => __('app.nav_residents'),
             'blocks' => __('app.nav_blocks'),
             'payments' => __('app.nav_payments'),
             'reports' => __('app.nav_reports'),
+            'posyandu' => 'Posyandu',
             'users' => __('app.nav_users'),
             'roles' => __('app.nav_roles'),
             'media' => __('app.nav_media'),
