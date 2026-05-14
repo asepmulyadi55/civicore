@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PosyanduExport;
 use App\Models\Block;
 use App\Models\FamilyMember;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PosyanduController extends Controller
 {
@@ -37,10 +39,6 @@ class PosyanduController extends Controller
         return $limits;
     }
 
-    /**
-     * Returns CATEGORIES with label and desc replaced by the active locale's translations.
-     * Use this in views instead of the CATEGORIES constant directly.
-     */
     public static function translatedCategories(): array
     {
         $cats = self::CATEGORIES;
@@ -53,10 +51,7 @@ class PosyanduController extends Controller
 
     public function index(Request $request)
     {
-        $query = FamilyMember::with([
-            'resident.block',
-            'resident.unit',
-        ])->orderBy('fullname');
+        $query = FamilyMember::with(['resident.block', 'resident.unit'])->orderBy('fullname');
 
         if ($blockId = $request->input('block_id')) {
             $query->whereHas('resident', fn($q) => $q->where('block_id', $blockId));
@@ -74,14 +69,27 @@ class PosyanduController extends Controller
 
         $all->each(function (FamilyMember $m) use ($limits) {
             $m->age_category = $this->resolveCategory($m->birth_date, $limits);
-            $m->age_label    = $m->birth_date ? $this->ageLabel($m->birth_date) : '???';
+            $m->age_label    = $m->birth_date ? $this->ageLabel($m->birth_date) : '---';
         });
 
+        // Gender stats from full unfiltered set
+        $genderStats = [
+            'male'    => $all->where('gender', 'male')->count(),
+            'female'  => $all->where('gender', 'female')->count(),
+            'unknown' => $all->whereNotIn('gender', ['male', 'female'])->count(),
+            'total'   => $all->count(),
+        ];
+
+        // Category filter
         $categoryFilter = $request->input('category');
-        if ($categoryFilter && array_key_exists($categoryFilter, self::CATEGORIES)) {
-            $filtered = $all->filter(fn($m) => $m->age_category === $categoryFilter)->values();
-        } else {
-            $filtered = $all;
+        $filtered = ($categoryFilter && array_key_exists($categoryFilter, self::CATEGORIES))
+            ? $all->filter(fn($m) => $m->age_category === $categoryFilter)->values()
+            : $all;
+
+        // Gender filter
+        $genderFilter = $request->input('gender');
+        if ($genderFilter && in_array($genderFilter, ['male', 'female'])) {
+            $filtered = $filtered->filter(fn($m) => $m->gender === $genderFilter)->values();
         }
 
         $categoryCounts = collect(self::CATEGORIES)->mapWithKeys(function ($_, $key) use ($all) {
@@ -100,7 +108,24 @@ class PosyanduController extends Controller
 
         $blocks = Block::active()->orderBy('name')->get();
 
-        return view('posyandu', compact('members', 'blocks', 'categoryCounts', 'categoryFilter'));
+        return view('posyandu', compact(
+            'members', 'blocks', 'categoryCounts', 'categoryFilter', 'genderFilter', 'genderStats'
+        ));
+    }
+
+    public function export(Request $request)
+    {
+        $blockId  = $request->input('block_id') ? (int) $request->input('block_id') : null;
+        $category = $request->input('category') ?: null;
+        $gender   = $request->input('gender') ?: null;
+        $search   = $request->input('search') ?: null;
+
+        $filename = 'posyandu_' . now()->format('Ymd_His') . '.xlsx';
+
+        return Excel::download(
+            new PosyanduExport($blockId, $category, $gender, $search),
+            $filename
+        );
     }
 
     private function resolveCategory(?Carbon $birthDate, array $limits): string

@@ -14,7 +14,9 @@ class BlockController extends Controller
             'residents',
             'residents as active_residents_count' => fn($q) => $q->where('is_active', true),
             'units',
-            'units as occupied_units_count' => fn($q) => $q->whereHas('resident'),
+            'units as owner_occupied_units_count' => fn($q) => $q->where('house_status', 'owner_occupied'),
+            'units as rented_units_count'         => fn($q) => $q->where('house_status', 'rented'),
+            'units as vacant_units_count'         => fn($q) => $q->where('house_status', 'vacant'),
         ])
             ->with([
                 'coordinators' => fn($q) => $q->select('id', 'name', 'block_id', 'role_id')

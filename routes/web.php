@@ -110,6 +110,8 @@ Route::middleware('auth')->group(function () {
     // ── Posyandu ───────────────────────────────────────────────────────────────
     Route::get('/posyandu', [\App\Http\Controllers\PosyanduController::class, 'index'])
         ->middleware('permission:posyandu.view')->name('posyandu.index');
+    Route::get('/posyandu/export', [\App\Http\Controllers\PosyanduController::class, 'export'])
+        ->middleware('permission:posyandu.view')->name('posyandu.export');
 
     // Family Members (nested under resident)
     Route::post('/residents/{resident}/family-members', [FamilyMemberController::class, 'store'])
