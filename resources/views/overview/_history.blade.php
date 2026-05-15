@@ -4,7 +4,7 @@
   {{-- Section Header --}}
   <div class="border-b border-slate-200 dark:border-slate-800 pb-4 space-y-3">
 
-    {{-- Legend â€” mobile only (above title) --}}
+    {{-- Legend — mobile only (above title) --}}
     <div class="flex sm:hidden items-center gap-4 text-xs flex-wrap">
       <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-primary"></span><span class="text-slate-500">Paid</span></div>
       <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-400"></span><span class="text-slate-500">Pending</span></div>
@@ -22,7 +22,7 @@
           class="px-4 py-1.5 rounded-md transition-all text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">{{ $previousYear }}</button>
       </div>
 
-      {{-- Legend â€” desktop only (right side) --}}
+      {{-- Legend — desktop only (right side) --}}
       <div class="hidden sm:flex items-center gap-4 text-xs flex-wrap ml-auto">
         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-primary"></span><span class="text-slate-500">Paid</span></div>
         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-400"></span><span class="text-slate-500">Pending</span></div>
@@ -88,7 +88,7 @@
               @break
             @default
               <span class="text-[10px] font-bold text-slate-400 uppercase bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded">Upcoming</span>
-              <span class="text-[10px] text-slate-400">â€”</span>
+              <span class="text-[10px] text-slate-400">—</span>
           @endswitch
         </div>
       </div>

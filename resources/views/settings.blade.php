@@ -1,4 +1,4 @@
-{{-- Settings Page â€” Orchestrator --}}
+{{-- Settings Page — Orchestrator --}}
 <x-layouts.app :title="__('app.settings_title')"
   class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 antialiased min-h-screen">
 
