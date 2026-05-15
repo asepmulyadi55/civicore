@@ -5,6 +5,7 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>Dwipapuri | {{ $title ?? 'Dashboard' }}</title>
+  <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 
   {{-- Dark mode: restore saved preference BEFORE paint to avoid flash of wrong theme --}}
   <script>

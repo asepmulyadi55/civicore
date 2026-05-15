@@ -3,26 +3,39 @@ import React from 'react';
 const DEFAULT_CONTENT = `Dwipapuri isn't just a location; it's a curated ecosystem where modern technology meets soulful living. We prioritize seamless experiences, professional management, and a vibrant community spirit that turns neighbors into lifelong friends.`;
 
 const DEFAULT_STATS = [
-    { value: '500+',    label: 'Residents' },
-    { value: '24/7',    label: 'Security'  },
-    { value: '12',      label: 'Parks'     },
-    { value: 'Monthly', label: 'Events'    },
+    { value: '500+', label: 'Residents' },
+    { value: '24/7', label: 'Security' },
+    { value: '12', label: 'Parks' },
+    { value: 'Monthly', label: 'Events' },
 ];
 
 // Matches v2: top-left navy, top-right grey (offset), bottom-left grey, bottom-right violet (offset)
 const STAT_CARD_STYLES = [
-    { background: '#1a237e', color: '#8690ee',  offset: false },
-    { background: '#e1e3e4', color: '#191c1d',  offset: true  },
-    { background: '#e1e3e4', color: '#191c1d',  offset: false },
-    { background: '#5f00e3', color: '#ffffff',  offset: true  },
+    { background: '#1a237e', color: '#8690ee', offset: false },
+    { background: '#e1e3e4', color: '#191c1d', offset: true },
+    { background: '#e1e3e4', color: '#191c1d', offset: false },
+    { background: '#5f00e3', color: '#ffffff', offset: true },
 ];
 
-const STAT_ICONS = ['group', 'shield', 'park', 'event_repeat'];
+const STAT_ICONS = ['Group', 'Shield', 'Park', 'Event'];
 
 export default function AboutSection({ about = {}, loading }) {
     const rawContent = about?.content || DEFAULT_CONTENT;
-    const stats      = (about?.stats?.length > 0) ? about.stats : DEFAULT_STATS;
+    const stats     = (about?.stats?.length > 0) ? about.stats : DEFAULT_STATS;
+    const badge     = about?.badge      || 'Our Identity';
+    const heading   = about?.heading    || 'Elevating Residential Living at Dwipapuri';
+    const btn1Label = about?.btn1_label || 'Explore Amenities';
+    const btn1Url   = about?.btn1_url   || null;
+    const btn2Label = about?.btn2_label || 'Our History';
+    const btn2Url   = about?.btn2_url   || null;
     const paragraphs = rawContent.split(/\n\n+/).filter(Boolean);
+
+    // Shared button base styles
+    const btn1Style = { background: '#000666', fontFamily: "'Plus Jakarta Sans', sans-serif" };
+    const btn2Style = { border: '1px solid rgba(198,197,212,0.6)', color: '#191c1d', fontFamily: "'Plus Jakarta Sans', sans-serif" };
+    const btn1Class = 'px-8 py-4 rounded-xl font-bold text-white transition-all hover:opacity-90 inline-block text-center';
+    const btn2Class = 'px-8 py-4 rounded-xl font-bold transition-all inline-block text-center';
+    const linkProps = { target: '_blank', rel: 'noopener noreferrer' };
 
     return (
         <section id="about" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-32" style={{ scrollMarginTop: '80px' }}>
@@ -33,11 +46,11 @@ export default function AboutSection({ about = {}, loading }) {
                     <div>
                         <span className="font-bold tracking-widest uppercase text-xs mb-3 block"
                             style={{ color: '#5f00e3', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                            Our Identity
+                            {badge}
                         </span>
                         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight mb-6 lg:mb-8"
                             style={{ color: '#1a237e', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                            Elevating Residential Living at Dwipapuri
+                            {heading}
                         </h2>
 
                         {loading ? (
@@ -54,23 +67,30 @@ export default function AboutSection({ about = {}, loading }) {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-4">
-                        <button
-                            className="px-8 py-4 rounded-xl font-bold text-white transition-all hover:opacity-90"
-                            style={{ background: '#000666', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                            Explore Amenities
-                        </button>
-                        <button
-                            className="px-8 py-4 rounded-xl font-bold transition-all hover:border-opacity-80"
-                            style={{
-                                border: '1px solid rgba(198,197,212,0.6)',
-                                color: '#191c1d',
-                                fontFamily: "'Plus Jakarta Sans', sans-serif",
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.borderColor = '#000666'}
-                            onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(198,197,212,0.6)'}
-                        >
-                            Our History
-                        </button>
+                        {btn1Url ? (
+                            <a href={btn1Url} className={btn1Class} style={btn1Style} {...linkProps}>
+                                {btn1Label}
+                            </a>
+                        ) : (
+                            <button className={btn1Class} style={btn1Style}>
+                                {btn1Label}
+                            </button>
+                        )}
+                        {btn2Url ? (
+                            <a href={btn2Url} className={btn2Class} style={btn2Style} {...linkProps}
+                                onMouseEnter={e => e.currentTarget.style.borderColor = '#000666'}
+                                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(198,197,212,0.6)'}
+                            >
+                                {btn2Label}
+                            </a>
+                        ) : (
+                            <button className={btn2Class} style={btn2Style}
+                                onMouseEnter={e => e.currentTarget.style.borderColor = '#000666'}
+                                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(198,197,212,0.6)'}
+                            >
+                                {btn2Label}
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -83,7 +103,7 @@ export default function AboutSection({ about = {}, loading }) {
                     ) : (
                         stats.map((stat, i) => {
                             const style = STAT_CARD_STYLES[i % STAT_CARD_STYLES.length];
-                            const icon  = STAT_ICONS[i % STAT_ICONS.length];
+                            const icon = STAT_ICONS[i % STAT_ICONS.length];
                             return (
                                 <div key={i}
                                     className={`p-5 sm:p-8 rounded-3xl flex flex-col justify-between h-36 sm:h-48 transition-transform hover:-translate-y-1 ${style.offset ? 'mt-6 sm:mt-8' : ''}`}
