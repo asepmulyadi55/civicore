@@ -27,7 +27,7 @@
     rel="stylesheet" />
 
   {{--
-  Tailwind config â€” defined once here for all pages.
+  Tailwind config — defined once here for all pages.
   NOTE: This must be an inline
   <script> when using the CDN.
       If you switch to Tailwind CLI / Vite, move this to tailwind.config.js at the project root.
@@ -63,7 +63,7 @@
 <body {{ $attributes->merge(['class' => 'font-display antialiased']) }}>
   {{ $slot }}
 
-  {{-- Global dark mode toggle â€” saves preference in localStorage so it persists across navigations --}}
+  {{-- Global dark mode toggle — saves preference in localStorage so it persists across navigations --}}
   <script>
     function toggleDark() {
       var isDark = document.documentElement.classList.toggle('dark');
@@ -80,7 +80,7 @@
       (function () {
         var MAX_SIDE = 1920;
         var QUALITY  = 0.85;
-        var SIZE_THRESHOLD = 300 * 1024; // 300 KB â€” skip if smaller
+        var SIZE_THRESHOLD = 300 * 1024; // 300 KB — skip if smaller
 
         function compressFile(file, callback) {
           if (!file.type.startsWith('image/') || file.size <= SIZE_THRESHOLD) {
@@ -115,7 +115,7 @@
             dt.items.add(file);
             input.files = dt.files;
           } catch (err) {
-            // DataTransfer not supported (very old browsers) â€” skip silently
+            // DataTransfer not supported (very old browsers) — skip silently
           }
         }
 
