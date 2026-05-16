@@ -20,7 +20,6 @@
     $flatItems[] = ['key' => 'settings', 'label_raw' => __('app.nav_settings'), 'icon' => 'settings', 'route' => 'settings.index', 'permission' => null];
     $navGroups = [['label' => null, 'group_icon' => null, 'items' => $flatItems]];
   } else {
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ All other roles: grouped nav ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
     $allGroups = [
       [
         'label' => null,
@@ -118,9 +117,9 @@
         @endphp
 
         {{-- Trigger --}}
-        <button type="button" onclick="toggleGroup('{{ $groupId }}')"
-          class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg font-medium transition-all
-                                        {{ $groupActive ? 'text-primary' : 'text-slate-500 hover:text-primary hover:bg-primary/5' }}">
+        <button type="button" onclick="toggleGroup('{{ $groupId }}')" 
+          class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg font-medium transition-all 
+          {{ $groupActive ? 'text-primary' : 'text-slate-500 hover:text-primary hover:bg-primary/5' }}">
           <span class="material-icons text-[20px]">{{ $groupIcon }}</span>
           <span class="flex-1 text-left">{{ $group['label'] }}</span>
           <span class="material-icons text-[18px] transition-transform duration-200 opacity-60" id="{{ $groupId }}-chevron">
@@ -135,9 +134,9 @@
               $isActive = $active === $item['key'];
               $label = isset($item['label_raw']) ? $item['label_raw'] : $item['label'];
             @endphp
-            <a href="{{ route($item['route']) }}"
-              class="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-{{ $isActive ? 'semibold' : 'medium' }} transition-all
-                                                          {{ $isActive ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:text-primary hover:bg-primary/5' }}">
+            <a href="{{ route($item['route']) }}" 
+              class="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-{{ $isActive ? 'semibold' : 'medium' }} transition-all 
+              {{ $isActive ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:text-primary hover:bg-primary/5' }}">
               <span class="material-icons text-[18px]">{{ $item['icon'] }}</span>
               <span>{{ $label }}</span>
             </a>
@@ -151,8 +150,8 @@
             $label = isset($item['label_raw']) ? $item['label_raw'] : $item['label'];
           @endphp
           <a href="{{ route($item['route']) }}"
-            class="flex items-center space-x-3 px-3 py-2.5 rounded-lg font-{{ $isActive ? 'semibold' : 'medium' }} transition-all
-                                                        {{ $isActive ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:text-primary hover:bg-primary/5' }}">
+            class="flex items-center space-x-3 px-3 py-2.5 rounded-lg font-{{ $isActive ? 'semibold' : 'medium' }} transition-all 
+            {{ $isActive ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:text-primary hover:bg-primary/5' }}">
             <span class="material-icons text-[20px]">{{ $item['icon'] }}</span>
             <span>{{ $label }}</span>
           </a>

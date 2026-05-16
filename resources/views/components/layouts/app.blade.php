@@ -73,7 +73,6 @@
   </script>
 
   @auth
-    {{-- â”€â”€ Auto Image Compression â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
     {{-- Automatically compresses any image file selected in an image input   --}}
     {{-- before it is submitted. Max 1920px width, JPEG 0.85 quality.         --}}
     {{-- Files already under 300 KB or non-image types (PDF) are skipped.     --}}
@@ -133,7 +132,6 @@
         });
       })();
     </script>
-    {{-- â”€â”€ Idle Session Timeout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
     @php $timeoutMinutes = (int) \App\Models\Setting::get('session_timeout_minutes', 30); @endphp
     <div id="idle-warning" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
       <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-8 max-w-sm w-full text-center space-y-4">
