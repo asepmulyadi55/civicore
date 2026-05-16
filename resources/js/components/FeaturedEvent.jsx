@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function FeaturedEvent({ featuredEvent = {}, loading }) {
     const title       = featuredEvent?.title       || 'Dwipapuri Summer Carnival 2026';
@@ -197,25 +197,25 @@ export default function FeaturedEvent({ featuredEvent = {}, loading }) {
 
                 {/* Dark gradient overlay */}
                 <div className="absolute inset-0"
-                    style={{ background: 'linear-gradient(to top, rgba(0,6,102,0.85) 0%, transparent 55%)' }} />
+                    style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.30) 50%, transparent 100%)' }} />
 
                 {/* Live indicator */}
                 {isLive && (
-                    <div className="absolute top-8 left-8 flex items-center gap-2 px-4 py-2 rounded-full animate-pulse"
-                        style={{ backgroundColor: '#ffdad6', color: '#93000a' }}>
-                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#ba1a1a' }} />
-                        <span className="text-xs font-bold uppercase tracking-widest">Live Now</span>
+                    <div className="absolute top-6 md:top-8 left-6 md:left-8 flex items-center gap-2 md:gap-3 px-3 md:px-4 py-1.5 md:py-2 rounded-full"
+                        style={{ background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.20)' }}>
+                        <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse" style={{ background: '#f87171' }} />
+                        <span className="text-[9px] md:text-[10px] font-semibold uppercase tracking-widest text-white">Live Now</span>
                     </div>
                 )}
 
-                {/* Glassmorphic card — bottom right */}
+                {/* Glassmorphic card — bottom left */}
                 <div
-                    className="absolute inset-x-3 bottom-3 md:inset-auto md:bottom-10 md:right-10 md:max-w-xl p-5 sm:p-7 md:p-10 rounded-2xl shadow-2xl"
+                    className="absolute inset-x-3 bottom-3 md:inset-auto md:bottom-12 md:left-12 md:max-w-xl p-5 sm:p-7 md:p-12 rounded-xl shadow-glass"
                     style={{
-                        background: 'rgba(248,249,250,0.10)',
-                        backdropFilter: 'blur(20px)',
-                        WebkitBackdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(255,255,255,0.10)',
+                        background: 'rgba(255,255,255,0.10)',
+                        backdropFilter: 'blur(16px)',
+                        WebkitBackdropFilter: 'blur(16px)',
+                        border: '1px solid rgba(255,255,255,0.20)',
                     }}
                 >
                     {loading ? (
@@ -230,8 +230,16 @@ export default function FeaturedEvent({ featuredEvent = {}, loading }) {
                         </div>
                     ) : (
                         <>
-                            <h1 className="text-xl sm:text-2xl md:text-4xl font-extrabold text-white tracking-tight leading-tight mb-2 md:mb-4"
-                                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                            <span
+                                className="font-semibold uppercase tracking-widest text-xs mb-3 md:mb-4 block drop-shadow-md"
+                                style={{ color: '#D4AF37', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                            >
+                                Featured Event
+                            </span>
+                            <h1
+                                className="text-xl sm:text-2xl md:text-4xl md:text-5xl font-semibold text-white tracking-tight leading-tight mb-4 md:mb-6 drop-shadow-md"
+                                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                            >
                                 {title}
                             </h1>
 
@@ -253,9 +261,9 @@ export default function FeaturedEvent({ featuredEvent = {}, loading }) {
                                 <button
                                     onClick={handleWatchNow}
                                     disabled={!youtubeUrl}
-                                    className="col-span-2 flex items-center justify-center gap-2 px-4 py-2.5 md:px-7 md:py-3.5 rounded-xl font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:opacity-90"
+                                    className="col-span-2 flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-3.5 rounded-lg font-medium text-sm md:text-base disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:opacity-90 shadow-lg"
                                     style={{
-                                        background: 'linear-gradient(45deg, #000666, #5f00e3)',
+                                        background: '#D4AF37',
                                         color: '#fff',
                                         fontFamily: "'Plus Jakarta Sans', sans-serif",
                                     }}

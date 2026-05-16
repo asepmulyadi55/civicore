@@ -46,39 +46,38 @@ export default function MemorableMoments({ moments = {}, pastEvents = [], loadin
     }
 
     return (
-        <section id="gallery" className="py-16 md:py-32" style={{ background: '#f3f4f5', scrollMarginTop: '80px' }}>
+        <section id="gallery" className="py-16 md:py-32" style={{ background: '#F4F3EF', scrollMarginTop: '80px' }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-                {/* Header row */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-16 gap-6">
-                    <div>
-                        <h2
-                            className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight"
-                            style={{ color: '#1a237e', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                        >
-                            {title}
-                        </h2>
-                        <p className="text-slate-500 mt-2">{subtitle}</p>
-                    </div>
+                {/* Header */}
+                <div className="text-center max-w-2xl mx-auto mb-12 md:mb-20">
+                    <span
+                        className="font-semibold tracking-widest uppercase text-xs mb-3 md:mb-4 block"
+                        style={{ color: '#D4AF37', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                    >
+                        The Gallery
+                    </span>
+                    <h2
+                        className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight mb-3 md:mb-4"
+                        style={{ color: '#1C2D27', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                    >
+                        {title}
+                    </h2>
+                    <p className="font-light text-sm md:text-base leading-relaxed" style={{ color: '#595959' }}>{subtitle}</p>
+                </div>
 
-                    {archiveUrl && (
+                {archiveUrl && (
+                    <div className="flex justify-center mb-12">
                         <a
                             href={archiveUrl}
-                            className="group inline-flex items-center gap-2 bg-white font-bold px-8 py-4 rounded-xl transition-all duration-300 hover:shadow-lg"
-                            style={{ color: '#000666' }}
-                            onMouseEnter={e => { e.currentTarget.style.background = '#000666'; e.currentTarget.style.color = '#ffffff'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = '#000666'; }}
+                            className="group inline-flex items-center gap-2 font-medium text-sm px-8 py-3 rounded-lg transition-all hover:opacity-90"
+                            style={{ background: '#1C2D27', color: '#FAF9F6', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                         >
                             View Full Archive
-                            <svg
-                                className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
+                            <span className="material-symbols-outlined text-sm transition-transform group-hover:translate-x-1">arrow_forward</span>
                         </a>
-                    )}
-                </div>
+                    </div>
+                )}
 
                 {/* Bento Grid */}
                 <div

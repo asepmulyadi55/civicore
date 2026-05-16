@@ -94,15 +94,15 @@
 <div class="fixed inset-0 bg-black/50 z-40 lg:hidden hidden" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <aside
-  class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-50 -translate-x-full lg:translate-x-0 transition-transform duration-300"
+  class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-dark-card border-r border-slate-200/60 dark:border-white/5 flex flex-col z-50 -translate-x-full lg:translate-x-0 transition-transform duration-300"
   id="sidebar">
 
   {{-- Brand --}}
-  <div class="p-6 flex items-center space-x-3">
-    <div class="bg-primary p-2 rounded-lg">
-      <span class="material-icons text-white">house</span>
+  <div class="p-8 flex items-center space-x-3">
+    <div class="w-8 h-8 flex items-center justify-center border border-primary/20 dark:border-secondary/20 rounded transition-colors duration-300">
+      <span class="material-symbols-outlined text-primary dark:text-secondary text-xl">architecture</span>
     </div>
-    <span class="text-xl font-extrabold tracking-tight text-primary">Dwipapuri</span>
+    <span class="text-xl font-bold tracking-tight text-primary dark:text-white font-headline transition-colors duration-300">Dwipapuri.</span>
   </div>
 
   {{-- Nav --}}
@@ -117,11 +117,11 @@
         @endphp
 
         {{-- Trigger --}}
-        <button type="button" onclick="toggleGroup('{{ $groupId }}')" 
-          class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg font-medium transition-all 
-          {{ $groupActive ? 'text-primary' : 'text-slate-500 hover:text-primary hover:bg-primary/5' }}">
+        <button type="button" onclick="toggleGroup('{{ $groupId }}')"
+          class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium transition-all
+          {{ $groupActive ? 'text-primary dark:text-secondary' : 'text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5' }}">
           <span class="material-icons text-[20px]">{{ $groupIcon }}</span>
-          <span class="flex-1 text-left">{{ $group['label'] }}</span>
+          <span class="flex-1 text-left text-sm">{{ $group['label'] }}</span>
           <span class="material-icons text-[18px] transition-transform duration-200 opacity-60" id="{{ $groupId }}-chevron">
             {{ $groupActive ? 'expand_less' : 'expand_more' }}
           </span>
@@ -134,9 +134,9 @@
               $isActive = $active === $item['key'];
               $label = isset($item['label_raw']) ? $item['label_raw'] : $item['label'];
             @endphp
-            <a href="{{ route($item['route']) }}" 
-              class="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-{{ $isActive ? 'semibold' : 'medium' }} transition-all 
-              {{ $isActive ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:text-primary hover:bg-primary/5' }}">
+            <a href="{{ route($item['route']) }}"
+              class="flex items-center space-x-3 px-4 py-2 rounded-lg text-sm font-{{ $isActive ? 'semibold' : 'medium' }} transition-all
+              {{ $isActive ? 'bg-primary/5 dark:bg-secondary/10 text-primary dark:text-secondary' : 'text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5' }}">
               <span class="material-icons text-[18px]">{{ $item['icon'] }}</span>
               <span>{{ $label }}</span>
             </a>
@@ -150,10 +150,10 @@
             $label = isset($item['label_raw']) ? $item['label_raw'] : $item['label'];
           @endphp
           <a href="{{ route($item['route']) }}"
-            class="flex items-center space-x-3 px-3 py-2.5 rounded-lg font-{{ $isActive ? 'semibold' : 'medium' }} transition-all 
-            {{ $isActive ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:text-primary hover:bg-primary/5' }}">
+            class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-{{ $isActive ? 'semibold' : 'medium' }} transition-all
+            {{ $isActive ? 'bg-primary/5 dark:bg-secondary/10 text-primary dark:text-secondary' : 'text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5' }}">
             <span class="material-icons text-[20px]">{{ $item['icon'] }}</span>
-            <span>{{ $label }}</span>
+            <span class="text-sm">{{ $label }}</span>
           </a>
         @endforeach
       @endif

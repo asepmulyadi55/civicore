@@ -1,12 +1,12 @@
 import React from 'react';
 
 const CATEGORY_BADGE_STYLES = {
-    wellness:  { background: '#000666', color: '#ffffff' },
-    meetings:  { background: '#5f00e3', color: '#ffffff' },
-    education: { background: '#5c1800', color: '#ffb59d' },
-    cultural:  { background: '#1a237e', color: '#bdc2ff' },
-    sports:    { background: '#000666', color: '#ffffff' },
-    other:     { background: '#454652', color: '#ffffff' },
+    wellness:  { background: 'rgba(255,255,255,0.85)', color: '#1C2D27' },
+    meetings:  { background: 'rgba(255,255,255,0.85)', color: '#1C2D27' },
+    education: { background: 'rgba(255,255,255,0.85)', color: '#1C2D27' },
+    cultural:  { background: 'rgba(255,255,255,0.85)', color: '#1C2D27' },
+    sports:    { background: 'rgba(255,255,255,0.85)', color: '#1C2D27' },
+    other:     { background: 'rgba(255,255,255,0.85)', color: '#1C2D27' },
 };
 
 const PLACEHOLDER_IMAGES = [
@@ -33,17 +33,27 @@ function SkeletonCard() {
 export default function UpcomingEvents({ events = [], loading }) {
     return (
         <section id="events" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20" style={{ scrollMarginTop: '80px' }}>
-            <div className="flex items-end justify-between mb-12">
+            <div className="flex items-end justify-between mb-10 md:mb-16 gap-6">
                 <div className="max-w-2xl">
-                    <span className="font-bold tracking-widest uppercase text-xs mb-3 block"
-                        style={{ color: '#5f00e3', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                    <span
+                        className="font-semibold tracking-widest uppercase text-xs mb-2 md:mb-4 block"
+                        style={{ color: '#D4AF37', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                    >
                         Discover More
                     </span>
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight"
-                        style={{ color: '#1a237e', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                    <h2
+                        className="text-2xl md:text-4xl font-medium tracking-tight"
+                        style={{ color: '#1C2D27', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                    >
                         Upcoming Community Events
                     </h2>
                 </div>
+                <button
+                    className="text-sm font-medium flex items-center gap-2 hover:gap-3 transition-all tracking-wide pb-1 border-b self-start sm:self-auto mt-2 sm:mt-0 flex-shrink-0"
+                    style={{ color: '#1C2D27', borderColor: 'rgba(28,45,39,0.3)', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                >
+                    View All <span className="material-symbols-outlined text-sm">arrow_right_alt</span>
+                </button>
             </div>
 
             {loading ? (
@@ -71,46 +81,57 @@ export default function UpcomingEvents({ events = [], loading }) {
                                 style={{ border: '1px solid rgba(198,197,212,0.10)' }}>
 
                                 {/* Image with category badge overlay */}
-                                <div className="relative h-64 overflow-hidden flex-shrink-0">
+                                <div className="relative h-56 md:h-[22rem] overflow-hidden flex-shrink-0">
                                     <img src={image} alt={event.title}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                                    <div className="absolute top-4 left-4 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-widest"
+                                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                                    <div
+                                        className="absolute top-4 md:top-5 left-4 md:left-5 px-3 md:px-4 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-widest shadow-sm"
                                         style={{
                                             ...badgeStyle,
                                             fontFamily: "'Plus Jakarta Sans', sans-serif",
-                                        }}>
+                                            backdropFilter: 'blur(12px)',
+                                            WebkitBackdropFilter: 'blur(12px)',
+                                        }}
+                                    >
                                         {category}
                                     </div>
                                 </div>
 
                                 {/* Card body */}
-                                <div className="p-8 flex flex-col flex-grow">
-                                    <h3 className="text-xl font-bold mb-4"
-                                        style={{ color: '#191c1d', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                <div className="p-6 md:p-10 flex flex-col flex-grow">
+                                    <h3
+                                        className="text-xl md:text-2xl font-medium mb-3"
+                                        style={{ color: '#1C2D27', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                                    >
                                         {event.title}
                                     </h3>
                                     {event.description && (
-                                        <p className="text-sm leading-relaxed mb-6 flex-grow italic"
-                                            style={{ color: '#454652' }}>
+                                        <p
+                                            className="text-sm leading-relaxed mb-6 md:mb-8 flex-grow font-light"
+                                            style={{ color: '#595959' }}
+                                        >
                                             &ldquo;{event.description}&rdquo;
                                         </p>
                                     )}
-
-                                    {/* Action row */}
-                                    <div className="flex items-center justify-between mt-auto">
+                                    <div className="flex items-center justify-between mt-auto border-t pt-5 md:pt-6" style={{ borderColor: '#E8E6E1' }}>
                                         {event.url ? (
                                             <a href={event.url} target="_blank" rel="noopener noreferrer"
-                                                className="group/btn font-bold text-sm flex items-center gap-2 transition-all hover:gap-3"
-                                                style={{ color: '#5f00e3', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                                                RSVP Now
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                                </svg>
+                                                className="font-medium text-xs md:text-sm flex items-center gap-2 hover:gap-3 transition-all tracking-wide"
+                                                style={{ color: '#D4AF37', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                                            >
+                                                RSVP NOW <span className="material-symbols-outlined text-sm">arrow_right_alt</span>
                                             </a>
                                         ) : (
-                                            <span className="font-bold text-sm"
-                                                style={{ color: '#767683', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                            <span
+                                                className="font-medium text-xs md:text-sm tracking-wide"
+                                                style={{ color: '#595959', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                                            >
                                                 Details TBA
+                                            </span>
+                                        )}
+                                        {event.date && (
+                                            <span className="text-xs font-light" style={{ color: '#595959' }}>
+                                                {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                             </span>
                                         )}
                                     </div>
