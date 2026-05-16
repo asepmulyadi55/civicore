@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 
+const C = {
+  primary: '#1C2D27',
+  secondary: '#D4AF37',
+  surface: '#FAF9F6',
+  surfaceVar: '#E8E6E1',
+  onSurface: '#2C2C2C',
+  onSurfaceVar: '#595959',
+};
+
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const basePath = import.meta.env.VITE_APP_BASE ?? '';
-  const loginUrl = `${basePath}/login`;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -14,86 +20,101 @@ export default function Header() {
   }, []);
 
   const navLinks = [
-    { label: 'Featured Event', href: '#featured' },
     { label: 'Events', href: '#events' },
     { label: 'Gallery', href: '#gallery' },
     { label: 'About', href: '#about' },
   ];
 
   return (
-    <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'shadow-md' : ''
-        }`}
+    <nav
+      className={`fixed top-0 w-full z-50 transition-all`}
       style={{
-        background: scrolled ? 'rgba(248,249,250,0.88)' : 'rgba(248,249,250,0.80)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        background: `${C.surface}E6`,
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: `1px solid ${C.surfaceVar}80`,
       }}
     >
-      <nav className="max-w-7xl mx-auto px-8 h-20 flex items-center justify-between">
+      <div className="flex justify-between items-center max-w-7xl mx-auto px-6 md:px-8 py-4 md:py-5">
+
         {/* Logo */}
-        <div className="text-2xl font-bold tracking-tighter"
-          style={{ color: '#1a237e', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-          Dwipapuri
+        <div
+          className="text-xl md:text-2xl font-semibold tracking-tight"
+          style={{ color: C.primary, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+        >
+          Dwipapuri.
         </div>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
-          {navLinks.map(link => (
-            <a key={link.label} href={link.href}
-              className="transition-colors font-medium tracking-tight"
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#454652', fontSize: '0.9375rem' }}
-              onMouseEnter={e => e.currentTarget.style.color = '#1a237e'}
-              onMouseLeave={e => e.currentTarget.style.color = '#454652'}
+        {/* Mobile hamburger button */}
+        <button
+          className="md:hidden p-2"
+          style={{ color: C.primary }}
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          <span className="material-symbols-outlined">
+            {menuOpen ? 'close' : 'menu'}
+          </span>
+        </button>
+
+        {/* Desktop nav links */}
+        <div className="hidden md:flex items-center gap-10">
+          {navLinks.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              className="font-medium tracking-wide text-sm transition-colors"
+              style={{
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                color: C.onSurfaceVar,
+                borderBottom: '1px solid transparent',
+                paddingBottom: '4px',
+              }}
+              onClick={(e) => {
+                if (link.href.startsWith('#')) {
+                  e.preventDefault();
+                  const id = link.href.slice(1);
+                  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+              onMouseEnter={e => { e.currentTarget.style.color = C.primary; e.currentTarget.style.borderBottomColor = C.primary; }}
+              onMouseLeave={e => { e.currentTarget.style.color = C.onSurfaceVar; e.currentTarget.style.borderBottomColor = 'transparent'; }}
             >
               {link.label}
             </a>
           ))}
-          {/* <a href={loginUrl}
-            className="ml-2 px-6 py-2.5 rounded-lg text-white font-semibold text-sm transition-all hover:opacity-90 active:scale-95"
-            style={{ background: '#000666', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-            Login
-          </a> */}
         </div>
 
-        {/* Mobile menu button */}
-        <button
-          className="md:hidden p-2 rounded-lg transition-colors"
-          style={{ color: '#454652' }}
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
-        >
-          {menuOpen ? (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          )}
-        </button>
-      </nav>
+      </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu panel */}
       {menuOpen && (
-        <div className="md:hidden border-t px-4 py-4 space-y-3"
-          style={{ borderColor: 'rgba(198,197,212,0.4)', background: 'rgba(248,249,250,0.97)' }}>
+        <div
+          className="md:hidden border-t px-6 py-5 space-y-4"
+          style={{ borderColor: `${C.surfaceVar}80`, background: `${C.surface}F5` }}
+        >
           {navLinks.map(link => (
-            <a key={link.label} href={link.href}
-              className="block py-2 font-medium transition-colors"
-              style={{ color: '#454652', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-              onClick={() => setMenuOpen(false)}>
+            <a
+              key={link.label}
+              href={link.href}
+              className="block font-medium text-sm transition-colors"
+              style={{ color: C.onSurfaceVar, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+              onClick={(e) => {
+                setMenuOpen(false);
+                if (link.href.startsWith('#')) {
+                  e.preventDefault();
+                  const id = link.href.slice(1);
+                  setTimeout(() => {
+                    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }, 50);
+                }
+              }}
+            >
               {link.label}
             </a>
           ))}
-          {/* <a href={loginUrl}
-            className="block w-full text-center px-5 py-2.5 rounded-lg text-white font-semibold text-sm mt-2"
-            style={{ background: '#000666', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-            Login
-          </a> */}
         </div>
       )}
-    </header>
+    </nav>
   );
 }
