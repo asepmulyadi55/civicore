@@ -10,7 +10,7 @@ class BlockController extends Controller
 {
     public function index(Request $request)
     {
-        $blocks = Block::withCount([
+        $query = Block::withCount([
             'residents',
             'residents as active_residents_count' => fn($q) => $q->where('is_active', true),
             'units',
@@ -22,8 +22,14 @@ class BlockController extends Controller
                 'coordinators' => fn($q) => $q->select('id', 'name', 'block_id', 'role_id')
                     ->whereHas('role', fn($r) => $r->where('name', 'block_coordinator'))
             ])
-            ->orderBy('name')
-            ->get();
+            ->orderBy('name');
+
+        if ($search = $request->get('search')) {
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+        }
+
+        $blocks = $query->get();
 
         return view('blocks', compact('blocks'));
     }

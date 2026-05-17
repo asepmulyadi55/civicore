@@ -28,11 +28,11 @@
     <table class="w-full text-left">
       <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
         <tr>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.posyandu_col_name') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">{{ __('app.posyandu_col_dob') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.posyandu_col_age') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.posyandu_col_cat') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">{{ __('app.posyandu_col_gender') }}</th>
+          <x-ui.sort-th column="fullname" :label="__('app.posyandu_col_name')" />
+          <x-ui.sort-th column="birth_date" :label="__('app.posyandu_col_dob')" class="hidden md:table-cell" />
+          <x-ui.sort-th column="birth_date" :label="__('app.posyandu_col_age')" />
+          <x-ui.sort-th column="age_category" :label="__('app.posyandu_col_cat')" />
+          <x-ui.sort-th column="gender" :label="__('app.posyandu_col_gender')" class="hidden sm:table-cell" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">{{ __('app.posyandu_col_rel') }}</th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">{{ __('app.posyandu_col_household') }}</th>
         </tr>

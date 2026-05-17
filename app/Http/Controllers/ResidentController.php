@@ -32,8 +32,8 @@ class ResidentController extends Controller
             'familyMembers' => fn($q) => $q->where('is_head', true)->select('id', 'resident_id', 'fullname'),
         ])->withCount('familyMembers')
           ->leftJoin('units', 'units.id', '=', 'residents.unit_id')
-          ->orderBy('residents.block_id')->orderBy('units.unit_number')
           ->select('residents.*');
+
 
         // Scope to coordinator's block
         if ($scopeBlockId) {
@@ -61,6 +61,20 @@ class ResidentController extends Controller
             $query->where('residents.is_active', true);
         } elseif ($request->get('status') === 'inactive') {
             $query->where('residents.is_active', false);
+        }
+
+        // Dynamic column sort
+        $sortableColumns = [
+            'fullname'     => 'residents.fullname',
+            'house_status' => 'units.house_status',
+            'is_active'    => 'residents.is_active',
+        ];
+        $sort = $request->get('sort');
+        $dir  = $request->get('direction', 'asc') === 'desc' ? 'desc' : 'asc';
+        if (isset($sortableColumns[$sort])) {
+            $query->orderBy($sortableColumns[$sort], $dir);
+        } else {
+            $query->orderBy('residents.block_id', 'asc')->orderBy('units.unit_number', 'asc');
         }
 
         $residents = $query->paginate(15)->withQueryString();

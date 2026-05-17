@@ -51,7 +51,7 @@ class PosyanduController extends Controller
 
     public function index(Request $request)
     {
-        $query = FamilyMember::with(['resident.block', 'resident.unit'])->orderBy('fullname');
+        $query = FamilyMember::with(['resident.block', 'resident.unit']);
 
         if ($blockId = $request->input('block_id')) {
             $query->whereHas('resident', fn($q) => $q->where('block_id', $blockId));
@@ -95,6 +95,19 @@ class PosyanduController extends Controller
         $categoryCounts = collect(self::CATEGORIES)->mapWithKeys(function ($_, $key) use ($all) {
             return [$key => $all->filter(fn($m) => $m->age_category === $key)->count()];
         })->all();
+
+        // Collection-level sort (after category & gender filters are applied)
+        $sort = $request->input('sort');
+        $dir  = $request->input('direction', 'asc');
+        $sortableFields = ['fullname', 'birth_date', 'gender', 'age_category'];
+        if (in_array($sort, $sortableFields)) {
+            $filtered = $dir === 'desc'
+                ? $filtered->sortByDesc($sort)->values()
+                : $filtered->sortBy($sort)->values();
+        } else {
+            // Default: fullname ascending
+            $filtered = $filtered->sortBy('fullname')->values();
+        }
 
         $perPage     = 20;
         $currentPage = max(1, (int) $request->input('page', 1));

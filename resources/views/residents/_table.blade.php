@@ -17,17 +17,12 @@
     <table class="w-full text-left">
       <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
         <tr>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {{ __('app.table_household') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">
-            {{ __('app.table_house_status') }}
-          </th>
+          <x-ui.sort-th column="fullname" :label="__('app.table_household')" />
+          <x-ui.sort-th column="house_status" :label="__('app.table_house_status')" class="hidden sm:table-cell" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
             {{ __('app.table_monthly_fee') }}
           </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}
-          </th>
+          <x-ui.sort-th column="is_active" :label="__('app.table_status')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
             {{ __('app.table_actions') }}
           </th>
