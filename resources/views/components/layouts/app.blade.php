@@ -83,7 +83,13 @@
     .dark .dark\:divide-slate-800 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(255,255,255,0.05); }
     /* Primary color (#1C2D27) is invisible on dark backgrounds — show secondary gold instead */
     .dark .text-primary { color: #D4AF37; }
-    /* But nav active items should stay white in dark mode (overridden by more specific dark:text-secondary/white classes) */
+    /* hover:text-primary in dark mode: same fix — gold instead of near-black */
+    .dark .hover\:text-primary:hover { color: #D4AF37; }
+    /* group-hover:text-primary in dark mode */
+    .dark .group:hover .group-hover\:text-primary { color: #D4AF37; }
+    /* hover:bg-primary/5 in dark mode: use a subtle gold wash instead of dark-green tint */
+    .dark .hover\:bg-primary\/5:hover { background-color: rgba(212,175,55,0.08); }
+    /* focus:ring-primary/20 and focus:border-primary stay as-is (they already look fine) */
   </style>
 
   {{-- Extra head content (per-page scripts, meta tags, etc.) --}}

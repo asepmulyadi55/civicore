@@ -16,7 +16,21 @@ class UserController extends Controller
 {
   public function index(Request $request)
   {
-    $query = User::with(['role', 'resident'])->orderBy('created_at', 'desc');
+    $sortMap = [
+      'name'          => 'name',
+      'email'         => 'email',
+      'is_active'     => 'is_active',
+      'last_login_at' => 'last_login_at',
+    ];
+    $sort = $request->get('sort');
+    $dir  = $request->get('direction', 'asc') === 'desc' ? 'desc' : 'asc';
+
+    $query = User::with(['role', 'resident']);
+    if (isset($sortMap[$sort])) {
+      $query->orderBy($sortMap[$sort], $dir);
+    } else {
+      $query->orderByDesc('created_at');
+    }
 
     if ($search = $request->get('search')) {
       $query->where(function ($q) use ($search) {

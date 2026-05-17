@@ -4,11 +4,11 @@
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_resident') }}</th>
+          <x-ui.sort-th column="resident" :label="__('app.table_resident')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_block') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_months') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_amount') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}</th>
+          <x-ui.sort-th column="month" :label="__('app.table_months')" />
+          <x-ui.sort-th column="amount" :label="__('app.table_amount')" />
+          <x-ui.sort-th column="status" :label="__('app.table_status')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">{{ __('app.table_actions') }}</th>
         </tr>
       </thead>

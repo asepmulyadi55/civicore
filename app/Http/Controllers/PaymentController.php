@@ -106,6 +106,28 @@ class PaymentController extends Controller
             })
             ->values();
 
+        // Apply collection-level sort (after batch grouping)
+        $sort = $request->get('sort');
+        $dir  = $request->get('direction', 'desc');
+        if ($sort === 'resident') {
+            $flatRows = $dir === 'asc'
+                ? $flatRows->sortBy(fn($p) => $p->resident?->fullname)->values()
+                : $flatRows->sortByDesc(fn($p) => $p->resident?->fullname)->values();
+        } elseif ($sort === 'amount') {
+            $flatRows = $dir === 'asc'
+                ? $flatRows->sortBy('total_amount')->values()
+                : $flatRows->sortByDesc('total_amount')->values();
+        } elseif ($sort === 'status') {
+            $flatRows = $dir === 'asc'
+                ? $flatRows->sortBy('status')->values()
+                : $flatRows->sortByDesc('status')->values();
+        } elseif ($sort === 'month') {
+            $flatRows = $dir === 'asc'
+                ? $flatRows->sortBy('payment_month')->values()
+                : $flatRows->sortByDesc('payment_month')->values();
+        }
+        // else keep default: pending first, then by month desc (from the DB orderBy above)
+
         $perPage = config('civicore.pagination.payments', 20);
         $page = $request->get('page', 1);
 

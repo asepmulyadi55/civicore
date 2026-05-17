@@ -19,8 +19,12 @@ class UnitController extends Controller
 
         $units = $block->units()
             ->with('resident')
-            ->orderBy('unit_number')
+            ->orderByRaw("
+                LEFT(unit_number, LOCATE('-', unit_number) - 1),
+                CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(unit_number, '-', -1), ' ', 1) AS UNSIGNED)
+            ")
             ->get();
+
 
         $totalCount         = $units->count();
         $ownerOccupiedCount = $units->where('house_status', 'owner_occupied')->count();
