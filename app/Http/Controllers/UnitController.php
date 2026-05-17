@@ -19,10 +19,7 @@ class UnitController extends Controller
 
         $units = $block->units()
             ->with('resident')
-            ->orderByRaw("
-                LEFT(unit_number, LOCATE('-', unit_number) - 1),
-                CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(unit_number, '-', -1), ' ', 1) AS UNSIGNED)
-            ")
+            ->orderByRaw('LENGTH(unit_number), unit_number')
             ->get();
 
 

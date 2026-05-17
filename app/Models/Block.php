@@ -19,7 +19,7 @@ class Block extends Model
     // Units that belong to this block
     public function units(): HasMany
     {
-        return $this->hasMany(Unit::class)->orderBy('unit_number');
+        return $this->hasMany(Unit::class)->orderByRaw('LENGTH(unit_number), unit_number');
     }
 
     // Residents who live in this block (denormalized FK)
