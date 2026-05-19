@@ -128,6 +128,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:blocks.view')->name('blocks.index');
     Route::post('/blocks', [BlockController::class, 'store'])
         ->middleware('permission:blocks.create')->name('blocks.store');
+    Route::post('/blocks/import-excel', [BlockController::class, 'importExcel'])
+        ->middleware('permission:blocks.create')->name('blocks.import');
     Route::match(['PUT', 'PATCH'], '/blocks/{block}', [BlockController::class, 'update'])
         ->middleware('permission:blocks.edit')->name('blocks.update');
     Route::delete('/blocks/{block}', [BlockController::class, 'destroy'])

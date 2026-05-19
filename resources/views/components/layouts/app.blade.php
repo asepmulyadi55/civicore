@@ -90,6 +90,22 @@
     /* hover:bg-primary/5 in dark mode: use a subtle gold wash instead of dark-green tint */
     .dark .hover\:bg-primary\/5:hover { background-color: rgba(212,175,55,0.08); }
     /* focus:ring-primary/20 and focus:border-primary stay as-is (they already look fine) */
+
+    /* ── Disabled / Readonly field distinction ───────────────────────
+       Makes locked fields visually distinct from editable ones.
+       Works for both :disabled attribute and .cursor-not-allowed helper. */
+    input:disabled, select:disabled, textarea:disabled {
+      background-color: #f1f5f9 !important;
+      border-style: dashed !important;
+      cursor: not-allowed !important;
+      opacity: 0.65 !important;
+    }
+    .dark input:disabled, .dark select:disabled, .dark textarea:disabled {
+      background-color: rgba(0, 0, 0, 0.35) !important;
+      border-style: dashed !important;
+      cursor: not-allowed !important;
+      opacity: 0.55 !important;
+    }
   </style>
 
   {{-- Extra head content (per-page scripts, meta tags, etc.) --}}

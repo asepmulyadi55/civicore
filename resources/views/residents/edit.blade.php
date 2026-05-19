@@ -4,7 +4,7 @@
   @if($isOwnHousehold)
     @include('overview._sidebar')
   @else
-    <x-nav.sidebar active="residents" />
+    <x-nav.sidebar :active="($isOwnHousehold ?? false) ? 'household' : 'residents'" />
   @endif
 
   <div class="lg:pl-64 min-h-screen bg-background-light dark:bg-background-dark flex flex-col">

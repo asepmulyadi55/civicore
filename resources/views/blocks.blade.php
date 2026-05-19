@@ -15,5 +15,6 @@
   </div>
 
   @include('blocks._delete_modal')
+  @include('blocks._import_modal')
 
 </x-layouts.app>
