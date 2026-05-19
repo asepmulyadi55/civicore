@@ -15,7 +15,7 @@
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
         @forelse($payments as $payment)
           @php
-            $initials = collect(explode(' ', $payment->resident->fullname))->map(fn($w) => strtoupper($w[0]))->take(2)->implode('');
+            $initials = collect(preg_split('/\s+/', trim($payment->resident->fullname ?? '')))->filter()->map(fn($w) => strtoupper($w[0]))->take(2)->implode('') ?: '?';
             $isMulti  = ($payment->month_count ?? 1) > 1;
             $allMonths = $payment->all_months ?? collect([$payment->payment_month]);
             $monthLabels = $allMonths->map(fn($m) => \Carbon\Carbon::parse($m)->format('F Y'))->implode(', ');
