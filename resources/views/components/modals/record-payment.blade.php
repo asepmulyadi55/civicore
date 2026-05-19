@@ -537,9 +537,13 @@ Review Modal, and all associated JavaScript.
     pointer-events: none;
     background-color: #f1f5f9;
   }
-
   .dark .month-card-paid {
     background-color: #1e293b;
+  }
+  /* Selected month card — dark mode: gold border + tint instead of invisible dark-green */
+  .dark .month-selected-card {
+    border-color: #D4AF37 !important;
+    background-color: rgba(212, 175, 55, 0.12) !important;
   }
 </style>
 
@@ -664,7 +668,7 @@ Review Modal, and all associated JavaScript.
         grid.insertAdjacentHTML('beforeend', `
           <label class="cursor-pointer group">
             <input type="checkbox" data-key="${key}" class="hidden peer month-cb" ${isSel ? 'checked' : ''} onchange="onMonthToggle(this)" />
-            <div class="border-2 ${isSel ? 'border-primary bg-primary/5' : 'border-slate-200 dark:border-slate-700'} rounded-xl p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
+            <div class="border-2 ${isSel ? 'border-primary bg-primary/5 month-selected-card' : 'border-slate-200 dark:border-slate-700'} rounded-xl p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
               <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${label}</span>
               <span class="text-[10px] font-bold ${isSel ? 'text-primary' : 'text-slate-400'} uppercase">${isSel ? 'Selected' : 'Unpaid'}</span>
             </div>
@@ -680,12 +684,12 @@ Review Modal, and all associated JavaScript.
     if (cb.checked) {
       selectedMonths.add(key);
       showMonthError(false);
-      inner.classList.add('border-primary', 'bg-primary/5');
+      inner.classList.add('border-primary', 'bg-primary/5', 'month-selected-card');
       inner.classList.remove('border-slate-200', 'dark:border-slate-700');
       badge.textContent = 'Selected'; badge.classList.add('text-primary'); badge.classList.remove('text-slate-400');
     } else {
       selectedMonths.delete(key);
-      inner.classList.remove('border-primary', 'bg-primary/5');
+      inner.classList.remove('border-primary', 'bg-primary/5', 'month-selected-card');
       inner.classList.add('border-slate-200');
       badge.textContent = 'Unpaid'; badge.classList.remove('text-primary'); badge.classList.add('text-slate-400');
     }
@@ -790,7 +794,7 @@ Review Modal, and all associated JavaScript.
         grid.insertAdjacentHTML('beforeend', `
           <label class="cursor-pointer group">
             <input type="checkbox" data-key="${key}" class="hidden peer em-month-cb" ${isSel ? 'checked' : ''} onchange="onEmMonthToggle(this)" />
-            <div class="border-2 ${isSel ? 'border-primary bg-primary/5' : 'border-slate-200 dark:border-slate-700'} rounded-xl p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
+            <div class="border-2 ${isSel ? 'border-primary bg-primary/5 month-selected-card' : 'border-slate-200 dark:border-slate-700'} rounded-xl p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
               <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${label}</span>
               <span class="text-[10px] font-bold ${isSel ? 'text-primary' : 'text-slate-400'} uppercase">${isSel ? 'Selected' : 'Unpaid'}</span>
             </div>
@@ -821,12 +825,12 @@ Review Modal, and all associated JavaScript.
     if (cb.checked) {
       emSelectedMonths.add(key);
       document.getElementById('em-error-months')?.classList.add('hidden');
-      inner.classList.add('border-primary', 'bg-primary/5');
+      inner.classList.add('border-primary', 'bg-primary/5', 'month-selected-card');
       inner.classList.remove('border-slate-200', 'dark:border-slate-700');
       badge.textContent = 'Selected'; badge.classList.add('text-primary'); badge.classList.remove('text-slate-400');
     } else {
       emSelectedMonths.delete(key);
-      inner.classList.remove('border-primary', 'bg-primary/5');
+      inner.classList.remove('border-primary', 'bg-primary/5', 'month-selected-card');
       inner.classList.add('border-slate-200');
       badge.textContent = 'Unpaid'; badge.classList.remove('text-primary'); badge.classList.add('text-slate-400');
     }
