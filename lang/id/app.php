@@ -653,4 +653,22 @@ return [
   'edu_master'             => 'Magister (S2)',
   'edu_doctorate'          => 'Doktor (S3)',
   'edu_other'              => 'Lainnya',
+
+  // ── Overview (Portal Warga) ─────────────────────────────────────────
+  'overview_payment_history'  => 'Riwayat Pembayaran',
+  'overview_active_fee'       => 'Iuran Bulanan Aktif',
+  'overview_total_paid'       => 'Total Dibayar :year',
+  'overview_due_on'           => 'Jatuh tempo setiap tanggal :day',
+  'overview_months_of_12'     => ':n dari 12 Bulan',
+  'overview_resident_since'   => '• Warga sejak :date',
+  'overview_under_review'     => 'Sedang ditinjau',
+  'overview_no_prev_records'  => 'Tidak ada catatan pembayaran untuk :year.',
+  'overview_notice_title'     => 'Transparansi & Keakuratan Data',
+  'overview_notice_body'      => 'Dasbor ini adalah representasi hanya-baca dari buku pembayaran yang dikelola oleh Manajemen :name. Jika terdapat ketidaksesuaian, silakan hubungi kantor manajemen secara langsung.',
+  'overview_notice_label'     => 'Pemberitahuan',
+  'overview_badge_active'     => 'Aktif',
+  'overview_badge_inactive'   => 'Tidak Aktif',
+  'status_paid'               => 'Lunas',
+  'status_upcoming'           => 'Akan Datang',
+  'status_overdue'            => 'Terlambat',
 ];

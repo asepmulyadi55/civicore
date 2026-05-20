@@ -9,13 +9,15 @@
   <div class="group relative bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-md hover:border-primary/30 transition-all"
     data-id="{{ $file->id }}">
 
-    {{-- Checkbox overlay (only shown when user has delete permission) --}}
+    {{-- Checkbox overlay (only shown when user has delete permission AND folder is not read-only) --}}
+    @unless($readOnly ?? false)
     @if(auth()->user()->can('media.delete'))
     <div class="absolute top-2 left-2 z-10">
       <input type="checkbox" class="file-checkbox w-5 h-5 rounded accent-primary opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
         data-id="{{ $file->id }}" onchange="updateBulkBar()">
     </div>
     @endif
+    @endunless
 
     {{-- Thumbnail --}}
     <div class="aspect-square bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden relative">
@@ -51,13 +53,19 @@
           <span class="material-icons text-lg">open_in_new</span>
         </a>
       @endif
-      @if(auth()->user()->can('media.delete'))
-        <button onclick="confirmDelete('{{ $file->id }}', '{{ addslashes($file->original_name) }}')"
-          class="p-2 bg-white rounded-full shadow-md text-slate-700 hover:bg-rose-500 hover:text-white transition-all"
-          title="{{ __('app.btn_delete') }}">
-          <span class="material-icons text-lg">delete_outline</span>
-        </button>
-      @endif
+      @unless($readOnly ?? false)
+        @if(auth()->user()->can('media.delete'))
+          <button onclick="confirmDelete('{{ $file->id }}', '{{ addslashes($file->original_name) }}')"
+            class="p-2 bg-white rounded-full shadow-md text-slate-700 hover:bg-rose-500 hover:text-white transition-all"
+            title="{{ __('app.btn_delete') }}">
+            <span class="material-icons text-lg">delete_outline</span>
+          </button>
+        @endif
+      @else
+        <span class="p-2 bg-white/80 rounded-full shadow-md text-slate-400 cursor-default" title="Manage via resident/member profile">
+          <span class="material-icons text-lg">lock_outline</span>
+        </span>
+      @endunless
     </div>
   </div>
 

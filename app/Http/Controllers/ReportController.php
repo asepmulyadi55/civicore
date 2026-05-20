@@ -37,7 +37,7 @@ class ReportController extends Controller
         ])->where('residents.is_active', true)
             ->leftJoin('units', 'units.id', '=', 'residents.unit_id')
             ->orderBy('residents.block_id')
-            ->orderBy('units.unit_number')
+            ->orderByRaw('CAST(units.unit_number AS UNSIGNED)')
             ->select('residents.*');
 
         if ($blockId) {

@@ -15,12 +15,12 @@
         <div class="mt-1 flex items-center gap-2">
           @if($resident->is_active)
             <span
-              class="px-2 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[10px] font-bold uppercase rounded">Active</span>
+              class="px-2 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[10px] font-bold uppercase rounded">{{ __('app.overview_badge_active') }}</span>
           @else
             <span
-              class="px-2 py-0.5 bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 text-[10px] font-bold uppercase rounded">Inactive</span>
+              class="px-2 py-0.5 bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 text-[10px] font-bold uppercase rounded">{{ __('app.overview_badge_inactive') }}</span>
           @endif
-          <span class="text-xs text-slate-400">• Resident since {{ $resident->created_at->format('M Y') }}</span>
+          <span class="text-xs text-slate-400">{{ __('app.overview_resident_since', ['date' => $resident->created_at->isoFormat('MMM Y')]) }}</span>
         </div>
       </div>
     </div>
@@ -28,13 +28,11 @@
 
   {{-- Active Fee Card --}}
   <div class="bg-primary text-white p-6 rounded-xl shadow-lg flex flex-col justify-between">
-    <span class="text-sm font-medium opacity-80 uppercase tracking-wider">Active Monthly Fee</span>
+    <span class="text-sm font-medium opacity-80 uppercase tracking-wider">{{ __('app.overview_active_fee') }}</span>
     <div>
       <span class="text-3xl font-extrabold">{{ $currency }} {{ number_format($currentFee) }}</span>
       <p class="text-xs opacity-75 mt-1">
-        Due on the
-        {{ $dueDayLabel }}{{ (int) $dueDayLabel === 1 ? 'st' : ((int) $dueDayLabel === 2 ? 'nd' : ((int) $dueDayLabel === 3 ? 'rd' : 'th')) }}
-        of every month
+        {{ __('app.overview_due_on', ['day' => $dueDayLabel]) }}
       </p>
     </div>
   </div>
@@ -42,12 +40,12 @@
   {{-- Total Paid This Year --}}
   <div
     class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
-    <span class="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Paid {{ $currentYear }}</span>
+    <span class="text-sm font-medium text-slate-500 uppercase tracking-wider">{{ __('app.overview_total_paid', ['year' => $currentYear]) }}</span>
     <div>
       <span class="text-2xl font-bold">{{ $currency }} {{ number_format($totalPaidYear) }}</span>
       <div class="flex items-center gap-1 text-emerald-500 text-xs font-bold mt-1">
         <span class="material-icons text-xs">check_circle</span>
-        <span>{{ $paidMonthsYear }} of 12 Months</span>
+        <span>{{ __('app.overview_months_of_12', ['n' => $paidMonthsYear]) }}</span>
       </div>
     </div>
   </div>
@@ -60,7 +58,7 @@
   <div class="p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl">
     <div class="flex items-center space-x-2 text-amber-700 dark:text-amber-400 mb-2">
       <span class="material-icons text-sm">sticky_note_2</span>
-      <span class="text-xs font-bold uppercase tracking-wider">Notice</span>
+    <span class="text-xs font-bold uppercase tracking-wider">{{ __('app.overview_notice_label') }}</span>
     </div>
     <p class="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">{{ $adminMemo }}</p>
   </div>
