@@ -42,7 +42,7 @@
   @endif
 </form>
 
-{{-- Bulk Actions Bar (delete permission required, not available for read-only folders) --}}
+{{-- Bulk Actions Bar (delete permission required; hidden when folder is read-only) --}}
 @unless($readOnly ?? false)
 @if(auth()->user()->can('media.delete'))
 <div id="bulk-bar"
@@ -71,7 +71,7 @@
 @endif
 @endunless
 
-{{-- Select All Toggle --}}
+{{-- Select All Toggle (hidden when folder is read-only) --}}
 @unless($readOnly ?? false)
 @if($files->count() > 0 && auth()->user()->can('media.delete'))
   <div class="flex items-center gap-3">

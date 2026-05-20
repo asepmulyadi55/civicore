@@ -392,8 +392,12 @@ return [
   'remove_image' => 'Hapus Gambar',
   'no_image_uploaded' => 'Belum ada gambar',
   'image_hint' => 'JPG, PNG, WEBP atau GIF Â· Maks 5 MB',
-  'flash_file_deleted' => 'Berkas berhasil dihapus.',
-  'flash_files_deleted' => ':count berkas berhasil dihapus.',
+  'flash_file_deleted'    => 'Berkas berhasil dihapus.',
+  'flash_files_deleted'   => ':count berkas berhasil dihapus.',
+  'flash_photo_removed'   => 'Foto berhasil dihapus dari :name.',
+  'flash_file_in_use'     => 'Tidak dapat dihapus: berkas ini masih digunakan oleh :reason.',
+  'flash_bulk_partial'    => ':deleted berkas dihapus. :skipped dilewati (masih digunakan).',
+  'flash_bulk_all_skipped'=> ':skipped berkas tidak dapat dihapus (masih digunakan).',
 
   // Reports
   'financial' => 'Keuangan',

@@ -209,10 +209,22 @@ Route::middleware('auth')->group(function () {
     // ── Media Manager ─────────────────────────────────────────────────────────
     Route::get('/media', [MediaController::class, 'index'])
         ->middleware('permission:media.view')->name('media.index');
-    Route::delete('/media/{mediaFile}', [MediaController::class, 'destroy'])
-        ->middleware('permission:media.delete')->name('media.destroy');
+
+    // Specific sub-paths MUST be declared before the {mediaFile} wildcard
     Route::delete('/media', [MediaController::class, 'bulkDestroy'])
         ->middleware('permission:media.delete')->name('media.bulk-destroy');
+    Route::delete('/media/virtual-bulk', [MediaController::class, 'virtualBulkDestroy'])
+        ->middleware('permission:media.delete')->name('media.virtual-bulk-destroy');
+    Route::delete('/media/resident-photo/{resident}', [MediaController::class, 'destroyResidentPhoto'])
+        ->middleware('permission:media.delete')->name('media.resident-photo.destroy');
+    Route::delete('/media/member-photo/{familyMember}', [MediaController::class, 'destroyMemberPhoto'])
+        ->middleware('permission:media.delete')->name('media.member-photo.destroy');
+
+    // Wildcard — must stay last so it does not swallow the routes above
+    Route::delete('/media/{mediaFile}', [MediaController::class, 'destroy'])
+        ->middleware('permission:media.delete')->name('media.destroy');
+
+
 
     // ── Sensitive data reveal (admin-only AJAX) ──────────────────────────────
     Route::get('/residents/{resident}/reveal-fcn', [SensitiveDataController::class, 'revealFCN'])

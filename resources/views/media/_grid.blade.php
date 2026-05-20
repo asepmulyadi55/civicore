@@ -9,7 +9,7 @@
   <div class="group relative bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-md hover:border-primary/30 transition-all"
     data-id="{{ $file->id }}">
 
-    {{-- Checkbox overlay (only shown when user has delete permission AND folder is not read-only) --}}
+    {{-- Checkbox overlay (only when folder is not read-only and user has delete permission) --}}
     @unless($readOnly ?? false)
     @if(auth()->user()->can('media.delete'))
     <div class="absolute top-2 left-2 z-10">
@@ -53,18 +53,16 @@
           <span class="material-icons text-lg">open_in_new</span>
         </a>
       @endif
+
+      {{-- Delete / action buttons --}}
       @unless($readOnly ?? false)
         @if(auth()->user()->can('media.delete'))
-          <button onclick="confirmDelete('{{ $file->id }}', '{{ addslashes($file->original_name) }}')"
+          <button onclick="confirmDelete('{{ route('media.destroy', $file->id) }}', '{{ addslashes($file->original_name) }}')"
             class="p-2 bg-white rounded-full shadow-md text-slate-700 hover:bg-rose-500 hover:text-white transition-all"
             title="{{ __('app.btn_delete') }}">
             <span class="material-icons text-lg">delete_outline</span>
           </button>
         @endif
-      @else
-        <span class="p-2 bg-white/80 rounded-full shadow-md text-slate-400 cursor-default" title="Manage via resident/member profile">
-          <span class="material-icons text-lg">lock_outline</span>
-        </span>
       @endunless
     </div>
   </div>
@@ -72,6 +70,7 @@
   @if($loop->last)
     </div>
   @endif
+
 @empty
   <div class="flex flex-col items-center justify-center py-24 text-center">
     <span class="material-icons text-5xl text-slate-300 dark:text-slate-700 mb-4">perm_media</span>

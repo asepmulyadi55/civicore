@@ -51,6 +51,19 @@ class VirtualMediaFile
         return str_starts_with($this->mime_type, 'image/');
     }
 
+    /**
+     * Blade uses $file->delete_url
+     * Returns the route URL for deleting this virtual file's photo from the owning record.
+     */
+    public function getDeleteUrlAttribute(): string
+    {
+        if (str_starts_with($this->id, 'resident:')) {
+            return route('media.resident-photo.destroy', substr($this->id, 9));
+        }
+        // member:
+        return route('media.member-photo.destroy', substr($this->id, 7));
+    }
+
     /** Blade uses $file->human_size */
     public function getHumanSizeAttribute(): string
     {
@@ -59,10 +72,12 @@ class VirtualMediaFile
         return round($this->size / 1048576, 2) . ' MB';
     }
 
-    /** Support Eloquent-style $file->url, $file->is_image, $file->human_size */
+    /** Support Eloquent-style $file->url, $file->is_image, $file->human_size, $file->delete_url */
     public function __get(string $name): mixed
     {
-        $method = 'get' . ucfirst($name) . 'Attribute';
+        // Convert snake_case to camelCase so e.g. 'is_image' → 'getIsImageAttribute'
+        $camel  = str_replace('_', '', ucwords($name, '_'));
+        $method = 'get' . $camel . 'Attribute';
         if (method_exists($this, $method)) {
             return $this->$method();
         }

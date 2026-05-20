@@ -392,8 +392,12 @@ return [
   'remove_image' => 'Remove Image',
   'no_image_uploaded' => 'No image uploaded',
   'image_hint' => 'JPG, PNG, WEBP or GIF Â· Max 5 MB',
-  'flash_file_deleted' => 'File deleted successfully.',
-  'flash_files_deleted' => ':count file(s) deleted successfully.',
+  'flash_file_deleted'    => 'File deleted successfully.',
+  'flash_files_deleted'   => ':count file(s) deleted successfully.',
+  'flash_photo_removed'   => 'Photo removed from :name.',
+  'flash_file_in_use'     => 'Cannot delete: this file is still used by :reason.',
+  'flash_bulk_partial'    => ':deleted file(s) deleted. :skipped skipped (still in use).',
+  'flash_bulk_all_skipped'=> ':skipped file(s) could not be deleted (still in use).',
 
   // Reports
   'financial' => 'Financial',
