@@ -31,7 +31,7 @@
                 <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $resident->unit_number }}</span>
                 <span class="text-[11px] text-slate-400 font-medium truncate">{{ $resident->fullname }}</span>
                 @if($resident->block)
-                  <span class="text-[10px] text-primary/70 font-medium mt-0.5">{{ $resident->block->name }}</span>
+                  <span class="text-[10px] text-primary/70 font-medium mt-0.5 dark:text-white">{{ $resident->block->name }}</span>
                 @endif
               </div>
             </td>
