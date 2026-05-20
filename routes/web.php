@@ -98,6 +98,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:residents.view')->name('residents.index');
     Route::post('/residents', [ResidentController::class, 'store'])
         ->middleware('permission:residents.create')->name('residents.store');
+    Route::post('/residents/import-excel', [ResidentController::class, 'importExcel'])
+        ->middleware('permission:residents.create')->name('residents.import');
     Route::get('/residents/{resident}/edit', [ResidentController::class, 'edit'])
         ->middleware('permission:residents.edit')->name('residents.edit');
     Route::match(['PUT', 'PATCH'], '/residents/{resident}', [ResidentController::class, 'update'])

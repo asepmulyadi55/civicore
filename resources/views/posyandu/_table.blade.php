@@ -60,9 +60,7 @@
               $relLabel = \App\Models\FamilyMember::$relationships[$member->relationship] ?? 'Other';
             }
 
-            $initials = collect(explode(' ', $member->fullname))
-              ->map(fn($w) => strtoupper($w[0] ?? ''))
-              ->take(2)->implode('');
+            $initials = collect(preg_split('/\s+/', trim($member->fullname ?? '')))->filter()->map(fn($w) => strtoupper($w[0]))->take(2)->implode('') ?: '?';
           @endphp
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
 
