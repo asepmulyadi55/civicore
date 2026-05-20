@@ -653,4 +653,22 @@ return [
   'edu_master'             => "Master's Degree (S2)",
   'edu_doctorate'          => 'Doctorate (S3)',
   'edu_other'              => 'Other',
+
+  // ── Overview (Resident Portal) ──────────────────────────────────────
+  'overview_payment_history'  => 'Payment History',
+  'overview_active_fee'       => 'Active Monthly Fee',
+  'overview_total_paid'       => 'Total Paid :year',
+  'overview_due_on'           => 'Due on the :day of every month',
+  'overview_months_of_12'     => ':n of 12 Months',
+  'overview_resident_since'   => '• Resident since :date',
+  'overview_under_review'     => 'Under review',
+  'overview_no_prev_records'  => 'No payment records for :year.',
+  'overview_notice_title'     => 'Transparency & Accuracy Notice',
+  'overview_notice_body'      => 'This dashboard is a read-only representation of your payment ledger as maintained by :name Management. If you notice any discrepancies, please contact the management office directly.',
+  'overview_notice_label'     => 'Notice',
+  'overview_badge_active'     => 'Active',
+  'overview_badge_inactive'   => 'Inactive',
+  'status_paid'               => 'Paid',
+  'status_upcoming'           => 'Upcoming',
+  'status_overdue'            => 'Overdue',
 ];
