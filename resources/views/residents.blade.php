@@ -14,6 +14,7 @@
 
   {{-- Resident form modals — in components/modals/ consistent with other sections --}}
   <x-modals.resident-form :blocks="$blocks" :currency="$currency" />
+  @include('residents._import_modal')
 
 
   {{-- ── Resident Confirmation Modal (Deactivate / Delete) ────────── --}}

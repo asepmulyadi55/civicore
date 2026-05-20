@@ -25,17 +25,11 @@
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_user') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_email') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_role') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {{ __('app.table_last_login') }}
-          </th>
+          <x-ui.sort-th column="name" :label="__('app.table_user')" />
+          <x-ui.sort-th column="email" :label="__('app.table_email')" />
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_role') }}</th>
+          <x-ui.sort-th column="is_active" :label="__('app.table_status')" />
+          <x-ui.sort-th column="last_login_at" :label="__('app.table_last_login')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
             {{ __('app.table_actions') }}
           </th>

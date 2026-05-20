@@ -121,4 +121,34 @@ class SettingController extends Controller
     return redirect()->route('settings.index')
       ->with('success', 'Admin memo updated successfully.');
   }
+
+  /** Save Posyandu age-category range limits — admin only. */
+  public function updatePosyandu(Request $request)
+  {
+    $request->validate([
+      'posyandu_baby_max_months'    => ['required', 'integer', 'min:1', 'max:24'],
+      'posyandu_toddler_max_months' => ['required', 'integer', 'min:2', 'max:60'],
+      'posyandu_child_max_months'   => ['required', 'integer', 'min:12', 'max:144'],
+      'posyandu_teen_max_months'    => ['required', 'integer', 'min:48', 'max:216'],
+      'posyandu_adult_max_months'   => ['required', 'integer', 'min:120', 'max:840'],
+    ]);
+
+    $keys = [
+      'posyandu_baby_max_months',
+      'posyandu_toddler_max_months',
+      'posyandu_child_max_months',
+      'posyandu_teen_max_months',
+      'posyandu_adult_max_months',
+    ];
+
+    foreach ($keys as $key) {
+      Setting::set($key, (string) $request->integer($key));
+    }
+
+    Cache::flush();
+
+    return redirect()->route('settings.index')
+      ->with('success', 'Posyandu age category ranges updated.');
+  }
 }
+

@@ -19,14 +19,22 @@ class UnitController extends Controller
 
         $units = $block->units()
             ->with('resident')
-            ->orderBy('unit_number')
+            ->orderByRaw("
+                LEFT(unit_number, LOCATE('-', unit_number) - 1),
+                CAST(SUBSTRING(unit_number, LOCATE('-', unit_number) + 1) AS UNSIGNED),
+                unit_number
+            ")
             ->get();
 
-        $totalCount    = $units->count();
-        $occupiedCount = $units->filter(fn($u) => $u->resident !== null)->count();
-        $vacantCount   = $totalCount - $occupiedCount;
 
-        return view('blocks.units', compact('block', 'units', 'totalCount', 'occupiedCount', 'vacantCount'));
+        $totalCount         = $units->count();
+        $ownerOccupiedCount = $units->where('house_status', 'owner_occupied')->count();
+        $rentedCount        = $units->where('house_status', 'rented')->count();
+        $vacantCount        = $units->where('house_status', 'vacant')->count();
+
+        return view('blocks.units', compact(
+            'block', 'units', 'totalCount', 'ownerOccupiedCount', 'rentedCount', 'vacantCount'
+        ));
     }
 
     /**

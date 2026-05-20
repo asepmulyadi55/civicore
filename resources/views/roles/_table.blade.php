@@ -16,12 +16,10 @@
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {{ __('app.table_role') }}</th>
+          <x-ui.sort-th column="label" :label="__('app.table_role')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
             {{ __('app.table_description') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {{ __('app.table_users_count') }}</th>
+          <x-ui.sort-th column="users_count" :label="__('app.table_users_count')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
             {{ __('app.table_permissions') }}</th>
           @if(auth()->user()->isAdmin())

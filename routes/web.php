@@ -63,8 +63,8 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name(
 // ── Auth-protected pages ──────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware('permission:dashboard.view')->name('dashboard');
 
     // ── Homepage CMS ─────────────────────────────────────────────────────────
     Route::get('/homepage', [HomepageController::class, 'index'])
@@ -89,14 +89,17 @@ Route::middleware('auth')->group(function () {
         ->where('path', '.+')
         ->name('private.file');
 
-    // Resident personal overview (residents only, no secondary permission needed)
-    Route::get('/overview', [OverviewController::class, 'index'])->name('overview');
+    // Overview (residents, posyandu, and any role with overview.view permission)
+    Route::get('/overview', [OverviewController::class, 'index'])
+        ->middleware('permission:overview.view')->name('overview');
 
     // ── Residents ─────────────────────────────────────────────────────────────
     Route::get('/residents', [ResidentController::class, 'index'])
         ->middleware('permission:residents.view')->name('residents.index');
     Route::post('/residents', [ResidentController::class, 'store'])
         ->middleware('permission:residents.create')->name('residents.store');
+    Route::post('/residents/import-excel', [ResidentController::class, 'importExcel'])
+        ->middleware('permission:residents.create')->name('residents.import');
     Route::get('/residents/{resident}/edit', [ResidentController::class, 'edit'])
         ->middleware('permission:residents.edit')->name('residents.edit');
     Route::match(['PUT', 'PATCH'], '/residents/{resident}', [ResidentController::class, 'update'])
@@ -105,6 +108,12 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:residents.edit')->name('residents.deactivate');
     Route::delete('/residents/{resident}', [ResidentController::class, 'destroy'])
         ->middleware('permission:residents.delete')->name('residents.destroy');
+
+    // ── Posyandu ───────────────────────────────────────────────────────────────
+    Route::get('/posyandu', [\App\Http\Controllers\PosyanduController::class, 'index'])
+        ->middleware('permission:posyandu.view')->name('posyandu.index');
+    Route::get('/posyandu/export', [\App\Http\Controllers\PosyanduController::class, 'export'])
+        ->middleware('permission:posyandu.view')->name('posyandu.export');
 
     // Family Members (nested under resident)
     Route::post('/residents/{resident}/family-members', [FamilyMemberController::class, 'store'])
@@ -121,6 +130,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:blocks.view')->name('blocks.index');
     Route::post('/blocks', [BlockController::class, 'store'])
         ->middleware('permission:blocks.create')->name('blocks.store');
+    Route::post('/blocks/import-excel', [BlockController::class, 'importExcel'])
+        ->middleware('permission:blocks.create')->name('blocks.import');
     Route::match(['PUT', 'PATCH'], '/blocks/{block}', [BlockController::class, 'update'])
         ->middleware('permission:blocks.edit')->name('blocks.update');
     Route::delete('/blocks/{block}', [BlockController::class, 'destroy'])
@@ -230,4 +241,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/reset-link', [SettingController::class, 'sendResetLink'])->name('settings.reset-link');
     Route::post('/settings/security', [SettingController::class, 'updateSecurity'])->middleware('permission:settings.edit')->name('settings.security');
     Route::post('/settings/memo', [SettingController::class, 'updateMemo'])->middleware('permission:settings.edit')->name('settings.memo');
+    Route::post('/settings/posyandu', [SettingController::class, 'updatePosyandu'])->middleware('permission:settings.edit')->name('settings.posyandu');
 });

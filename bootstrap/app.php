@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->prependToGroup('web', [
+            \App\Http\Middleware\TrustProxies::class,
             \App\Http\Middleware\UpdateLastActive::class,
         ]);
 

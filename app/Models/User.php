@@ -118,12 +118,20 @@ class User extends Authenticatable
     return $this->role?->name === 'resident';
   }
 
+  public function isPosyandu(): bool
+  {
+    return $this->role?->name === 'posyandu';
+  }
+
   /**
    * The URL to redirect this user to after login.
    */
   public function homeUrl(): string
   {
-    return $this->isResident() ? '/overview' : '/dashboard';
+    if ($this->can('overview.view') && !$this->can('dashboard.view')) {
+      return '/overview';
+    }
+    return '/dashboard';
   }
 
   /**

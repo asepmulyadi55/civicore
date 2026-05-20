@@ -4,18 +4,18 @@
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_resident') }}</th>
+          <x-ui.sort-th column="resident" :label="__('app.table_resident')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_block') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_months') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_amount') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}</th>
+          <x-ui.sort-th column="month" :label="__('app.table_months')" />
+          <x-ui.sort-th column="amount" :label="__('app.table_amount')" />
+          <x-ui.sort-th column="status" :label="__('app.table_status')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">{{ __('app.table_actions') }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
         @forelse($payments as $payment)
           @php
-            $initials = collect(explode(' ', $payment->resident->fullname))->map(fn($w) => strtoupper($w[0]))->take(2)->implode('');
+            $initials = collect(preg_split('/\s+/', trim($payment->resident->fullname ?? '')))->filter()->map(fn($w) => strtoupper($w[0]))->take(2)->implode('') ?: '?';
             $isMulti  = ($payment->month_count ?? 1) > 1;
             $allMonths = $payment->all_months ?? collect([$payment->payment_month]);
             $monthLabels = $allMonths->map(fn($m) => \Carbon\Carbon::parse($m)->format('F Y'))->implode(', ');

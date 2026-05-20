@@ -11,6 +11,11 @@
   </div>
   <div class="flex items-center gap-3">
     @if(auth()->user()->can('blocks.create'))
+    <button onclick="document.getElementById('modal-import-excel').classList.remove('hidden'); document.getElementById('modal-import-excel').classList.add('flex')"
+      class="flex items-center gap-2 border border-primary/30 hover:bg-primary/5 text-primary dark:border-secondary/30 dark:hover:bg-secondary/5 dark:text-secondary px-4 py-2 rounded-lg font-semibold transition-all text-sm">
+      <span class="material-icons text-sm">upload_file</span>
+      <span class="hidden sm:inline">Import Excel</span>
+    </button>
     <button onclick="openAddBlockModal()"
       class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-sm shadow-primary/20 text-sm">
       <span class="material-icons text-sm">add</span>

@@ -1,4 +1,4 @@
-﻿{{-- Media Manager Page - Orchestrator --}}
+{{-- Media Manager Page - Orchestrator --}}
 <x-layouts.app :title="__('app.media_manager')"
   class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 antialiased min-h-screen">
 
@@ -30,13 +30,25 @@
         <div class="mx-4 my-1 border-t border-slate-100 dark:border-slate-800"></div>
         <p class="px-4 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Folders</p>
 
-        @php $folders = \App\Http\Controllers\MediaController::folders(); @endphp
+        @php
+          $folders = \App\Http\Controllers\MediaController::folders();
+          $shownCommunityHeader = false;
+        @endphp
         @foreach($folders as $key => $meta)
+          {{-- Section divider before first read-only (community) folder --}}
+          @if(($meta['readonly'] ?? false) && !$shownCommunityHeader)
+            <div class="mx-4 my-1 border-t border-slate-100 dark:border-slate-800"></div>
+            <p class="px-4 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Community</p>
+            @php $shownCommunityHeader = true; @endphp
+          @endif
           <a href="{{ route('media.index', ['folder' => $key]) }}"
              class="flex items-center gap-3 px-4 py-3 mx-2 my-0.5 rounded-xl text-sm font-semibold transition-all
                     {{ $folder === $key ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800' }}">
             <span class="material-icons text-[20px]">{{ $meta['icon'] }}</span>
             <span class="flex-1">{{ $meta['label'] }}</span>
+            @if($meta['readonly'] ?? false)
+              <span class="material-icons text-[13px] text-slate-300 dark:text-slate-600 mr-0.5" title="View only — managed via resident profiles">lock</span>
+            @endif
             <span class="text-xs font-bold px-2 py-0.5 rounded-full
                          {{ $folder === $key ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500' }}">
               {{ $folderCounts[$key] ?? 0 }}
