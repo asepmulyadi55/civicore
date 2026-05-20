@@ -11,47 +11,53 @@ jobs:
 
     steps:
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.0.3
+
         with:
           host: 52.77.165.164
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          command_timeout: 30m
+
           script: |
             set -e
 
             cd /var/www/civicore
-
-            echo "Fix ownership before git pull..."
-            sudo chown -R ubuntu:ubuntu .
 
             echo "Pull latest code..."
             git fetch origin main
             git reset --hard origin/main
 
             echo "Install PHP dependencies..."
-            composer install --no-dev --optimize-autoloader
+            composer install \
+              --no-dev \
+              --optimize-autoloader \
+              --no-interaction \
+              --prefer-dist
 
             echo "Install Node dependencies..."
-            npm ci
+            npm install --silent
 
             echo "Build Vite..."
+            export NODE_OPTIONS=--max-old-space-size=512
             npm run build
 
             echo "Laravel optimize..."
             php artisan config:cache
             php artisan route:cache
-            php artisan view:cache
-            php artisan storage:link --force
 
-            echo "Run migration..."
+            echo "Run migrations..."
             php artisan migrate --force
 
-            echo "Set Laravel permissions..."
+            echo "Set permissions..."
             sudo chown -R www-data:www-data storage bootstrap/cache
             sudo chmod -R 775 storage bootstrap/cache
 
-            echo "Restart services..."
+            echo "Restart PHP-FPM..."
             sudo systemctl restart php8.2-fpm
-            sudo systemctl restart nginx
+
+            echo "Reload Nginx..."
+            sudo systemctl reload nginx
 
             echo "Deploy complete!"
