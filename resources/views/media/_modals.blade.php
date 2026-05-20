@@ -57,14 +57,21 @@
   </div>
 </div>
 
-{{-- Bulk Delete Form (hidden) --}}
+{{-- Bulk Delete Form for standard media_files (hidden) --}}
 <form id="bulk-delete-form" method="POST" action="{{ route('media.bulk-destroy') }}" class="hidden">
   @csrf @method('DELETE')
   <div id="bulk-ids"></div>
 </form>
 
+{{-- Bulk Delete Form for virtual files — residents/members (hidden) --}}
+<form id="virtual-bulk-delete-form" method="POST" action="{{ route('media.virtual-bulk-destroy') }}" class="hidden">
+  @csrf @method('DELETE')
+  <div id="virtual-bulk-ids"></div>
+</form>
+
 <script>
-  const mediaBaseUrl = "{{ url('/media') }}";
+  const mediaBaseUrl    = "{{ url('/media') }}";
+  const isVirtualFolder = {{ ($isVirtualFolder ?? false) ? 'true' : 'false' }};
 
   function showOverlay(id) {
     const el = document.getElementById(id);
@@ -80,9 +87,9 @@
   }
 
   // ── Single delete ─────────────────────────────────────────────
-  function confirmDelete(id, name) {
+  function confirmDelete(url, name) {
     document.getElementById('delete-file-name').textContent = name;
-    document.getElementById('delete-file-form').action = `${mediaBaseUrl}/${id}`;
+    document.getElementById('delete-file-form').action = url;
     showOverlay('delete-file-overlay');
   }
   function closeDeleteModal() { hideOverlay('delete-file-overlay'); }
@@ -145,17 +152,32 @@
 
   function confirmBulkDelete() {
     const checked = document.querySelectorAll('.file-checkbox:checked');
-    const form = document.getElementById('bulk-delete-form');
-    const container = document.getElementById('bulk-ids');
-    container.innerHTML = '';
-    checked.forEach(cb => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'ids[]';
-      input.value = cb.dataset.id;
-      container.appendChild(input);
-    });
-    form.submit();
+
+    if (isVirtualFolder) {
+      // Virtual folder (residents / members) — use separate bulk route
+      const container = document.getElementById('virtual-bulk-ids');
+      container.innerHTML = '';
+      checked.forEach(cb => {
+        const input = document.createElement('input');
+        input.type  = 'hidden';
+        input.name  = 'ids[]';
+        input.value = cb.dataset.id;
+        container.appendChild(input);
+      });
+      document.getElementById('virtual-bulk-delete-form').submit();
+    } else {
+      // Regular media_files folder
+      const container = document.getElementById('bulk-ids');
+      container.innerHTML = '';
+      checked.forEach(cb => {
+        const input = document.createElement('input');
+        input.type  = 'hidden';
+        input.name  = 'ids[]';
+        input.value = cb.dataset.id;
+        container.appendChild(input);
+      });
+      document.getElementById('bulk-delete-form').submit();
+    }
   }
 
   document.querySelectorAll('.file-checkbox').forEach(cb => {
