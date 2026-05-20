@@ -42,7 +42,8 @@
   @endif
 </form>
 
-{{-- Bulk Actions Bar (delete permission required) --}}
+{{-- Bulk Actions Bar (delete permission required, not available for read-only folders) --}}
+@unless($readOnly ?? false)
 @if(auth()->user()->can('media.delete'))
 <div id="bulk-bar"
   class="hidden items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-5 py-3">
@@ -68,8 +69,10 @@
   </div>
 </div>
 @endif
+@endunless
 
 {{-- Select All Toggle --}}
+@unless($readOnly ?? false)
 @if($files->count() > 0 && auth()->user()->can('media.delete'))
   <div class="flex items-center gap-3">
     <label class="flex items-center gap-2 cursor-pointer select-none text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
@@ -78,3 +81,4 @@
     </label>
   </div>
 @endif
+@endunless
