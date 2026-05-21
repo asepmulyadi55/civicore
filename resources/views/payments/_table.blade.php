@@ -113,7 +113,7 @@
                         '{{ addslashes($payment->notes ?? '') }}',
                         {{ $isMulti ? "'{$payment->batch_id}'" : 'null' }}
                       )"
-                      class="text-primary hover:text-primary/80 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-primary/40 dark:border-primary/60 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-all">
+                      class="text-amber-600 dark:text-amber-400 border border-amber-500/40 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-500/10 hover:bg-amber-500 hover:border-amber-500 hover:text-white dark:hover:bg-amber-500 dark:hover:border-amber-500 dark:hover:text-white font-semibold text-xs px-3 py-1.5 rounded-lg transition-all">
                       {{ __('app.review_payment') }}
                     </button>
                   @elseif($statusValue === 'approved')

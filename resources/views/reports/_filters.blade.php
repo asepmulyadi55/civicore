@@ -50,7 +50,7 @@
     {{-- Apply / Clear --}}
     <div class="flex items-end gap-2">
       <button type="submit"
-        class="flex-1 bg-primary/10 text-primary hover:bg-primary/20 py-2.5 rounded-lg text-sm font-bold transition-colors border border-primary/30 dark:border-primary/50">
+        class="flex-1 bg-primary/10 dark:bg-primary/15 text-primary hover:bg-primary/20 dark:hover:bg-primary/25 py-2.5 rounded-lg text-sm font-bold transition-colors border border-primary/30 dark:border-primary">
         {{ __('app.btn_apply') }}
       </button>
       @if($search || (!$isCoordinator && $blockId))
