@@ -60,24 +60,33 @@ class SettingController extends Controller
       ->with('success', __('app.flash_profile_updated'));
   }
 
-  /** Change password — requires current password verification. */
+  /** Change password — requires current password only if one is already set. */
   public function updatePassword(Request $request)
   {
     /** @var \App\Models\User $user */
     $user = Auth::user();
+    // Google OAuth users always have a random password they don't know.
+    // The correct signal is google_id: if set, skip the current-password requirement.
+    $hasPassword = is_null($user->google_id);
 
-    $request->validate([
-      'current_password' => ['required', 'string'],
+    // Validation rules differ depending on whether the user already has a password
+    $rules = [
       'password' => ['required', 'confirmed', PasswordRule::min(8)->mixedCase()->numbers()->symbols()],
-    ]);
+    ];
+    if ($hasPassword) {
+      $rules['current_password'] = ['required', 'string'];
+    }
 
-    if (!Hash::check($request->current_password, $user->password)) {
+    $request->validate($rules);
+
+    // For users with an existing password, verify it before allowing the change
+    if ($hasPassword && !Hash::check($request->current_password, $user->password)) {
       return back()
         ->withErrors(['current_password' => 'The current password is incorrect.'])
         ->withInput();
     }
 
-    $user->update(['password' => Hash::make($request->password)]);
+    $user->update(['password' => $request->password]); // Cast 'hashed' applies bcrypt automatically
 
     return redirect()->route('settings.index')
       ->with('success', __('app.flash_password_changed'));
