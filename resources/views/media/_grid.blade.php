@@ -100,14 +100,34 @@
         </a>
       @endif
 
-      @foreach($files->getUrlRange(max(1, $files->currentPage() - 2), min($files->lastPage(), $files->currentPage() + 2)) as $page => $url)
-        @if($page === $files->currentPage())
-          <span class="px-3 py-1.5 text-sm font-bold text-white bg-primary border border-primary rounded-lg">{{ $page }}</span>
-        @else
-          <a href="{{ $url }}"
-            class="px-3 py-1.5 text-sm text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-primary/50 hover:text-primary transition-all">{{ $page }}</a>
+      @php
+        $lastPage    = $files->lastPage();
+        $currentPage = $files->currentPage();
+        $start       = max(1, $currentPage - 2);
+        $end         = min($lastPage, $currentPage + 2);
+      @endphp
+
+      @if ($start > 1)
+        <a href="{{ $files->url(1) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">1</a>
+        @if ($start > 2)
+          <span class="px-1 text-slate-400 text-sm">&hellip;</span>
         @endif
-      @endforeach
+      @endif
+
+      @for ($p = $start; $p <= $end; $p++)
+        @if ($p === $currentPage)
+          <span class="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-semibold">{{ $p }}</span>
+        @else
+          <a href="{{ $files->url($p) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $p }}</a>
+        @endif
+      @endfor
+
+      @if ($end < $lastPage)
+        @if ($end < $lastPage - 1)
+          <span class="px-1 text-slate-400 text-sm">&hellip;</span>
+        @endif
+        <a href="{{ $files->url($lastPage) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $lastPage }}</a>
+      @endif
 
       @if($files->hasMorePages())
         <a href="{{ $files->nextPageUrl() }}"
