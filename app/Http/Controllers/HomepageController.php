@@ -20,6 +20,7 @@ class HomepageController extends Controller
         $allEvents = json_decode(Setting::get('homepage_events', '[]'), true) ?? [];
         $about = json_decode(Setting::get('homepage_about', '{}'), true) ?? [];
         $memorableMoments = json_decode(Setting::get('homepage_memorable_moments', '{}'), true) ?? [];
+        $footer = json_decode(Setting::get('homepage_footer', '{}'), true) ?? [];
 
         // ── Event filters ────────────────────────────────────────────────────
         $search = trim($request->input('event_search', ''));
@@ -62,7 +63,7 @@ class HomepageController extends Controller
 
         $totalEvents = count($allEvents);
 
-        return view('homepage', compact('hero', 'featuredEvent', 'events', 'pagination', 'about', 'totalEvents', 'memorableMoments'));
+        return view('homepage', compact('hero', 'featuredEvent', 'events', 'pagination', 'about', 'totalEvents', 'memorableMoments', 'footer'));
     }
 
     // ── Hero Section ──────────────────────────────────────────────────────────
@@ -245,48 +246,22 @@ class HomepageController extends Controller
     public function updateAbout(Request $request)
     {
         $data = $request->validate([
-            'badge' => 'nullable|string|max:60',
-            'heading' => 'required|string|max:120',
-            'btn1_label' => 'nullable|string|max:60',
-            'btn1_url' => 'nullable|url|max:500',
-            'btn2_label' => 'nullable|string|max:60',
-            'btn2_url' => 'nullable|url|max:500',
-            'content' => 'required|string|max:3000',
-            'image_url' => 'nullable|image|max:5120', // max 5 MB
-            'stats' => 'nullable|array|max:4',
+            'badge'       => 'nullable|string|max:60',
+            'heading'     => 'required|string|max:120',
+            'btn1_label'  => 'nullable|string|max:60',
+            'btn1_url'    => 'nullable|url|max:500',
+            'btn2_label'  => 'nullable|string|max:60',
+            'btn2_url'    => 'nullable|url|max:500',
+            'content'     => 'required|string|max:3000',
+            'stats'       => 'nullable|array|max:4',
             'stats.*.value' => 'nullable|string|max:50',
             'stats.*.label' => 'nullable|string|max:50',
         ]);
 
-        // Load existing about to preserve/replace the stored image
+        // Preserve existing image data (uploaded previously) unchanged
         $existing = json_decode(Setting::get('homepage_about', '{}'), true) ?? [];
-
-        if ($request->hasFile('image_url')) {
-            // Delete old stored file if it exists
-            if (!empty($existing['image_path'])) {
-                Storage::disk('public')->delete($existing['image_path']);
-                MediaFile::where('path', $existing['image_path'])->delete();
-            }
-
-            $file = $request->file('image_url');
-            $path = $file->store('homepage', 'public');
-            $publicUrl = Storage::disk('public')->url($path);
-
-            MediaFile::create([
-                'disk' => 'public',
-                'path' => $path,
-                'original_name' => $file->getClientOriginalName(),
-                'mime_type' => $file->getMimeType(),
-                'size' => $file->getSize(),
-                'uploaded_by' => auth()->id(),
-            ]);
-
-            $data['image_url'] = $publicUrl;
-            $data['image_path'] = $path;
-        } else {
-            $data['image_url'] = $existing['image_url'] ?? null;
-            $data['image_path'] = $existing['image_path'] ?? null;
-        }
+        $data['image_url']  = $existing['image_url']  ?? null;
+        $data['image_path'] = $existing['image_path'] ?? null;
 
         // Clean out empty stat rows
         if (!empty($data['stats'])) {
@@ -301,7 +276,35 @@ class HomepageController extends Controller
         return redirect()->route('homepage.index')->with('success', 'About section saved.');
     }
 
-    // ── Memorable Moments ─────────────────────────────────────────────────────
+    // ── Footer Section ────────────────────────────────────────────────────────
+
+    public function updateFooter(Request $request)
+    {
+        $data = $request->validate([
+            'brand_name'     => 'nullable|string|max:100',
+            'tagline'        => 'nullable|string|max:300',
+            'contact_email'  => 'nullable|email|max:200',
+            'contact_phone'  => 'nullable|string|max:50',
+            'facebook_url'   => 'nullable|url|max:500',
+            'instagram_url'  => 'nullable|url|max:500',
+            'copyright'      => 'nullable|string|max:300',
+            'bottom_note'    => 'nullable|string|max:300',
+            'links'          => 'nullable|array|max:4',
+            'links.*.label'  => 'nullable|string|max:60',
+            'links.*.url'    => 'nullable|url|max:500',
+        ]);
+
+        if (!empty($data['links'])) {
+            $data['links'] = array_values(array_filter(
+                $data['links'],
+                fn($l) => !empty($l['label']) || !empty($l['url'])
+            ));
+        }
+
+        $this->saveSetting('homepage_footer', json_encode($data), 'Footer Section');
+
+        return redirect()->route('homepage.index')->with('success', 'Footer saved.');
+    }
 
     public function updateMemorableMoments(Request $request)
     {

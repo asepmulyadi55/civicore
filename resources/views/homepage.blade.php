@@ -41,6 +41,7 @@
       @include('homepage._events')
       @include('homepage._memorable_moments')
       @include('homepage._about')
+      @include('homepage._footer')
 
     </main>
   </div>
