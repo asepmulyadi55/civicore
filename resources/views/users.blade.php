@@ -56,10 +56,31 @@
           const roleId = @json(old('role_id'));
           const blockId = @json(old('block_id'));
           const unitNum = @json(old('unit_number'));
-          openEditModal(id, name, username, email, roleId ? parseInt(roleId) : null, blockId ? parseInt(blockId) : null, unitNum);
+          openEditModal(id, name, username, email, roleId || null, blockId || null, unitNum);
         }
       });
     </script>
   @endif
+
+  <script>
+    function checkPwStrength(pw, prefix) {
+      const box = document.getElementById('pw-req-' + prefix);
+      if (!box) return;
+      if (!pw) { box.classList.add('hidden'); return; }
+      box.classList.remove('hidden');
+      function setReq(id, passed) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const icon = el.querySelector('.material-icons');
+        if (passed) { el.classList.replace('text-slate-400', 'text-emerald-500'); icon.textContent = 'check_circle'; }
+        else { el.classList.replace('text-emerald-500', 'text-slate-400'); icon.textContent = 'radio_button_unchecked'; }
+      }
+      setReq(prefix + '-req-length', pw.length >= 8);
+      setReq(prefix + '-req-upper',  /[A-Z]/.test(pw));
+      setReq(prefix + '-req-lower',  /[a-z]/.test(pw));
+      setReq(prefix + '-req-number', /[0-9]/.test(pw));
+      setReq(prefix + '-req-symbol', /[^A-Za-z0-9]/.test(pw));
+    }
+  </script>
 
 </x-layouts.app>

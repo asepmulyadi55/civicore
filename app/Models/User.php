@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Storage;
 class User extends Authenticatable
 {
   /** @use HasFactory<\Database\Factories\UserFactory> */
-  use HasFactory, Notifiable;
+  use HasFactory, Notifiable, HasUuids;
 
   protected $fillable = [
     'name',
@@ -23,6 +24,7 @@ class User extends Authenticatable
     'google_id',
     'role_id',
     'block_id',
+    'unit_number',
     'avatar',
     'language',
     'session_token',
@@ -65,6 +67,35 @@ class User extends Authenticatable
     return $this->hasOne(Resident::class);
   }
 
+  /**
+   * Resolve the linked resident with a three-level fallback:
+   * 1. By user_id (fast path, already linked)
+   * 2. By email (if emails match)
+   * 3. By block_id + unit_number (if neither user_id nor email matched)
+   * Auto-repairs residents.user_id on match so future lookups use the fast path.
+   */
+  public function resolveResident(): ?Resident
+  {
+    $resident = $this->hasOne(Resident::class)->first();
+
+    if (!$resident && $this->email) {
+      $resident = Resident::where('email', $this->email)->first();
+    }
+
+    if (!$resident && $this->block_id && $this->unit_number) {
+      $resident = Resident::whereHas('unit', fn($q) =>
+          $q->where('block_id', $this->block_id)
+            ->where('unit_number', $this->unit_number)
+      )->first();
+    }
+
+    if ($resident && !$resident->user_id) {
+      $resident->update(['user_id' => $this->id]);
+    }
+
+    return $resident;
+  }
+
   // ── Role Helpers ────────────────────────────────────────────
 
   public function isAdmin(): bool
@@ -87,21 +118,31 @@ class User extends Authenticatable
     return $this->role?->name === 'resident';
   }
 
+  public function isPosyandu(): bool
+  {
+    return $this->role?->name === 'posyandu';
+  }
+
   /**
    * The URL to redirect this user to after login.
    */
   public function homeUrl(): string
   {
-    return $this->isResident() ? '/my-overview' : '/dashboard';
+    if ($this->can('overview.view') && !$this->can('dashboard.view')) {
+      return '/overview';
+    }
+    return '/dashboard';
   }
 
   /**
-   * Returns the user's avatar URL, falling back to a DiceBear initials avatar.
+   * Returns the user's avatar URL.
+   * Served through the authenticated /private/* route — not publicly accessible.
+   * Falls back to a DiceBear initials avatar for users without an uploaded photo.
    */
   public function avatarUrl(): string
   {
-    if ($this->avatar && Storage::disk('public')->exists($this->avatar)) {
-      return Storage::url($this->avatar);
+    if ($this->avatar && Storage::disk('local')->exists($this->avatar)) {
+      return route('private.file', ['path' => $this->avatar]);
     }
     $initials = urlencode(mb_substr($this->name, 0, 2, 'UTF-8'));
     return "https://api.dicebear.com/8.x/initials/svg?seed={$initials}&backgroundColor=4f46e5&fontFamily=Arial";

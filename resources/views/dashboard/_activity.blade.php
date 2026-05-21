@@ -38,24 +38,16 @@
                 <span class="ml-1 text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded">{{ $activity->month_count }} {{ __('app.months_count') }}</span>
               @endif
             </td>
-            <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+            <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 min-w-[140px] whitespace-nowrap">
               {{ $activity->resident->block?->name ?? '—' }} · {{ $activity->resident->unit_number }}
             </td>
-            <td class="px-6 py-4 text-sm text-slate-500">
+            <td class="px-6 py-4 text-sm text-slate-500 min-w-[140px] whitespace-nowrap">
               {{ $activity->updated_at->format('M d, g:i A') }}
             </td>
             <td class="px-6 py-4 text-right">
-              @switch($activity->status)
-                @case('approved')
-                  <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">Approved</span>
-                  @break
-                @case('pending')
-                  <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Pending</span>
-                  @break
-                @case('rejected')
-                  <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">Rejected</span>
-                  @break
-              @endswitch
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $activity->status->badgeClass() }}">
+                {{ $activity->status->label() }}
+              </span>
             </td>
           </tr>
         @empty

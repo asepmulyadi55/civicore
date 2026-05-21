@@ -15,7 +15,7 @@ class LoginController extends Controller
     if (Auth::check()) {
       return redirect(Auth::user()->homeUrl());
     }
-    return view('login');
+    return view('auth.login');
   }
 
   public function login(Request $request)
@@ -37,14 +37,30 @@ class LoginController extends Controller
     }
 
     if (!$user->is_active) {
-      return back()->with('error', 'Your account is pending admin approval.')
+      // Distinguish pending (never logged in / never approved) from deactivated
+      if ($user->last_login_at) {
+        $msg = 'Your account has been deactivated. Please contact the administrator.';
+      } else {
+        $msg = 'Your account is pending admin approval.';
+      }
+      return back()->with('error', $msg)
         ->withInput($request->only('username', 'remember'));
     }
 
     // ── Single-session check ──────────────────────────────────────────────
     // If another active session exists for this user, redirect to conflict page
     // so they can choose to cancel or kick the other device.
-    if ($user->session_token && $user->session_token !== $request->session()->getId()) {
+    // EXCEPTION: if the stored session has been inactive for ≥ 8 hours we
+    // treat it as expired and silently take over (no popup).
+    $sessionTimeoutHours = (int) config('session.timeout_hours', 8);
+    $oldSessionExpired = !$user->last_active_at
+      || $user->last_active_at->diffInHours(now()) >= $sessionTimeoutHours;
+
+    if (
+      $user->session_token
+      && $user->session_token !== $request->session()->getId()
+      && !$oldSessionExpired
+    ) {
       // Store user_id in session temporarily (guest session) so the conflict
       // page can offer the "Use this device" action.
       session(['conflict_user_id' => $user->id]);
@@ -71,12 +87,13 @@ class LoginController extends Controller
     if ($user) {
       /** @var \App\Models\User $user */
       $user->session_token = null;
+      $user->last_active_at = null;   // mark as offline immediately
       $user->save();
     }
 
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
-    return redirect('/');
+    return redirect()->route('login');
   }
 }

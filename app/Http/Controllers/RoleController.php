@@ -9,9 +9,24 @@ use Illuminate\Support\Facades\Log;
 
 class RoleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $roles = Role::withCount('users')->orderBy('id')->get();
+        $query = Role::withCount('users');
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('label', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $sortMap = ['label' => 'label', 'users_count' => 'users_count'];
+        $sort = $request->get('sort');
+        $dir  = $request->get('direction', 'asc') === 'desc' ? 'desc' : 'asc';
+        $query->orderBy(isset($sortMap[$sort]) ? $sort : 'id', $dir);
+
+        $roles = $query->get();
         return view('roles', compact('roles'));
     }
 

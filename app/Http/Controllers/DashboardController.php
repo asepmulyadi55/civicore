@@ -6,6 +6,7 @@ use App\Models\PaymentMethod;
 use App\Models\PaymentRecord;
 use App\Models\Resident;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
 
@@ -61,13 +62,41 @@ class DashboardController extends Controller
       ->take(7)
       ->values();
 
+    // Notification: pending payment batches (up to 5 unique batches)
+    $rawPendingPayments = PaymentRecord::with(['resident'])
+      ->where('status', 'pending')
+      ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
+      ->orderByDesc('created_at')
+      ->limit(30)
+      ->get();
+
+    $notifPayments = $rawPendingPayments
+      ->groupBy(fn($r) => $r->batch_id ?? 'single_' . $r->id)
+      ->map(function ($records) {
+        $lead = $records->first();
+        $lead->notif_month_count = $records->count();
+        return $lead;
+      })
+      ->values()
+      ->take(5);
+
+    // Notification: pending user registrations (admin only)
+    $notifUsers = $user->isAdmin()
+      ? User::where('is_active', false)->whereNotNull('email')->orderByDesc('created_at')->limit(5)->get()
+      : collect();
+
+    $notifTotal = $notifPayments->count() + $notifUsers->count();
+
     return view('dashboard', compact(
       'currency',
       'totalCollected',
       'pendingCount',
       'unpaidCount',
       'activeResidents',
-      'recentActivity'
+      'recentActivity',
+      'notifPayments',
+      'notifUsers',
+      'notifTotal'
     ));
   }
 }

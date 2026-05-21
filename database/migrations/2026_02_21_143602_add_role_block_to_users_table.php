@@ -9,14 +9,14 @@ return new class extends Migration {
     {
         Schema::table('users', function (Blueprint $table) {
             // Role — references the configurable roles table (default = 4 = resident)
-            $table->foreignId('role_id')
+            $table->foreignUuid('role_id')
                 ->nullable()
                 ->after('is_active')
                 ->constrained('roles')
                 ->nullOnDelete();
 
             // Block — only populated for block_coordinator role
-            $table->foreignId('block_id')
+            $table->foreignUuid('block_id')
                 ->nullable()
                 ->after('role_id')
                 ->constrained('blocks')

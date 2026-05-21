@@ -9,7 +9,7 @@
         <div class="inline-flex items-center justify-center p-3 bg-primary/10 rounded-xl mb-4">
           <span class="material-icons text-primary text-4xl">apartment</span>
         </div>
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">CiviCore</h1>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Dwipapuri</h1>
         <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium">Password Recovery</p>
       </div>
 
@@ -32,13 +32,9 @@
           @endif
 
           {{-- Errors --}}
-          @if($errors->any())
-            <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 rounded-lg">
-              <p class="text-sm text-red-700 dark:text-red-400">{{ $errors->first() }}</p>
-            </div>
-          @endif
+          {{-- server-side errors shown inline below field --}}
 
-          <form action="{{ route('password.email') }}" method="POST" class="space-y-5" novalidate>
+          <form id="forgot-form" action="{{ route('password.email') }}" method="POST" class="space-y-5" novalidate>
             @csrf
             <div>
               <label for="email" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
@@ -49,9 +45,13 @@
                   <span class="material-icons text-slate-400 text-sm">mail</span>
                 </span>
                 <input id="email" name="email" type="email" value="{{ old('email') }}" placeholder="admin@civicore.com"
-                  class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none @error('email') border-red-500 @enderror"
-                  required autofocus />
+                  class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none @error('email') border-red-500 @enderror"
+                  autofocus oninput="clearFpErr('err-fp-email')" />
               </div>
+              <p id="err-fp-email" class="hidden mt-1.5 text-sm text-red-600 dark:text-red-400"></p>
+              @error('email')
+                <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+              @enderror
             </div>
 
             <button type="submit"
@@ -73,6 +73,27 @@
 
     </div>
   </main>
+
+  <script>
+    function clearFpErr(id) {
+      const el = document.getElementById(id); if (el) el.classList.add('hidden');
+    }
+    function showFpErr(id, msg) {
+      const el = document.getElementById(id); if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+    }
+    document.getElementById('forgot-form').addEventListener('submit', function(e) {
+      const email = document.getElementById('email').value.trim();
+      if (!email) {
+        showFpErr('err-fp-email', 'Please enter your email address.');
+        e.preventDefault();
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFpErr('err-fp-email', 'Please enter a valid email address.');
+        e.preventDefault();
+      } else {
+        clearFpErr('err-fp-email');
+      }
+    });
+  </script>
 
   {{-- Dark mode toggle --}}
   <div class="fixed bottom-6 right-6">

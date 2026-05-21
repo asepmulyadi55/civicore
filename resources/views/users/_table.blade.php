@@ -25,17 +25,11 @@
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_user') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_email') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_role') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {{ __('app.table_last_login') }}
-          </th>
+          <x-ui.sort-th column="name" :label="__('app.table_user')" />
+          <x-ui.sort-th column="email" :label="__('app.table_email')" />
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_role') }}</th>
+          <x-ui.sort-th column="is_active" :label="__('app.table_status')" />
+          <x-ui.sort-th column="last_login_at" :label="__('app.table_last_login')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
             {{ __('app.table_actions') }}
           </th>
@@ -47,8 +41,9 @@
           @php
             $initials = collect(explode(' ', $user->name))->map(fn($w) => strtoupper($w[0]))->take(2)->implode('');
             $avatarColors = ['bg-primary/10 text-primary', 'bg-blue-100 text-blue-600', 'bg-emerald-100 text-emerald-600', 'bg-amber-100 text-amber-600', 'bg-indigo-100 text-indigo-600'];
-            $color = $avatarColors[$user->id % count($avatarColors)];
-            $isPending = !$user->is_active;
+            $color = $avatarColors[abs(crc32($user->id)) % count($avatarColors)];
+            $isPending = !$user->is_active && !$user->last_login_at;
+            $isInactive = !$user->is_active && $user->last_login_at;
             $isSelf = $user->id === auth()->id();
             $roleBadge = match ($user->role?->name) {
               'admin' => 'bg-purple-100 text-purple-700',
@@ -63,10 +58,18 @@
             {{-- User Details --}}
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
-                <div
-                  class="w-10 h-10 rounded-full {{ $color }} flex items-center justify-center font-bold text-sm flex-shrink-0">
-                  {{ $initials }}
-                </div>
+                @if($user->avatar)
+                  <img src="{{ $user->avatarUrl() }}" alt="{{ $user->name }}"
+                    class="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                    onerror="this.replaceWith(this.nextElementSibling)">
+                  <div class="w-10 h-10 rounded-full {{ $color }} items-center justify-center font-bold text-sm flex-shrink-0 hidden">
+                    {{ $initials }}
+                  </div>
+                @else
+                  <div class="w-10 h-10 rounded-full {{ $color }} flex items-center justify-center font-bold text-sm flex-shrink-0">
+                    {{ $initials }}
+                  </div>
+                @endif
                 <div>
                   <div class="font-bold text-slate-900 dark:text-white">{{ $user->name }}</div>
                   <div class="text-xs text-slate-400">&#64;{{ $user->username }}</div>
@@ -96,13 +99,18 @@
                     class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>{{ __('app.status_active') }}
                   </span>
+                @elseif($isInactive)
+                  <span
+                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>{{ __('app.status_inactive') }}
+                  </span>
                 @else
                   <span
                     class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>{{ __('app.status_pending') }}
                   </span>
                 @endif
-                @if($user->isOnline())
+                @if($user->id === auth()->id() || $user->isOnline())
                   <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>{{ __('app.status_online') }}
                   </span>
@@ -130,33 +138,46 @@
             <td class="px-6 py-4 text-right">
               <div class="flex justify-end gap-1.5 items-center">
 
-                {{-- Edit (always shown) --}}
+                {{-- Edit --}}
+                @if(auth()->user()->can('users.edit'))
                 <button onclick="openEditModal(
-                                {{ $user->id }},
-                                {{ json_encode($user->name) }},
-                                {{ json_encode($user->username) }},
-                                {{ json_encode($user->email) }},
-                                {{ $user->role_id ?? 'null' }},
-                                {{ $user->block_id ?? 'null' }},
-                                {{ json_encode($user->resident?->unit_number) }}
-                              )"
+                                      '{{ $user->id }}',
+                                      {{ json_encode($user->name) }},
+                                      {{ json_encode($user->username) }},
+                                      {{ json_encode($user->email) }},
+                                      {{ $user->role_id ? "'{$user->role_id}'" : 'null' }},
+                                      {{ $user->block_id ? "'{$user->block_id}'" : 'null' }},
+                                      {{ json_encode($user->resident?->unit_number ?? $user->unit_number) }}
+                                    )"
                   class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                   title="{{ __('app.title_edit_user') }}">
                   <span class="material-icons text-lg">edit</span>
                 </button>
+                @endif
 
                 @if($isPending)
-                  {{-- Approve button → triggers approve modal with block/unit assignment --}}
+                  {{-- Approve button --}}
+                  @if(auth()->user()->can('users.approve'))
                   <button
-                    onclick="openApproveModal({{ $user->id }}, {{ json_encode($user->name) }}, {{ json_encode($user->email) }})"
+                    onclick="openApproveModal('{{ $user->id }}', {{ json_encode($user->name) }}, {{ json_encode($user->email) }}, {{ $user->block_id ? "'{$user->block_id}'" : 'null' }}, {{ json_encode($user->unit_number) }})"
                     class="bg-primary text-white text-[10px] px-3 py-1.5 rounded font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors flex items-center gap-1">
                     <span class="material-icons text-xs">verified</span>
                     {{ __('app.btn_approve') }}
                   </button>
+                  @endif
+                @elseif($isInactive)
+                  @if(!$isSelf && auth()->user()->can('users.edit'))
+                    {{-- Reactivate button --}}
+                    <button onclick="openUserConfirmModal('reactivate', '{{ $user->id }}', {{ json_encode($user->name) }})"
+                      class="p-1.5 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                      title="Reactivate user">
+                      <span class="material-icons text-lg">person_add</span>
+                    </button>
+                  @endif
                 @else
-                  @if(!$isSelf)
-                    {{-- Deactivate button → triggers modal --}}
-                    <button onclick="openUserConfirmModal('deactivate', {{ $user->id }}, {{ json_encode($user->name) }})"
+                  @if(!$isSelf && auth()->user()->can('users.edit'))
+                    {{-- Deactivate button --}}
+                    <button onclick="openUserConfirmModal('deactivate', '{{ $user->id }}', {{ json_encode($user->name) }})"
                       class="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
                       title="{{ __('app.title_deactivate_user') }}">
                       <span class="material-icons text-lg">person_off</span>
@@ -164,9 +185,9 @@
                   @endif
                 @endif
 
-                {{-- Delete button → triggers modal --}}
-                @if(!$isSelf)
-                  <button onclick="openUserConfirmModal('delete', {{ $user->id }}, {{ json_encode($user->name) }})"
+                {{-- Delete button --}}
+                @if(!$isSelf && auth()->user()->can('users.delete'))
+                  <button onclick="openUserConfirmModal('delete', '{{ $user->id }}', {{ json_encode($user->name) }})"
                     class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     title="{{ __('app.title_delete_user') }}">
                     <span class="material-icons text-lg">delete_outline</span>
@@ -201,6 +222,55 @@
       {{ __('app.showing') }} {{ $users->firstItem() ?? 0 }}–{{ $users->lastItem() ?? 0 }} {{ __('app.of') }}
       {{ $users->total() }} {{ __('app.users_lowercase') }}
     </span>
-    {{ $users->links() }}
+    <div class="flex items-center gap-1">
+      @if ($users->onFirstPage())
+        <button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 cursor-not-allowed" disabled>
+          <span class="material-icons text-sm">chevron_left</span>
+        </button>
+      @else
+        <a href="{{ $users->previousPageUrl() }}" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+          <span class="material-icons text-sm">chevron_left</span>
+        </a>
+      @endif
+
+      @php
+        $lastPage    = $users->lastPage();
+        $currentPage = $users->currentPage();
+        $start       = max(1, $currentPage - 2);
+        $end         = min($lastPage, $currentPage + 2);
+      @endphp
+
+      @if ($start > 1)
+        <a href="{{ $users->url(1) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">1</a>
+        @if ($start > 2)
+          <span class="px-1 text-slate-400 text-sm">&hellip;</span>
+        @endif
+      @endif
+
+      @for ($p = $start; $p <= $end; $p++)
+        @if ($p === $currentPage)
+          <span class="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-semibold">{{ $p }}</span>
+        @else
+          <a href="{{ $users->url($p) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $p }}</a>
+        @endif
+      @endfor
+
+      @if ($end < $lastPage)
+        @if ($end < $lastPage - 1)
+          <span class="px-1 text-slate-400 text-sm">&hellip;</span>
+        @endif
+        <a href="{{ $users->url($lastPage) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $lastPage }}</a>
+      @endif
+
+      @if ($users->hasMorePages())
+        <a href="{{ $users->nextPageUrl() }}" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+          <span class="material-icons text-sm">chevron_right</span>
+        </a>
+      @else
+        <button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 cursor-not-allowed" disabled>
+          <span class="material-icons text-sm">chevron_right</span>
+        </button>
+      @endif
+    </div>
   </div>
 </div>

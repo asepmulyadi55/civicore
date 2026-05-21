@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class RegisterController extends Controller
 {
@@ -14,7 +15,7 @@ class RegisterController extends Controller
    */
   public function showRegistrationForm()
   {
-    return view('register');
+    return view('auth.register');
   }
 
   /**
@@ -27,7 +28,7 @@ class RegisterController extends Controller
       'fullname' => ['required', 'string', 'max:255'],
       'username' => ['required', 'string', 'max:255', 'unique:users'],
       'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-      'password' => ['required', 'string', 'min:8', 'confirmed'],
+      'password' => ['required', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
       'password_confirmation' => ['required'],
     ], [
       'fullname.required' => 'Please enter your full name.',
@@ -50,6 +51,6 @@ class RegisterController extends Controller
       'is_active' => false,
     ]);
 
-    return redirect('/')->with('success', 'Registration successful! Please wait for admin approval before logging in.');
+    return redirect()->route('login')->with('success', 'Registration successful! Please wait for admin approval before logging in.');
   }
 }

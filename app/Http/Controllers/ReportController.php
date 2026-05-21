@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ReportExport;
 use App\Models\Block;
 use App\Models\PaymentRecord;
 use App\Models\Resident;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
@@ -30,18 +32,21 @@ class ReportController extends Controller
         // Build resident query
         $residentQuery = Resident::with([
             'block',
+            'unit',
             'paymentRecords' => fn($q) => $q->whereYear('payment_month', $year)->orderBy('payment_month'),
-        ])->where('is_active', true)
-            ->orderBy('block_id')
-            ->orderBy('unit_number');
+        ])->where('residents.is_active', true)
+            ->leftJoin('units', 'units.id', '=', 'residents.unit_id')
+            ->orderBy('residents.block_id')
+            ->orderByRaw('CAST(units.unit_number AS UNSIGNED)')
+            ->select('residents.*');
 
         if ($blockId) {
-            $residentQuery->where('block_id', $blockId);
+            $residentQuery->where('residents.block_id', $blockId);
         }
         if ($search) {
             $residentQuery->where(function ($q) use ($search) {
-                $q->where('fullname', 'like', "%{$search}%")
-                    ->orWhere('unit_number', 'like', "%{$search}%");
+                $q->where('residents.fullname', 'like', "%{$search}%")
+                    ->orWhere('units.unit_number', 'like', "%{$search}%");
             });
         }
 
@@ -81,5 +86,19 @@ class ReportController extends Controller
             'totalResidents',
             'isCoordinator'
         ));
+    }
+
+    /** Download the current view as an Excel file. */
+    public function export(Request $request)
+    {
+        $user = auth()->user();
+        $year = (int) $request->get('year', now()->year);
+        $blockId = $user->isBlockCoordinator()
+            ? $user->block_id
+            : $request->get('block_id');
+
+        $filename = 'report-' . $year . ($blockId ? '-block' . $blockId : '') . '.xlsx';
+
+        return Excel::download(new ReportExport($year, $blockId), $filename);
     }
 }

@@ -8,15 +8,15 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('residents', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
 
             // Optional link to a system user account
-            $table->foreignId('user_id')
+            $table->foreignUuid('user_id')
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
 
-            $table->foreignId('block_id')
+            $table->foreignUuid('block_id')
                 ->constrained('blocks');
 
             $table->string('unit_number');             // e.g. A-101, B-203

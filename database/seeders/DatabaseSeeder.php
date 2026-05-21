@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
     $this->call([
         // Lookup tables first (no dependencies)
       RoleSeeder::class,
+      RolePermissionSeeder::class,
       BlockSeeder::class,
       PaymentMethodSeeder::class,
       SettingSeeder::class,

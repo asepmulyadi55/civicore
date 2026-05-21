@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MediaFile;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,9 +34,19 @@ class SettingController extends Controller
     if ($request->hasFile('avatar')) {
       // Delete old avatar if exists
       if ($user->avatar) {
-        Storage::disk('public')->delete($user->avatar);
+        Storage::disk('local')->delete($user->avatar);
+        MediaFile::where('path', $user->avatar)->delete();
       }
-      $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+      $file = $request->file('avatar');
+      $data['avatar'] = $file->store('avatars', 'local');
+      MediaFile::create([
+        'disk'          => 'local',
+        'path'          => $data['avatar'],
+        'original_name' => $file->getClientOriginalName(),
+        'mime_type'     => $file->getMimeType(),
+        'size'          => $file->getSize(),
+        'uploaded_by'   => $user->id,
+      ]);
     } else {
       unset($data['avatar']);
     }
@@ -49,24 +60,33 @@ class SettingController extends Controller
       ->with('success', __('app.flash_profile_updated'));
   }
 
-  /** Change password — requires current password verification. */
+  /** Change password — requires current password only if one is already set. */
   public function updatePassword(Request $request)
   {
     /** @var \App\Models\User $user */
     $user = Auth::user();
+    // Google OAuth users always have a random password they don't know.
+    // The correct signal is google_id: if set, skip the current-password requirement.
+    $hasPassword = is_null($user->google_id);
 
-    $request->validate([
-      'current_password' => ['required', 'string'],
-      'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->numbers()],
-    ]);
+    // Validation rules differ depending on whether the user already has a password
+    $rules = [
+      'password' => ['required', 'confirmed', PasswordRule::min(8)->mixedCase()->numbers()->symbols()],
+    ];
+    if ($hasPassword) {
+      $rules['current_password'] = ['required', 'string'];
+    }
 
-    if (!Hash::check($request->current_password, $user->password)) {
+    $request->validate($rules);
+
+    // For users with an existing password, verify it before allowing the change
+    if ($hasPassword && !Hash::check($request->current_password, $user->password)) {
       return back()
         ->withErrors(['current_password' => 'The current password is incorrect.'])
         ->withInput();
     }
 
-    $user->update(['password' => Hash::make($request->password)]);
+    $user->update(['password' => $request->password]); // Cast 'hashed' applies bcrypt automatically
 
     return redirect()->route('settings.index')
       ->with('success', __('app.flash_password_changed'));
@@ -97,4 +117,47 @@ class SettingController extends Controller
     return redirect()->route('settings.index')
       ->with('success', __('app.flash_security_saved'));
   }
+
+  /** Save admin memo — admin only. */
+  public function updateMemo(Request $request)
+  {
+    $request->validate([
+      'admin_memo' => ['nullable', 'string', 'max:1000'],
+    ]);
+
+    Setting::set('admin_memo', $request->input('admin_memo', ''));
+
+    return redirect()->route('settings.index')
+      ->with('success', 'Admin memo updated successfully.');
+  }
+
+  /** Save Posyandu age-category range limits — admin only. */
+  public function updatePosyandu(Request $request)
+  {
+    $request->validate([
+      'posyandu_baby_max_months'    => ['required', 'integer', 'min:1', 'max:24'],
+      'posyandu_toddler_max_months' => ['required', 'integer', 'min:2', 'max:60'],
+      'posyandu_child_max_months'   => ['required', 'integer', 'min:12', 'max:144'],
+      'posyandu_teen_max_months'    => ['required', 'integer', 'min:48', 'max:216'],
+      'posyandu_adult_max_months'   => ['required', 'integer', 'min:120', 'max:840'],
+    ]);
+
+    $keys = [
+      'posyandu_baby_max_months',
+      'posyandu_toddler_max_months',
+      'posyandu_child_max_months',
+      'posyandu_teen_max_months',
+      'posyandu_adult_max_months',
+    ];
+
+    foreach ($keys as $key) {
+      Setting::set($key, (string) $request->integer($key));
+    }
+
+    Cache::flush();
+
+    return redirect()->route('settings.index')
+      ->with('success', 'Posyandu age category ranges updated.');
+  }
 }
+

@@ -10,12 +10,27 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
   public function index(Request $request)
   {
-    $query = User::with(['role', 'resident'])->orderBy('created_at', 'desc');
+    $sortMap = [
+      'name'          => 'name',
+      'email'         => 'email',
+      'is_active'     => 'is_active',
+      'last_login_at' => 'last_login_at',
+    ];
+    $sort = $request->get('sort');
+    $dir  = $request->get('direction', 'asc') === 'desc' ? 'desc' : 'asc';
+
+    $query = User::with(['role', 'resident']);
+    if (isset($sortMap[$sort])) {
+      $query->orderBy($sortMap[$sort], $dir);
+    } else {
+      $query->orderByDesc('created_at');
+    }
 
     if ($search = $request->get('search')) {
       $query->where(function ($q) use ($search) {
@@ -50,28 +65,6 @@ class UserController extends Controller
   }
 
   /**
-   * AJAX: check if an email exists in the residents table.
-   * Returns JSON: { found, block_id, block_name, unit_number }
-   */
-  public function checkResidentEmail(Request $request)
-  {
-    $request->validate(['email' => ['required', 'email']]);
-
-    $resident = Resident::where('email', $request->email)->with('block')->first();
-
-    if (!$resident) {
-      return response()->json(['found' => false]);
-    }
-
-    return response()->json([
-      'found' => true,
-      'block_id' => $resident->block_id,
-      'block_name' => $resident->block?->name ?? '—',
-      'unit_number' => $resident->unit_number,
-    ]);
-  }
-
-  /**
    * Create a new user from the admin form.
    */
   public function store(Request $request)
@@ -80,7 +73,7 @@ class UserController extends Controller
       'name' => ['required', 'string', 'max:100'],
       'username' => ['required', 'string', 'max:50', 'unique:users,username'],
       'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-      'password' => ['required', 'string', 'min:8'],
+      'password' => ['required', 'string', Password::min(8)->mixedCase()->numbers()->symbols()],
       'role_id' => ['nullable', 'exists:roles,id'],
       'is_active' => ['nullable', 'boolean'],
     ], [
@@ -129,7 +122,7 @@ class UserController extends Controller
       'role_id' => ['nullable', 'exists:roles,id'],
       'block_id' => ['nullable', 'exists:blocks,id'],
       'unit_number' => ['nullable', 'string', 'max:50'],
-      'password' => ['nullable', 'string', 'min:8'],
+      'password' => ['nullable', 'string', Password::min(8)->mixedCase()->numbers()->symbols()],
     ], [
       'name.required' => 'Please enter the user\'s full name.',
       'name.max' => 'Full name must not exceed 100 characters.',
@@ -150,6 +143,7 @@ class UserController extends Controller
     $user->email = $validated['email'];
     $user->role_id = $validated['role_id'] ?? null;
     $user->block_id = $validated['block_id'] ?? null;
+    $user->unit_number = $validated['unit_number'] ?? null;
 
     if (!empty($validated['password'])) {
       $user->password = Hash::make($validated['password']);
@@ -185,6 +179,7 @@ class UserController extends Controller
     $user->update([
       'is_active' => true,
       'block_id' => $blockId,
+      'unit_number' => $request->input('unit_number'),
     ]);
 
     // Link matching resident if email found
@@ -223,6 +218,20 @@ class UserController extends Controller
 
     return redirect()->route('users.index')
       ->with('success', "\"{$user->name}\" has been deactivated.");
+  }
+
+  public function reactivate(User $user)
+  {
+    $user->update(['is_active' => true]);
+
+    Log::info('User reactivated', [
+      'user_id' => $user->id,
+      'email' => $user->email,
+      'reactivated_by' => auth()->id(),
+    ]);
+
+    return redirect()->route('users.index')
+      ->with('success', "\"{$user->name}\" has been reactivated and can now log in.");
   }
 
   public function destroy(User $user)

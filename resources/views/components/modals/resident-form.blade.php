@@ -19,6 +19,7 @@
 
     {{-- Header --}}
     <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center shrink-0">
+      {{-- Add New Resident (Header label update) --}}
       <div>
         <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ __('app.add_new_resident') }}</h2>
         <p class="text-sm text-slate-400 mt-0.5">{{ __('app.add_resident_desc') }}</p>
@@ -88,7 +89,7 @@
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">domain</span>
               <select id="add-block_id" name="block_id"
                 class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('block_id') border-red-500 @enderror"
-                onchange="clearRmErr('js-rm-block_id')">
+                onchange="clearRmErr('js-rm-block_id'); loadUnitsForAdd(this.value)">
                 <option value="">{{ __('app.select_block') }}</option>
                 @foreach($blocks as $block)
                   <option value="{{ $block->id }}" {{ old('block_id') == $block->id ? 'selected' : '' }}>{{ $block->name }}</option>
@@ -107,15 +108,30 @@
             </label>
             <div class="relative">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">meeting_room</span>
-              <input id="add-unit_number" type="text" name="unit_number" value="{{ old('unit_number') }}" placeholder="{{ __('app.eg_unit') }}"
-                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('unit_number') border-red-500 @enderror"
-                oninput="clearRmErr('js-rm-unit_number')" />
+              <select id="add-unit_id" name="unit_id" disabled
+                class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white @error('unit_id') border-red-500 @enderror"
+                onchange="clearRmErr('js-rm-unit_id')">
+                <option value="">{{ __('app.select_block') }}</option>
+              </select>
+              <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
             </div>
-            @error('unit_number') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
-            <p id="js-rm-unit_number" class="hidden text-xs text-red-500 items-center gap-1">
+            @error('unit_id') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+            <p id="js-rm-unit_id" class="hidden text-xs text-red-500 items-center gap-1">
               <span class="material-icons text-xs">error_outline</span> {{ __('app.err_unit') }}
             </p>
           </div>
+        </div>
+
+        <div class="border-t border-slate-100 dark:border-slate-800"></div>
+
+        {{-- Family Card Number --}}
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            {{ __('app.no_kk') }} <span class="font-normal normal-case text-slate-400">{{ __('app.optional') }}</span>
+          </label>
+          <input type="text" name="family_card_number" value="{{ old('family_card_number') }}"
+            placeholder="{{ __('app.kk_placeholder') }}" maxlength="20"
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white">
         </div>
 
         <div class="border-t border-slate-100 dark:border-slate-800"></div>
@@ -247,6 +263,7 @@
             <div class="relative">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">domain</span>
               <select id="edit-block_id" name="block_id"
+                onchange="loadUnitsForEdit(this.value, null)"
                 class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white">
                 @foreach($blocks as $block)
                   <option value="{{ $block->id }}">{{ $block->name }}</option>
@@ -261,8 +278,11 @@
             </label>
             <div class="relative">
               <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">meeting_room</span>
-              <input type="text" id="edit-unit_number" name="unit_number"
-                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white" />
+              <select id="edit-unit_id" name="unit_id" disabled
+                class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white">
+                <option value="">{{ __('app.units_loading') }}</option>
+              </select>
+              <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
             </div>
           </div>
         </div>
@@ -346,21 +366,65 @@
   }
 
   // ── Edit Resident Modal ───────────────────────────────────────────
-  function openEditDrawer(id, data) {
+  const apiBlocksUrl = "{{ url('/api/blocks') }}";
+
+  async function loadUnitsIntoSelect(blockId, selectId, currentUnitId) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    if (!blockId) {
+      sel.innerHTML = '<option value="">{{ __('app.select_block') }}</option>';
+      sel.disabled = true;
+      return;
+    }
+    sel.innerHTML = '<option value="">{{ __('app.units_loading') }}</option>';
+    sel.disabled = true;
+    try {
+      const qs = currentUnitId ? '?current_unit_id=' + currentUnitId : '';
+      const res = await fetch(`${apiBlocksUrl}/${blockId}/units${qs}`);
+      const units = await res.json();
+      if (!units.length) {
+        sel.innerHTML = '<option value="">{{ __('app.no_units_in_block') }}</option>';
+        return;
+      }
+      sel.innerHTML = '<option value="">{{ __('app.select_unit') }}</option>';
+      units.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.unit_number + (u.is_occupied ? ' ({{ __('app.occupied_count') }})' : '');
+        opt.disabled = u.is_occupied;
+        if (u.id === currentUnitId) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.disabled = false;
+    } catch {
+      sel.innerHTML = '<option value="">{{ __('app.select_unit') }}</option>';
+      sel.disabled = false;
+    }
+  }
+
+  function loadUnitsForAdd(blockId) {
+    loadUnitsIntoSelect(blockId, 'add-unit_id', null);
+  }
+
+  async function loadUnitsForEdit(blockId, currentUnitId) {
+    await loadUnitsIntoSelect(blockId, 'edit-unit_id', currentUnitId);
+  }
+
+  async function openEditDrawer(id, data) {
     document.getElementById('edit-fullname').value    = data.fullname;
     document.getElementById('edit-phone').value       = data.phone    || '';
     document.getElementById('edit-email').value       = data.email    || '';
     document.getElementById('edit-block_id').value    = data.block_id;
-    document.getElementById('edit-unit_number').value = data.unit_number;
     document.getElementById('edit-is_active').checked = data.is_active;
     document.getElementById('edit-monthly_fee').value = '';
     document.getElementById('edit-fee_start').value   = '{{ now()->format("Y-m") }}';
-    document.getElementById('erm-unit-badge').textContent = data.unit_number;
+    document.getElementById('erm-unit-badge').textContent = data.unit_number || '';
     document.getElementById('erm-name-sub').textContent   = data.fullname;
-    document.getElementById('form-edit-resident').action  = `/residents/${id}`;
+    document.getElementById('form-edit-resident').action  = `{{ url('/residents') }}/${id}`;
     const el = document.getElementById('edit-resident-modal');
     el.classList.remove('hidden'); el.classList.add('flex');
     document.body.classList.add('overflow-hidden');
+    await loadUnitsForEdit(data.block_id, data.unit_id ?? null);
   }
   function closeEditResidentModal() {
     const el = document.getElementById('edit-resident-modal');
@@ -378,9 +442,14 @@
     }
   });
 
-  // Re-open add modal if validation fails
+  // Re-open add modal if validation fails (and reload units)
   @if($errors->any() && old('_form') === 'add')
-    document.addEventListener('DOMContentLoaded', () => openAddResidentModal());
+    document.addEventListener('DOMContentLoaded', () => {
+      openAddResidentModal();
+      const preBlock = @json(old('block_id'));
+      const preUnit  = @json(old('unit_id'));
+      if (preBlock) loadUnitsIntoSelect(preBlock, 'add-unit_id', preUnit || null);
+    });
   @endif
 
   // ── Resident modal: client-side validation ────────────────────────
@@ -398,7 +467,7 @@
     const checks = [
       ['add-fullname',    'js-rm-fullname',    v => v.trim().length > 0],
       ['add-block_id',   'js-rm-block_id',    v => v !== ''],
-      ['add-unit_number','js-rm-unit_number', v => v.trim().length > 0],
+      ['add-unit_id',    'js-rm-unit_id',     v => v !== ''],
       ['add-monthly_fee','js-rm-monthly_fee', v => v.trim().length > 0 && parseFloat(v) >= 0],
       ['add-fee_start',  'js-rm-fee_start',   v => v.trim().length > 0],
     ];
@@ -414,8 +483,8 @@
     let valid = true;
     const checks = [
       ['edit-fullname',    'js-erm-fullname',    v => v.trim().length > 0],
-      ['edit-block_id',   'js-erm-block_id',    v => v !== ''],
-      ['edit-unit_number','js-erm-unit_number', v => v.trim().length > 0],
+      ['edit-block_id', 'js-erm-block_id', v => v !== ''],
+      ['edit-unit_id',  'js-erm-unit_id',  v => v !== ''],
     ];
     checks.forEach(([fieldId, errId, fn]) => {
       const el = document.getElementById(fieldId);

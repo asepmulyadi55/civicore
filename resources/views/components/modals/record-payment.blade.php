@@ -204,7 +204,7 @@ Review Modal, and all associated JavaScript.
     {{-- Footer --}}
     <div class="px-8 py-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3 shrink-0">
       <button onclick="closeCreateModal()"
-        class="px-6 py-2.5 rounded-xl font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+        class="px-6 py-2.5 rounded-xl font-bold text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
         {{ __('app.btn_cancel') }}
       </button>
       <button onclick="submitCreateModal()"
@@ -537,13 +537,18 @@ Review Modal, and all associated JavaScript.
     pointer-events: none;
     background-color: #f1f5f9;
   }
-
   .dark .month-card-paid {
     background-color: #1e293b;
+  }
+  /* Selected month card — dark mode: gold border + tint instead of invisible dark-green */
+  .dark .month-selected-card {
+    border-color: #D4AF37 !important;
+    background-color: rgba(212, 175, 55, 0.12) !important;
   }
 </style>
 
 <script>
+  const paymentsBaseUrl  = "{{ url('/payments') }}";
   const paidMonthsMap    = @json($paidMonthsByResident ?? []);
   const pendingMonthsMap = @json($pendingMonthsByResident ?? []);
   const residentFeesMap  = @json($residentFees ?? []);
@@ -663,7 +668,7 @@ Review Modal, and all associated JavaScript.
         grid.insertAdjacentHTML('beforeend', `
           <label class="cursor-pointer group">
             <input type="checkbox" data-key="${key}" class="hidden peer month-cb" ${isSel ? 'checked' : ''} onchange="onMonthToggle(this)" />
-            <div class="border-2 ${isSel ? 'border-primary bg-primary/5' : 'border-slate-200 dark:border-slate-700'} rounded-xl p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
+            <div class="border-2 ${isSel ? 'border-primary bg-primary/5 month-selected-card' : 'border-slate-200 dark:border-slate-700'} rounded-xl p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
               <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${label}</span>
               <span class="text-[10px] font-bold ${isSel ? 'text-primary' : 'text-slate-400'} uppercase">${isSel ? 'Selected' : 'Unpaid'}</span>
             </div>
@@ -679,12 +684,12 @@ Review Modal, and all associated JavaScript.
     if (cb.checked) {
       selectedMonths.add(key);
       showMonthError(false);
-      inner.classList.add('border-primary', 'bg-primary/5');
+      inner.classList.add('border-primary', 'bg-primary/5', 'month-selected-card');
       inner.classList.remove('border-slate-200', 'dark:border-slate-700');
       badge.textContent = 'Selected'; badge.classList.add('text-primary'); badge.classList.remove('text-slate-400');
     } else {
       selectedMonths.delete(key);
-      inner.classList.remove('border-primary', 'bg-primary/5');
+      inner.classList.remove('border-primary', 'bg-primary/5', 'month-selected-card');
       inner.classList.add('border-slate-200');
       badge.textContent = 'Unpaid'; badge.classList.remove('text-primary'); badge.classList.add('text-slate-400');
     }
@@ -789,7 +794,7 @@ Review Modal, and all associated JavaScript.
         grid.insertAdjacentHTML('beforeend', `
           <label class="cursor-pointer group">
             <input type="checkbox" data-key="${key}" class="hidden peer em-month-cb" ${isSel ? 'checked' : ''} onchange="onEmMonthToggle(this)" />
-            <div class="border-2 ${isSel ? 'border-primary bg-primary/5' : 'border-slate-200 dark:border-slate-700'} rounded-xl p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
+            <div class="border-2 ${isSel ? 'border-primary bg-primary/5 month-selected-card' : 'border-slate-200 dark:border-slate-700'} rounded-xl p-3 flex flex-col items-center justify-center gap-1 transition-all h-full peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50">
               <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${label}</span>
               <span class="text-[10px] font-bold ${isSel ? 'text-primary' : 'text-slate-400'} uppercase">${isSel ? 'Selected' : 'Unpaid'}</span>
             </div>
@@ -820,12 +825,12 @@ Review Modal, and all associated JavaScript.
     if (cb.checked) {
       emSelectedMonths.add(key);
       document.getElementById('em-error-months')?.classList.add('hidden');
-      inner.classList.add('border-primary', 'bg-primary/5');
+      inner.classList.add('border-primary', 'bg-primary/5', 'month-selected-card');
       inner.classList.remove('border-slate-200', 'dark:border-slate-700');
       badge.textContent = 'Selected'; badge.classList.add('text-primary'); badge.classList.remove('text-slate-400');
     } else {
       emSelectedMonths.delete(key);
-      inner.classList.remove('border-primary', 'bg-primary/5');
+      inner.classList.remove('border-primary', 'bg-primary/5', 'month-selected-card');
       inner.classList.add('border-slate-200');
       badge.textContent = 'Unpaid'; badge.classList.remove('text-primary'); badge.classList.add('text-slate-400');
     }
@@ -913,7 +918,7 @@ Review Modal, and all associated JavaScript.
     const proofWrap = document.getElementById('em-proof-wrap');
     if (proofUrl) { document.getElementById('em-proof-link').href = proofUrl; proofWrap.classList.remove('hidden'); }
     else { proofWrap.classList.add('hidden'); }
-    document.getElementById('em-form').action = `/payments/${id}`;
+    document.getElementById('em-form').action = `${paymentsBaseUrl}/${id}`;
     const el = document.getElementById('edit-modal-overlay');
     el.classList.remove('hidden'); el.classList.add('flex');
     document.body.classList.add('overflow-hidden');
@@ -956,14 +961,14 @@ Review Modal, and all associated JavaScript.
 
     if (batchId) {
       // Batch: POST to batch routes (no _method override needed)
-      approveForm.action = `/payments/batch/${batchId}/approve`;
-      rejectForm.action  = `/payments/batch/${batchId}/reject`;
+      approveForm.action = `${paymentsBaseUrl}/batch/${batchId}/approve`;
+      rejectForm.action  = `${paymentsBaseUrl}/batch/${batchId}/reject`;
       if (approveMeth) approveMeth.remove();
       if (rejectMeth)  rejectMeth.remove();
     } else {
       // Single: PATCH to individual routes
-      approveForm.action = `/payments/${id}/approve`;
-      rejectForm.action  = `/payments/${id}/reject`;
+      approveForm.action = `${paymentsBaseUrl}/${id}/approve`;
+      rejectForm.action  = `${paymentsBaseUrl}/${id}/reject`;
       if (!approveMeth) {
         approveForm.insertAdjacentHTML('afterbegin', '<input type="hidden" name="_method" value="PATCH">');
       } else { approveMeth.value = 'PATCH'; }
@@ -1013,7 +1018,7 @@ Review Modal, and all associated JavaScript.
   function openPaymentDeleteModal(id, name) {
     document.getElementById('pdm-body').innerHTML =
       `Payment record for <strong class="text-slate-800 dark:text-slate-200">${name}</strong> will be permanently removed. This <em>cannot</em> be undone.`;
-    document.getElementById('pdm-form').action = `/payments/${id}`;
+    document.getElementById('pdm-form').action = `${paymentsBaseUrl}/${id}`;
     const modal = document.getElementById('payment-delete-modal');
     const card  = document.getElementById('pdm-card');
     modal.classList.remove('hidden');

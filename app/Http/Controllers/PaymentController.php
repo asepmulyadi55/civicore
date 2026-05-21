@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\PaymentStatus;
 use App\Models\Block;
+use App\Models\MediaFile;
 use App\Models\PaymentRecord;
 use App\Models\Resident;
 use App\Models\Setting;
@@ -30,7 +31,7 @@ class PaymentController extends Controller
         if ($search = $request->get('search')) {
             $baseQ->whereHas('resident', function ($q) use ($search) {
                 $q->where('fullname', 'like', "%{$search}%")
-                    ->orWhere('unit_number', 'like', "%{$search}%");
+                    ->orWhereHas('unit', fn($u) => $u->where('unit_number', 'like', "%{$search}%"));
             });
         }
         if (!$scopeBlockId && $blockId = $request->get('block_id')) {
@@ -62,7 +63,7 @@ class PaymentController extends Controller
      * Load residents list and their current fee map for the JS payment modal.
      * Returns ['residents' => Collection, 'residentFees' => Collection].
      */
-    private function buildResidentData(?int $scopeBlockId): array
+    private function buildResidentData(?string $scopeBlockId): array
     {
         $residents = Resident::with(['block', 'feeHistories'])
             ->where('is_active', true)
@@ -105,12 +106,38 @@ class PaymentController extends Controller
             })
             ->values();
 
+        // Apply collection-level sort (after batch grouping)
+        $sort = $request->get('sort');
+        $dir  = $request->get('direction', 'desc');
+        if ($sort === 'resident') {
+            $flatRows = $dir === 'asc'
+                ? $flatRows->sortBy(fn($p) => $p->resident?->fullname)->values()
+                : $flatRows->sortByDesc(fn($p) => $p->resident?->fullname)->values();
+        } elseif ($sort === 'amount') {
+            $flatRows = $dir === 'asc'
+                ? $flatRows->sortBy('total_amount')->values()
+                : $flatRows->sortByDesc('total_amount')->values();
+        } elseif ($sort === 'status') {
+            $flatRows = $dir === 'asc'
+                ? $flatRows->sortBy('status')->values()
+                : $flatRows->sortByDesc('status')->values();
+        } elseif ($sort === 'month') {
+            $flatRows = $dir === 'asc'
+                ? $flatRows->sortBy('payment_month')->values()
+                : $flatRows->sortByDesc('payment_month')->values();
+        }
+        // else keep default: pending first, then by month desc (from the DB orderBy above)
+
         $perPage = config('civicore.pagination.payments', 20);
-        $page = $request->get('page', 1);
+        $total   = $flatRows->count();
+
+        // If filters changed and the current page no longer exists, fall back to 1
+        $lastPage = (int) ceil($total / $perPage) ?: 1;
+        $page     = max(1, min((int) $request->get('page', 1), $lastPage));
 
         return new \Illuminate\Pagination\LengthAwarePaginator(
             $flatRows->slice(($page - 1) * $perPage, $perPage)->values(),
-            $flatRows->count(),
+            $total,
             $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
@@ -121,7 +148,7 @@ class PaymentController extends Controller
      * Build summary stats (counts / totals) for the payments dashboard header.
      * Returns array suitable for merging into view compact().
      */
-    private function buildStats(?int $scopeBlockId): array
+    private function buildStats(?string $scopeBlockId): array
     {
         $statBase = PaymentRecord::when(
             $scopeBlockId,
@@ -190,7 +217,16 @@ class PaymentController extends Controller
 
         $proofPath = null;
         if ($request->hasFile('proof')) {
-            $proofPath = $request->file('proof')->store('proofs', 'public');
+            $proofFile = $request->file('proof');
+            $proofPath = $proofFile->store('proofs', 'local');
+            MediaFile::create([
+                'disk'          => 'local',
+                'path'          => $proofPath,
+                'original_name' => $proofFile->getClientOriginalName(),
+                'mime_type'     => $proofFile->getMimeType(),
+                'size'          => $proofFile->getSize(),
+                'uploaded_by'   => auth()->id(),
+            ]);
         }
 
         $baseData = [
@@ -261,9 +297,19 @@ class PaymentController extends Controller
         $proofPath = $payment->proof_path;
         if ($request->hasFile('proof')) {
             if ($proofPath) {
-                \Storage::disk('public')->delete($proofPath);
+                \Storage::disk('local')->delete($proofPath);
+                MediaFile::where('path', $proofPath)->delete();
             }
-            $proofPath = $request->file('proof')->store('proofs', 'public');
+            $proofFile = $request->file('proof');
+            $proofPath = $proofFile->store('proofs', 'local');
+            MediaFile::create([
+                'disk'          => 'local',
+                'path'          => $proofPath,
+                'original_name' => $proofFile->getClientOriginalName(),
+                'mime_type'     => $proofFile->getMimeType(),
+                'size'          => $proofFile->getSize(),
+                'uploaded_by'   => auth()->id(),
+            ]);
         }
 
         $status = $request->status;

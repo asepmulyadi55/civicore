@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class MyOverviewController extends Controller
+class OverviewController extends Controller
 {
     public function index()
     {
@@ -20,7 +20,7 @@ class MyOverviewController extends Controller
             ->with(['block', 'feeHistories' => fn($q) => $q->orderByDesc('effective_from')])
             ->first();
 
-        // Fallback: find by email (covers the case where resident was created
+        // Fallback 1: find by email (covers the case where resident was created
         // after the user was already approved, so user_id was never set)
         if (!$resident && $user->email) {
             $resident = Resident::where('email', $user->email)
@@ -33,18 +33,34 @@ class MyOverviewController extends Controller
             }
         }
 
+        // Fallback 2: find by block_id + unit_number (covers admin-assigned accounts
+        // where neither user_id nor email was matched to a resident record)
+        if (!$resident && $user->block_id && $user->unit_number) {
+            $resident = Resident::whereHas('unit', fn($q) =>
+                    $q->where('block_id', $user->block_id)
+                      ->where('unit_number', $user->unit_number)
+                )
+                ->with(['block', 'feeHistories' => fn($q) => $q->orderByDesc('effective_from')])
+                ->first();
+
+            // Auto-repair so next visit uses the fast path
+            if ($resident) {
+                $resident->update(['user_id' => $user->id]);
+            }
+        }
+
         if (!$resident) {
-            return view('my-overview', [
-                'resident' => null,
-                'currentFee' => 0,
-                'currentYear' => now()->year,
-                'previousYear' => now()->year - 1,
-                'currentRecords' => collect(),
+            return view('overview', [
+                'resident'        => null,
+                'currentFee'      => 0,
+                'currentYear'     => now()->year,
+                'previousYear'    => now()->year - 1,
+                'currentRecords'  => collect(),
                 'previousRecords' => collect(),
-                'totalPaidYear' => 0,
-                'paidMonthsYear' => 0,
-                'currency' => Setting::get('currency_symbol', 'Rp'),
-                'dueDayLabel' => Setting::get('payment_due_day', '10'),
+                'totalPaidYear'   => 0,
+                'paidMonthsYear'  => 0,
+                'currency'        => Setting::get('currency_symbol', 'Rp'),
+                'dueDayLabel'     => Setting::get('payment_due_day', '10'),
             ]);
         }
 
@@ -75,7 +91,7 @@ class MyOverviewController extends Controller
         $totalPaidYear = $currentRecords->where('status', 'approved')->sum('amount');
         $paidMonthsYear = $currentRecords->where('status', 'approved')->count();
 
-        return view('my-overview', compact(
+        return view('overview', compact(
             'resident',
             'currentFee',
             'currentYear',

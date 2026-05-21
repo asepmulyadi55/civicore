@@ -4,18 +4,18 @@
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_resident') }}</th>
+          <x-ui.sort-th column="resident" :label="__('app.table_resident')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_block') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_months') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_amount') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}</th>
+          <x-ui.sort-th column="month" :label="__('app.table_months')" />
+          <x-ui.sort-th column="amount" :label="__('app.table_amount')" />
+          <x-ui.sort-th column="status" :label="__('app.table_status')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">{{ __('app.table_actions') }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
         @forelse($payments as $payment)
           @php
-            $initials = collect(explode(' ', $payment->resident->fullname))->map(fn($w) => strtoupper($w[0]))->take(2)->implode('');
+            $initials = collect(preg_split('/\s+/', trim($payment->resident->fullname ?? '')))->filter()->map(fn($w) => strtoupper($w[0]))->take(2)->implode('') ?: '?';
             $isMulti  = ($payment->month_count ?? 1) > 1;
             $allMonths = $payment->all_months ?? collect([$payment->payment_month]);
             $monthLabels = $allMonths->map(fn($m) => \Carbon\Carbon::parse($m)->format('F Y'))->implode(', ');
@@ -64,7 +64,7 @@
                 {{-- View Proof --}}
                 @if($payment->proof_path)
                   <button
-                    onclick="openProofModal('{{ asset('storage/' . $payment->proof_path) }}')"
+                    onclick="openProofModal('{{ route('private.file', ['path' => $payment->proof_path]) }}')"
                     title="View payment proof"
                     class="p-1.5 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
                     <span class="material-icons text-lg">receipt_long</span>
@@ -79,17 +79,17 @@
                 @if($canEditApproved || $statusValue !== 'approved')
                   <button
                     onclick="openEditModal(
-                      {{ $payment->id }},
-                      {{ $payment->resident_id }},
+                      '{{ $payment->id }}',
+                      '{{ $payment->resident_id }}',
                       '{{ addslashes($payment->resident->fullname) }}',
                       '{{ $payment->resident->unit_number }}',
                       '{{ $monthsForJs }}',
                       {{ $payment->amount }},
-                      {{ $payment->payment_method_id ?? 'null' }},
+                      {{ $payment->payment_method_id ? "'{$payment->payment_method_id}'" : 'null' }},
                       '{{ $payment->status instanceof \App\Enums\PaymentStatus ? $payment->status->value : $payment->status }}',
                       '{{ addslashes($payment->rejection_reason ?? '') }}',
                       '{{ addslashes($payment->notes ?? '') }}',
-                      '{{ $payment->proof_path ? asset('storage/' . $payment->proof_path) : '' }}'
+                      '{{ $payment->proof_path ? route('private.file', ['path' => $payment->proof_path]) : '' }}'
                     )"
                     title="Edit payment"
                     class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
@@ -105,7 +105,7 @@
                 @if($canApprove)
                   @if($statusValue === 'pending')
                     <button onclick="openReviewModal(
-                        {{ $payment->id }},
+                        '{{ $payment->id }}',
                         '{{ addslashes($payment->resident->fullname) }}',
                         '{{ $payment->resident->unit_number }}',
                         '{{ $currency }} {{ number_format($payment->total_amount ?? $payment->amount) }}',
@@ -113,7 +113,7 @@
                         '{{ addslashes($payment->notes ?? '') }}',
                         {{ $isMulti ? "'{$payment->batch_id}'" : 'null' }}
                       )"
-                      class="text-primary hover:text-primary/80 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-primary/20 rounded-lg hover:bg-primary/5 transition-all">
+                      class="text-primary hover:text-primary/80 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-primary/40 dark:border-primary/60 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-all">
                       {{ __('app.review_payment') }}
                     </button>
                   @elseif($statusValue === 'approved')
@@ -134,7 +134,7 @@
                 @if(auth()->user()->isAdmin())
                   @if($statusValue !== 'approved')
                     <button type="button"
-                      onclick="openPaymentDeleteModal({{ $payment->id }}, '{{ addslashes($payment->resident->fullname) }}')"
+                      onclick="openPaymentDeleteModal('{{ $payment->id }}', '{{ addslashes($payment->resident->fullname) }}')"
                       title="Delete payment"
                       class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors">
                       <span class="material-icons text-lg">delete_outline</span>
@@ -168,6 +168,7 @@
     <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
       <p class="text-sm text-slate-500">{{ __('app.showing') }} {{ $payments->firstItem() }}–{{ $payments->lastItem() }} {{ __('app.of') }} {{ $payments->total() }}</p>
       <div class="flex items-center gap-1">
+        {{-- Previous --}}
         @if ($payments->onFirstPage())
           <button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 cursor-not-allowed" disabled>
             <span class="material-icons text-sm">chevron_left</span>
@@ -178,6 +179,39 @@
           </a>
         @endif
 
+        {{-- Page numbers (show at most 5 around current page) --}}
+        @php
+          $lastPage    = $payments->lastPage();
+          $currentPage = $payments->currentPage();
+          $window      = 2; // pages either side of current
+          $start       = max(1, $currentPage - $window);
+          $end         = min($lastPage, $currentPage + $window);
+          // Always show first and last page with ellipsis if needed
+        @endphp
+
+        @if ($start > 1)
+          <a href="{{ $payments->url(1) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">1</a>
+          @if ($start > 2)
+            <span class="px-1 text-slate-400 text-sm">…</span>
+          @endif
+        @endif
+
+        @for ($p = $start; $p <= $end; $p++)
+          @if ($p === $currentPage)
+            <span class="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-semibold">{{ $p }}</span>
+          @else
+            <a href="{{ $payments->url($p) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $p }}</a>
+          @endif
+        @endfor
+
+        @if ($end < $lastPage)
+          @if ($end < $lastPage - 1)
+            <span class="px-1 text-slate-400 text-sm">…</span>
+          @endif
+          <a href="{{ $payments->url($lastPage) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $lastPage }}</a>
+        @endif
+
+        {{-- Next --}}
         @if ($payments->hasMorePages())
           <a href="{{ $payments->nextPageUrl() }}" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
             <span class="material-icons text-sm">chevron_right</span>

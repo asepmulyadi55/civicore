@@ -14,6 +14,7 @@
 
   {{-- Resident form modals — in components/modals/ consistent with other sections --}}
   <x-modals.resident-form :blocks="$blocks" :currency="$currency" />
+  @include('residents._import_modal')
 
 
   {{-- ── Resident Confirmation Modal (Deactivate / Delete) ────────── --}}
@@ -61,6 +62,7 @@
   </div>
 
   <script>
+    const residentsBaseUrl = "{{ url('/residents') }}";
     const RCM_CONFIGS = {
       deactivate: {
         iconWrap: 'bg-amber-100 dark:bg-amber-900/30',
@@ -69,7 +71,7 @@
         title: '{{ __('app.deactivate_title') }}',
         body: (name) => `<strong class="text-slate-800 dark:text-slate-200">${name}</strong> {{ __('app.deactivate_body') }}`,
         form: 'rcm-form-deactivate',
-        route: (id) => `/residents/${id}/deactivate`,
+        route: (id) => `${residentsBaseUrl}/${id}/deactivate`,
       },
       delete: {
         iconWrap: 'bg-red-100 dark:bg-red-900/30',
@@ -78,7 +80,7 @@
         title: '{{ __('app.delete_title') }}',
         body: (name) => `<strong class="text-slate-800 dark:text-slate-200">${name}</strong> {!! __('app.delete_body') !!}`,
         form: 'rcm-form-delete',
-        route: (id) => `/residents/${id}`,
+        route: (id) => `${residentsBaseUrl}/${id}`,
       },
     };
 
