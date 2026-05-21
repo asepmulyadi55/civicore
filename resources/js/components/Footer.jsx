@@ -6,14 +6,21 @@ const C = {
   surface:  '#FAF9F6',
 };
 
-const QUICK_LINKS = [
-  { label: 'Resident Portal',    href: '#' },
-  { label: 'Amenities Map',      href: '#' },
-  { label: 'Community Rules',    href: '#' },
-  { label: 'Maintenance Request',href: '#' },
-];
-
-export default function Footer() {
+export default function Footer({ footer = {} }) {
+  const brandName   = footer.brand_name    || 'Dwipapuri.';
+  const tagline     = footer.tagline       || 'Defining the gold standard of modern residential living through curation, privacy, and community.';
+  const quickLinks  = (footer.links?.length ? footer.links : [
+    { label: 'Resident Portal',     url: '#' },
+    { label: 'Amenities Map',       url: '#' },
+    { label: 'Community Rules',     url: '#' },
+    { label: 'Maintenance Request', url: '#' },
+  ]);
+  const contactEmail   = footer.contact_email  || 'concierge@dwipapuri.res';
+  const contactPhone   = footer.contact_phone  || '+62 123 4567 890';
+  const facebookUrl    = footer.facebook_url   || null;
+  const instagramUrl   = footer.instagram_url  || null;
+  const copyright      = footer.copyright      || '© 2026 Dwipapuri Residential. All rights reserved.';
+  const bottomNote     = footer.bottom_note    || null;
   return (
     <footer id="contact" style={{ backgroundColor: C.primary, color: C.surface }}>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-12 max-w-7xl mx-auto px-6 md:px-8 py-12 md:py-20">
@@ -24,10 +31,10 @@ export default function Footer() {
             className="text-xl md:text-2xl font-semibold tracking-tight"
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           >
-            Dwipapuri.
+            {brandName}
           </div>
           <p className="text-sm leading-relaxed font-light" style={{ color: `${C.surface}99` }}>
-            Defining the gold standard of modern residential living through curation, privacy, and community.
+            {tagline}
           </p>
         </div>
 
@@ -40,10 +47,10 @@ export default function Footer() {
             Quick Links
           </h4>
           <ul className="space-y-3 md:space-y-4 text-xs md:text-sm font-light" style={{ color: `${C.surface}99` }}>
-            {QUICK_LINKS.map(link => (
-              <li key={link.label}>
+            {quickLinks.map((link, i) => (
+              <li key={i}>
                 <a
-                  href={link.href}
+                  href={link.url || '#'}
                   className="transition-colors"
                   onMouseEnter={e => e.currentTarget.style.color = C.secondary}
                   onMouseLeave={e => e.currentTarget.style.color = `${C.surface}99`}
@@ -70,11 +77,11 @@ export default function Footer() {
             </li>
             <li className="flex items-center gap-3">
               <span className="material-symbols-outlined text-base opacity-70">call</span>
-              +62 123 4567 890
+              {contactPhone}
             </li>
             <li className="flex items-center gap-3">
               <span className="material-symbols-outlined text-base opacity-70">mail</span>
-              concierge@dwipapuri.res
+              {contactEmail}
             </li>
           </ul>
         </div>
@@ -104,20 +111,40 @@ export default function Footer() {
             </button>
           </div>
           <div className="mt-6 md:mt-8 flex gap-4 md:gap-5" style={{ color: `${C.surface}66` }}>
-            <span
-              className="material-symbols-outlined cursor-pointer transition-colors"
-              onMouseEnter={e => e.currentTarget.style.color = C.surface}
-              onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
-            >
-              brand_awareness
-            </span>
-            <span
-              className="material-symbols-outlined cursor-pointer transition-colors"
-              onMouseEnter={e => e.currentTarget.style.color = C.surface}
-              onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
-            >
-              groups
-            </span>
+            {facebookUrl ? (
+              <a
+                href={facebookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="material-symbols-outlined cursor-pointer transition-colors"
+                style={{ color: `${C.surface}66` }}
+                onMouseEnter={e => e.currentTarget.style.color = C.surface}
+                onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
+              >brand_awareness</a>
+            ) : (
+              <span
+                className="material-symbols-outlined cursor-pointer transition-colors"
+                onMouseEnter={e => e.currentTarget.style.color = C.surface}
+                onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
+              >brand_awareness</span>
+            )}
+            {instagramUrl ? (
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="material-symbols-outlined cursor-pointer transition-colors"
+                style={{ color: `${C.surface}66` }}
+                onMouseEnter={e => e.currentTarget.style.color = C.surface}
+                onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
+              >groups</a>
+            ) : (
+              <span
+                className="material-symbols-outlined cursor-pointer transition-colors"
+                onMouseEnter={e => e.currentTarget.style.color = C.surface}
+                onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
+              >groups</span>
+            )}
             <span
               className="material-symbols-outlined cursor-pointer transition-colors"
               onMouseEnter={e => e.currentTarget.style.color = C.surface}
@@ -131,16 +158,11 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div
-        className="border-t py-6 md:py-8 text-center text-[10px] md:text-xs font-light flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-0"
+        className="border-t py-6 md:py-8 text-[10px] md:text-xs font-light flex flex-col sm:flex-row justify-between items-center px-6 md:px-8 max-w-7xl mx-auto gap-2"
         style={{ borderColor: `${C.surface}1A`, color: `${C.surface}66` }}
       >
-        <span>© 2026 Dwipapuri Residential. All rights reserved.</span>
-        <div className="flex items-center mt-2 sm:mt-0">
-          <span className="mx-3 md:mx-4 opacity-30 hidden sm:inline">|</span>
-          <a href="#" className="hover:opacity-80 transition-opacity">Privacy Policy</a>
-          <span className="mx-3 md:mx-4 opacity-30">|</span>
-          <a href="#" className="hover:opacity-80 transition-opacity">Terms of Service</a>
-        </div>
+        <span>{copyright}</span>
+        {bottomNote && <span>{bottomNote}</span>}
       </div>
     </footer>
   );
