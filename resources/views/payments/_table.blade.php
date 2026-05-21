@@ -113,7 +113,7 @@
                         '{{ addslashes($payment->notes ?? '') }}',
                         {{ $isMulti ? "'{$payment->batch_id}'" : 'null' }}
                       )"
-                      class="text-primary hover:text-primary/80 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-primary/20 rounded-lg hover:bg-primary/5 transition-all">
+                      class="text-primary hover:text-primary/80 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-primary/40 dark:border-primary/60 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-all">
                       {{ __('app.review_payment') }}
                     </button>
                   @elseif($statusValue === 'approved')
@@ -168,6 +168,7 @@
     <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
       <p class="text-sm text-slate-500">{{ __('app.showing') }} {{ $payments->firstItem() }}–{{ $payments->lastItem() }} {{ __('app.of') }} {{ $payments->total() }}</p>
       <div class="flex items-center gap-1">
+        {{-- Previous --}}
         @if ($payments->onFirstPage())
           <button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 cursor-not-allowed" disabled>
             <span class="material-icons text-sm">chevron_left</span>
@@ -178,6 +179,39 @@
           </a>
         @endif
 
+        {{-- Page numbers (show at most 5 around current page) --}}
+        @php
+          $lastPage    = $payments->lastPage();
+          $currentPage = $payments->currentPage();
+          $window      = 2; // pages either side of current
+          $start       = max(1, $currentPage - $window);
+          $end         = min($lastPage, $currentPage + $window);
+          // Always show first and last page with ellipsis if needed
+        @endphp
+
+        @if ($start > 1)
+          <a href="{{ $payments->url(1) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">1</a>
+          @if ($start > 2)
+            <span class="px-1 text-slate-400 text-sm">…</span>
+          @endif
+        @endif
+
+        @for ($p = $start; $p <= $end; $p++)
+          @if ($p === $currentPage)
+            <span class="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-semibold">{{ $p }}</span>
+          @else
+            <a href="{{ $payments->url($p) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $p }}</a>
+          @endif
+        @endfor
+
+        @if ($end < $lastPage)
+          @if ($end < $lastPage - 1)
+            <span class="px-1 text-slate-400 text-sm">…</span>
+          @endif
+          <a href="{{ $payments->url($lastPage) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $lastPage }}</a>
+        @endif
+
+        {{-- Next --}}
         @if ($payments->hasMorePages())
           <a href="{{ $payments->nextPageUrl() }}" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
             <span class="material-icons text-sm">chevron_right</span>
