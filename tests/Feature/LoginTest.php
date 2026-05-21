@@ -14,10 +14,10 @@ class LoginTest extends TestCase
   /** @test */
   public function login_page_can_be_displayed()
   {
-    $response = $this->get('/');
+    $response = $this->get('/login');
 
     $response->assertStatus(200);
-    $response->assertViewIs('login');
+    $response->assertViewIs('auth.login');
   }
 
   /** @test */

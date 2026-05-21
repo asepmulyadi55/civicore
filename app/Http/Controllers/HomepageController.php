@@ -246,22 +246,17 @@ class HomepageController extends Controller
     public function updateAbout(Request $request)
     {
         $data = $request->validate([
-            'badge'       => 'nullable|string|max:60',
-            'heading'     => 'required|string|max:120',
-            'btn1_label'  => 'nullable|string|max:60',
-            'btn1_url'    => 'nullable|url|max:500',
-            'btn2_label'  => 'nullable|string|max:60',
-            'btn2_url'    => 'nullable|url|max:500',
-            'content'     => 'required|string|max:3000',
-            'stats'       => 'nullable|array|max:4',
+            'badge'         => 'nullable|string|max:60',
+            'heading'       => 'required|string|max:120',
+            'btn1_label'    => 'nullable|string|max:60',
+            'btn1_url'      => 'nullable|url|max:500',
+            'btn2_label'    => 'nullable|string|max:60',
+            'btn2_url'      => 'nullable|url|max:500',
+            'content'       => 'required|string|max:3000',
+            'stats'         => 'nullable|array|max:4',
             'stats.*.value' => 'nullable|string|max:50',
             'stats.*.label' => 'nullable|string|max:50',
         ]);
-
-        // Preserve existing image data (uploaded previously) unchanged
-        $existing = json_decode(Setting::get('homepage_about', '{}'), true) ?? [];
-        $data['image_url']  = $existing['image_url']  ?? null;
-        $data['image_path'] = $existing['image_path'] ?? null;
 
         // Clean out empty stat rows
         if (!empty($data['stats'])) {
