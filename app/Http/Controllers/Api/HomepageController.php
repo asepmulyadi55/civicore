@@ -20,6 +20,7 @@ class HomepageController extends Controller
         $events           = json_decode(Setting::get('homepage_events',              '[]'), true) ?? [];
         $about            = json_decode(Setting::get('homepage_about',               '{}'), true) ?? [];
         $memorableMoments = json_decode(Setting::get('homepage_memorable_moments',   '{}'), true) ?? [];
+        $footer           = json_decode(Setting::get('homepage_footer',              '{}'), true) ?? [];
 
         $today          = now()->toDateString();
         $upcomingEvents = array_slice(array_values(array_filter($events, fn($e) =>
@@ -40,6 +41,7 @@ class HomepageController extends Controller
             'past_events'       => $pastEvents,
             'memorable_moments' => $memorableMoments,
             'about'             => $about,
+            'footer'            => $footer,
         ]);
     }
 }

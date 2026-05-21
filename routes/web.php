@@ -81,6 +81,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:homepage.delete')->name('homepage.events.destroy');
     Route::post('/homepage/about', [HomepageController::class, 'updateAbout'])
         ->middleware('permission:homepage.edit')->name('homepage.about');
+    Route::post('/homepage/footer', [HomepageController::class, 'updateFooter'])
+        ->middleware('permission:homepage.edit')->name('homepage.footer');
     Route::post('/homepage/memorable-moments', [HomepageController::class, 'updateMemorableMoments'])
         ->middleware('permission:homepage.edit')->name('homepage.memorable-moments');
 
