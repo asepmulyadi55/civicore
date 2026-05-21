@@ -25,6 +25,9 @@ jobs:
 
             cd /var/www/civicore
 
+            echo "Fix permissions..."
+            sudo chown -R ubuntu:ubuntu /var/www/civicore
+
             echo "Pull latest code..."
             git fetch origin main
             git reset --hard origin/main

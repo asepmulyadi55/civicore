@@ -58,10 +58,18 @@
             {{-- User Details --}}
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
-                <div
-                  class="w-10 h-10 rounded-full {{ $color }} flex items-center justify-center font-bold text-sm flex-shrink-0">
-                  {{ $initials }}
-                </div>
+                @if($user->avatar)
+                  <img src="{{ $user->avatarUrl() }}" alt="{{ $user->name }}"
+                    class="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                    onerror="this.replaceWith(this.nextElementSibling)">
+                  <div class="w-10 h-10 rounded-full {{ $color }} items-center justify-center font-bold text-sm flex-shrink-0 hidden">
+                    {{ $initials }}
+                  </div>
+                @else
+                  <div class="w-10 h-10 rounded-full {{ $color }} flex items-center justify-center font-bold text-sm flex-shrink-0">
+                    {{ $initials }}
+                  </div>
+                @endif
                 <div>
                   <div class="font-bold text-slate-900 dark:text-white">{{ $user->name }}</div>
                   <div class="text-xs text-slate-400">&#64;{{ $user->username }}</div>
