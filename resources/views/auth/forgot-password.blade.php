@@ -64,9 +64,9 @@
 
         <div class="p-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 text-center">
           <a href="{{ route('login') }}"
-            class="flex items-center justify-center gap-2 text-sm font-bold text-primary hover:text-primary/80 transition-colors">
+            class="group flex items-center justify-center gap-2 text-sm font-bold text-primary transition-colors">
             <span class="material-icons text-base">arrow_back</span>
-            Back to Login
+            <span class="group-hover:underline">Back to Login</span>
           </a>
         </div>
       </div>
