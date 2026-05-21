@@ -33,7 +33,7 @@ export default function HomePage() {
                 <MemorableMoments moments={data?.memorable_moments} pastEvents={data?.past_events ?? []} loading={loading} />
                 <AboutSection about={data?.about} loading={loading} />
             </main>
-            <Footer />
+            <Footer footer={data?.footer} />
         </div>
     );
 }
