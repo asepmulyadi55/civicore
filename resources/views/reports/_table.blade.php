@@ -110,7 +110,56 @@
       </div>
     </div>
     @if($residents->hasPages())
-      <div>{{ $residents->links() }}</div>
+      <div class="flex items-center gap-1">
+        @if ($residents->onFirstPage())
+          <button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 cursor-not-allowed" disabled>
+            <span class="material-icons text-sm">chevron_left</span>
+          </button>
+        @else
+          <a href="{{ $residents->previousPageUrl() }}" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            <span class="material-icons text-sm">chevron_left</span>
+          </a>
+        @endif
+
+        @php
+          $lastPage    = $residents->lastPage();
+          $currentPage = $residents->currentPage();
+          $start       = max(1, $currentPage - 2);
+          $end         = min($lastPage, $currentPage + 2);
+        @endphp
+
+        @if ($start > 1)
+          <a href="{{ $residents->url(1) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">1</a>
+          @if ($start > 2)
+            <span class="px-1 text-slate-400 text-sm">&hellip;</span>
+          @endif
+        @endif
+
+        @for ($p = $start; $p <= $end; $p++)
+          @if ($p === $currentPage)
+            <span class="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-semibold">{{ $p }}</span>
+          @else
+            <a href="{{ $residents->url($p) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $p }}</a>
+          @endif
+        @endfor
+
+        @if ($end < $lastPage)
+          @if ($end < $lastPage - 1)
+            <span class="px-1 text-slate-400 text-sm">&hellip;</span>
+          @endif
+          <a href="{{ $residents->url($lastPage) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $lastPage }}</a>
+        @endif
+
+        @if ($residents->hasMorePages())
+          <a href="{{ $residents->nextPageUrl() }}" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            <span class="material-icons text-sm">chevron_right</span>
+          </a>
+        @else
+          <button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 cursor-not-allowed" disabled>
+            <span class="material-icons text-sm">chevron_right</span>
+          </button>
+        @endif
+      </div>
     @endif
   </div>
 </div>
