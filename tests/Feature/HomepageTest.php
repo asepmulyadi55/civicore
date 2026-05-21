@@ -176,4 +176,78 @@ class HomepageTest extends TestCase
       'content' => '',
     ])->assertSessionHasErrors('content');
   }
+
+  // ── Footer section ────────────────────────────────────────────────────────────
+
+  /** @test */
+  public function admin_can_save_footer_section()
+  {
+    $admin = $this->createAdminUser();
+
+    $this->actingAs($admin)->post(route('homepage.footer'), [
+      'brand_name'    => 'Dwipapuri',
+      'tagline'       => 'A great place to live.',
+      'contact_email' => 'hello@dwipapuri.com',
+      'contact_phone' => '+62 123 4567 890',
+      'facebook_url'  => 'https://facebook.com/dwipapuri',
+      'instagram_url' => 'https://instagram.com/dwipapuri',
+      'copyright'     => '© 2025 Dwipapuri. All rights reserved.',
+      'bottom_note'   => 'Built for a better community experience.',
+      'links'         => [
+        ['label' => 'Resident Portal', 'url' => 'https://dwipapuri.com/portal'],
+        ['label' => 'Privacy Policy',  'url' => 'https://dwipapuri.com/privacy'],
+      ],
+    ])
+      ->assertRedirect(route('homepage.index'))
+      ->assertSessionHas('success');
+
+    $saved = json_decode(\App\Models\Setting::get('homepage_footer', '{}'), true);
+    $this->assertEquals('Dwipapuri', $saved['brand_name']);
+    $this->assertCount(2, $saved['links']);
+  }
+
+  /** @test */
+  public function footer_rejects_invalid_email()
+  {
+    $admin = $this->createAdminUser();
+
+    $this->actingAs($admin)->post(route('homepage.footer'), [
+      'contact_email' => 'not-an-email',
+    ])->assertSessionHasErrors('contact_email');
+  }
+
+  /** @test */
+  public function footer_rejects_invalid_social_urls()
+  {
+    $admin = $this->createAdminUser();
+
+    $this->actingAs($admin)->post(route('homepage.footer'), [
+      'facebook_url' => 'not-a-url',
+    ])->assertSessionHasErrors('facebook_url');
+  }
+
+  /** @test */
+  public function footer_strips_empty_links()
+  {
+    $admin = $this->createAdminUser();
+
+    $this->actingAs($admin)->post(route('homepage.footer'), [
+      'links' => [
+        ['label' => '', 'url' => ''],
+        ['label' => 'Portal', 'url' => 'https://dwipapuri.com'],
+      ],
+    ])
+      ->assertRedirect(route('homepage.index'));
+
+    $saved = json_decode(\App\Models\Setting::get('homepage_footer', '{}'), true);
+    $this->assertCount(1, $saved['links']);
+    $this->assertEquals('Portal', $saved['links'][0]['label']);
+  }
+
+  /** @test */
+  public function guest_cannot_save_footer()
+  {
+    $this->post(route('homepage.footer'), ['brand_name' => 'Test'])
+      ->assertRedirect(route('login'));
+  }
 }

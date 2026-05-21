@@ -32,16 +32,21 @@ class CheckSingleSession
     if ($user->session_token && $user->session_token !== $request->session()->getId()) {
       if ($oldSessionExpired) {
         // Silently take over — old session has died
-        $user->session_token = $request->session()->getId();
-        $user->last_active_at = \Illuminate\Support\Carbon::now();
         $user->timestamps = false;
-        $user->save();
-        $user->timestamps = true;
+        try {
+          $user->session_token  = $request->session()->getId();
+          $user->last_active_at = \Illuminate\Support\Carbon::now();
+          $user->save();
+        } finally {
+          $user->timestamps = true;
+        }
       } else {
+        $userId = $user->id;
         Auth::logout();
         $request->session()->invalidate();
-        return redirect()->route('session.conflict')
-          ->with('conflict_user_id', $user->id);
+        $request->session()->regenerateToken();
+        session(['conflict_user_id' => $userId]);
+        return redirect()->route('session.conflict');
       }
     }
 

@@ -50,6 +50,11 @@ class SocialAuthController extends Controller
         }
 
         Auth::login($user, true);
+        request()->session()->regenerate();
+        $user->session_token  = request()->session()->getId();
+        $user->last_login_at  = now();
+        $user->last_active_at = now();
+        $user->save();
         return redirect($user->homeUrl())->with('success', 'Welcome back, ' . $user->name . '!');
       }
 
@@ -71,6 +76,11 @@ class SocialAuthController extends Controller
 
         $user->update(['google_id' => $googleUser->id]);
         Auth::login($user, true);
+        request()->session()->regenerate();
+        $user->session_token  = request()->session()->getId();
+        $user->last_login_at  = now();
+        $user->last_active_at = now();
+        $user->save();
         return redirect($user->homeUrl())->with('success', 'Google account linked successfully!');
       }
 
@@ -84,16 +94,26 @@ class SocialAuthController extends Controller
       // REGISTER flow: Create new user with default 'resident' role
       $residentRole = Role::where('name', 'resident')->first();
 
-      $user = User::create([
-        'name' => $googleUser->name,
-        'username' => $this->generateUsername($googleUser->email),
-        'email' => $googleUser->email,
-        'google_id' => $googleUser->id,
-        'password' => Hash::make(uniqid()), // Random password — Google users sign in via OAuth
-        'role_id' => $residentRole?->id,   // Default role so views don't break
-        'is_active' => false,                 // Require admin approval
-        'email_verified_at' => now(),
-      ]);
+      try {
+        $user = User::create([
+          'name'              => $googleUser->name,
+          'username'          => $this->generateUsername($googleUser->email),
+          'email'             => $googleUser->email,
+          'google_id'         => $googleUser->id,
+          'password'          => Hash::make(uniqid()), // Random password — Google users sign in via OAuth
+          'role_id'           => $residentRole?->id,   // Default role so views don't break
+          'is_active'         => false,                // Require admin approval
+          'email_verified_at' => now(),
+        ]);
+      } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+        // Race condition: two simultaneous registrations with the same email.
+        // The second one loses — redirect as if registration succeeded so the
+        // user is not confused, but they will need admin approval regardless.
+        Log::warning('Google OAuth registration race condition', ['email' => $googleUser->email]);
+
+        return redirect()->route('login')
+          ->with('success', 'Account created! Please wait for admin approval before logging in.');
+      }
 
       // Don't login yet — redirect to login page with message
       return redirect()->route('login')
@@ -110,20 +130,25 @@ class SocialAuthController extends Controller
   }
 
   /**
-   * Generate unique username from email
+   * Generate unique username from email.
+   * Uses a retry loop with a max cap; the DB unique constraint is the true
+   * source of truth — the loop is just a best-effort pre-check.
    */
-  private function generateUsername($email)
+  private function generateUsername(string $email): string
   {
-    $username = explode('@', $email)[0];
-    $username = preg_replace('/[^a-zA-Z0-9_]/', '_', $username);
+    $base     = preg_replace('/[^a-zA-Z0-9_]/', '_', explode('@', $email)[0]);
+    $username = $base;
+    $counter  = 1;
+    $maxTries = 50;
 
-    // Check if username exists
-    $originalUsername = $username;
-    $counter = 1;
-
-    while (User::where('username', $username)->exists()) {
-      $username = $originalUsername . '_' . $counter;
+    while ($counter <= $maxTries && User::where('username', $username)->exists()) {
+      $username = $base . '_' . $counter;
       $counter++;
+    }
+
+    // Final fallback: append random suffix to guarantee uniqueness
+    if ($counter > $maxTries) {
+      $username = $base . '_' . substr(bin2hex(random_bytes(4)), 0, 8);
     }
 
     return $username;
