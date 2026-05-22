@@ -280,6 +280,7 @@ class HomepageController extends Controller
             'tagline'        => 'nullable|string|max:300',
             'contact_email'  => 'nullable|email|max:200',
             'contact_phone'  => 'nullable|string|max:50',
+            'location'       => 'nullable|string|max:200',
             'facebook_url'   => 'nullable|url|max:500',
             'instagram_url'  => 'nullable|url|max:500',
             'copyright'      => 'nullable|string|max:300',

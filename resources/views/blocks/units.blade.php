@@ -62,7 +62,7 @@
       @endif
 
       {{-- Stats Row --}}
-      <div class="grid grid-cols-4 gap-4">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 text-center">
           <p class="text-3xl font-bold text-slate-900 dark:text-white">{{ $totalCount }}</p>
           <p class="text-xs text-slate-500 font-medium uppercase mt-1">{{ __('app.units_count') }}</p>

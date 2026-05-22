@@ -21,7 +21,8 @@
           @php
             $isMulti = ($activity->month_count ?? 1) > 1;
             $allMonths = $activity->all_months ?? collect([$activity->payment_month]);
-            $monthLabels = $allMonths->map(fn($m) => \Carbon\Carbon::parse($m)->format('M Y'))->implode(', ');
+            $allMonthLabels = $allMonths->map(fn($m) => \Carbon\Carbon::parse($m)->format('M Y'));
+            $monthLabels = $allMonthLabels->take(2)->implode(', ') . ($allMonths->count() > 2 ? '…' : '');
           @endphp
           <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
             <td class="px-6 py-4">
@@ -32,7 +33,7 @@
                 <span class="text-sm font-semibold truncate max-w-[140px]">{{ $activity->resident->fullname }}</span>
               </div>
             </td>
-            <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+            <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 max-w-[200px]" title="{{ $allMonthLabels->implode(', ') }}">
               {{ $monthLabels }}
               @if($isMulti)
                 <span class="ml-1 text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded">{{ $activity->month_count }} {{ __('app.months_count') }}</span>
