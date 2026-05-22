@@ -43,7 +43,9 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // ── Single-session conflict (public — no auth required) ────────────────────────
 Route::get('/session-conflict', [SessionConflictController::class, 'show'])->name('session.conflict');
-Route::post('/session-use-this', [SessionConflictController::class, 'useThisDevice'])->name('session.use-this');
+Route::post('/session-use-this', [SessionConflictController::class, 'useThisDevice'])
+    ->middleware('throttle:5,1')
+    ->name('session.use-this');
 
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:5,1');
@@ -187,7 +189,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/users/{user}/approve', [UserController::class, 'approve'])
         ->middleware('permission:users.approve')->name('users.approve');
     Route::post('/users/check-resident-email', [ApiResidentController::class, 'checkEmail'])
-        ->middleware('throttle:30,1')->name('users.check-resident-email');
+        ->middleware(['permission:users.edit', 'throttle:30,1'])->name('users.check-resident-email');
     Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate'])
         ->middleware('permission:users.edit')->name('users.deactivate');
     Route::patch('/users/{user}/reactivate', [UserController::class, 'reactivate'])
@@ -230,8 +232,10 @@ Route::middleware('auth')->group(function () {
 
     // ── Sensitive data reveal (admin-only AJAX) ──────────────────────────────
     Route::get('/residents/{resident}/reveal-fcn', [SensitiveDataController::class, 'revealFCN'])
+        ->middleware(['permission:residents.view', 'throttle:10,1'])
         ->name('residents.reveal-fcn');
     Route::get('/residents/{resident}/family-members/{familyMember}/reveal-nik', [SensitiveDataController::class, 'revealNIK'])
+        ->middleware(['permission:residents.view', 'throttle:10,1'])
         ->name('residents.family-members.reveal-nik');
 
     // ── Household (resident self-service) ─────────────────────────────────
