@@ -4,7 +4,7 @@
 <div class="space-y-3">
 
   {{-- Stat cards: Total / Male / Female --}}
-  <div class="grid grid-cols-3 gap-3">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
     {{-- Total --}}
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 flex items-center gap-3">
@@ -49,7 +49,7 @@
 
   {{-- Filter bar --}}
   <form method="GET" action="{{ route('posyandu.index') }}"
-    class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-3">
+    class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
 
     {{-- Preserve active category pill across filter form submissions --}}
     @if($categoryFilter)
@@ -57,7 +57,7 @@
     @endif
 
     {{-- Search --}}
-    <div class="relative flex-grow max-w-sm">
+    <div class="relative w-full sm:flex-grow sm:max-w-sm">
       <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
       <input type="text" name="search" value="{{ request('search') }}"
         placeholder="{{ __('app.posyandu_search_ph') }}"
@@ -67,9 +67,9 @@
     </div>
 
     {{-- Block filter --}}
-    <div class="relative">
+    <div class="relative w-full sm:w-auto">
       <select name="block_id"
-        class="appearance-none pl-4 pr-9 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200
+        class="appearance-none w-full sm:w-auto pl-4 pr-9 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200
                dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300
                focus:ring-2 focus:ring-primary/20 focus:border-primary">
         <option value="">{{ __('app.posyandu_all_blocks') }}</option>
@@ -83,9 +83,9 @@
     </div>
 
     {{-- Category filter --}}
-    <div class="relative">
+    <div class="relative w-full sm:w-auto">
       <select name="category"
-        class="appearance-none pl-4 pr-9 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200
+        class="appearance-none w-full sm:w-auto pl-4 pr-9 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200
                dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300
                focus:ring-2 focus:ring-primary/20 focus:border-primary">
         <option value="">{{ __('app.posyandu_all_cats') }}</option>
@@ -99,9 +99,9 @@
     </div>
 
     {{-- Gender filter --}}
-    <div class="relative">
+    <div class="relative w-full sm:w-auto">
       <select name="gender"
-        class="appearance-none pl-4 pr-9 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200
+        class="appearance-none w-full sm:w-auto pl-4 pr-9 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200
                dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300
                focus:ring-2 focus:ring-primary/20 focus:border-primary">
         <option value="">{{ __('app.posyandu_all_genders') }}</option>
@@ -117,27 +117,27 @@
 
     {{-- Search button --}}
     <button type="submit"
-      class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-lg shadow-sm shadow-primary/20 transition-all">
+      class="flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-lg shadow-sm shadow-primary/20 transition-all w-full sm:w-auto">
       <span class="material-icons text-sm">search</span>
       {{ __('app.btn_search') }}
     </button>
 
     @if(request()->hasAny(['search', 'block_id', 'category', 'gender']))
       <a href="{{ route('posyandu.index') }}"
-        class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-slate-500 hover:text-primary transition-colors">
+        class="flex justify-center items-center gap-1 px-3 py-2 text-sm font-medium text-slate-500 hover:text-primary transition-colors w-full sm:w-auto">
         <span class="material-icons text-sm">close</span>
         {{ __('app.clear_filters') }}
       </a>
     @endif
 
     {{-- Spacer --}}
-    <div class="flex-1"></div>
+    <div class="hidden sm:block flex-1"></div>
 
     {{-- Export button --}}
     <a href="{{ route('posyandu.export', request()->query()) }}"
-      class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-400
+      class="flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-400
              bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800
-             hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-lg transition-all">
+             hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-lg transition-all w-full sm:w-auto">
       <span class="material-icons text-sm">download</span>
       {{ __('app.posyandu_export') }}
     </a>

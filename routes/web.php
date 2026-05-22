@@ -39,6 +39,7 @@ Route::get('/api/homepage', [ApiHomepageController::class, 'index'])
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:10,1');
+Route::get('/logout', fn() => redirect()->route('login'));
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // ── Single-session conflict (public — no auth required) ────────────────────────

@@ -17,6 +17,7 @@ export default function Footer({ footer = {} }) {
   ]);
   const contactEmail   = footer.contact_email  || 'concierge@dwipapuri.res';
   const contactPhone   = footer.contact_phone  || '+62 123 4567 890';
+  const location       = footer.location       || '101 Dwipapuri Blvd, Serene Valley';
   const facebookUrl    = footer.facebook_url   || null;
   const instagramUrl   = footer.instagram_url  || null;
   const copyright      = footer.copyright      || '© 2026 Dwipapuri Residential. All rights reserved.';
@@ -73,7 +74,7 @@ export default function Footer({ footer = {} }) {
           <ul className="space-y-3 md:space-y-4 text-xs md:text-sm font-light" style={{ color: `${C.surface}99` }}>
             <li className="flex items-start gap-3">
               <span className="material-symbols-outlined text-base opacity-70 mt-0.5">location_on</span>
-              101 Dwipapuri Blvd, Serene Valley
+              {location}
             </li>
             <li className="flex items-center gap-3">
               <span className="material-symbols-outlined text-base opacity-70">call</span>
