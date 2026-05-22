@@ -69,7 +69,7 @@
         </div>
         <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 text-center">
           <p class="text-3xl font-bold text-primary">{{ $ownerOccupiedCount }}</p>
-          <p class="text-xs text-primary/70 font-medium uppercase mt-1">{{ __('app.house_status_owner_occupied') }}</p>
+          <p class="text-xs text-amber-500/80 font-medium uppercase mt-1">{{ __('app.house_status_owner_occupied') }}</p>
         </div>
         <div class="bg-white dark:bg-slate-900 rounded-xl border border-amber-200 dark:border-amber-800/40 p-4 text-center">
           <p class="text-3xl font-bold text-amber-500">{{ $rentedCount }}</p>
