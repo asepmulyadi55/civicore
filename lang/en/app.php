@@ -533,6 +533,7 @@ return [
   'hp_footer_quick_links_hint' => 'Up to 4 links shown in the Quick Links column.',
   'hp_footer_contact_email' => 'Contact Email',
   'hp_footer_contact_phone' => 'Contact Phone',
+  'hp_footer_location'       => 'Location',
   'hp_footer_facebook_url' => 'Facebook URL',
   'hp_footer_instagram_url' => 'Instagram URL',
   'hp_footer_copyright' => 'Copyright Text',
