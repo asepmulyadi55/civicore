@@ -40,14 +40,14 @@
         </div>
 
         {{-- Stats --}}
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        <div class="grid grid-cols-2 lg:grid-cols-2 gap-2">
           <div class="bg-slate-50 dark:bg-slate-800 rounded-lg p-2 text-center">
             <p class="text-xl font-bold text-slate-900 dark:text-white">{{ $block->units_count }}</p>
             <p class="text-[9px] text-slate-500 font-medium uppercase mt-0.5 leading-tight">{{ __('app.units_count') }}</p>
           </div>
           <div class="bg-primary/5 dark:bg-primary/10 rounded-lg p-2 text-center">
             <p class="text-xl font-bold text-primary">{{ $block->owner_occupied_units_count }}</p>
-            <p class="text-[9px] text-primary/70 dark:text-primary font-medium uppercase mt-0.5 leading-tight">{{ __('app.house_status_owner_occupied') }}</p>
+            <p class="text-[9px] text-amber-500/80 font-medium uppercase mt-0.5 leading-tight">{{ __('app.house_status_owner_occupied') }}</p>
           </div>
           <div class="bg-amber-50 dark:bg-amber-900/10 rounded-lg p-2 text-center">
             <p class="text-xl font-bold text-amber-500">{{ $block->rented_units_count }}</p>
