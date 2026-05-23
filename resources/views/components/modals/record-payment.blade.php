@@ -49,22 +49,40 @@ Review Modal, and all associated JavaScript.
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div class="flex flex-col gap-2">
           <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.resident_req') }}</label>
-          <div class="relative">
-            <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">person</span>
-            <select id="cm-resident-select"
-              class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
-              onchange="onResidentChange(this)">
-              <option value="">{{ __('app.select_resident_first') }}</option>
+          <div class="relative" id="cm-resident-wrapper">
+            {{-- Search input --}}
+            <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg z-10 pointer-events-none">search</span>
+            <input type="text" id="cm-resident-search"
+              placeholder="{{ __('app.search_resident_unit') }}"
+              autocomplete="off"
+              class="w-full pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
+              oninput="filterCmResidents(this.value)"
+              onfocus="openCmResidentDropdown()"
+              onblur="setTimeout(closeCmResidentDropdown, 150)">
+            {{-- Clear button (shown when a resident is selected) --}}
+            <button type="button" id="cm-resident-clear-btn"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors hidden"
+              onclick="clearCmResident()">
+              <span class="material-icons text-[18px]">close</span>
+            </button>
+            <span id="cm-resident-expand-icon"
+              class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
+            {{-- Hidden select for JS compatibility (data-* attributes kept for onResidentChange) --}}
+            <select id="cm-resident-select" class="sr-only">
+              <option value=""></option>
               @foreach($residents as $r)
-                <option value="{{ $r->id }}" data-name="{{ $r->fullname }}" data-unit="Unit {{ $r->unit_number }}"
+                <option value="{{ $r->id }}"
+                  data-name="{{ $r->fullname }}"
+                  data-unit="Unit {{ $r->unit_number }}"
                   data-block="{{ $r->block?->name ?? '' }}"
                   data-fee="{{ $r->currentFee()?->amount ?? 0 }}">
-                  {{ $r->fullname }} — {{ $r->block?->name }} Unit {{ $r->unit_number }}
                 </option>
               @endforeach
             </select>
-            <span
-              class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
+            {{-- Filterable dropdown list --}}
+            <div id="cm-resident-dropdown"
+              class="absolute z-50 left-0 right-0 top-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl max-h-56 overflow-y-auto hidden">
+            </div>
           </div>
           <p id="cm-error-resident" class="hidden text-xs text-red-500 items-center gap-1">
             <span class="material-icons text-xs">error_outline</span> {{ __('app.err_select_resident') }}
@@ -561,6 +579,68 @@ Review Modal, and all associated JavaScript.
   const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'];
 
+  // ── Resident searchable combobox ────────────────────────────────────
+  const cmResidentData = Array.from(
+    document.querySelectorAll('#cm-resident-select option[value]:not([value=""])')
+  ).map(o => ({
+    id: o.value, name: o.dataset.name, unit: o.dataset.unit,
+    block: o.dataset.block, fee: parseFloat(o.dataset.fee) || 0,
+  }));
+
+  function openCmResidentDropdown() {
+    filterCmResidents(document.getElementById('cm-resident-search').value);
+  }
+  function closeCmResidentDropdown() {
+    document.getElementById('cm-resident-dropdown').classList.add('hidden');
+  }
+  function filterCmResidents(query) {
+    const dropdown = document.getElementById('cm-resident-dropdown');
+    const q = query.toLowerCase().trim();
+    const filtered = q
+      ? cmResidentData.filter(r =>
+          r.name.toLowerCase().includes(q) ||
+          (r.block && r.block.toLowerCase().includes(q)) ||
+          r.unit.toLowerCase().includes(q))
+      : cmResidentData;
+    if (!filtered.length) {
+      dropdown.innerHTML = '<div class="px-4 py-3 text-sm text-slate-400 text-center">No residents found</div>';
+      dropdown.classList.remove('hidden');
+      return;
+    }
+    // Build dropdown items via DOM (avoids escaping issues with names containing quotes)
+    const frag = document.createDocumentFragment();
+    filtered.slice(0, 80).forEach(r => {
+      const label = r.block ? `${r.name} — ${r.block} ${r.unit}` : `${r.name} — ${r.unit}`;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'w-full text-left px-4 py-2.5 text-sm hover:bg-primary/5 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors border-b border-slate-100 dark:border-slate-700/50 last:border-0';
+      btn.innerHTML = `<span class="font-semibold">${r.name}</span><span class="text-slate-400 ml-2 text-xs">— ${r.block} ${r.unit}</span>`;
+      btn.addEventListener('mousedown', () => selectCmResident(r.id, label));
+      frag.appendChild(btn);
+    });
+    dropdown.innerHTML = '';
+    dropdown.appendChild(frag);
+    dropdown.classList.remove('hidden');
+  }
+  function selectCmResident(id, label) {
+    const sel = document.getElementById('cm-resident-select');
+    sel.value = id;
+    document.getElementById('cm-resident-search').value = label;
+    document.getElementById('cm-resident-clear-btn').classList.remove('hidden');
+    document.getElementById('cm-resident-expand-icon').classList.add('hidden');
+    closeCmResidentDropdown();
+    onResidentChange(sel);
+  }
+  function clearCmResident() {
+    const sel = document.getElementById('cm-resident-select');
+    sel.value = '';
+    document.getElementById('cm-resident-search').value = '';
+    document.getElementById('cm-resident-clear-btn').classList.add('hidden');
+    document.getElementById('cm-resident-expand-icon').classList.remove('hidden');
+    closeCmResidentDropdown();
+    onResidentChange(sel);
+  }
+
   // ── CREATE MODAL ───────────────────────────────────────────────────
   function openCreateModal() {
     resetCreateModal();
@@ -575,6 +655,10 @@ Review Modal, and all associated JavaScript.
   }
   function resetCreateModal() {
     document.getElementById('cm-resident-select').value = '';
+    document.getElementById('cm-resident-search').value = '';
+    document.getElementById('cm-resident-clear-btn').classList.add('hidden');
+    document.getElementById('cm-resident-expand-icon').classList.remove('hidden');
+    closeCmResidentDropdown();
     document.getElementById('cm-year-select').value = '{{ now()->year }}';
     document.getElementById('cm-method').value = '';
     document.getElementById('cm-status').value = 'unpaid';

@@ -94,21 +94,23 @@
   {{-- Reset / forgot password link (only relevant when user already has a password) --}}
   @if($hasPassword)
   <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
-    <div class="flex items-start gap-4">
-      <div class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
-        <span class="material-icons text-amber-500 text-lg">email</span>
-      </div>
-      <div class="flex-1">
-        <h3 class="font-bold text-slate-900 dark:text-white text-sm">{{ __('app.settings_forgot_password') }}</h3>
-        <p class="text-xs text-slate-500 mt-0.5">
-          {{ __('app.settings_reset_link_desc') }}
-          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ $user->email }}</span>
-        </p>
+    <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+      <div class="flex items-start gap-3 flex-1">
+        <div class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+          <span class="material-icons text-amber-500 text-lg">email</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-sm">{{ __('app.settings_forgot_password') }}</h3>
+          <p class="text-xs text-slate-500 mt-0.5">
+            {{ __('app.settings_reset_link_desc') }}
+            <span class="font-semibold text-slate-700 dark:text-slate-300">{{ $user->email }}</span>
+          </p>
+        </div>
       </div>
       <form method="POST" action="{{ route('settings.reset-link') }}">
         @csrf
         <button type="submit"
-          class="flex items-center gap-1.5 px-4 py-2 border border-amber-400 dark:border-amber-600 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg text-xs font-semibold transition-all whitespace-nowrap">
+          class="flex items-center justify-center gap-1.5 w-full sm:w-auto px-4 py-2 border border-amber-400 dark:border-amber-600 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg text-xs font-semibold transition-all whitespace-nowrap">
           <span class="material-icons text-sm">send</span>
           {{ __('app.settings_send_reset') }}
         </button>

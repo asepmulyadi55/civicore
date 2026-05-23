@@ -22,6 +22,7 @@ use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\FamilyMemberController;
 use App\Http\Controllers\HouseholdController;
+use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\SensitiveDataController;
 use App\Http\Controllers\Api\BlockController as ApiBlockController;
 use App\Http\Controllers\Api\ResidentController as ApiResidentController;
@@ -198,6 +199,19 @@ Route::middleware('auth')->group(function () {
     Route::delete('/users/{user}', [UserController::class, 'destroy'])
         ->middleware('permission:users.delete')->name('users.destroy');
 
+
+    // ── Organization ─────────────────────────────────────────────────────────
+    // View: all authenticated users. Manage (create/edit/delete): admin only (checked in controller)
+    Route::get('/organization', [OrganizationController::class, 'index'])->name('organization.index');
+    Route::post('/organization/periods', [OrganizationController::class, 'storePeriod'])->name('organization.periods.store');
+    Route::put('/organization/periods/{period}', [OrganizationController::class, 'updatePeriod'])->name('organization.periods.update');
+    Route::patch('/organization/periods/{period}/activate', [OrganizationController::class, 'activatePeriod'])->name('organization.periods.activate');
+    Route::delete('/organization/periods/{period}', [OrganizationController::class, 'destroyPeriod'])->name('organization.periods.destroy');
+    Route::post('/organization/periods/{period}/positions', [OrganizationController::class, 'storePosition'])->name('organization.positions.store');
+    Route::put('/organization/positions/{position}', [OrganizationController::class, 'updatePosition'])->name('organization.positions.update');
+    Route::delete('/organization/positions/{position}', [OrganizationController::class, 'destroyPosition'])->name('organization.positions.destroy');
+    Route::get('/organization/search-members', [OrganizationController::class, 'searchMembers'])
+        ->middleware('throttle:60,1')->name('organization.search-members');
 
     // ── Roles ─────────────────────────────────────────────────────────────────
     Route::get('/roles', [RoleController::class, 'index'])

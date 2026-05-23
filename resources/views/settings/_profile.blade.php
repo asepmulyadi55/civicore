@@ -62,7 +62,7 @@
       <h2 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-4">
         {{ __('app.settings_language') }}
       </h2>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         @foreach(['en' => ['flag' => '🇬🇧', 'label' => 'English'], 'id' => ['flag' => '🇮🇩', 'label' => 'Indonesian']] as $langCode => $lang)
           @php $isActive = (old('language', $user->language ?? 'en') === $langCode); @endphp
           <label for="lang-{{ $langCode }}"

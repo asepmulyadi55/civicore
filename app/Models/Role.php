@@ -38,7 +38,8 @@ class Role extends Model
         'posyandu'  => ['view'],
         'users'     => ['view', 'create', 'edit', 'delete', 'approve'],
         'roles'     => ['view', 'create', 'edit', 'delete'],
-        'media'     => ['view', 'delete'],
+        'media'         => ['view', 'delete'],
+        'organization'  => ['view', 'create', 'edit', 'delete'],
     ];
 
     public function users(): HasMany

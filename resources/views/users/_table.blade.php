@@ -217,8 +217,8 @@
   </div>
 
   {{-- Pagination --}}
-  <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-3">
-    <span class="text-sm text-slate-500">
+  <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center sm:justify-between gap-3">
+    <span class="text-sm text-slate-500 text-center sm:text-left">
       {{ __('app.showing') }} {{ $users->firstItem() ?? 0 }}–{{ $users->lastItem() ?? 0 }} {{ __('app.of') }}
       {{ $users->total() }} {{ __('app.users_lowercase') }}
     </span>
