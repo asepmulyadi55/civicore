@@ -43,6 +43,7 @@
         'label' => __('app.nav_group_finance'),
         'group_icon' => 'attach_money',
         'items' => [
+          ['key' => 'finance', 'label' => __('app.nav_finance'), 'icon' => 'account_balance', 'route' => 'finance.index', 'permission' => 'finance.view'],
           ['key' => 'payments', 'label' => __('app.nav_payments'), 'icon' => 'payments', 'route' => 'payments.index', 'permission' => 'payments.view'],
           ['key' => 'reports', 'label' => __('app.nav_reports'), 'icon' => 'bar_chart', 'route' => 'reports.index', 'permission' => 'reports.view'],
         ],
