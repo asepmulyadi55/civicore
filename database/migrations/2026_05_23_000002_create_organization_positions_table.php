@@ -33,9 +33,9 @@ return new class extends Migration
                   ->nullOnDelete();
 
             $table->index('parent_id');
-            $table->index(['organization_period_id', 'sort_order']);
-            $table->index(['organization_period_id', 'resident_id']);
-            $table->index(['organization_period_id', 'family_member_id']);
+            $table->index(['organization_period_id', 'sort_order'],        'org_pos_period_sort_idx');
+            $table->index(['organization_period_id', 'resident_id'],       'org_pos_period_resident_idx');
+            $table->index(['organization_period_id', 'family_member_id'],  'org_pos_period_family_idx');
         });
     }
 
