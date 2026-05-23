@@ -90,7 +90,7 @@
 
   {{-- Legend + Pagination --}}
   <div
-    class="p-4 flex flex-col md:flex-row items-center justify-between border-t border-slate-200 dark:border-slate-800 gap-4">
+    class="p-4 flex flex-col sm:flex-row items-center sm:justify-between border-t border-slate-200 dark:border-slate-800 gap-4">
     <div class="flex items-center gap-6">
       <div class="flex items-center gap-2">
         <div class="w-3 h-3 bg-emerald-500 rounded-sm"></div>

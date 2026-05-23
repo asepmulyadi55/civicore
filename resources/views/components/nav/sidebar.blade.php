@@ -17,6 +17,7 @@
     if ($user->can('posyandu.view')) {
       $flatItems[] = ['key' => 'posyandu', 'label_raw' => 'Posyandu', 'icon' => 'health_and_safety', 'route' => 'posyandu.index', 'permission' => 'posyandu.view'];
     }
+    $flatItems[] = ['key' => 'organization', 'label_raw' => __('app.nav_organization'), 'icon' => 'account_tree', 'route' => 'organization.index', 'permission' => null];
     $flatItems[] = ['key' => 'settings', 'label_raw' => __('app.nav_settings'), 'icon' => 'settings', 'route' => 'settings.index', 'permission' => null];
     $navGroups = [['label' => null, 'group_icon' => null, 'items' => $flatItems]];
   } else {
@@ -35,6 +36,7 @@
           ['key' => 'residents', 'label' => __('app.nav_residents'), 'icon' => 'people', 'route' => 'residents.index', 'permission' => 'residents.view'],
           ['key' => 'blocks', 'label' => __('app.nav_blocks'), 'icon' => 'domain', 'route' => 'blocks.index', 'permission' => 'blocks.view'],
           ['key' => 'posyandu', 'label' => 'Posyandu', 'icon' => 'health_and_safety', 'route' => 'posyandu.index', 'permission' => 'posyandu.view'],
+          ['key' => 'organization', 'label' => __('app.nav_organization'), 'icon' => 'account_tree', 'route' => 'organization.index', 'permission' => null],
         ],
       ],
       [

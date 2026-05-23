@@ -165,8 +165,8 @@
 
   {{-- Pagination --}}
   @if($payments->hasPages())
-    <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-      <p class="text-sm text-slate-500">{{ __('app.showing') }} {{ $payments->firstItem() }}–{{ $payments->lastItem() }} {{ __('app.of') }} {{ $payments->total() }}</p>
+    <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center sm:justify-between gap-3">
+      <p class="text-sm text-slate-500 text-center sm:text-left">{{ __('app.showing') }} {{ $payments->firstItem() }}–{{ $payments->lastItem() }} {{ __('app.of') }} {{ $payments->total() }}</p>
       <div class="flex items-center gap-1">
         {{-- Previous --}}
         @if ($payments->onFirstPage())

@@ -8,7 +8,7 @@
 
     @include('homepage._header')
 
-    <main class="flex-1 p-6 lg:p-8 space-y-8">
+    <main class="flex-1 p-6 lg:p-8 space-y-6">
 
       {{-- Flash Messages --}}
       @if(session('success'))
@@ -37,13 +37,106 @@
         </div>
       @endif
 
-      @include('homepage._featured')
-      @include('homepage._events')
-      @include('homepage._memorable_moments')
-      @include('homepage._about')
-      @include('homepage._footer')
+      {{-- ── Tab Navigation ──────────────────────────────────────── --}}
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <nav class="flex border-b border-slate-100 dark:border-slate-800 min-w-max" id="hp-tab-nav" aria-label="Homepage sections">
+
+            <button type="button" id="hp-tab-btn-featured" onclick="switchHpTab('featured')"
+              class="hp-tab-btn flex items-center gap-2 px-5 py-4 text-sm font-semibold whitespace-nowrap border-b-2 transition-all
+                     border-primary text-primary">
+              <span class="material-icons text-[18px]">star</span>
+              {{ __('app.hp_section_featured') }}
+            </button>
+
+            <button type="button" id="hp-tab-btn-events" onclick="switchHpTab('events')"
+              class="hp-tab-btn flex items-center gap-2 px-5 py-4 text-sm font-semibold whitespace-nowrap border-b-2 transition-all
+                     border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/40">
+              <span class="material-icons text-[18px]">event</span>
+              {{ __('app.hp_section_events') }}
+              <span class="px-1.5 py-0.5 text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full">{{ $totalEvents }}</span>
+            </button>
+
+            <button type="button" id="hp-tab-btn-moments" onclick="switchHpTab('moments')"
+              class="hp-tab-btn flex items-center gap-2 px-5 py-4 text-sm font-semibold whitespace-nowrap border-b-2 transition-all
+                     border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/40">
+              <span class="material-icons text-[18px]">photo_library</span>
+              {{ __('app.hp_section_moments') }}
+            </button>
+
+            <button type="button" id="hp-tab-btn-about" onclick="switchHpTab('about')"
+              class="hp-tab-btn flex items-center gap-2 px-5 py-4 text-sm font-semibold whitespace-nowrap border-b-2 transition-all
+                     border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/40">
+              <span class="material-icons text-[18px]">info</span>
+              {{ __('app.hp_section_about') }}
+            </button>
+
+            <button type="button" id="hp-tab-btn-footer" onclick="switchHpTab('footer')"
+              class="hp-tab-btn flex items-center gap-2 px-5 py-4 text-sm font-semibold whitespace-nowrap border-b-2 transition-all
+                     border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/40">
+              <span class="material-icons text-[18px]">web_asset</span>
+              {{ __('app.hp_section_footer') }}
+            </button>
+
+          </nav>
+        </div>
+      </div>
+
+      {{-- ── Tab Panels ───────────────────────────────────────────── --}}
+      <div id="hp-tab-featured" class="hp-tab-panel">
+        @include('homepage._featured')
+      </div>
+      <div id="hp-tab-events" class="hp-tab-panel hidden">
+        @include('homepage._events')
+      </div>
+      <div id="hp-tab-moments" class="hp-tab-panel hidden">
+        @include('homepage._memorable_moments')
+      </div>
+      <div id="hp-tab-about" class="hp-tab-panel hidden">
+        @include('homepage._about')
+      </div>
+      <div id="hp-tab-footer" class="hp-tab-panel hidden">
+        @include('homepage._footer')
+      </div>
 
     </main>
+
+    <script>
+    function switchHpTab(tab, updateHistory) {
+      document.querySelectorAll('.hp-tab-panel').forEach(function(p) { p.classList.add('hidden'); });
+      document.querySelectorAll('.hp-tab-btn').forEach(function(b) {
+        b.classList.remove('border-primary', 'text-primary');
+        b.classList.add('border-transparent', 'text-slate-500');
+      });
+      var panel = document.getElementById('hp-tab-' + tab);
+      if (panel) panel.classList.remove('hidden');
+      var btn = document.getElementById('hp-tab-btn-' + tab);
+      if (btn) {
+        btn.classList.remove('border-transparent', 'text-slate-500');
+        btn.classList.add('border-primary', 'text-primary');
+      }
+      if (updateHistory !== false) history.replaceState(null, null, location.pathname + location.search + '#' + tab);
+    }
+    (function () {
+      var validTabs = ['featured', 'events', 'moments', 'about', 'footer'];
+      var stored    = sessionStorage.getItem('hp_active_tab');
+      var hash      = location.hash.slice(1);
+      sessionStorage.removeItem('hp_active_tab');
+      var active = (stored && validTabs.indexOf(stored) !== -1) ? stored
+                 : (validTabs.indexOf(hash) !== -1             ? hash
+                 : 'featured');
+      switchHpTab(active, false);
+
+      // Remember active tab across form submissions
+      document.querySelectorAll('.hp-tab-panel').forEach(function(panel) {
+        panel.querySelectorAll('form').forEach(function(form) {
+          form.addEventListener('submit', function() {
+            sessionStorage.setItem('hp_active_tab', panel.id.replace('hp-tab-', ''));
+          });
+        });
+      });
+    })();
+    </script>
   </div>
 
   @include('homepage._modals')
