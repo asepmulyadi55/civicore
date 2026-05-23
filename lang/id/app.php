@@ -533,6 +533,7 @@ return [
   'hp_footer_quick_links_hint' => 'Hingga 4 tautan yang ditampilkan di kolom Tautan Cepat.',
   'hp_footer_contact_email' => 'Email Kontak',
   'hp_footer_contact_phone' => 'Telepon Kontak',
+  'hp_footer_location'       => 'Lokasi',
   'hp_footer_facebook_url' => 'URL Facebook',
   'hp_footer_instagram_url' => 'URL Instagram',
   'hp_footer_copyright' => 'Teks Hak Cipta',

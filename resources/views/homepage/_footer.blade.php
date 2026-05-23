@@ -81,6 +81,15 @@
       </div>
     </div>
 
+    {{-- Location --}}
+    <div class="space-y-1.5">
+      <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_footer_location') }}</label>
+      <input type="text" name="location" maxlength="200"
+        value="{{ old('location', $footer['location'] ?? '') }}"
+        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+        placeholder="e.g. 101 Dwipapuri Blvd, Serene Valley">
+    </div>
+
     {{-- Social Links --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div class="space-y-1.5">
