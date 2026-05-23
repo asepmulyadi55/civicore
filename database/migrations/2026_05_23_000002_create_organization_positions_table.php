@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::dropIfExists('organization_positions');
         Schema::create('organization_positions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('organization_period_id')
