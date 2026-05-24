@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\OverviewController;
@@ -69,6 +70,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('permission:dashboard.view')->name('dashboard');
+    Route::post('/dashboard/notifications/read', [DashboardController::class, 'markNotificationsRead'])
+        ->name('notifications.read');
 
     // ── Homepage CMS ─────────────────────────────────────────────────────────
     Route::get('/homepage', [HomepageController::class, 'index'])
@@ -180,6 +183,32 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:reports.view')->name('reports.index');
     Route::get('/reports/export', [ReportController::class, 'export'])
         ->middleware('permission:reports.view')->name('reports.export');
+
+    // ── Finance ───────────────────────────────────────────────────────────────
+    Route::get('/finance', [FinanceController::class, 'index'])
+        ->middleware('permission:finance.view')->name('finance.index');
+    Route::post('/finance/transactions', [FinanceController::class, 'storeTransaction'])
+        ->middleware('permission:finance.create')->name('finance.transactions.store');
+    Route::put('/finance/transactions/{transaction}', [FinanceController::class, 'updateTransaction'])
+        ->middleware('permission:finance.edit')->name('finance.transactions.update');
+    Route::delete('/finance/transactions/{transaction}', [FinanceController::class, 'destroyTransaction'])
+        ->middleware('permission:finance.delete')->name('finance.transactions.destroy');
+    Route::post('/finance/reports/generate', [FinanceController::class, 'generateReport'])
+        ->middleware('permission:finance.create')->name('finance.reports.generate');
+    Route::patch('/finance/reports/{report}/opening-balance', [FinanceController::class, 'updateOpeningBalance'])
+        ->middleware('permission:finance.edit')->name('finance.reports.opening-balance');
+    Route::patch('/finance/reports/{report}/submit', [FinanceController::class, 'submitReport'])
+        ->middleware('permission:finance.create')->name('finance.reports.submit');
+    Route::patch('/finance/reports/{report}/approve', [FinanceController::class, 'approveReport'])
+        ->middleware('permission:finance.approve')->name('finance.reports.approve');
+    Route::patch('/finance/reports/{report}/revise', [FinanceController::class, 'reviseReport'])
+        ->middleware('permission:finance.approve')->name('finance.reports.revise');
+    Route::get('/finance/reports/{report}/export', [FinanceController::class, 'exportReport'])
+        ->middleware('permission:finance.view')->name('finance.reports.export');
+    Route::delete('/finance/reports/{report}', [FinanceController::class, 'destroyReport'])
+        ->middleware('permission:finance.delete')->name('finance.reports.destroy');
+    Route::get('/finance/categories/search', [FinanceController::class, 'searchCategories'])
+        ->middleware(['permission:finance.create', 'throttle:60,1'])->name('finance.categories.search');
 
     // ── User Management ───────────────────────────────────────────────────────
     Route::get('/users', [UserController::class, 'index'])
