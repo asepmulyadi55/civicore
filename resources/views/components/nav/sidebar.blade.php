@@ -17,6 +17,15 @@
     if ($user->can('posyandu.view')) {
       $flatItems[] = ['key' => 'posyandu', 'label_raw' => 'Posyandu', 'icon' => 'health_and_safety', 'route' => 'posyandu.index', 'permission' => 'posyandu.view'];
     }
+    if ($user->can('finance.view')) {
+      $flatItems[] = ['key' => 'finance', 'label_raw' => __('app.nav_finance'), 'icon' => 'account_balance', 'route' => 'finance.index', 'permission' => 'finance.view'];
+    }
+    if ($user->can('payments.view')) {
+      $flatItems[] = ['key' => 'payments', 'label_raw' => __('app.nav_payments'), 'icon' => 'payments', 'route' => 'payments.index', 'permission' => 'payments.view'];
+    }
+    if ($user->can('reports.view')) {
+      $flatItems[] = ['key' => 'reports', 'label_raw' => __('app.nav_reports'), 'icon' => 'bar_chart', 'route' => 'reports.index', 'permission' => 'reports.view'];
+    }
     $flatItems[] = ['key' => 'organization', 'label_raw' => __('app.nav_organization'), 'icon' => 'account_tree', 'route' => 'organization.index', 'permission' => null];
     $flatItems[] = ['key' => 'settings', 'label_raw' => __('app.nav_settings'), 'icon' => 'settings', 'route' => 'settings.index', 'permission' => null];
     $navGroups = [['label' => null, 'group_icon' => null, 'items' => $flatItems]];

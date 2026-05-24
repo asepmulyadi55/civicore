@@ -32,6 +32,12 @@
           </button>
         @endif
       @endif
+
+      {{-- Dark mode toggle --}}
+      <button onclick="toggleDark()" title="Toggle dark mode"
+        class="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-primary/50 transition-all">
+        <span class="material-icons text-slate-500 dark:text-slate-400 text-[20px]">dark_mode</span>
+      </button>
     </div>
   </div>
 </header>

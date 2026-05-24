@@ -124,8 +124,9 @@ class FinanceReport extends Model
             ->sum('amount');
 
         $paymentIncome = PaymentRecord::where('status', 'approved')
-            ->whereYear('payment_month', $this->year)
-            ->whereMonth('payment_month', $this->month)
+            ->whereNotNull('approved_at')
+            ->whereYear('approved_at', $this->year)
+            ->whereMonth('approved_at', $this->month)
             ->sum('amount');
 
         $totalExpense = FinanceTransaction::where('type', 'expense')

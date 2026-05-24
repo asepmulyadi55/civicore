@@ -8,105 +8,125 @@ use App\Models\PaymentRecord;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class FinanceReportExport implements
     FromCollection,
-    WithHeadings,
     WithTitle,
     ShouldAutoSize,
-    WithStyles,
     WithEvents
 {
     protected FinanceReport $report;
     protected string $currency;
-    protected string $locale;
-    protected bool $isId;
+
+    /** Number of title rows inserted before data (LAPORAN KEUANGAN header block). */
+    private const TITLE_OFFSET = 5;
+
+    // Collection-relative row indices (1-based); resolved in collection(), used in AfterSheet.
+    protected int $jumlahCollRow    = 0;
+    protected int $saldoCollRow     = 0;
+    protected int $tabHdrCollRow    = 0;
+    protected int $tabColCollRow    = 0;
+    protected int $tabJumlahCollRow = 0;
+    protected int $tabSaldoCollRow  = 0;
 
     public function __construct(FinanceReport $report)
     {
         $this->report   = $report;
         $this->currency = Setting::get('currency_symbol', 'Rp');
-        $this->locale   = session('app_locale', config('app.locale', 'en'));
-        $this->isId     = $this->locale === 'id';
     }
 
     public function title(): string
     {
-        $label = $this->isId ? 'Laporan Keuangan' : 'Finance Report';
-        return $label . ' ' . Carbon::create($this->report->year, $this->report->month, 1)->format('M Y');
+        return 'Laporan Keuangan';
     }
 
-    public function headings(): array
+    // ── Indonesian month names ────────────────────────────────────────────────
+
+    private function monthName(int $month): string
     {
-        return $this->isId
-            ? ['#', 'Tanggal', 'Deskripsi', 'Kategori', 'Jenis', 'Jumlah']
-            : ['#', 'Date', 'Description', 'Category', 'Type', 'Amount'];
+        return ['Januari','Februari','Maret','April','Mei','Juni',
+                'Juli','Agustus','September','Oktober','November','Desember'][$month - 1];
     }
+
+    private function periodLabel(int $month, int $year): string
+    {
+        return $this->monthName($month) . ' ' . $year;
+    }
+
+    // ── Currency formatter ────────────────────────────────────────────────────
+
+    private function fmt(float|int|string $n): string
+    {
+        return $this->currency . ' ' . number_format((float) $n, 0, ',', '.');
+    }
+
+    // ── Collection (all rows) ─────────────────────────────────────────────────
 
     public function collection(): Collection
     {
         $rows = collect();
         $no   = 1;
-        $fmt  = fn($n) => $this->currency . ' ' . number_format((float)$n, 0, ',', '.');
 
-        // ── Summary rows ──────────────────────────────────────────────────────
-        $summaryLabel = $this->isId ? '— Ringkasan —' : '— Summary —';
-        $rows->push(['', $summaryLabel, '', '', '', '']);
-        $rows->push(['', $this->isId ? 'Periode' : 'Period',
-            Carbon::create($this->report->year, $this->report->month, 1)->format('F Y'), '', '', '']);
-        $rows->push(['', $this->isId ? 'Saldo Awal' : 'Opening Balance',
-            '', '', '', $fmt($this->report->opening_balance)]);
-        $rows->push(['', $this->isId ? 'Total Pemasukan' : 'Total Income',
-            '', '', '', $fmt($this->report->total_income)]);
-        $rows->push(['', $this->isId ? 'Total Pengeluaran' : 'Total Expense',
-            '', '', '', $fmt($this->report->total_expense)]);
-        $rows->push(['', $this->isId ? 'Saldo Akhir' : 'Closing Balance',
-            '', '', '', $fmt($this->report->closing_balance)]);
-        $rows->push(['', '', '', '', '', '']); // blank separator
+        // Row 1 of collection = spreadsheet row (1 + TITLE_OFFSET) after AfterSheet inserts title rows.
+        // Column order: NO | TANGGAL | URAIAN | PENERIMAAN | PENGELUARAN | KETERANGAN
 
-        // ── Payment income (from PaymentRecord) ───────────────────────────────
-        $pyLabel = $this->isId ? '— Pemasukan Warga —' : '— Resident Payments (Income) —';
-        $rows->push(['', $pyLabel, '', '', '', '']);
+        // ── Column header row ─────────────────────────────────────────────────
+        $rows->push(['NO', 'TANGGAL', 'URAIAN', 'PENERIMAAN', 'PENGELUARAN', 'KETERANGAN']);
 
-        $payments = PaymentRecord::with('resident')
-            ->where('status', 'approved')
-            ->whereYear('payment_month', $this->report->year)
-            ->whereMonth('payment_month', $this->report->month)
-            ->orderBy('payment_month')
+        // ── Opening balance (first PENERIMAAN row) ────────────────────────────
+        $prevMonth = $this->report->month === 1 ? 12 : $this->report->month - 1;
+        $prevYear  = $this->report->month === 1 ? $this->report->year - 1 : $this->report->year;
+        $openDate  = Carbon::create($this->report->year, $this->report->month, 1)->format('d/m/Y');
+
+        $rows->push([
+            $no++,
+            $openDate,
+            'Diterima saldo bulan ' . $this->periodLabel($prevMonth, $prevYear),
+            $this->fmt($this->report->opening_balance),
+            '-',
+            '',
+        ]);
+
+        // ── Approved resident payment records — one aggregated row per payment_month ──
+        // Group by payment_month so "3 residents paying Apr 2026" → one line with total + count.
+        $payments = PaymentRecord::where('status', 'approved')
+            ->whereNotNull('approved_at')
+            ->whereYear('approved_at', $this->report->year)
+            ->whereMonth('approved_at', $this->report->month)
+            ->select(
+                DB::raw('DATE_FORMAT(payment_month, "%Y-%m-01") as period'),
+                DB::raw('COUNT(DISTINCT resident_id) as resident_count'),
+                DB::raw('SUM(amount) as total_amount'),
+                DB::raw('MIN(approved_at) as first_approved_at')
+            )
+            ->groupBy(DB::raw('DATE_FORMAT(payment_month, "%Y-%m-01")'))
+            ->orderBy(DB::raw('DATE_FORMAT(payment_month, "%Y-%m-01")'))
             ->get();
 
-        foreach ($payments as $payment) {
+        foreach ($payments as $pg) {
+            $period     = Carbon::parse($pg->period);
+            $periodName = $this->periodLabel((int) $period->month, (int) $period->year);
+            $approvedAt = Carbon::parse($pg->first_approved_at)->format('d/m/Y');
             $rows->push([
                 $no++,
-                Carbon::parse($payment->payment_month)->format('d M Y'),
-                $payment->resident?->fullname ?? '—',
-                $this->isId ? 'Iuran Warga' : 'Resident Fee',
-                $this->isId ? 'Pemasukan' : 'Income',
-                $fmt($payment->amount),
+                $approvedAt,
+                'Diterima Iuran dari Warga bulan ' . $periodName . ' (' . $pg->resident_count . ' KK)',
+                $this->fmt($pg->total_amount),
+                '-',
+                '',
             ]);
         }
 
-        if ($payments->isEmpty()) {
-            $rows->push(['', $this->isId ? 'Tidak ada' : 'None', '', '', '', '']);
-        }
-
-        $rows->push(['', '', '', '', '', '']); // blank separator
-
-        // ── Manual transactions ───────────────────────────────────────────────
-        $txLabel = $this->isId ? '— Transaksi Manual —' : '— Manual Transactions —';
-        $rows->push(['', $txLabel, '', '', '', '']);
-
+        // ── Manual transactions (income then expense, ordered by date) ─────────
         $transactions = FinanceTransaction::where('report_month', $this->report->month)
             ->where('report_year', $this->report->year)
             ->orderBy('transaction_date')
@@ -115,102 +135,218 @@ class FinanceReportExport implements
         foreach ($transactions as $tx) {
             $rows->push([
                 $no++,
-                $tx->transaction_date->format('d M Y'),
+                $tx->transaction_date->format('d/m/Y'),
                 $tx->description,
-                $tx->category ?? '—',
-                $tx->type === 'income'
-                    ? ($this->isId ? 'Pemasukan' : 'Income')
-                    : ($this->isId ? 'Pengeluaran' : 'Expense'),
-                ($tx->type === 'expense' ? '-' : '') . $fmt($tx->amount),
+                $tx->type === 'income'  ? $this->fmt($tx->amount) : '-',
+                $tx->type === 'expense' ? $this->fmt($tx->amount) : '-',
+                $tx->notes ?? '',
             ]);
         }
 
-        if ($transactions->isEmpty()) {
-            $rows->push(['', $this->isId ? 'Tidak ada' : 'None', '', '', '', '']);
+        // ── JUMLAH row ────────────────────────────────────────────────────────
+        // PENERIMAAN total = opening_balance + total_income (matches reference)
+        $totalPenerimaan = (float) $this->report->opening_balance + (float) $this->report->total_income;
+        $this->jumlahCollRow = $rows->count() + 1;
+        $rows->push([
+            '', 'JUMLAH', '',
+            $this->fmt($totalPenerimaan),
+            $this->fmt($this->report->total_expense),
+            '',
+        ]);
+
+        // ── SALDO KAS row ─────────────────────────────────────────────────────
+        $this->saldoCollRow = $rows->count() + 1;
+        $rows->push([
+            '', 'SALDO KAS bulan ' . $this->periodLabel($this->report->month, $this->report->year),
+            '', '', $this->fmt($this->report->closing_balance), '',
+        ]);
+
+        // ── Blank separator ───────────────────────────────────────────────────
+        $rows->push(['', '', '', '', '', '']);
+        $rows->push(['', '', '', '', '', '']);
+
+        // ── CATATAN TABUNGAN section ──────────────────────────────────────────
+        $communityName = Setting::get('community_name', 'RT');
+        $this->tabHdrCollRow = $rows->count() + 1;
+        $rows->push(['', 'Catatan Tabungan yang ada di Bendahara Umum ' . $communityName . ' :', '', '', '', '']);
+
+        $this->tabColCollRow = $rows->count() + 1;
+        $rows->push(['NO', 'TANGGAL', 'URAIAN', 'PENERIMAAN', 'PENGELUARAN', 'KETERANGAN']);
+
+        // Savings transactions: notes or category contains "tabungan" (case-insensitive)
+        $savingsTx = FinanceTransaction::where('report_month', $this->report->month)
+            ->where('report_year', $this->report->year)
+            ->where(function ($q) {
+                $q->whereRaw("LOWER(COALESCE(notes, '')) LIKE ?", ['%tabungan%'])
+                  ->orWhereRaw("LOWER(COALESCE(category, '')) LIKE ?", ['%tabungan%']);
+            })
+            ->orderBy('transaction_date')
+            ->get();
+
+        $sNo      = 1;
+        $sIncome  = 0.0;
+        $sExpense = 0.0;
+
+        foreach ($savingsTx as $tx) {
+            $inc = $tx->type === 'income'  ? (float) $tx->amount : 0.0;
+            $exp = $tx->type === 'expense' ? (float) $tx->amount : 0.0;
+            $sIncome  += $inc;
+            $sExpense += $exp;
+            $rows->push([
+                $sNo++,
+                $tx->transaction_date->format('d/m/Y'),
+                $tx->description,
+                $inc > 0 ? $this->fmt($inc) : '-',
+                $exp > 0 ? $this->fmt($exp) : '-',
+                $tx->notes ?? '',
+            ]);
         }
+
+        if ($savingsTx->isEmpty()) {
+            $rows->push(['', 'Tidak ada catatan tabungan', '', '', '', '']);
+        }
+
+        $this->tabJumlahCollRow = $rows->count() + 1;
+        $rows->push(['', 'JUMLAH', '', $this->fmt($sIncome), $this->fmt($sExpense), '']);
+
+        $this->tabSaldoCollRow = $rows->count() + 1;
+        $rows->push([
+            '', 'SALDO TABUNGAN bulan ' . $this->periodLabel($this->report->month, $this->report->year),
+            '', '', $this->fmt($sIncome - $sExpense), '',
+        ]);
 
         return $rows;
     }
 
-    public function styles(Worksheet $sheet): array
-    {
-        return [
-            1 => [
-                'font'      => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
-                'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF1C2D27']],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
-            ],
-        ];
-    }
+    // ── AfterSheet styling ────────────────────────────────────────────────────
 
     public function registerEvents(): array
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $sheet = $event->sheet->getDelegate();
+                $sheet   = $event->sheet->getDelegate();
                 $lastCol = 'F';
+                $off     = self::TITLE_OFFSET; // rows to prepend
 
-                // Insert title rows at the top
-                $sheet->insertNewRowBefore(1, 3);
+                // ── Prepend 5 title rows ──────────────────────────────────────
+                $sheet->insertNewRowBefore(1, $off);
 
+                $communityName    = Setting::get('community_name', 'DWIPAPURI RESIDENTIAL COMMUNITY');
+                $communityAddress = Setting::get('community_address', '');
+                $monthId          = strtoupper($this->monthName($this->report->month));
+                $year             = $this->report->year;
+
+                // Row 1: LAPORAN KEUANGAN
                 $sheet->mergeCells("A1:{$lastCol}1");
-                $title = $this->isId ? 'LAPORAN KEUANGAN' : 'FINANCE REPORT';
-                $period = Carbon::create($this->report->year, $this->report->month, 1)->format('F Y');
-                $sheet->setCellValue('A1', strtoupper($title . ' — ' . $period));
+                $sheet->setCellValue('A1', 'LAPORAN KEUANGAN');
                 $sheet->getStyle('A1')->applyFromArray([
-                    'font'      => ['bold' => true, 'size' => 14, 'color' => ['argb' => 'FF1C2D27']],
+                    'font'      => ['bold' => true, 'size' => 14],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 ]);
 
-                $genLabel = $this->isId ? 'Status: ' : 'Status: ';
-                $statusMap = ['draft' => 'Draft', 'submitted' => 'Submitted', 'approved' => 'Approved', 'revised' => 'Revised'];
+                // Row 2: Community name
                 $sheet->mergeCells("A2:{$lastCol}2");
-                $sheet->setCellValue('A2', $genLabel . ($statusMap[$this->report->status] ?? $this->report->status));
+                $sheet->setCellValue('A2', strtoupper($communityName));
                 $sheet->getStyle('A2')->applyFromArray([
-                    'font'      => ['italic' => true, 'size' => 9, 'color' => ['argb' => 'FF64748B']],
+                    'font'      => ['bold' => true, 'size' => 11],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 ]);
 
-                $genLabel2 = $this->isId ? 'Dibuat: ' : 'Generated: ';
+                // Row 3: Address (omit row if empty)
                 $sheet->mergeCells("A3:{$lastCol}3");
-                $sheet->setCellValue('A3', $genLabel2 . now()->format('d M Y H:i'));
+                if ($communityAddress) {
+                    $sheet->setCellValue('A3', strtoupper($communityAddress));
+                }
                 $sheet->getStyle('A3')->applyFromArray([
-                    'font'      => ['italic' => true, 'size' => 9, 'color' => ['argb' => 'FF64748B']],
+                    'font'      => ['bold' => false, 'size' => 10],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 ]);
 
-                // Freeze header row
-                $sheet->freezePane('A5');
+                // Row 4: BULAN … TAHUN …
+                $sheet->mergeCells("A4:{$lastCol}4");
+                $sheet->setCellValue('A4', "BULAN {$monthId} TAHUN {$year}");
+                $sheet->getStyle('A4')->applyFromArray([
+                    'font'      => ['bold' => true, 'size' => 11],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                ]);
 
-                // Column widths
-                $sheet->getColumnDimension('A')->setWidth(5);
-                $sheet->getColumnDimension('B')->setWidth(16);
-                $sheet->getColumnDimension('C')->setWidth(36);
-                $sheet->getColumnDimension('D')->setWidth(20);
-                $sheet->getColumnDimension('E')->setWidth(14);
-                $sheet->getColumnDimension('F')->setWidth(20);
+                // Row 5: blank spacer (already blank from insert)
 
-                // Borders
-                $lastRow = $sheet->getHighestRow();
-                $sheet->getStyle("A4:{$lastCol}{$lastRow}")->applyFromArray([
+                // ── Map collection rows → sheet rows ──────────────────────────
+                $colHdrRow    = 1  + $off; // 6  — column header
+                $jumlahRow    = $this->jumlahCollRow    + $off;
+                $saldoRow     = $this->saldoCollRow     + $off;
+                $tabHdrRow    = $this->tabHdrCollRow    + $off;
+                $tabColRow    = $this->tabColCollRow    + $off;
+                $tabJumlahRow = $this->tabJumlahCollRow + $off;
+                $tabSaldoRow  = $this->tabSaldoCollRow  + $off;
+                $lastRow      = $sheet->getHighestRow();
+
+                // ── Column header rows (main + tabungan) ──────────────────────
+                foreach ([$colHdrRow, $tabColRow] as $r) {
+                    $sheet->getStyle("A{$r}:{$lastCol}{$r}")->applyFromArray([
+                        'font'      => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
+                        'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF1C4532']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    ]);
+                }
+
+                // ── JUMLAH rows ───────────────────────────────────────────────
+                foreach ([$jumlahRow, $tabJumlahRow] as $r) {
+                    $sheet->getStyle("A{$r}:{$lastCol}{$r}")->applyFromArray([
+                        'font' => ['bold' => true],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFECFDF5']],
+                    ]);
+                }
+
+                // ── SALDO rows ────────────────────────────────────────────────
+                foreach ([$saldoRow, $tabSaldoRow] as $r) {
+                    $sheet->getStyle("A{$r}:{$lastCol}{$r}")->applyFromArray([
+                        'font' => ['bold' => true],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFD1FAE5']],
+                    ]);
+                }
+
+                // ── Tabungan section header (merged) ──────────────────────────
+                $sheet->mergeCells("A{$tabHdrRow}:{$lastCol}{$tabHdrRow}");
+                $sheet->getStyle("A{$tabHdrRow}:{$lastCol}{$tabHdrRow}")->applyFromArray([
+                    'font'      => ['bold' => true, 'size' => 11],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
+                ]);
+                $sheet->getRowDimension($tabHdrRow)->setRowHeight(18);
+
+                // ── Thin borders for all data rows ────────────────────────────
+                $sheet->getStyle("A{$colHdrRow}:{$lastCol}{$lastRow}")->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => Border::BORDER_THIN,
-                            'color'       => ['argb' => 'FFE2E8F0'],
+                            'color'       => ['argb' => 'FFB0BEC5'],
                         ],
                     ],
                 ]);
 
-                // Alternate row shading
-                for ($row = 5; $row <= $lastRow; $row += 2) {
-                    $sheet->getStyle("A{$row}:{$lastCol}{$row}")->applyFromArray([
-                        'fill' => [
-                            'fillType'   => Fill::FILL_SOLID,
-                            'startColor' => ['argb' => 'FFF8FAFC'],
-                        ],
-                    ]);
-                }
+                // ── Right-align amount columns ────────────────────────────────
+                $sheet->getStyle("D{$colHdrRow}:E{$lastRow}")->applyFromArray([
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT],
+                ]);
+
+                // ── Column widths ─────────────────────────────────────────────
+                $sheet->getColumnDimension('A')->setWidth(5);
+                $sheet->getColumnDimension('B')->setWidth(14);
+                $sheet->getColumnDimension('C')->setWidth(50);
+                $sheet->getColumnDimension('D')->setWidth(20);
+                $sheet->getColumnDimension('E')->setWidth(20);
+                $sheet->getColumnDimension('F')->setWidth(18);
+
+                // ── Title row heights ─────────────────────────────────────────
+                $sheet->getRowDimension(1)->setRowHeight(22);
+                $sheet->getRowDimension(2)->setRowHeight(18);
+                $sheet->getRowDimension(4)->setRowHeight(18);
+
+                // ── Freeze pane below column headers ──────────────────────────
+                $sheet->freezePane('A' . ($colHdrRow + 1));
             },
         ];
     }
+
 }

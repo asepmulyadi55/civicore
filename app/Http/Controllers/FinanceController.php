@@ -376,7 +376,8 @@ class FinanceController extends Controller
             ->where('report_month', $month)->where('report_year', $year)->sum('amount');
 
         $paymentIncome = (float) PaymentRecord::where('status', 'approved')
-            ->whereYear('payment_month', $year)->whereMonth('payment_month', $month)->sum('amount');
+            ->whereNotNull('approved_at')
+            ->whereYear('approved_at', $year)->whereMonth('approved_at', $month)->sum('amount');
 
         $monthIncome  = $manualIncome + $paymentIncome;
         $monthExpense = (float) FinanceTransaction::where('type', 'expense')
@@ -398,10 +399,11 @@ class FinanceController extends Controller
             ->groupBy(fn($r) => $r->report_year . '-' . str_pad($r->report_month, 2, '0', STR_PAD_LEFT));
 
         $pyTrend = PaymentRecord::where('status', 'approved')
-            ->where('payment_month', '>=', $sixMonthsAgo->format('Y-m-01'))
+            ->whereNotNull('approved_at')
+            ->where('approved_at', '>=', $sixMonthsAgo->format('Y-m-01'))
             ->select(
-                DB::raw('YEAR(payment_month) as py_year'),
-                DB::raw('MONTH(payment_month) as py_month'),
+                DB::raw('YEAR(approved_at) as py_year'),
+                DB::raw('MONTH(approved_at) as py_month'),
                 DB::raw('SUM(amount) as total')
             )
             ->groupBy('py_year', 'py_month')
