@@ -22,10 +22,16 @@ class FinanceController extends Controller
     public function index(Request $request): View
     {
         $user      = auth()->user();
-        $tab       = $request->get('tab', 'dashboard');
-        $currency  = Setting::get('currency_symbol', 'Rp');
         $canManage = $user->can('finance.create');
         $canApprove = $user->can('finance.approve');
+
+        // Residents can only see the Monthly Reports tab
+        $defaultTab = $canManage ? 'dashboard' : 'reports';
+        $tab        = $request->get('tab', $defaultTab);
+        if (!$canManage && in_array($tab, ['dashboard', 'transactions'])) {
+            $tab = 'reports';
+        }
+        $currency  = Setting::get('currency_symbol', 'Rp');
 
         $now          = now();
         $currentMonth = (int) $now->month;
@@ -464,6 +470,11 @@ class FinanceController extends Controller
     private function buildReportData(Request $request): array
     {
         $q = FinanceReport::with(['submittedBy', 'approvedBy']);
+
+        // Residents only see approved reports
+        if (!auth()->user()->can('finance.create')) {
+            $q->where('status', 'approved');
+        }
 
         if ($ry = $request->get('rpt_year')) {
             $q->where('year', (int)$ry);

@@ -34,20 +34,30 @@
 
       {{-- Tab navigation --}}
       <div class="flex gap-1 border-b border-slate-200 dark:border-slate-700">
-        @foreach([
-          'dashboard'    => ['icon' => 'dashboard',      'label' => __('app.fin_tab_dashboard')],
-          'transactions' => ['icon' => 'receipt_long',   'label' => __('app.fin_tab_transactions')],
-          'reports'      => ['icon' => 'summarize',      'label' => __('app.fin_tab_reports')],
-        ] as $tabKey => $tabInfo)
-          <a href="{{ route('finance.index', ['tab' => $tabKey]) }}"
+        @can('finance.create')
+          @foreach([
+            'dashboard'    => ['icon' => 'dashboard',      'label' => __('app.fin_tab_dashboard')],
+            'transactions' => ['icon' => 'receipt_long',   'label' => __('app.fin_tab_transactions')],
+            'reports'      => ['icon' => 'summarize',      'label' => __('app.fin_tab_reports')],
+          ] as $tabKey => $tabInfo)
+            <a href="{{ route('finance.index', ['tab' => $tabKey]) }}"
+               class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors
+                 {{ $tab === $tabKey
+                   ? 'border-primary text-primary dark:text-emerald-400 dark:border-emerald-400 bg-white dark:bg-slate-800/50'
+                   : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600' }}">
+              <span class="material-icons text-[18px]">{{ $tabInfo['icon'] }}</span>
+              {{ $tabInfo['label'] }}
+            </a>
+          @endforeach
+        @else
+          {{-- Residents: only Monthly Reports tab --}}
+          <a href="{{ route('finance.index', ['tab' => 'reports']) }}"
              class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors
-               {{ $tab === $tabKey
-                 ? 'border-primary text-primary dark:text-emerald-400 dark:border-emerald-400 bg-white dark:bg-slate-800/50'
-                 : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600' }}">
-            <span class="material-icons text-[18px]">{{ $tabInfo['icon'] }}</span>
-            {{ $tabInfo['label'] }}
+               border-primary text-primary dark:text-emerald-400 dark:border-emerald-400 bg-white dark:bg-slate-800/50">
+            <span class="material-icons text-[18px]">summarize</span>
+            {{ __('app.fin_tab_reports') }}
           </a>
-        @endforeach
+        @endcan
       </div>
 
       {{-- Tab content --}}
