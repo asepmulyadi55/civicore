@@ -810,6 +810,8 @@ return [
   'fin_transaction_deleted'       => 'Transaction deleted.',
   'fin_delete_transaction'        => 'Delete Transaction?',
   'fin_delete_transaction_body'   => 'This transaction will be permanently removed.',
+  'fin_delete_report'             => 'Delete Report',
+  'fin_delete_report_body'        => 'Delete the :period report? This cannot be undone.',
   'fin_filter_month'              => 'Month',
   'fin_filter_type'               => 'Type',
   'fin_filter_category'           => 'Category',

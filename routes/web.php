@@ -70,6 +70,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('permission:dashboard.view')->name('dashboard');
+    Route::post('/dashboard/notifications/read', [DashboardController::class, 'markNotificationsRead'])
+        ->name('notifications.read');
 
     // ── Homepage CMS ─────────────────────────────────────────────────────────
     Route::get('/homepage', [HomepageController::class, 'index'])
@@ -203,6 +205,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:finance.approve')->name('finance.reports.revise');
     Route::get('/finance/reports/{report}/export', [FinanceController::class, 'exportReport'])
         ->middleware('permission:finance.view')->name('finance.reports.export');
+    Route::delete('/finance/reports/{report}', [FinanceController::class, 'destroyReport'])
+        ->middleware('permission:finance.delete')->name('finance.reports.destroy');
     Route::get('/finance/categories/search', [FinanceController::class, 'searchCategories'])
         ->middleware(['permission:finance.create', 'throttle:60,1'])->name('finance.categories.search');
 

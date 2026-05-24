@@ -69,7 +69,7 @@
             {{ __('app.fin_transaction_date') }} <span class="text-rose-500">*</span>
           </label>
           <input type="date" id="fin-tx-date" name="transaction_date"
-            class="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/30">
+            class="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/30 dark:[color-scheme:dark]">
         </div>
       </div>
 
@@ -147,8 +147,39 @@
   </div>
 </div>
 
-{{-- ══════════════════════════════════════════════════════════════════
-     3. Generate Report Modal
+{{-- ══════════════════════════════════════════════════════════════════     2b. Delete Report Modal
+══════════════════════════════════════════════════════════════════ --}}
+<div id="fin-delete-report-modal"
+  class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+  role="dialog" aria-modal="true">
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm p-6"
+       onclick="event.stopPropagation()">
+    <div class="flex items-start gap-4 mb-5">
+      <div class="flex-shrink-0 w-11 h-11 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
+        <span class="material-icons text-rose-500 text-[22px]">delete_outline</span>
+      </div>
+      <div>
+        <h3 class="text-base font-semibold text-slate-800 dark:text-slate-100">{{ __('app.fin_delete_report') }}</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" id="fin-delete-report-desc"></p>
+      </div>
+    </div>
+    <form id="fin-delete-report-form" method="POST">
+      @csrf @method('DELETE')
+      <div class="flex gap-3 justify-end">
+        <button type="button" onclick="closeDeleteReportModal()"
+          class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-lg hover:opacity-80">
+          {{ __('app.btn_cancel') }}
+        </button>
+        <button type="submit"
+          class="px-4 py-2 text-sm font-medium bg-rose-600 text-white rounded-lg hover:opacity-90 transition-opacity">
+          {{ __('app.btn_yes_delete') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- ══════════════════════════════════════════════════════════════════     3. Generate Report Modal
 ═══════════════════════════════════════════════════════════════════════ --}}
 <div id="fin-gen-modal"
   class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
@@ -343,6 +374,21 @@ function openDeleteTransactionModal(id, description) {
 function closeDeleteModal() {
   document.getElementById('fin-delete-modal').classList.add('hidden');
   document.getElementById('fin-delete-modal').classList.remove('flex');
+}
+
+// ── Delete Report Modal ───────────────────────────────────────────────────────
+function openDeleteReportModal(id, period) {
+  const form = document.getElementById('fin-delete-report-form');
+  form.action = '{{ url('/finance/reports') }}/' + id;
+  const body = '{{ __('app.fin_delete_report_body', ['period' => ':period']) }}';
+  document.getElementById('fin-delete-report-desc').textContent = body.replace(':period', period);
+  document.getElementById('fin-delete-report-modal').classList.remove('hidden');
+  document.getElementById('fin-delete-report-modal').classList.add('flex');
+}
+
+function closeDeleteReportModal() {
+  document.getElementById('fin-delete-report-modal').classList.add('hidden');
+  document.getElementById('fin-delete-report-modal').classList.remove('flex');
 }
 
 // ── Generate Report Modal ─────────────────────────────────────────────────────

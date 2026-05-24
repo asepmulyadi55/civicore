@@ -810,6 +810,8 @@ return [
   'fin_transaction_deleted'       => 'Transaksi dihapus.',
   'fin_delete_transaction'        => 'Hapus Transaksi?',
   'fin_delete_transaction_body'   => 'Transaksi ini akan dihapus secara permanen.',
+  'fin_delete_report'             => 'Hapus Laporan',
+  'fin_delete_report_body'        => 'Hapus laporan :period? Ini tidak dapat dikembalikan.',
   'fin_filter_month'              => 'Bulan',
   'fin_filter_type'               => 'Jenis',
   'fin_filter_category'           => 'Kategori',

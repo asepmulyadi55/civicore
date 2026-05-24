@@ -351,6 +351,26 @@ class FinanceController extends Controller
         return Excel::download(new FinanceReportExport($report), $filename);
     }
 
+    // ── Delete a draft/revised report ────────────────────────────────────────
+
+    public function destroyReport(FinanceReport $report): RedirectResponse
+    {
+        $user = auth()->user();
+        if (!$user->can('finance.delete')) abort(403);
+
+        if (!in_array($report->status, ['draft', 'revised'])) {
+            return back()->withErrors(['general' => 'Only draft or revised reports can be deleted.']);
+        }
+
+        $report->delete();
+
+        Log::info('Finance report deleted', ['id' => $report->id, 'by' => $user->id]);
+
+        return redirect()
+            ->route('finance.index', ['tab' => 'reports'])
+            ->with('success', 'Report deleted successfully.');
+    }
+
     // ── Category autocomplete ─────────────────────────────────────────────────
 
     public function searchCategories(Request $request)
@@ -381,11 +401,7 @@ class FinanceController extends Controller
         $manualIncome = (float) FinanceTransaction::where('type', 'income')
             ->where('report_month', $month)->where('report_year', $year)->sum('amount');
 
-        $paymentIncome = (float) PaymentRecord::where('status', 'approved')
-            ->whereNotNull('approved_at')
-            ->whereYear('approved_at', $year)->whereMonth('approved_at', $month)->sum('amount');
-
-        $monthIncome  = $manualIncome + $paymentIncome;
+        $monthIncome  = $manualIncome;
         $monthExpense = (float) FinanceTransaction::where('type', 'expense')
             ->where('report_month', $month)->where('report_year', $year)->sum('amount');
 
@@ -404,27 +420,13 @@ class FinanceController extends Controller
             ->get()
             ->groupBy(fn($r) => $r->report_year . '-' . str_pad($r->report_month, 2, '0', STR_PAD_LEFT));
 
-        $pyTrend = PaymentRecord::where('status', 'approved')
-            ->whereNotNull('approved_at')
-            ->where('approved_at', '>=', $sixMonthsAgo->format('Y-m-01'))
-            ->select(
-                DB::raw('YEAR(approved_at) as py_year'),
-                DB::raw('MONTH(approved_at) as py_month'),
-                DB::raw('SUM(amount) as total')
-            )
-            ->groupBy('py_year', 'py_month')
-            ->get()
-            ->keyBy(fn($r) => $r->py_year . '-' . str_pad($r->py_month, 2, '0', STR_PAD_LEFT));
-
         $trend    = [];
         $maxTrend = 1; // avoid division by zero
         for ($i = 5; $i >= 0; $i--) {
             $d   = Carbon::now()->startOfMonth()->subMonths($i);
             $key = $d->format('Y-m');
 
-            $incomeRows = $txTrend->get($key, collect())->where('type', 'income')->sum('total');
-            $pyRow      = $pyTrend->get($key);
-            $inc = (float) $incomeRows + (float) ($pyRow?->total ?? 0);
+            $inc = (float) ($txTrend->get($key, collect())->where('type', 'income')->sum('total'));
             $exp = (float) ($txTrend->get($key, collect())->where('type', 'expense')->sum('total'));
 
             $trend[]  = ['label' => $d->format('M'), 'month' => (int)$d->month, 'year' => (int)$d->year, 'income' => $inc, 'expense' => $exp];

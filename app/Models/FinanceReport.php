@@ -123,18 +123,12 @@ class FinanceReport extends Model
             ->where('report_year', $this->year)
             ->sum('amount');
 
-        $paymentIncome = PaymentRecord::where('status', 'approved')
-            ->whereNotNull('approved_at')
-            ->whereYear('approved_at', $this->year)
-            ->whereMonth('approved_at', $this->month)
-            ->sum('amount');
-
         $totalExpense = FinanceTransaction::where('type', 'expense')
             ->where('report_month', $this->month)
             ->where('report_year', $this->year)
             ->sum('amount');
 
-        $this->total_income   = (float) $manualIncome + (float) $paymentIncome;
+        $this->total_income   = (float) $manualIncome;
         $this->total_expense  = (float) $totalExpense;
         $this->closing_balance = (float) $this->opening_balance + $this->total_income - $this->total_expense;
 

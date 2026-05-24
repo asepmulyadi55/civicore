@@ -163,6 +163,16 @@
                     </a>
                   @endif
 
+                  {{-- Delete (draft / revised only) --}}
+                  @if($canManage && in_array($report->status, ['draft', 'revised']))
+                    <button type="button"
+                      onclick="openDeleteReportModal('{{ $report->id }}', {{ json_encode($report->periodLabel()) }})"
+                      class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                      title="Delete report">
+                      <span class="material-icons text-[18px]">delete</span>
+                    </button>
+                  @endif
+
                 </div>
               </td>
             </tr>

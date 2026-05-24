@@ -4,11 +4,9 @@ namespace App\Exports;
 
 use App\Models\FinanceReport;
 use App\Models\FinanceTransaction;
-use App\Models\PaymentRecord;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -95,36 +93,6 @@ class FinanceReportExport implements
             '-',
             '',
         ]);
-
-        // ── Approved resident payment records — one aggregated row per payment_month ──
-        // Group by payment_month so "3 residents paying Apr 2026" → one line with total + count.
-        $payments = PaymentRecord::where('status', 'approved')
-            ->whereNotNull('approved_at')
-            ->whereYear('approved_at', $this->report->year)
-            ->whereMonth('approved_at', $this->report->month)
-            ->select(
-                DB::raw('DATE_FORMAT(payment_month, "%Y-%m-01") as period'),
-                DB::raw('COUNT(DISTINCT resident_id) as resident_count'),
-                DB::raw('SUM(amount) as total_amount'),
-                DB::raw('MIN(approved_at) as first_approved_at')
-            )
-            ->groupBy(DB::raw('DATE_FORMAT(payment_month, "%Y-%m-01")'))
-            ->orderBy(DB::raw('DATE_FORMAT(payment_month, "%Y-%m-01")'))
-            ->get();
-
-        foreach ($payments as $pg) {
-            $period     = Carbon::parse($pg->period);
-            $periodName = $this->periodLabel((int) $period->month, (int) $period->year);
-            $approvedAt = Carbon::parse($pg->first_approved_at)->format('d/m/Y');
-            $rows->push([
-                $no++,
-                $approvedAt,
-                'Diterima Iuran dari Warga bulan ' . $periodName . ' (' . $pg->resident_count . ' KK)',
-                $this->fmt($pg->total_amount),
-                '-',
-                '',
-            ]);
-        }
 
         // ── Manual transactions (income then expense, ordered by date) ─────────
         $transactions = FinanceTransaction::where('report_month', $this->report->month)

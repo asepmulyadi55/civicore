@@ -34,7 +34,7 @@
 
       {{-- Tab navigation --}}
       <div class="flex gap-1 border-b border-slate-200 dark:border-slate-700">
-        @can('finance.create')
+        @if($canManage)
           @foreach([
             'dashboard'    => ['icon' => 'dashboard',      'label' => __('app.fin_tab_dashboard')],
             'transactions' => ['icon' => 'receipt_long',   'label' => __('app.fin_tab_transactions')],
@@ -57,7 +57,7 @@
             <span class="material-icons text-[18px]">summarize</span>
             {{ __('app.fin_tab_reports') }}
           </a>
-        @endcan
+        @endif
       </div>
 
       {{-- Tab content --}}
