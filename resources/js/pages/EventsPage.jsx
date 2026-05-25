@@ -14,7 +14,9 @@ const PLACEHOLDER_IMAGES = [
 
 const SKELETON_KEYS = ['sk-a', 'sk-b', 'sk-c', 'sk-d', 'sk-e', 'sk-f'];
 
-const C = { primary: '#1C2D27', secondary: '#D4AF37', surface: '#FAF9F6', border: '#E8E6E1', muted: '#595959' };(current, total) {
+const C = { primary: '#1C2D27', secondary: '#D4AF37', surface: '#FAF9F6', border: '#E8E6E1', muted: '#595959' };
+
+function getPaginationPages(current, total) {
     if (total <= 7) return new Array(total).fill(null).map((_, i) => i + 1);
     const pages = [1];
     if (current > 3) pages.push('ellipsis-start');
