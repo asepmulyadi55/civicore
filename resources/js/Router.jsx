@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import AdminRedirect from './pages/AdminRedirect';
+import EventsPage from './pages/EventsPage';
 
 export default function Router() {
   const basePath = import.meta.env.VITE_APP_BASE ?? '';
@@ -10,6 +11,7 @@ export default function Router() {
     <BrowserRouter basename={basePath}>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/events" element={<EventsPage />} />
         <Route path="/admin" element={<AdminRedirect />} />
       </Routes>
     </BrowserRouter>
