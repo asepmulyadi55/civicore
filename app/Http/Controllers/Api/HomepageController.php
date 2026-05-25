@@ -23,11 +23,22 @@ class HomepageController extends Controller
         $footer           = json_decode(Setting::get('homepage_footer',              '{}'), true) ?? [];
 
         $today          = now()->toDateString();
-        $upcomingEvents = array_slice(array_values(array_filter($events, fn($e) =>
+        $upcomingFiltered = array_values(array_filter($events, fn($e) =>
             ($e['status'] ?? '') === 'ongoing' ||
             empty($e['date']) ||
             $e['date'] >= $today
-        )), 0, 3);
+        ));
+        usort($upcomingFiltered, function ($a, $b) {
+            $aDate = $a['date'] ?? '';
+            $bDate = $b['date'] ?? '';
+            $aEmpty = empty($aDate);
+            $bEmpty = empty($bDate);
+            if ($aEmpty || $bEmpty) {
+                return $aEmpty <=> $bEmpty;
+            }
+            return strcmp($aDate, $bDate);
+        });
+        $upcomingEvents = array_slice($upcomingFiltered, 0, 3);
         $pastEvents     = array_slice(array_values(array_filter($events, fn($e) =>
             ($e['status'] ?? '') !== 'ongoing' &&
             !empty($e['date']) &&
