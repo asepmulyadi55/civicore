@@ -31,12 +31,16 @@ use App\Http\Controllers\Api\HomepageController as ApiHomepageController;
 
 // ── Public homepage (React SPA) ───────────────────────────────────────────────
 Route::get('/', fn() => view('spa'))->name('home');
+Route::get('/events', fn() => view('spa'))->name('events');
 
 // ── Internal API — Homepage content for React SPA ───────────────────────────
 // Protected by X-Api-Key header (key injected into SPA via Blade meta tag).
 Route::get('/api/homepage', [ApiHomepageController::class, 'index'])
     ->middleware('api.key')
     ->name('api.homepage');
+Route::get('/api/events', [ApiHomepageController::class, 'events'])
+    ->middleware('api.key')
+    ->name('api.events');
 
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

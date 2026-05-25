@@ -44,4 +44,33 @@ class HomepageController extends Controller
             'footer'            => $footer,
         ]);
     }
+
+    /**
+     * All events for the events listing page.
+     *
+     * GET /api/events
+     */
+    public function events(): JsonResponse
+    {
+        $events = json_decode(Setting::get('homepage_events', '[]'), true) ?? [];
+        $footer = json_decode(Setting::get('homepage_footer',  '{}'), true) ?? [];
+
+        usort($events, function ($a, $b) {
+            $aDate  = $a['date'] ?? '';
+            $bDate  = $b['date'] ?? '';
+            $aEmpty = empty($aDate);
+            $bEmpty = empty($bDate);
+
+            if ($aEmpty || $bEmpty) {
+                return $aEmpty <=> $bEmpty;
+            }
+
+            return strcmp($aDate, $bDate);
+        });
+
+        return response()->json([
+            'events' => array_values($events),
+            'footer' => $footer,
+        ]);
+    }
 }
