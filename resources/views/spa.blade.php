@@ -4,9 +4,26 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dwipapuri - Community Events</title>
-  <meta name="description"
-    content="Dwipapuri Community Events — bringing neighbors together through curated gatherings, cultural celebrations, and digital experiences.">
+
+  {{-- Primary SEO --}}
+  <title>Dwipapuri - Community Events &amp; Residential Living</title>
+  <meta name="title" content="Dwipapuri - Community Events &amp; Residential Living">
+  <meta name="description" content="Dwipapuri Residential Community in Bandung &mdash; discover upcoming events, connect with neighbors, and experience curated residential living.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://dwipapuri.amsite.click">
+
+  {{-- Open Graph --}}
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dwipapuri.amsite.click">
+  <meta property="og:title" content="Dwipapuri - Community Events &amp; Residential Living">
+  <meta property="og:description" content="Dwipapuri Residential Community in Bandung &mdash; discover upcoming events, connect with neighbors, and experience curated residential living.">
+  <meta property="og:locale" content="id_ID">
+
+  {{-- Twitter Card --}}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Dwipapuri - Community Events &amp; Residential Living">
+  <meta name="twitter:description" content="Dwipapuri Residential Community in Bandung &mdash; discover upcoming events, connect with neighbors, and experience curated residential living.">
+
   {{-- API key injected at render-time so it is never in static source files --}}
   <meta name="api-key" content="{{ config('civicore.api_key') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
