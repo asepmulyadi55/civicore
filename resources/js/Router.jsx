@@ -1,14 +1,26 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import AdminRedirect from './pages/AdminRedirect';
 import EventsPage from './pages/EventsPage';
+
+function GaTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    if (typeof globalThis.gtag !== 'function') return;
+    globalThis.gtag('event', 'page_view', {
+      page_path: location.pathname + location.search,
+    });
+  }, [location]);
+  return null;
+}
 
 export default function Router() {
   const basePath = import.meta.env.VITE_APP_BASE ?? '';
 
   return (
     <BrowserRouter basename={basePath}>
+      <GaTracker />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/events" element={<EventsPage />} />
