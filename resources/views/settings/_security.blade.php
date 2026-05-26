@@ -28,6 +28,26 @@
       @error('session_timeout_minutes') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
     </div>
 
+    {{-- Google Analytics --}}
+    <div class="border-t border-slate-100 dark:border-slate-800 pt-5">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-icons text-slate-400 text-lg">bar_chart</span>
+        <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Google Analytics</h3>
+      </div>
+      <div>
+        <label for="ga_measurement_id" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+          Measurement ID
+        </label>
+        <input type="text" name="ga_measurement_id" id="ga_measurement_id"
+          maxlength="20"
+          value="{{ old('ga_measurement_id', \App\Models\Setting::get('ga_measurement_id', '')) }}"
+          class="w-full max-w-xs px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all font-mono"
+          placeholder="G-XXXXXXXXXX">
+        <p class="text-xs text-slate-400 mt-1">Leave empty to disable tracking. Format: <code>G-XXXXXXXXXX</code></p>
+        @error('ga_measurement_id') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
+      </div>
+    </div>
+
     <div class="flex justify-end pt-1">
       <button type="submit"
         class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-lg font-semibold transition-all shadow-sm shadow-primary/20 text-sm">

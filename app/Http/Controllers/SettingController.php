@@ -104,14 +104,16 @@ class SettingController extends Controller
       ->with('success', __('app.flash_reset_sent', ['email' => $user->email]));
   }
 
-  /** Save session timeout — admin only (permission:settings.view). */
+  /** Save session timeout and GA ID — admin only (permission:settings.edit). */
   public function updateSecurity(Request $request)
   {
     $request->validate([
       'session_timeout_minutes' => ['required', 'integer', 'min:5', 'max:120'],
+      'ga_measurement_id'       => ['nullable', 'string', 'max:20', 'regex:/^G-[A-Z0-9]+$/i'],
     ]);
 
     Setting::set('session_timeout_minutes', (string) $request->session_timeout_minutes);
+    Setting::set('ga_measurement_id', trim((string) $request->input('ga_measurement_id', '')));
     Cache::flush();
 
     return redirect()->route('settings.index')

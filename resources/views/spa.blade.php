@@ -4,9 +4,26 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dwipapuri - Community Events</title>
-  <meta name="description"
-    content="Dwipapuri Community Events — bringing neighbors together through curated gatherings, cultural celebrations, and digital experiences.">
+
+  {{-- Primary SEO --}}
+  <title>Dwipapuri - Community Events &amp; Residential Living</title>
+  <meta name="title" content="Dwipapuri - Community Events &amp; Residential Living">
+  <meta name="description" content="Dwipapuri Residential Community in Bandung &mdash; discover upcoming events, connect with neighbors, and experience curated residential living.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://dwipapuri.amsite.click">
+
+  {{-- Open Graph --}}
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dwipapuri.amsite.click">
+  <meta property="og:title" content="Dwipapuri - Community Events &amp; Residential Living">
+  <meta property="og:description" content="Dwipapuri Residential Community in Bandung &mdash; discover upcoming events, connect with neighbors, and experience curated residential living.">
+  <meta property="og:locale" content="id_ID">
+
+  {{-- Twitter Card --}}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Dwipapuri - Community Events &amp; Residential Living">
+  <meta name="twitter:description" content="Dwipapuri Residential Community in Bandung &mdash; discover upcoming events, connect with neighbors, and experience curated residential living.">
+
   {{-- API key injected at render-time so it is never in static source files --}}
   <meta name="api-key" content="{{ config('civicore.api_key') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,6 +36,17 @@
     .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
   </style>
   @vite(['resources/css/app.css', 'resources/js/app.jsx'])
+  @php $gaId = \App\Models\Setting::get('ga_measurement_id', ''); @endphp
+  @if($gaId)
+  {{-- Google Analytics --}}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gaId }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '{{ $gaId }}');
+  </script>
+  @endif
 </head>
 
 <body>

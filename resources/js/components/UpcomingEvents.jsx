@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const CATEGORY_BADGE_STYLES = {
     wellness:  { background: 'rgba(255,255,255,0.85)', color: '#1C2D27' },
@@ -48,12 +49,12 @@ export default function UpcomingEvents({ events = [], loading }) {
                         Upcoming Community Events
                     </h2>
                 </div>
-                {/* <button
+                <Link to="/events"
                     className="text-sm font-medium flex items-center gap-2 hover:gap-3 transition-all tracking-wide pb-1 border-b self-start sm:self-auto mt-2 sm:mt-0 flex-shrink-0"
                     style={{ color: '#1C2D27', borderColor: 'rgba(28,45,39,0.3)', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 >
                     View All <span className="material-symbols-outlined text-sm">arrow_right_alt</span>
-                </button> */}
+                </Link>
             </div>
 
             {loading ? (
