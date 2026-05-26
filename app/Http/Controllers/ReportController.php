@@ -34,10 +34,10 @@ class ReportController extends Controller
             'block',
             'unit',
             'paymentRecords' => fn($q) => $q->whereYear('payment_month', $year)->orderBy('payment_month'),
-        ])->where('is_active', true)
+        ])->where('residents.is_active', true)
             ->leftJoin('units', 'units.id', '=', 'residents.unit_id')
             ->orderBy('residents.block_id')
-            ->orderBy('units.unit_number')
+            ->orderByRaw('CAST(units.unit_number AS UNSIGNED)')
             ->select('residents.*');
 
         if ($blockId) {

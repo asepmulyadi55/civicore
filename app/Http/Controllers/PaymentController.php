@@ -31,7 +31,7 @@ class PaymentController extends Controller
         if ($search = $request->get('search')) {
             $baseQ->whereHas('resident', function ($q) use ($search) {
                 $q->where('fullname', 'like', "%{$search}%")
-                    ->orWhere('unit_number', 'like', "%{$search}%");
+                    ->orWhereHas('unit', fn($u) => $u->where('unit_number', 'like', "%{$search}%"));
             });
         }
         if (!$scopeBlockId && $blockId = $request->get('block_id')) {
@@ -106,12 +106,38 @@ class PaymentController extends Controller
             })
             ->values();
 
+        // Apply collection-level sort (after batch grouping)
+        $sort = $request->get('sort');
+        $dir  = $request->get('direction', 'desc');
+        if ($sort === 'resident') {
+            $flatRows = $dir === 'asc'
+                ? $flatRows->sortBy(fn($p) => $p->resident?->fullname)->values()
+                : $flatRows->sortByDesc(fn($p) => $p->resident?->fullname)->values();
+        } elseif ($sort === 'amount') {
+            $flatRows = $dir === 'asc'
+                ? $flatRows->sortBy('total_amount')->values()
+                : $flatRows->sortByDesc('total_amount')->values();
+        } elseif ($sort === 'status') {
+            $flatRows = $dir === 'asc'
+                ? $flatRows->sortBy('status')->values()
+                : $flatRows->sortByDesc('status')->values();
+        } elseif ($sort === 'month') {
+            $flatRows = $dir === 'asc'
+                ? $flatRows->sortBy('payment_month')->values()
+                : $flatRows->sortByDesc('payment_month')->values();
+        }
+        // else keep default: pending first, then by month desc (from the DB orderBy above)
+
         $perPage = config('civicore.pagination.payments', 20);
-        $page = $request->get('page', 1);
+        $total   = $flatRows->count();
+
+        // If filters changed and the current page no longer exists, fall back to 1
+        $lastPage = (int) ceil($total / $perPage) ?: 1;
+        $page     = max(1, min((int) $request->get('page', 1), $lastPage));
 
         return new \Illuminate\Pagination\LengthAwarePaginator(
             $flatRows->slice(($page - 1) * $perPage, $perPage)->values(),
-            $flatRows->count(),
+            $total,
             $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]

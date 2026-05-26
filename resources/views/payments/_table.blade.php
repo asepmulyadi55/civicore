@@ -4,18 +4,18 @@
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_resident') }}</th>
+          <x-ui.sort-th column="resident" :label="__('app.table_resident')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_block') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_months') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_amount') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}</th>
+          <x-ui.sort-th column="month" :label="__('app.table_months')" />
+          <x-ui.sort-th column="amount" :label="__('app.table_amount')" />
+          <x-ui.sort-th column="status" :label="__('app.table_status')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">{{ __('app.table_actions') }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
         @forelse($payments as $payment)
           @php
-            $initials = collect(explode(' ', $payment->resident->fullname))->map(fn($w) => strtoupper($w[0]))->take(2)->implode('');
+            $initials = collect(preg_split('/\s+/', trim($payment->resident->fullname ?? '')))->filter()->map(fn($w) => strtoupper($w[0]))->take(2)->implode('') ?: '?';
             $isMulti  = ($payment->month_count ?? 1) > 1;
             $allMonths = $payment->all_months ?? collect([$payment->payment_month]);
             $monthLabels = $allMonths->map(fn($m) => \Carbon\Carbon::parse($m)->format('F Y'))->implode(', ');
@@ -113,7 +113,7 @@
                         '{{ addslashes($payment->notes ?? '') }}',
                         {{ $isMulti ? "'{$payment->batch_id}'" : 'null' }}
                       )"
-                      class="text-primary hover:text-primary/80 font-bold text-xs uppercase tracking-widest px-3 py-1 border border-primary/20 rounded-lg hover:bg-primary/5 transition-all">
+                      class="text-amber-600 dark:text-amber-400 border border-amber-500/40 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-500/10 hover:bg-amber-500 hover:border-amber-500 hover:text-white dark:hover:bg-amber-500 dark:hover:border-amber-500 dark:hover:text-white font-semibold text-xs px-3 py-1.5 rounded-lg transition-all">
                       {{ __('app.review_payment') }}
                     </button>
                   @elseif($statusValue === 'approved')
@@ -165,9 +165,10 @@
 
   {{-- Pagination --}}
   @if($payments->hasPages())
-    <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-      <p class="text-sm text-slate-500">{{ __('app.showing') }} {{ $payments->firstItem() }}–{{ $payments->lastItem() }} {{ __('app.of') }} {{ $payments->total() }}</p>
+    <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center sm:justify-between gap-3">
+      <p class="text-sm text-slate-500 text-center sm:text-left">{{ __('app.showing') }} {{ $payments->firstItem() }}–{{ $payments->lastItem() }} {{ __('app.of') }} {{ $payments->total() }}</p>
       <div class="flex items-center gap-1">
+        {{-- Previous --}}
         @if ($payments->onFirstPage())
           <button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 cursor-not-allowed" disabled>
             <span class="material-icons text-sm">chevron_left</span>
@@ -178,6 +179,39 @@
           </a>
         @endif
 
+        {{-- Page numbers (show at most 5 around current page) --}}
+        @php
+          $lastPage    = $payments->lastPage();
+          $currentPage = $payments->currentPage();
+          $window      = 2; // pages either side of current
+          $start       = max(1, $currentPage - $window);
+          $end         = min($lastPage, $currentPage + $window);
+          // Always show first and last page with ellipsis if needed
+        @endphp
+
+        @if ($start > 1)
+          <a href="{{ $payments->url(1) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">1</a>
+          @if ($start > 2)
+            <span class="px-1 text-slate-400 text-sm">…</span>
+          @endif
+        @endif
+
+        @for ($p = $start; $p <= $end; $p++)
+          @if ($p === $currentPage)
+            <span class="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-semibold">{{ $p }}</span>
+          @else
+            <a href="{{ $payments->url($p) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $p }}</a>
+          @endif
+        @endfor
+
+        @if ($end < $lastPage)
+          @if ($end < $lastPage - 1)
+            <span class="px-1 text-slate-400 text-sm">…</span>
+          @endif
+          <a href="{{ $payments->url($lastPage) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $lastPage }}</a>
+        @endif
+
+        {{-- Next --}}
         @if ($payments->hasMorePages())
           <a href="{{ $payments->nextPageUrl() }}" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
             <span class="material-icons text-sm">chevron_right</span>

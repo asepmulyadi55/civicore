@@ -18,21 +18,21 @@
         class="relative p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-primary/50 transition-all"
         onclick="toggleNotif()" aria-label="Notifications">
         <span class="material-icons text-slate-500">notifications</span>
-        @if($notifTotal > 0)
-          <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 leading-none">
-            {{ $notifTotal > 9 ? '9+' : $notifTotal }}
+        @if($notifBadge > 0)
+          <span id="notif-badge" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 leading-none">
+            {{ $notifBadge > 9 ? '9+' : $notifBadge }}
           </span>
         @endif
       </button>
 
-      {{-- Dropdown panel --}}
+      {{-- Dropdown panel — responsive: full-width on mobile, fixed 320px on sm+ --}}
       <div id="notif-panel"
-        class="hidden absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 overflow-hidden">
+        class="hidden absolute right-0 top-full mt-2 w-[calc(100vw-1.5rem)] sm:w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 overflow-hidden">
 
         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800">
           <span class="text-sm font-bold text-slate-800 dark:text-white">Notifications</span>
           @if($notifTotal > 0)
-            <span class="text-[10px] font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 px-1.5 py-0.5 rounded-full">{{ $notifTotal }} new</span>
+            <span class="text-[10px] font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 px-1.5 py-0.5 rounded-full">{{ $notifTotal }} pending</span>
           @endif
         </div>
 
@@ -105,7 +105,23 @@
 
 <script>
   function toggleNotif() {
-    document.getElementById('notif-panel').classList.toggle('hidden');
+    const panel = document.getElementById('notif-panel');
+    const isOpening = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden');
+
+    if (isOpening) {
+      // Mark notifications as read — hide badge immediately, persist on server
+      const badge = document.getElementById('notif-badge');
+      if (badge) badge.remove();
+
+      fetch('{{ route("notifications.read") }}', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+          'Content-Type': 'application/json'
+        }
+      });
+    }
   }
   document.addEventListener('click', function (e) {
     var wrapper = document.getElementById('notif-wrapper');

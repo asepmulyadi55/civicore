@@ -62,18 +62,22 @@
       @endif
 
       {{-- Stats Row --}}
-      <div class="grid grid-cols-3 gap-4">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 text-center">
           <p class="text-3xl font-bold text-slate-900 dark:text-white">{{ $totalCount }}</p>
           <p class="text-xs text-slate-500 font-medium uppercase mt-1">{{ __('app.units_count') }}</p>
         </div>
-        <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 text-center">
-          <p class="text-3xl font-bold text-primary">{{ $occupiedCount }}</p>
-          <p class="text-xs text-primary/70 font-medium uppercase mt-1">{{ __('app.occupied_count') }}</p>
+        <div class="bg-white dark:bg-slate-900 rounded-xl border border-amber-200 dark:border-amber-800/40 p-4 text-center">
+          <p class="text-3xl font-bold text-amber-500">{{ $ownerOccupiedCount }}</p>
+          <p class="text-xs text-amber-500/80 font-medium uppercase mt-1">{{ __('app.house_status_owner_occupied') }}</p>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-xl border border-amber-200 dark:border-amber-800/40 p-4 text-center">
+          <p class="text-3xl font-bold text-amber-500">{{ $rentedCount }}</p>
+          <p class="text-xs text-amber-500/80 font-medium uppercase mt-1">{{ __('app.house_status_rented') }}</p>
         </div>
         <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 text-center">
-          <p class="text-3xl font-bold text-slate-400">{{ $vacantCount }}</p>
-          <p class="text-xs text-slate-500 font-medium uppercase mt-1">{{ __('app.vacant_count') }}</p>
+          <p class="text-3xl font-bold text-slate-900 dark:text-white">{{ $vacantCount }}</p>
+          <p class="text-xs text-slate-500 font-medium uppercase mt-1">{{ __('app.house_status_vacant') }}</p>
         </div>
       </div>
 
@@ -94,7 +98,10 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           @foreach($units as $unit)
             @php
-              $isOccupied = $unit->resident !== null;
+              // $hasResident → resident is linked (used for: resident name display + delete guard)
+              // $isNotVacant → house_status is not vacant (used for: icon + border color)
+              $hasResident = $unit->resident !== null;
+              $isNotVacant = $unit->house_status !== 'vacant';
               $houseStatusColors = [
                 'owner_occupied' => 'bg-primary/10 text-primary',
                 'rented'         => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
@@ -103,14 +110,14 @@
               $statusColor = $houseStatusColors[$unit->house_status] ?? 'bg-slate-100 text-slate-500';
               $statusLabel = __('app.house_status_' . $unit->house_status);
             @endphp
-            <div
-              class="bg-white dark:bg-slate-900 rounded-xl border {{ $isOccupied ? 'border-primary/30' : 'border-slate-200 dark:border-slate-800' }} shadow-sm p-4 flex flex-col gap-3 hover:shadow-md transition-all">
+              <div
+              class="bg-white dark:bg-slate-900 rounded-xl border {{ $isNotVacant ? 'border-primary/30' : 'border-slate-200 dark:border-slate-800' }} shadow-sm p-4 flex flex-col gap-3 hover:shadow-md transition-all">
 
               {{-- Unit number + status badge --}}
               <div class="flex items-start justify-between gap-2">
                 <div class="flex items-center gap-2 min-w-0">
-                  <div class="w-9 h-9 rounded-lg {{ $isOccupied ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-400 dark:bg-slate-800' }} flex items-center justify-center flex-shrink-0">
-                    <span class="material-icons text-base">{{ $isOccupied ? 'person' : 'home' }}</span>
+                  <div class="w-9 h-9 rounded-lg {{ $isNotVacant ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-400 dark:bg-slate-800' }} flex items-center justify-center flex-shrink-0">
+                    <span class="material-icons text-base">{{ $isNotVacant ? 'person' : 'home' }}</span>
                   </div>
                   <div class="min-w-0">
                     <p class="font-bold text-slate-900 dark:text-white text-sm">{{ $unit->unit_number }}</p>
@@ -128,7 +135,7 @@
 
               {{-- Resident info --}}
               <div class="flex-1">
-                @if($isOccupied)
+                @if($hasResident)
                   <div class="flex items-center gap-2">
                     <span class="material-icons text-sm text-slate-400">person_outline</span>
                     <a href="{{ route('residents.index', ['search' => $unit->resident->fullname]) }}"
@@ -153,7 +160,7 @@
                   <span class="material-icons text-sm">edit</span>{{ __('app.btn_edit') }}
                 </button>
                 <button
-                  onclick="openDeleteUnitModal('{{ $unit->id }}','{{ addslashes($unit->unit_number) }}',{{ $isOccupied ? 'true' : 'false' }})"
+                  onclick="openDeleteUnitModal('{{ $unit->id }}','{{ addslashes($unit->unit_number) }}',{{ $hasResident ? 'true' : 'false' }})"
                   class="flex items-center justify-center p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors border border-slate-200 dark:border-slate-700">
                   <span class="material-icons text-sm">delete_outline</span>
                 </button>

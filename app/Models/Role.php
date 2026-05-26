@@ -28,14 +28,19 @@ class Role extends Model
 
     // ── Available permissions — single source of truth ──────────────
     public static array $availablePermissions = [
+        'overview'  => ['view'],
+        'dashboard' => ['view'],
         'homepage'  => ['view', 'create', 'edit', 'delete'],
         'residents' => ['view', 'create', 'edit', 'delete'],
         'blocks'    => ['view', 'create', 'edit', 'delete'],
         'payments'  => ['view', 'create', 'edit', 'delete', 'approve'],
         'reports'   => ['view'],
+        'posyandu'  => ['view'],
         'users'     => ['view', 'create', 'edit', 'delete', 'approve'],
         'roles'     => ['view', 'create', 'edit', 'delete'],
-        'media'     => ['view', 'delete'],
+        'media'         => ['view', 'delete'],
+        'organization'  => ['view', 'create', 'edit', 'delete'],
+        'finance'       => ['view', 'create', 'edit', 'delete', 'approve'],
     ];
 
     public function users(): HasMany

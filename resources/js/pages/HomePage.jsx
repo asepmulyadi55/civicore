@@ -9,10 +9,22 @@ import Footer from '../components/Footer';
 export default function HomePage() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isDark, setIsDark] = useState(() => {
+        try { return localStorage.getItem('homepageDark') === 'true'; } catch { return false; }
+    });
+
+    const toggleDark = () => {
+        setIsDark(prev => {
+            const next = !prev;
+            try { localStorage.setItem('homepageDark', String(next)); } catch {}
+            return next;
+        });
+    };
 
     useEffect(() => {
+        const basePath = import.meta.env.VITE_APP_BASE ?? '';
         const apiKey = document.querySelector('meta[name="api-key"]')?.content ?? '';
-        fetch('/api/homepage', {
+        fetch(`${basePath}/api/homepage`, {
             headers: { 'X-Api-Key': apiKey },
         })
             .then(res => res.json())
@@ -24,15 +36,15 @@ export default function HomePage() {
     }, []);
 
     return (
-        <div className="font-sans text-slate-800" style={{ backgroundColor: '#f8f9fa' }}>
-            <Header />
+        <div className="font-sans" style={{ backgroundColor: isDark ? '#0D1A17' : '#f8f9fa', color: isDark ? '#F0EDE8' : '#2C2C2C', minHeight: '100vh', transition: 'background-color 0.3s, color 0.3s' }}>
+            <Header isDark={isDark} toggleDark={toggleDark} />
             <main className="pt-20">
-                <FeaturedEvent featuredEvent={data?.featured_event} loading={loading} />
-                <UpcomingEvents events={data?.upcoming_events ?? []} loading={loading} />
-                <MemorableMoments moments={data?.memorable_moments} pastEvents={data?.past_events ?? []} loading={loading} />
-                <AboutSection about={data?.about} loading={loading} />
+                <FeaturedEvent featuredEvent={data?.featured_event} loading={loading} isDark={isDark} />
+                <UpcomingEvents events={data?.upcoming_events ?? []} loading={loading} isDark={isDark} />
+                <MemorableMoments moments={data?.memorable_moments} pastEvents={data?.past_events ?? []} loading={loading} isDark={isDark} />
+                <AboutSection about={data?.about} loading={loading} isDark={isDark} />
             </main>
-            <Footer />
+            <Footer footer={data?.footer} isDark={isDark} />
         </div>
     );
 }

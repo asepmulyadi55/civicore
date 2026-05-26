@@ -1,87 +1,169 @@
 import React from 'react';
 
-export default function Footer() {
+const C = {
+  primary:  '#1C2D27',
+  secondary: '#D4AF37',
+  surface:  '#FAF9F6',
+};
+
+export default function Footer({ footer = {}, isDark = false }) {
+  const brandName   = footer.brand_name    || 'Dwipapuri.';
+  const tagline     = footer.tagline       || 'Defining the gold standard of modern residential living through curation, privacy, and community.';
+  const quickLinks  = (footer.links?.length ? footer.links : [
+    { label: 'Resident Portal',     url: '#' },
+    { label: 'Amenities Map',       url: '#' },
+    { label: 'Community Rules',     url: '#' },
+    { label: 'Maintenance Request', url: '#' },
+  ]);
+  const contactEmail   = footer.contact_email  || 'concierge@dwipapuri.res';
+  const contactPhone   = footer.contact_phone  || '+62 123 4567 890';
+  const location       = footer.location       || '101 Dwipapuri Blvd, Serene Valley';
+  const facebookUrl    = footer.facebook_url   || null;
+  const instagramUrl   = footer.instagram_url  || null;
+  const copyright      = footer.copyright      || '© 2026 Dwipapuri Residential. All rights reserved.';
+  const bottomNote     = footer.bottom_note    || null;
   return (
-    <footer id="contact" style={{ backgroundColor: '#0F1221', color: 'white' }} className="pt-24 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          {/* Brand */}
-          <div className="col-span-1 md:col-span-1">
-            <h3 className="text-2xl font-bold mb-6">Dwipapuri</h3>
-            <p className="text-white/60 leading-relaxed text-sm">
-              Cultivating a better lifestyle through community, nature, and innovation.
-            </p>
-          </div>
+    <footer id="contact" style={{ backgroundColor: C.primary, color: C.surface }}>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-12 max-w-7xl mx-auto px-6 md:px-8 py-12 md:py-20">
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-bold mb-6 text-sm uppercase tracking-widest">Quick Links</h4>
-            <ul className="space-y-4 text-sm text-white/60">
-              {['Resident Portal', 'Event Calendar', 'Amenities', 'Privacy Policy'].map((link) => (
-                <li key={link}>
-                  <a href="#" className="hover:text-white transition-colors duration-200">{link}</a>
-                </li>
-              ))}
-            </ul>
+        {/* Brand */}
+        <div className="space-y-4 md:space-y-6 md:pr-8">
+          <div
+            className="text-xl md:text-2xl font-semibold tracking-tight"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+          >
+            {brandName}
           </div>
-
-          {/* Contact */}
-          <div>
-            <h4 className="font-bold mb-6 text-sm uppercase tracking-widest">Contact Us</h4>
-            <ul className="space-y-4 text-sm text-white/60">
-              <li className="flex items-center">
-                <svg className="w-4 h-4 mr-3" style={{ color: '#FF7043' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-                </svg>
-                hello@dwipapuri.com
-              </li>
-              <li className="flex items-center">
-                <svg className="w-4 h-4 mr-3" style={{ color: '#FF7043' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                    strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-                </svg>
-                +62 123 4567 890
-              </li>
-            </ul>
-          </div>
-
-          {/* Social */}
-          <div>
-            <h4 className="font-bold mb-6 text-sm uppercase tracking-widest">Follow Us</h4>
-            <div className="flex space-x-4">
-              {/* Facebook */}
-              <a href="#"
-                className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
-                style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FF7043'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
-                </svg>
-              </a>
-              {/* Instagram */}
-              <a href="#"
-                className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
-                style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FF7043'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12.315 2c2.43 0 2.784.01 3.71.054 1.14.051 1.918.27 2.594.533a4.885 4.885 0 011.757 1.143 4.885 4.885 0 011.141 1.757c.264.676.48 1.454.533 2.594.045.927.054 1.28.054 3.71s-.01 2.784-.054 3.71c-.053 1.14-.27 1.918-.533 2.594a4.885 4.885 0 01-1.141 1.757 4.885 4.885 0 01-1.757 1.143c-.676.264-1.454.48-2.594.533-.927.045-1.28.054-3.71.054s-2.784-.01-3.71-.054c-1.14-.051-1.918-.27-2.594-.533a4.885 4.885 0 01-1.757-1.143 4.885 4.885 0 01-1.141-1.757c-.264-.676-.48-1.454-.533-2.594-.045-.927-.054-1.28-.054-3.71s.01-2.784.054-3.71c.053-1.14.27-1.918.533-2.594a4.885 4.885 0 011.141-1.757 4.885 4.885 0 011.757-1.143c.676-.264 1.454-.48 2.594-.533.927-.045 1.28-.054 3.71-.054zM12 6.865a5.135 5.135 0 100 10.27 5.135 5.135 0 000-10.27zm0 1.802a3.333 3.333 0 110 6.666 3.333 3.333 0 010-6.666zm5.338-3.205a1.2 1.2 0 100 2.4 1.2 1.2 0 000-2.4z" />
-                </svg>
-              </a>
-            </div>
-          </div>
+          <p className="text-sm leading-relaxed font-light" style={{ color: `${C.surface}99` }}>
+            {tagline}
+          </p>
         </div>
 
-        {/* Bottom bar */}
-        <div className="border-t pt-10 flex flex-col md:flex-row justify-between items-center text-xs"
-          style={{ borderColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)' }}>
-          <p>© 2025 Dwipapuri Residential Community. All rights reserved.</p>
-          <p className="mt-4 md:mt-0">Built for a better community experience.</p>
+        {/* Quick Links */}
+        <div>
+          <h4
+            className="font-medium mb-4 md:mb-6 tracking-wide text-sm md:text-base"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+          >
+            Quick Links
+          </h4>
+          <ul className="space-y-3 md:space-y-4 text-xs md:text-sm font-light" style={{ color: `${C.surface}99` }}>
+            {quickLinks.map((link, i) => (
+              <li key={i}>
+                <a
+                  href={link.url || '#'}
+                  className="transition-colors"
+                  onMouseEnter={e => e.currentTarget.style.color = C.secondary}
+                  onMouseLeave={e => e.currentTarget.style.color = `${C.surface}99`}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
+
+        {/* Contact */}
+        <div>
+          <h4
+            className="font-medium mb-4 md:mb-6 tracking-wide text-sm md:text-base"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+          >
+            Contact
+          </h4>
+          <ul className="space-y-3 md:space-y-4 text-xs md:text-sm font-light" style={{ color: `${C.surface}99` }}>
+            <li className="flex items-start gap-3">
+              <span className="material-symbols-outlined text-base opacity-70 mt-0.5">location_on</span>
+              {location}
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-base opacity-70">call</span>
+              {contactPhone}
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-base opacity-70">mail</span>
+              {contactEmail}
+            </li>
+          </ul>
+        </div>
+
+        {/* Newsletter */}
+        <div>
+          <h4
+            className="font-medium mb-4 md:mb-6 tracking-wide text-sm md:text-base"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+          >
+            Newsletter
+          </h4>
+          <div className="flex gap-2 border-b pb-2" style={{ borderColor: `${C.surface}33` }}>
+            <input
+              type="email"
+              placeholder="Email address"
+              className="bg-transparent border-none px-0 py-1 md:py-2 text-xs md:text-sm w-full focus:ring-0 font-light placeholder:opacity-40"
+              style={{ color: C.surface, fontFamily: "'Inter', sans-serif" }}
+            />
+            <button
+              className="transition-colors p-1 md:p-2"
+              style={{ color: C.secondary }}
+              onMouseEnter={e => e.currentTarget.style.color = C.surface}
+              onMouseLeave={e => e.currentTarget.style.color = C.secondary}
+            >
+              <span className="material-symbols-outlined text-lg">arrow_forward</span>
+            </button>
+          </div>
+          <div className="mt-6 md:mt-8 flex gap-4 md:gap-5" style={{ color: `${C.surface}66` }}>
+            {facebookUrl ? (
+              <a
+                href={facebookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="material-symbols-outlined cursor-pointer transition-colors"
+                style={{ color: `${C.surface}66` }}
+                onMouseEnter={e => e.currentTarget.style.color = C.surface}
+                onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
+              >brand_awareness</a>
+            ) : (
+              <span
+                className="material-symbols-outlined cursor-pointer transition-colors"
+                onMouseEnter={e => e.currentTarget.style.color = C.surface}
+                onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
+              >brand_awareness</span>
+            )}
+            {instagramUrl ? (
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="material-symbols-outlined cursor-pointer transition-colors"
+                style={{ color: `${C.surface}66` }}
+                onMouseEnter={e => e.currentTarget.style.color = C.surface}
+                onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
+              >groups</a>
+            ) : (
+              <span
+                className="material-symbols-outlined cursor-pointer transition-colors"
+                onMouseEnter={e => e.currentTarget.style.color = C.surface}
+                onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
+              >groups</span>
+            )}
+            <span
+              className="material-symbols-outlined cursor-pointer transition-colors"
+              onMouseEnter={e => e.currentTarget.style.color = C.surface}
+              onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
+            >
+              public
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div
+        className="border-t py-6 md:py-8 text-[10px] md:text-xs font-light flex flex-col sm:flex-row justify-between items-center px-6 md:px-8 max-w-7xl mx-auto gap-2"
+        style={{ borderColor: `${C.surface}1A`, color: `${C.surface}66` }}
+      >
+        <span>{copyright}</span>
+        {bottomNote && <span>{bottomNote}</span>}
       </div>
     </footer>
   );

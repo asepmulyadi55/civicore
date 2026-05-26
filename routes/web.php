@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\OverviewController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\FamilyMemberController;
 use App\Http\Controllers\HouseholdController;
+use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\SensitiveDataController;
 use App\Http\Controllers\Api\BlockController as ApiBlockController;
 use App\Http\Controllers\Api\ResidentController as ApiResidentController;
@@ -29,21 +31,28 @@ use App\Http\Controllers\Api\HomepageController as ApiHomepageController;
 
 // ── Public homepage (React SPA) ───────────────────────────────────────────────
 Route::get('/', fn() => view('spa'))->name('home');
+Route::get('/events', fn() => view('spa'))->name('events');
 
 // ── Internal API — Homepage content for React SPA ───────────────────────────
 // Protected by X-Api-Key header (key injected into SPA via Blade meta tag).
 Route::get('/api/homepage', [ApiHomepageController::class, 'index'])
     ->middleware('api.key')
     ->name('api.homepage');
+Route::get('/api/events', [ApiHomepageController::class, 'events'])
+    ->middleware('api.key')
+    ->name('api.events');
 
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:10,1');
+Route::get('/logout', fn() => redirect()->route('login'));
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // ── Single-session conflict (public — no auth required) ────────────────────────
 Route::get('/session-conflict', [SessionConflictController::class, 'show'])->name('session.conflict');
-Route::post('/session-use-this', [SessionConflictController::class, 'useThisDevice'])->name('session.use-this');
+Route::post('/session-use-this', [SessionConflictController::class, 'useThisDevice'])
+    ->middleware('throttle:5,1')
+    ->name('session.use-this');
 
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:5,1');
@@ -63,8 +72,10 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name(
 // ── Auth-protected pages ──────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware('permission:dashboard.view')->name('dashboard');
+    Route::post('/dashboard/notifications/read', [DashboardController::class, 'markNotificationsRead'])
+        ->name('notifications.read');
 
     // ── Homepage CMS ─────────────────────────────────────────────────────────
     Route::get('/homepage', [HomepageController::class, 'index'])
@@ -81,6 +92,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:homepage.delete')->name('homepage.events.destroy');
     Route::post('/homepage/about', [HomepageController::class, 'updateAbout'])
         ->middleware('permission:homepage.edit')->name('homepage.about');
+    Route::post('/homepage/footer', [HomepageController::class, 'updateFooter'])
+        ->middleware('permission:homepage.edit')->name('homepage.footer');
     Route::post('/homepage/memorable-moments', [HomepageController::class, 'updateMemorableMoments'])
         ->middleware('permission:homepage.edit')->name('homepage.memorable-moments');
 
@@ -89,14 +102,17 @@ Route::middleware('auth')->group(function () {
         ->where('path', '.+')
         ->name('private.file');
 
-    // Resident personal overview (residents only, no secondary permission needed)
-    Route::get('/overview', [OverviewController::class, 'index'])->name('overview');
+    // Overview (residents, posyandu, and any role with overview.view permission)
+    Route::get('/overview', [OverviewController::class, 'index'])
+        ->middleware('permission:overview.view')->name('overview');
 
     // ── Residents ─────────────────────────────────────────────────────────────
     Route::get('/residents', [ResidentController::class, 'index'])
         ->middleware('permission:residents.view')->name('residents.index');
     Route::post('/residents', [ResidentController::class, 'store'])
         ->middleware('permission:residents.create')->name('residents.store');
+    Route::post('/residents/import-excel', [ResidentController::class, 'importExcel'])
+        ->middleware('permission:residents.create')->name('residents.import');
     Route::get('/residents/{resident}/edit', [ResidentController::class, 'edit'])
         ->middleware('permission:residents.edit')->name('residents.edit');
     Route::match(['PUT', 'PATCH'], '/residents/{resident}', [ResidentController::class, 'update'])
@@ -105,6 +121,12 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:residents.edit')->name('residents.deactivate');
     Route::delete('/residents/{resident}', [ResidentController::class, 'destroy'])
         ->middleware('permission:residents.delete')->name('residents.destroy');
+
+    // ── Posyandu ───────────────────────────────────────────────────────────────
+    Route::get('/posyandu', [\App\Http\Controllers\PosyanduController::class, 'index'])
+        ->middleware('permission:posyandu.view')->name('posyandu.index');
+    Route::get('/posyandu/export', [\App\Http\Controllers\PosyanduController::class, 'export'])
+        ->middleware('permission:posyandu.view')->name('posyandu.export');
 
     // Family Members (nested under resident)
     Route::post('/residents/{resident}/family-members', [FamilyMemberController::class, 'store'])
@@ -121,6 +143,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:blocks.view')->name('blocks.index');
     Route::post('/blocks', [BlockController::class, 'store'])
         ->middleware('permission:blocks.create')->name('blocks.store');
+    Route::post('/blocks/import-excel', [BlockController::class, 'importExcel'])
+        ->middleware('permission:blocks.create')->name('blocks.import');
     Route::match(['PUT', 'PATCH'], '/blocks/{block}', [BlockController::class, 'update'])
         ->middleware('permission:blocks.edit')->name('blocks.update');
     Route::delete('/blocks/{block}', [BlockController::class, 'destroy'])
@@ -164,6 +188,32 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/export', [ReportController::class, 'export'])
         ->middleware('permission:reports.view')->name('reports.export');
 
+    // ── Finance ───────────────────────────────────────────────────────────────
+    Route::get('/finance', [FinanceController::class, 'index'])
+        ->middleware('permission:finance.view')->name('finance.index');
+    Route::post('/finance/transactions', [FinanceController::class, 'storeTransaction'])
+        ->middleware('permission:finance.create')->name('finance.transactions.store');
+    Route::put('/finance/transactions/{transaction}', [FinanceController::class, 'updateTransaction'])
+        ->middleware('permission:finance.edit')->name('finance.transactions.update');
+    Route::delete('/finance/transactions/{transaction}', [FinanceController::class, 'destroyTransaction'])
+        ->middleware('permission:finance.delete')->name('finance.transactions.destroy');
+    Route::post('/finance/reports/generate', [FinanceController::class, 'generateReport'])
+        ->middleware('permission:finance.create')->name('finance.reports.generate');
+    Route::patch('/finance/reports/{report}/opening-balance', [FinanceController::class, 'updateOpeningBalance'])
+        ->middleware('permission:finance.edit')->name('finance.reports.opening-balance');
+    Route::patch('/finance/reports/{report}/submit', [FinanceController::class, 'submitReport'])
+        ->middleware('permission:finance.create')->name('finance.reports.submit');
+    Route::patch('/finance/reports/{report}/approve', [FinanceController::class, 'approveReport'])
+        ->middleware('permission:finance.approve')->name('finance.reports.approve');
+    Route::patch('/finance/reports/{report}/revise', [FinanceController::class, 'reviseReport'])
+        ->middleware('permission:finance.approve')->name('finance.reports.revise');
+    Route::get('/finance/reports/{report}/export', [FinanceController::class, 'exportReport'])
+        ->middleware('permission:finance.view')->name('finance.reports.export');
+    Route::delete('/finance/reports/{report}', [FinanceController::class, 'destroyReport'])
+        ->middleware('permission:finance.delete')->name('finance.reports.destroy');
+    Route::get('/finance/categories/search', [FinanceController::class, 'searchCategories'])
+        ->middleware(['permission:finance.create', 'throttle:60,1'])->name('finance.categories.search');
+
     // ── User Management ───────────────────────────────────────────────────────
     Route::get('/users', [UserController::class, 'index'])
         ->middleware('permission:users.view')->name('users.index');
@@ -174,7 +224,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/users/{user}/approve', [UserController::class, 'approve'])
         ->middleware('permission:users.approve')->name('users.approve');
     Route::post('/users/check-resident-email', [ApiResidentController::class, 'checkEmail'])
-        ->middleware('throttle:30,1')->name('users.check-resident-email');
+        ->middleware(['permission:users.edit', 'throttle:30,1'])->name('users.check-resident-email');
     Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate'])
         ->middleware('permission:users.edit')->name('users.deactivate');
     Route::patch('/users/{user}/reactivate', [UserController::class, 'reactivate'])
@@ -182,6 +232,19 @@ Route::middleware('auth')->group(function () {
     Route::delete('/users/{user}', [UserController::class, 'destroy'])
         ->middleware('permission:users.delete')->name('users.destroy');
 
+
+    // ── Organization ─────────────────────────────────────────────────────────
+    // View: all authenticated users. Manage (create/edit/delete): admin only (checked in controller)
+    Route::get('/organization', [OrganizationController::class, 'index'])->name('organization.index');
+    Route::post('/organization/periods', [OrganizationController::class, 'storePeriod'])->name('organization.periods.store');
+    Route::put('/organization/periods/{period}', [OrganizationController::class, 'updatePeriod'])->name('organization.periods.update');
+    Route::patch('/organization/periods/{period}/activate', [OrganizationController::class, 'activatePeriod'])->name('organization.periods.activate');
+    Route::delete('/organization/periods/{period}', [OrganizationController::class, 'destroyPeriod'])->name('organization.periods.destroy');
+    Route::post('/organization/periods/{period}/positions', [OrganizationController::class, 'storePosition'])->name('organization.positions.store');
+    Route::put('/organization/positions/{position}', [OrganizationController::class, 'updatePosition'])->name('organization.positions.update');
+    Route::delete('/organization/positions/{position}', [OrganizationController::class, 'destroyPosition'])->name('organization.positions.destroy');
+    Route::get('/organization/search-members', [OrganizationController::class, 'searchMembers'])
+        ->middleware('throttle:60,1')->name('organization.search-members');
 
     // ── Roles ─────────────────────────────────────────────────────────────────
     Route::get('/roles', [RoleController::class, 'index'])
@@ -198,15 +261,29 @@ Route::middleware('auth')->group(function () {
     // ── Media Manager ─────────────────────────────────────────────────────────
     Route::get('/media', [MediaController::class, 'index'])
         ->middleware('permission:media.view')->name('media.index');
-    Route::delete('/media/{mediaFile}', [MediaController::class, 'destroy'])
-        ->middleware('permission:media.delete')->name('media.destroy');
+
+    // Specific sub-paths MUST be declared before the {mediaFile} wildcard
     Route::delete('/media', [MediaController::class, 'bulkDestroy'])
         ->middleware('permission:media.delete')->name('media.bulk-destroy');
+    Route::delete('/media/virtual-bulk', [MediaController::class, 'virtualBulkDestroy'])
+        ->middleware('permission:media.delete')->name('media.virtual-bulk-destroy');
+    Route::delete('/media/resident-photo/{resident}', [MediaController::class, 'destroyResidentPhoto'])
+        ->middleware('permission:media.delete')->name('media.resident-photo.destroy');
+    Route::delete('/media/member-photo/{familyMember}', [MediaController::class, 'destroyMemberPhoto'])
+        ->middleware('permission:media.delete')->name('media.member-photo.destroy');
+
+    // Wildcard — must stay last so it does not swallow the routes above
+    Route::delete('/media/{mediaFile}', [MediaController::class, 'destroy'])
+        ->middleware('permission:media.delete')->name('media.destroy');
+
+
 
     // ── Sensitive data reveal (admin-only AJAX) ──────────────────────────────
     Route::get('/residents/{resident}/reveal-fcn', [SensitiveDataController::class, 'revealFCN'])
+        ->middleware(['permission:residents.view', 'throttle:10,1'])
         ->name('residents.reveal-fcn');
     Route::get('/residents/{resident}/family-members/{familyMember}/reveal-nik', [SensitiveDataController::class, 'revealNIK'])
+        ->middleware(['permission:residents.view', 'throttle:10,1'])
         ->name('residents.family-members.reveal-nik');
 
     // ── Household (resident self-service) ─────────────────────────────────
@@ -230,4 +307,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/reset-link', [SettingController::class, 'sendResetLink'])->name('settings.reset-link');
     Route::post('/settings/security', [SettingController::class, 'updateSecurity'])->middleware('permission:settings.edit')->name('settings.security');
     Route::post('/settings/memo', [SettingController::class, 'updateMemo'])->middleware('permission:settings.edit')->name('settings.memo');
+    Route::post('/settings/posyandu', [SettingController::class, 'updatePosyandu'])->middleware('permission:settings.edit')->name('settings.posyandu');
 });

@@ -7,7 +7,12 @@ const PLACEHOLDER_IMAGES = [
     'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80&auto=format',
 ];
 
-export default function MemorableMoments({ moments = {}, pastEvents = [], loading }) {
+export default function MemorableMoments({ moments = {}, pastEvents = [], loading, isDark = false }) {
+    const headingColor = isDark ? '#F0EDE8' : '#1C2D27';
+    const bodyColor    = isDark ? '#9E9C97' : '#595959';
+    const sectionBg    = isDark ? '#0A1510' : '#F4F3EF';
+    const skBg         = isDark ? '#1C2D27' : '#e2e8f0';
+
     const title      = moments?.title       || 'Memorable Moments';
     const subtitle   = moments?.subtitle    || 'A look back at the experiences that define our community.';
     const archiveUrl = moments?.archive_url || null;
@@ -22,23 +27,23 @@ export default function MemorableMoments({ moments = {}, pastEvents = [], loadin
 
     if (loading) {
         return (
-            <section className="py-32" style={{ background: '#f3f4f5' }}>
+            <section className="py-32" style={{ background: sectionBg }}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-16 gap-6">
                         <div className="space-y-3">
-                            <div className="h-9 w-64 bg-slate-200 animate-pulse rounded-xl" />
-                            <div className="h-4 w-80 bg-slate-200 animate-pulse rounded-lg" />
+                            <div className="h-9 w-64 rounded-xl animate-pulse" style={{ background: skBg }} />
+                            <div className="h-4 w-80 rounded-lg animate-pulse" style={{ background: skBg }} />
                         </div>
-                        <div className="h-12 w-48 bg-slate-200 animate-pulse rounded-xl" />
+                        <div className="h-12 w-48 rounded-xl animate-pulse" style={{ background: skBg }} />
                     </div>
                     <div
                         className="memorable-bento grid grid-cols-1 md:grid-cols-4 gap-4"
                         style={{ gridAutoRows: '250px' }}
                     >
-                        <div className="memorable-bento__large rounded-2xl bg-slate-200 animate-pulse" />
-                        <div className="memorable-bento__wide rounded-2xl bg-slate-200 animate-pulse" />
-                        <div className="rounded-2xl bg-slate-200 animate-pulse" />
-                        <div className="rounded-2xl bg-slate-200 animate-pulse" />
+                        <div className="memorable-bento__large rounded-2xl animate-pulse" style={{ background: skBg }} />
+                        <div className="memorable-bento__wide rounded-2xl animate-pulse" style={{ background: skBg }} />
+                        <div className="rounded-2xl animate-pulse" style={{ background: skBg }} />
+                        <div className="rounded-2xl animate-pulse" style={{ background: skBg }} />
                     </div>
                 </div>
             </section>
@@ -46,39 +51,38 @@ export default function MemorableMoments({ moments = {}, pastEvents = [], loadin
     }
 
     return (
-        <section id="gallery" className="py-16 md:py-32" style={{ background: '#f3f4f5', scrollMarginTop: '80px' }}>
+        <section id="gallery" className="py-16 md:py-32" style={{ background: sectionBg, scrollMarginTop: '80px' }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-                {/* Header row */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-16 gap-6">
-                    <div>
-                        <h2
-                            className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight"
-                            style={{ color: '#1a237e', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                        >
-                            {title}
-                        </h2>
-                        <p className="text-slate-500 mt-2">{subtitle}</p>
-                    </div>
+                {/* Header */}
+                <div className="text-center max-w-2xl mx-auto mb-12 md:mb-20">
+                    <span
+                        className="font-semibold tracking-widest uppercase text-xs mb-3 md:mb-4 block"
+                        style={{ color: '#D4AF37', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                    >
+                        The Gallery
+                    </span>
+                    <h2
+                        className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight mb-3 md:mb-4"
+                        style={{ color: headingColor, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                    >
+                        {title}
+                    </h2>
+                    <p className="font-light text-sm md:text-base leading-relaxed" style={{ color: bodyColor }}>{subtitle}</p>
+                </div>
 
-                    {archiveUrl && (
+                {archiveUrl && (
+                    <div className="flex justify-center mb-12">
                         <a
                             href={archiveUrl}
-                            className="group inline-flex items-center gap-2 bg-white font-bold px-8 py-4 rounded-xl transition-all duration-300 hover:shadow-lg"
-                            style={{ color: '#000666' }}
-                            onMouseEnter={e => { e.currentTarget.style.background = '#000666'; e.currentTarget.style.color = '#ffffff'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = '#000666'; }}
+                            className="group inline-flex items-center gap-2 font-medium text-sm px-8 py-3 rounded-lg transition-all hover:opacity-90"
+                            style={{ background: '#1C2D27', color: '#FAF9F6', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                         >
                             View Full Archive
-                            <svg
-                                className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
+                            <span className="material-symbols-outlined text-sm transition-transform group-hover:translate-x-1">arrow_forward</span>
                         </a>
-                    )}
-                </div>
+                    </div>
+                )}
 
                 {/* Bento Grid */}
                 <div

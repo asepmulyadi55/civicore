@@ -6,6 +6,7 @@
   <main class="lg:ml-64 flex flex-col h-screen overflow-hidden">
     @include('roles._header')
     <div class="flex-1 overflow-y-auto p-8 space-y-6">
+      @include('roles._filters')
       @include('roles._table')
     </div>
   </main>

@@ -24,8 +24,7 @@ class VerifyApiKey
             abort(403, 'API key not configured.');
         }
 
-        $provided = $request->header('X-Api-Key')
-            ?? $request->query('api_key');
+        $provided = $request->header('X-Api-Key');
 
         // Constant-time comparison to prevent timing attacks
         if (!hash_equals($expected, (string) $provided)) {

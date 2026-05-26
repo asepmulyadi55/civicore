@@ -4,7 +4,8 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>CiviCore | {{ $title ?? 'Dashboard' }}</title>
+  <title>Dwipapuri | {{ $title ?? 'Dashboard' }}</title>
+  <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 
   {{-- Dark mode: restore saved preference BEFORE paint to avoid flash of wrong theme --}}
   <script>
@@ -20,10 +21,10 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
   {{-- Google Fonts --}}
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL,GRAD,opsz@300,0,0,24&display=swap"
     rel="stylesheet" />
 
   {{--
@@ -32,35 +33,86 @@
   <script> when using the CDN.
       If you switch to Tailwind CLI / Vite, move this to tailwind.config.js at the project root.
   --}}
-    <script>
-      tailwind.config = {
-        darkMode: "class",
+  <script>
+    tailwind.config = {
+      darkMode: "class",
       theme: {
         extend: {
-        colors: {
-        "primary": "#137fec",
-      "background-light": "#f6f7f8",
-      "background-dark": "#101922",
+          colors: {
+            "primary":    "#1C2D27",
+            "secondary":  "#D4AF37",
+            "surface":    "#F8F8F7",
+            "dark-bg":    "#111815",
+            "dark-card":  "#17221E",
+            "background-light": "#F8F8F7",
+            "background-dark":  "#111815",
           },
-      fontFamily: {
-        "display": ["Manrope"]
+          fontFamily: {
+            "headline": ["Plus Jakarta Sans", "sans-serif"],
+            "body":     ["Inter", "sans-serif"],
+            "display":  ["Plus Jakarta Sans", "sans-serif"],
           },
-      borderRadius: {
-        "DEFAULT": "0.25rem",
-      "lg": "0.5rem",
-      "xl": "0.75rem",
-      "full": "9999px"
+          boxShadow: {
+            "elegant":      "0 4px 24px -12px rgba(28, 45, 39, 0.10)",
+            "elegant-dark": "0 4px 24px -12px rgba(0, 0, 0, 0.50)",
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg":  "0.5rem",
+            "xl":  "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px",
           },
         },
       },
     }
   </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-headline { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+
+    /* ── Dark Mode Normalization ──────────────────────────────
+       Rebases legacy slate-800/900 card surfaces to dark-card (#17221E)
+       and makes borders/dividers use the design token.
+       Applied here (after Tailwind CDN) so these take precedence.  */
+    .dark .dark\:bg-slate-900  { background-color: #17221E; }
+    .dark .dark\:bg-slate-800  { background-color: rgba(255,255,255,0.04); }
+    .dark .dark\:border-slate-800 { border-color: rgba(255,255,255,0.06); }
+    .dark .dark\:border-slate-700 { border-color: rgba(255,255,255,0.08); }
+    .dark .dark\:divide-slate-800 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(255,255,255,0.05); }
+    /* Primary color (#1C2D27) is invisible on dark backgrounds — show secondary gold instead */
+    .dark .text-primary { color: #D4AF37; }
+    /* hover:text-primary in dark mode: same fix — gold instead of near-black */
+    .dark .hover\:text-primary:hover { color: #D4AF37; }
+    /* group-hover:text-primary in dark mode */
+    .dark .group:hover .group-hover\:text-primary { color: #D4AF37; }
+    /* hover:bg-primary/5 in dark mode: use a subtle gold wash instead of dark-green tint */
+    .dark .hover\:bg-primary\/5:hover { background-color: rgba(212,175,55,0.08); }
+    /* focus:ring-primary/20 and focus:border-primary stay as-is (they already look fine) */
+
+    /* ── Disabled / Readonly field distinction ───────────────────────
+       Makes locked fields visually distinct from editable ones.
+       Works for both :disabled attribute and .cursor-not-allowed helper. */
+    input:disabled, select:disabled, textarea:disabled {
+      background-color: #f1f5f9 !important;
+      border-style: dashed !important;
+      cursor: not-allowed !important;
+      opacity: 0.65 !important;
+    }
+    .dark input:disabled, .dark select:disabled, .dark textarea:disabled {
+      background-color: rgba(0, 0, 0, 0.35) !important;
+      border-style: dashed !important;
+      cursor: not-allowed !important;
+      opacity: 0.55 !important;
+    }
+  </style>
 
   {{-- Extra head content (per-page scripts, meta tags, etc.) --}}
   {{ $head ?? '' }}
 </head>
 
-<body {{ $attributes->merge(['class' => 'font-display antialiased']) }}>
+<body {{ $attributes->merge(['class' => 'font-body bg-surface dark:bg-dark-bg text-slate-800 dark:text-slate-300 antialiased min-h-screen transition-colors duration-500']) }}>
   {{ $slot }}
 
   {{-- Global dark mode toggle — saves preference in localStorage so it persists across navigations --}}
@@ -72,7 +124,6 @@
   </script>
 
   @auth
-    {{-- ── Auto Image Compression ────────────────────────────────────────── --}}
     {{-- Automatically compresses any image file selected in an image input   --}}
     {{-- before it is submitted. Max 1920px width, JPEG 0.85 quality.         --}}
     {{-- Files already under 300 KB or non-image types (PDF) are skipped.     --}}
@@ -132,7 +183,6 @@
         });
       })();
     </script>
-    {{-- ── Idle Session Timeout ──────────────────────────────────────────── --}}
     @php $timeoutMinutes = (int) \App\Models\Setting::get('session_timeout_minutes', 30); @endphp
     <div id="idle-warning" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
       <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-8 max-w-sm w-full text-center space-y-4">

@@ -25,23 +25,36 @@ class SessionConflictController extends Controller
    */
   public function useThisDevice(Request $request)
   {
-    $userId = $request->input('user_id');
-    $user = User::find($userId);
+    $userId   = $request->input('user_id');
+    $expected = session('conflict_user_id');
 
-    if ($user) {
-      // Log in first — this regenerates the session ID internally
-      Auth::login($user);
-
-      // NOW capture the new session ID (post-login) and store it
-      $user->session_token = $request->session()->getId();
-      $user->last_login_at = now();
-      $user->last_active_at = now();
-      $user->save();
-
-      return redirect($user->homeUrl())
-        ->with('success', 'You are now using this device. Other sessions have been logged out.');
+    // Validate that the submitted user_id matches what the server stored.
+    // hash_equals prevents timing attacks on the comparison.
+    if (!$expected || !hash_equals((string) $expected, (string) $userId)) {
+      return redirect()->route('login')
+        ->with('error', 'Session expired. Please log in again.');
     }
 
-    return redirect('/')->with('error', 'Session expired. Please log in again.');
+    $user = User::find($userId);
+
+    if (!$user) {
+      return redirect()->route('login')
+        ->with('error', 'Account not found. Please log in again.');
+    }
+
+    // Consume the stored value — one-time use only.
+    session()->forget('conflict_user_id');
+
+    // Log in first — Auth::login() regenerates the session ID internally.
+    // Capture the new session ID AFTER login to avoid an instant mismatch loop.
+    Auth::login($user);
+
+    $user->session_token  = $request->session()->getId();
+    $user->last_login_at  = now();
+    $user->last_active_at = now();
+    $user->save();
+
+    return redirect($user->homeUrl())
+      ->with('success', 'You are now using this device. Other sessions have been logged out.');
   }
 }

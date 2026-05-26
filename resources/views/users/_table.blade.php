@@ -25,17 +25,11 @@
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_user') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_email') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_role') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {{ __('app.table_last_login') }}
-          </th>
+          <x-ui.sort-th column="name" :label="__('app.table_user')" />
+          <x-ui.sort-th column="email" :label="__('app.table_email')" />
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_role') }}</th>
+          <x-ui.sort-th column="is_active" :label="__('app.table_status')" />
+          <x-ui.sort-th column="last_login_at" :label="__('app.table_last_login')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
             {{ __('app.table_actions') }}
           </th>
@@ -64,10 +58,18 @@
             {{-- User Details --}}
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
-                <div
-                  class="w-10 h-10 rounded-full {{ $color }} flex items-center justify-center font-bold text-sm flex-shrink-0">
-                  {{ $initials }}
-                </div>
+                @if($user->avatar)
+                  <img src="{{ $user->avatarUrl() }}" alt="{{ $user->name }}"
+                    class="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                    onerror="this.replaceWith(this.nextElementSibling)">
+                  <div class="w-10 h-10 rounded-full {{ $color }} items-center justify-center font-bold text-sm flex-shrink-0 hidden">
+                    {{ $initials }}
+                  </div>
+                @else
+                  <div class="w-10 h-10 rounded-full {{ $color }} flex items-center justify-center font-bold text-sm flex-shrink-0">
+                    {{ $initials }}
+                  </div>
+                @endif
                 <div>
                   <div class="font-bold text-slate-900 dark:text-white">{{ $user->name }}</div>
                   <div class="text-xs text-slate-400">&#64;{{ $user->username }}</div>
@@ -215,11 +217,60 @@
   </div>
 
   {{-- Pagination --}}
-  <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-3">
-    <span class="text-sm text-slate-500">
+  <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center sm:justify-between gap-3">
+    <span class="text-sm text-slate-500 text-center sm:text-left">
       {{ __('app.showing') }} {{ $users->firstItem() ?? 0 }}–{{ $users->lastItem() ?? 0 }} {{ __('app.of') }}
       {{ $users->total() }} {{ __('app.users_lowercase') }}
     </span>
-    {{ $users->links() }}
+    <div class="flex items-center gap-1">
+      @if ($users->onFirstPage())
+        <button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 cursor-not-allowed" disabled>
+          <span class="material-icons text-sm">chevron_left</span>
+        </button>
+      @else
+        <a href="{{ $users->previousPageUrl() }}" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+          <span class="material-icons text-sm">chevron_left</span>
+        </a>
+      @endif
+
+      @php
+        $lastPage    = $users->lastPage();
+        $currentPage = $users->currentPage();
+        $start       = max(1, $currentPage - 2);
+        $end         = min($lastPage, $currentPage + 2);
+      @endphp
+
+      @if ($start > 1)
+        <a href="{{ $users->url(1) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">1</a>
+        @if ($start > 2)
+          <span class="px-1 text-slate-400 text-sm">&hellip;</span>
+        @endif
+      @endif
+
+      @for ($p = $start; $p <= $end; $p++)
+        @if ($p === $currentPage)
+          <span class="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-semibold">{{ $p }}</span>
+        @else
+          <a href="{{ $users->url($p) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $p }}</a>
+        @endif
+      @endfor
+
+      @if ($end < $lastPage)
+        @if ($end < $lastPage - 1)
+          <span class="px-1 text-slate-400 text-sm">&hellip;</span>
+        @endif
+        <a href="{{ $users->url($lastPage) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $lastPage }}</a>
+      @endif
+
+      @if ($users->hasMorePages())
+        <a href="{{ $users->nextPageUrl() }}" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+          <span class="material-icons text-sm">chevron_right</span>
+        </a>
+      @else
+        <button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 cursor-not-allowed" disabled>
+          <span class="material-icons text-sm">chevron_right</span>
+        </button>
+      @endif
+    </div>
   </div>
 </div>

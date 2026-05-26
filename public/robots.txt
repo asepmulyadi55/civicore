@@ -1,2 +1,4 @@
 User-agent: *
 Disallow:
+
+Sitemap: https://dwipapuri.amsite.click/sitemap.xml

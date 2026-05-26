@@ -7,7 +7,9 @@ use App\Models\PaymentRecord;
 use App\Models\Resident;
 use App\Models\Setting;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -87,6 +89,19 @@ class DashboardController extends Controller
 
     $notifTotal = $notifPayments->count() + $notifUsers->count();
 
+    // Badge count: only items newer than the last time the user opened the panel
+    $notifReadAt = session('notif_read_at') ? Carbon::parse(session('notif_read_at')) : null;
+    if ($notifReadAt) {
+      $newPayments = $rawPendingPayments
+        ->filter(fn($p) => $p->created_at > $notifReadAt)
+        ->groupBy(fn($r) => $r->batch_id ?? 'single_' . $r->id)
+        ->count();
+      $newUsers = $notifUsers->filter(fn($u) => $u->created_at > $notifReadAt)->count();
+      $notifBadge = $newPayments + $newUsers;
+    } else {
+      $notifBadge = $notifTotal;
+    }
+
     return view('dashboard', compact(
       'currency',
       'totalCollected',
@@ -96,7 +111,14 @@ class DashboardController extends Controller
       'recentActivity',
       'notifPayments',
       'notifUsers',
-      'notifTotal'
+      'notifTotal',
+      'notifBadge'
     ));
+  }
+
+  public function markNotificationsRead(): JsonResponse
+  {
+    session(['notif_read_at' => now()->toISOString()]);
+    return response()->json(['ok' => true]);
   }
 }

@@ -62,18 +62,18 @@
       <h2 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-4">
         {{ __('app.settings_language') }}
       </h2>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         @foreach(['en' => ['flag' => '🇬🇧', 'label' => 'English'], 'id' => ['flag' => '🇮🇩', 'label' => 'Indonesian']] as $langCode => $lang)
           @php $isActive = (old('language', $user->language ?? 'en') === $langCode); @endphp
           <label for="lang-{{ $langCode }}"
-            class="flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all {{ $isActive ? 'border-primary bg-primary/5' : 'border-slate-200 dark:border-slate-700 hover:border-primary/40' }}">
+            class="flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all {{ $isActive ? 'border-primary bg-primary/5 dark:border-secondary dark:bg-secondary/10' : 'border-slate-200 dark:border-slate-700 hover:border-primary/40 dark:hover:border-secondary/40' }}">
             <input type="radio" name="language" id="lang-{{ $langCode }}" value="{{ $langCode }}"
               class="sr-only" {{ $isActive ? 'checked' : '' }}
               onchange="updateLangCards()">
             <span class="text-2xl">{{ $lang['flag'] }}</span>
             <span class="font-semibold text-sm text-slate-800 dark:text-slate-200">{{ $lang['label'] }}</span>
             @if($isActive)
-              <span class="ml-auto material-icons text-primary text-base">check_circle</span>
+              <span class="ml-auto material-icons text-secondary dark:text-secondary text-base">check_circle</span>
             @else
               <span class="ml-auto material-icons text-slate-300 text-base">radio_button_unchecked</span>
             @endif

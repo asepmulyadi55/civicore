@@ -9,7 +9,7 @@
         <div class="inline-flex items-center justify-center p-3 bg-primary/10 rounded-xl mb-4">
           <span class="material-icons text-primary text-4xl">apartment</span>
         </div>
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">CiviCore</h1>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Dwipapuri</h1>
         <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium">Set New Password</p>
       </div>
 
@@ -32,7 +32,7 @@
           <form action="{{ route('password.update') }}" method="POST" class="space-y-5" novalidate>
             @csrf
 
-            {{-- Hidden fields —- email & token are from the reset link, not editable --}}
+            {{-- Hidden fields —”- email & token are from the reset link, not editable --}}
             <input type="hidden" name="token" value="{{ $token }}" />
             <input type="hidden" name="email" value="{{ $email ?? old('email') }}" />
 

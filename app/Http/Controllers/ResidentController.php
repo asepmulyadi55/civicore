@@ -6,15 +6,18 @@ use App\Http\Requests\StoreResidentRequest;
 use App\Http\Requests\UpdateResidentRequest;
 use App\Models\Block;
 use App\Models\FeeHistory;
+use App\Models\PaymentRecord;
 use App\Models\Resident;
 use App\Models\Setting;
 use App\Models\Unit;
 use App\Models\User;
+use App\Enums\PaymentStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ResidentController extends Controller
 {
@@ -32,12 +35,12 @@ class ResidentController extends Controller
             'familyMembers' => fn($q) => $q->where('is_head', true)->select('id', 'resident_id', 'fullname'),
         ])->withCount('familyMembers')
           ->leftJoin('units', 'units.id', '=', 'residents.unit_id')
-          ->orderBy('residents.block_id')->orderBy('units.unit_number')
           ->select('residents.*');
+
 
         // Scope to coordinator's block
         if ($scopeBlockId) {
-            $query->where('block_id', $scopeBlockId);
+            $query->where('residents.block_id', $scopeBlockId);
         }
 
         // Live search — includes family member names
@@ -63,11 +66,25 @@ class ResidentController extends Controller
             $query->where('residents.is_active', false);
         }
 
+        // Dynamic column sort
+        $sortableColumns = [
+            'fullname'     => 'residents.fullname',
+            'house_status' => 'units.house_status',
+            'is_active'    => 'residents.is_active',
+        ];
+        $sort = $request->get('sort');
+        $dir  = $request->get('direction', 'asc') === 'desc' ? 'desc' : 'asc';
+        if (isset($sortableColumns[$sort])) {
+            $query->orderBy($sortableColumns[$sort], $dir);
+        } else {
+            $query->orderBy('residents.block_id', 'asc')->orderBy('units.unit_number', 'asc');
+        }
+
         $residents = $query->paginate(15)->withQueryString();
         $blocks = Block::active()->orderBy('name')->get();
 
 
-        $baseCount = Resident::when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId));
+        $baseCount   = Resident::when($scopeBlockId, fn($q) => $q->where('residents.block_id', $scopeBlockId));
         $totalCount = (clone $baseCount)->count();
         $activeCount = (clone $baseCount)->where('is_active', true)->count();
         $currency = Setting::get('currency_symbol', 'Rp');
@@ -106,6 +123,127 @@ class ResidentController extends Controller
 
         return redirect()->route('residents.index')
             ->with('success', 'Resident added successfully.');
+    }
+
+    /**
+     * Import residents, fee histories, and payment records from an Excel file.
+     *
+     * Column layout (IuranWarga sheet, data from row 4):
+     *   F  = Block letter | G  = Unit number | I  = Full name | J  = Status Warga
+     *   K  = Monthly fee amount
+     *   Per month (3 cols each): fee, payment date, status ('L'=Lunas/'BL'=Belum Lunas)
+     *   Jan→K/L/M  Feb→N/O/P  Mar→Q/R/S  Apr→T/U/V  May→W/X/Y  Jun→Z/AA/AB
+     *   Jul→AC/AD/AE  Aug→AF/AG/AH  Sep→AI/AJ/AK  Oct→AL/AM/AN  Nov→AO/AP/AQ  Dec→AR/AS/AT
+     */
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'excel_file' => ['required', 'file', 'mimes:xlsx,xls', 'max:10240'],
+            'year'       => ['required', 'integer', 'min:2020', 'max:2035'],
+        ], [
+            'excel_file.required' => 'Please choose an Excel file.',
+            'excel_file.mimes'    => 'Only .xlsx and .xls files are accepted.',
+        ]);
+
+        $year = (int) $request->input('year', 2026);
+
+        // Month column map: month_number => [fee_col, date_col, status_col]
+        $monthCols = [
+            1  => ['K', 'L', 'M'],   2  => ['N', 'O', 'P'],
+            3  => ['Q', 'R', 'S'],   4  => ['T', 'U', 'V'],
+            5  => ['W', 'X', 'Y'],   6  => ['Z', 'AA', 'AB'],
+            7  => ['AC', 'AD', 'AE'], 8 => ['AF', 'AG', 'AH'],
+            9  => ['AI', 'AJ', 'AK'], 10 => ['AL', 'AM', 'AN'],
+            11 => ['AO', 'AP', 'AQ'], 12 => ['AR', 'AS', 'AT'],
+        ];
+
+        $spreadsheet = IOFactory::load($request->file('excel_file')->getRealPath());
+        $sheet       = $spreadsheet->getSheet(0);
+        $maxRow      = $sheet->getHighestRow();
+
+        $stats = ['residents_created' => 0, 'residents_skipped' => 0,
+                  'fees_created' => 0, 'payments_created' => 0, 'payments_skipped' => 0];
+
+        $effectiveFrom = Carbon::create($year, 1, 1)->toDateString();
+
+        DB::transaction(function () use ($sheet, $maxRow, $year, $monthCols, $effectiveFrom, &$stats) {
+            for ($row = 4; $row <= $maxRow; $row++) {
+                $blockLetter = strtoupper(trim($sheet->getCell('F' . $row)->getCalculatedValue() ?? ''));
+                $unitNum     = trim($sheet->getCell('G' . $row)->getCalculatedValue() ?? '');
+                $name        = trim($sheet->getCell('I' . $row)->getCalculatedValue() ?? '');
+                $rawStatus   = strtolower(trim(preg_replace('/\s+/', ' ',
+                    $sheet->getCell('J' . $row)->getCalculatedValue() ?? '')));
+
+                // Skip empty rows, header repeats, common areas, and nameless units
+                if (empty($blockLetter) || empty($unitNum) || empty($name)) continue;
+                if (in_array($rawStatus, ['fasum', 'fasilitasumum'])) continue;
+                if (!ctype_alpha($blockLetter)) continue;
+
+                // ── Find Block + Unit (must exist from block import) ───────
+                $block = Block::where('name', $blockLetter)->first();
+                if (!$block) continue;
+
+                $unit = Unit::where('block_id', $block->id)->where('unit_number', $unitNum)->first();
+                if (!$unit) continue;
+
+                // ── Resident (one per unit) ────────────────────────────────
+                $resident = Resident::firstOrCreate(
+                    ['unit_id' => $unit->id],
+                    ['fullname' => $name, 'block_id' => $block->id, 'is_active' => true]
+                );
+                $resident->wasRecentlyCreated
+                    ? $stats['residents_created']++
+                    : $stats['residents_skipped']++;
+
+                // ── Monthly fee (column K) ─────────────────────────────────
+                $feeAmount = (float) ($sheet->getCell('K' . $row)->getCalculatedValue() ?? 0);
+                if ($feeAmount > 0) {
+                    $feeExists = FeeHistory::where('resident_id', $resident->id)
+                        ->where('effective_from', $effectiveFrom)->exists();
+                    if (!$feeExists) {
+                        FeeHistory::create([
+                            'resident_id'    => $resident->id,
+                            'amount'         => $feeAmount,
+                            'effective_from' => $effectiveFrom,
+                            'notes'          => "Imported from Excel ({$effectiveFrom})",
+                        ]);
+                        $stats['fees_created']++;
+                    }
+                }
+
+                // ── Payment records for each paid month ────────────────────
+                foreach ($monthCols as $month => [$feeCol, $dateCol, $statusCol]) {
+                    $monthStatus = strtolower(trim(
+                        $sheet->getCell($statusCol . $row)->getCalculatedValue() ?? ''
+                    ));
+                    if ($monthStatus !== 'l') continue;  // Only import "Lunas"
+
+                    $paymentMonth = Carbon::create($year, $month, 1)->toDateString();
+                    $exists = PaymentRecord::where('resident_id', $resident->id)
+                        ->where('payment_month', $paymentMonth)->exists();
+
+                    if ($exists) { $stats['payments_skipped']++; continue; }
+
+                    PaymentRecord::create([
+                        'resident_id'   => $resident->id,
+                        'payment_month' => $paymentMonth,
+                        'amount'        => $feeAmount > 0 ? $feeAmount : 165000,
+                        'status'        => PaymentStatus::Approved,
+                        'notes'         => 'Imported from Excel',
+                    ]);
+                    $stats['payments_created']++;
+                }
+            }
+        });
+
+        $summary = sprintf(
+            'Import complete — %d resident(s) created, %d already existed | %d fee record(s) created | %d payment(s) imported, %d already existed.',
+            $stats['residents_created'], $stats['residents_skipped'],
+            $stats['fees_created'],
+            $stats['payments_created'], $stats['payments_skipped']
+        );
+
+        return redirect()->route('residents.index')->with('success', $summary);
     }
 
     public function edit(Resident $resident)

@@ -16,6 +16,7 @@ class UserSeeder extends Seeder
     $treasurerRole = Role::where('name', 'treasurer')->first();
     $coordinatorRole = Role::where('name', 'block_coordinator')->first();
     $residentRole = Role::where('name', 'resident')->first();
+    $posyanduRole = Role::where('name', 'posyandu')->first();
 
     $blockA = Block::where('name', 'Block A')->first();
 
@@ -54,6 +55,15 @@ class UserSeeder extends Seeder
       'password' => Hash::make('password'),
       'is_active' => true,
       'role_id' => $residentRole?->id,
+    ]);
+
+    // Posyandu officer
+    User::firstOrCreate(['email' => 'posyandu@civicore.test'], [
+      'name' => 'Siti Rahayu',
+      'username' => 'posyandu',
+      'password' => Hash::make('password'),
+      'is_active' => true,
+      'role_id' => $posyanduRole?->id,
     ]);
   }
 }

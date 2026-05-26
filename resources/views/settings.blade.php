@@ -1,4 +1,4 @@
-{{-- Settings Page — Orchestrator --}}
+{{-- Settings Page â€” Orchestrator --}}
 <x-layouts.app :title="__('app.settings_title')"
   class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 antialiased min-h-screen">
 
@@ -26,18 +26,24 @@
         ];
         if (auth()->user()->isAdmin()) {
           $tabs[] = ['id' => 'security', 'icon' => 'security',      'label' => __('app.settings_tab_security')];
-          $tabs[] = ['id' => 'memo',     'icon' => 'sticky_note_2', 'label' => 'Admin Memo'];
+          $tabs[] = ['id' => 'memo',     'icon' => 'sticky_note_2',    'label' => 'Admin Memo'];
+          $tabs[] = ['id' => 'posyandu', 'icon' => 'health_and_safety','label' => 'Posyandu'];
         }
       @endphp
 
-      <div class="grid grid-cols-2 sm:flex gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl mb-6">
-        @foreach($tabs as $tab)
-          <button type="button" id="tab-btn-{{ $tab['id'] }}" onclick="switchTab('{{ $tab['id'] }}')"
-            class="settings-tab-btn flex items-center justify-center gap-1.5 px-3 sm:px-5 py-2 rounded-lg text-sm font-semibold transition-all text-slate-500 dark:text-slate-400">
-            <span class="material-icons text-base">{{ $tab['icon'] }}</span>
-            {{ $tab['label'] }}
-          </button>
-        @endforeach
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mb-6">
+        <div class="overflow-x-auto">
+          <nav class="flex border-b border-slate-100 dark:border-slate-800 min-w-max" aria-label="Settings sections">
+            @foreach($tabs as $tab)
+              <button type="button" id="tab-btn-{{ $tab['id'] }}" onclick="switchTab('{{ $tab['id'] }}')"
+                class="settings-tab-btn flex items-center gap-2 px-5 py-4 text-sm font-semibold whitespace-nowrap border-b-2 transition-all
+                       border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                <span class="material-icons text-[18px]">{{ $tab['icon'] }}</span>
+                {{ $tab['label'] }}
+              </button>
+            @endforeach
+          </nav>
+        </div>
       </div>
 
       @include('settings._profile')
@@ -45,13 +51,14 @@
       @if(auth()->user()->isAdmin())
         @include('settings._security')
         @include('settings._memo')
+        @include('settings._posyandu')
       @endif
 
     </main>
   </div>
 
   <script>
-    const tabIds = ['profile', 'password', 'security', 'memo'];
+    const tabIds = ['profile', 'password', 'security', 'memo', 'posyandu'];
 
     function switchTab(active) {
       tabIds.forEach(function(id) {
@@ -60,12 +67,12 @@
         if (!panel || !btn) { return; }
         if (id === active) {
           panel.classList.remove('hidden');
-          btn.classList.add('bg-primary/10', 'text-primary');
-          btn.classList.remove('text-slate-500', 'dark:text-slate-400');
+          btn.classList.add('border-primary', 'text-primary');
+          btn.classList.remove('border-transparent', 'text-slate-500');
         } else {
           panel.classList.add('hidden');
-          btn.classList.remove('bg-primary/10', 'text-primary');
-          btn.classList.add('text-slate-500', 'dark:text-slate-400');
+          btn.classList.remove('border-primary', 'text-primary');
+          btn.classList.add('border-transparent', 'text-slate-500');
         }
       });
       sessionStorage.setItem('settingsTab', active);
@@ -90,18 +97,20 @@
         const card = radio.closest('label');
         const icon = card.querySelector('.material-icons.ml-auto');
         if (radio.checked) {
-          card.classList.add('border-primary', 'bg-primary/5');
-          card.classList.remove('border-slate-200', 'hover:border-primary/40');
+          card.classList.add('border-primary', 'bg-primary/5', 'dark:border-secondary', 'dark:bg-secondary/10');
+          card.classList.remove('border-slate-200', 'dark:border-slate-700', 'hover:border-primary/40', 'dark:hover:border-secondary/40');
           if (icon) {
             icon.textContent = 'check_circle';
-            icon.classList.replace('text-slate-300', 'text-primary');
+            icon.classList.remove('text-slate-300');
+            icon.classList.add('text-secondary');
           }
         } else {
-          card.classList.remove('border-primary', 'bg-primary/5');
-          card.classList.add('border-slate-200', 'hover:border-primary/40');
+          card.classList.remove('border-primary', 'bg-primary/5', 'dark:border-secondary', 'dark:bg-secondary/10');
+          card.classList.add('border-slate-200', 'dark:border-slate-700', 'hover:border-primary/40', 'dark:hover:border-secondary/40');
           if (icon) {
             icon.textContent = 'radio_button_unchecked';
-            icon.classList.replace('text-primary', 'text-slate-300');
+            icon.classList.remove('text-secondary');
+            icon.classList.add('text-slate-300');
           }
         }
       });

@@ -9,13 +9,15 @@
   <div class="group relative bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-md hover:border-primary/30 transition-all"
     data-id="{{ $file->id }}">
 
-    {{-- Checkbox overlay (only shown when user has delete permission) --}}
+    {{-- Checkbox overlay (only when folder is not read-only and user has delete permission) --}}
+    @unless($readOnly ?? false)
     @if(auth()->user()->can('media.delete'))
     <div class="absolute top-2 left-2 z-10">
       <input type="checkbox" class="file-checkbox w-5 h-5 rounded accent-primary opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
         data-id="{{ $file->id }}" onchange="updateBulkBar()">
     </div>
     @endif
+    @endunless
 
     {{-- Thumbnail --}}
     <div class="aspect-square bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden relative">
@@ -51,19 +53,24 @@
           <span class="material-icons text-lg">open_in_new</span>
         </a>
       @endif
-      @if(auth()->user()->can('media.delete'))
-        <button onclick="confirmDelete('{{ $file->id }}', '{{ addslashes($file->original_name) }}')"
-          class="p-2 bg-white rounded-full shadow-md text-slate-700 hover:bg-rose-500 hover:text-white transition-all"
-          title="{{ __('app.btn_delete') }}">
-          <span class="material-icons text-lg">delete_outline</span>
-        </button>
-      @endif
+
+      {{-- Delete / action buttons --}}
+      @unless($readOnly ?? false)
+        @if(auth()->user()->can('media.delete'))
+          <button onclick="confirmDelete('{{ route('media.destroy', $file->id) }}', '{{ addslashes($file->original_name) }}')"
+            class="p-2 bg-white rounded-full shadow-md text-slate-700 hover:bg-rose-500 hover:text-white transition-all"
+            title="{{ __('app.btn_delete') }}">
+            <span class="material-icons text-lg">delete_outline</span>
+          </button>
+        @endif
+      @endunless
     </div>
   </div>
 
   @if($loop->last)
     </div>
   @endif
+
 @empty
   <div class="flex flex-col items-center justify-center py-24 text-center">
     <span class="material-icons text-5xl text-slate-300 dark:text-slate-700 mb-4">perm_media</span>
@@ -93,14 +100,34 @@
         </a>
       @endif
 
-      @foreach($files->getUrlRange(max(1, $files->currentPage() - 2), min($files->lastPage(), $files->currentPage() + 2)) as $page => $url)
-        @if($page === $files->currentPage())
-          <span class="px-3 py-1.5 text-sm font-bold text-white bg-primary border border-primary rounded-lg">{{ $page }}</span>
-        @else
-          <a href="{{ $url }}"
-            class="px-3 py-1.5 text-sm text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-primary/50 hover:text-primary transition-all">{{ $page }}</a>
+      @php
+        $lastPage    = $files->lastPage();
+        $currentPage = $files->currentPage();
+        $start       = max(1, $currentPage - 2);
+        $end         = min($lastPage, $currentPage + 2);
+      @endphp
+
+      @if ($start > 1)
+        <a href="{{ $files->url(1) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">1</a>
+        @if ($start > 2)
+          <span class="px-1 text-slate-400 text-sm">&hellip;</span>
         @endif
-      @endforeach
+      @endif
+
+      @for ($p = $start; $p <= $end; $p++)
+        @if ($p === $currentPage)
+          <span class="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-semibold">{{ $p }}</span>
+        @else
+          <a href="{{ $files->url($p) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $p }}</a>
+        @endif
+      @endfor
+
+      @if ($end < $lastPage)
+        @if ($end < $lastPage - 1)
+          <span class="px-1 text-slate-400 text-sm">&hellip;</span>
+        @endif
+        <a href="{{ $files->url($lastPage) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $lastPage }}</a>
+      @endif
 
       @if($files->hasMorePages())
         <a href="{{ $files->nextPageUrl() }}"

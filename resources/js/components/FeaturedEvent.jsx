@@ -1,7 +1,12 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-export default function FeaturedEvent({ featuredEvent = {}, loading }) {
-    const title       = featuredEvent?.title       || 'Dwipapuri Summer Carnival';
+export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = false }) {
+    const dropdownBg      = isDark ? '#1A2E28' : '#ffffff';
+    const dropdownBorder  = isDark ? '#1C2D27' : '#f1f5f9';
+    const dropdownText    = isDark ? '#F0EDE8' : '#374151';
+    const dropdownHoverBg = isDark ? '#1C2D27' : '#f8fafc';
+
+    const title       = featuredEvent?.title       || 'Dwipapuri Summer Carnival 2026';
     const description = featuredEvent?.description || 'Join us for the most anticipated event of the year! Live music, local food stalls, and community activities for all ages.';
     const date        = featuredEvent?.date        || null;
     const youtubeId   = featuredEvent?.youtube_id  || null;
@@ -197,25 +202,25 @@ export default function FeaturedEvent({ featuredEvent = {}, loading }) {
 
                 {/* Dark gradient overlay */}
                 <div className="absolute inset-0"
-                    style={{ background: 'linear-gradient(to top, rgba(0,6,102,0.85) 0%, transparent 55%)' }} />
+                    style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.30) 50%, transparent 100%)' }} />
 
                 {/* Live indicator */}
                 {isLive && (
-                    <div className="absolute top-8 left-8 flex items-center gap-2 px-4 py-2 rounded-full animate-pulse"
-                        style={{ backgroundColor: '#ffdad6', color: '#93000a' }}>
-                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#ba1a1a' }} />
-                        <span className="text-xs font-bold uppercase tracking-widest">Live Now</span>
+                    <div className="absolute top-6 md:top-8 left-6 md:left-8 flex items-center gap-2 md:gap-3 px-3 md:px-4 py-1.5 md:py-2 rounded-full"
+                        style={{ background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.20)' }}>
+                        <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse" style={{ background: '#f87171' }} />
+                        <span className="text-[9px] md:text-[10px] font-semibold uppercase tracking-widest text-white">Live Now</span>
                     </div>
                 )}
 
-                {/* Glassmorphic card — bottom right */}
+                {/* Glassmorphic card — bottom left */}
                 <div
-                    className="absolute inset-x-3 bottom-3 md:inset-auto md:bottom-10 md:right-10 md:max-w-xl p-5 sm:p-7 md:p-10 rounded-2xl shadow-2xl"
+                    className="absolute inset-x-3 bottom-3 md:inset-auto md:bottom-12 md:left-12 md:max-w-xl p-5 sm:p-7 md:p-12 rounded-xl shadow-glass"
                     style={{
-                        background: 'rgba(248,249,250,0.10)',
-                        backdropFilter: 'blur(20px)',
-                        WebkitBackdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(255,255,255,0.10)',
+                        background: 'rgba(255,255,255,0.10)',
+                        backdropFilter: 'blur(16px)',
+                        WebkitBackdropFilter: 'blur(16px)',
+                        border: '1px solid rgba(255,255,255,0.20)',
                     }}
                 >
                     {loading ? (
@@ -230,8 +235,16 @@ export default function FeaturedEvent({ featuredEvent = {}, loading }) {
                         </div>
                     ) : (
                         <>
-                            <h1 className="text-xl sm:text-2xl md:text-4xl font-extrabold text-white tracking-tight leading-tight mb-2 md:mb-4"
-                                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                            <span
+                                className="font-semibold uppercase tracking-widest text-xs mb-3 md:mb-4 block drop-shadow-md"
+                                style={{ color: '#D4AF37', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                            >
+                                Featured Event
+                            </span>
+                            <h1
+                                className="text-xl sm:text-2xl md:text-4xl md:text-5xl font-semibold text-white tracking-tight leading-tight mb-4 md:mb-6 drop-shadow-md"
+                                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                            >
                                 {title}
                             </h1>
 
@@ -253,9 +266,9 @@ export default function FeaturedEvent({ featuredEvent = {}, loading }) {
                                 <button
                                     onClick={handleWatchNow}
                                     disabled={!youtubeUrl}
-                                    className="col-span-2 flex items-center justify-center gap-2 px-4 py-2.5 md:px-7 md:py-3.5 rounded-xl font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:opacity-90"
+                                    className="col-span-2 flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-3.5 rounded-lg font-medium text-sm md:text-base disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:opacity-90 shadow-lg"
                                     style={{
-                                        background: 'linear-gradient(45deg, #000666, #5f00e3)',
+                                        background: '#D4AF37',
                                         color: '#fff',
                                         fontFamily: "'Plus Jakarta Sans', sans-serif",
                                     }}
@@ -288,16 +301,22 @@ export default function FeaturedEvent({ featuredEvent = {}, loading }) {
                                         <span className="sm:hidden">Calendar</span>
                                     </button>
                                     {calOpen && (
-                                        <div className="absolute bottom-full mb-2 left-0 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
+                                        <div className="absolute bottom-full mb-2 left-0 w-52 rounded-2xl shadow-xl overflow-hidden z-50" style={{ background: dropdownBg, border: `1px solid ${dropdownBorder}` }}>
                                             <a href={buildGoogleCalUrl()} target="_blank" rel="noopener noreferrer"
                                                 onClick={() => setCalOpen(false)}
-                                                className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                                className="flex items-center gap-3 px-4 py-3 text-sm transition-colors"
+                                                style={{ color: dropdownText }}
+                                                onMouseEnter={e => e.currentTarget.style.background = dropdownHoverBg}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                                 <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="" />
                                                 Google Calendar
                                             </a>
                                             <button onClick={downloadIcs}
-                                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-50">
-                                                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors"
+                                                style={{ color: dropdownText, borderTop: `1px solid ${dropdownBorder}` }}
+                                                onMouseEnter={e => e.currentTarget.style.background = dropdownHoverBg}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                                <svg className="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                 </svg>
@@ -325,23 +344,29 @@ export default function FeaturedEvent({ featuredEvent = {}, loading }) {
                                         <span className="md:hidden">Share</span>
                                     </button>
                                     {shareOpen && (
-                                        <div className="absolute bottom-full mb-2 right-0 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
-                                            <p className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Share via</p>
+                                        <div className="absolute bottom-full mb-2 right-0 w-56 rounded-2xl shadow-xl overflow-hidden z-50" style={{ background: dropdownBg, border: `1px solid ${dropdownBorder}` }}>
+                                            <p className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: isDark ? '#6B8A7A' : '#94a3b8' }}>Share via</p>
                                             {shareOptions.map(opt => opt.copyOnly ? (
                                                 <button key={opt.label} onClick={() => handleCopyLink(opt.label)}
-                                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                                                    style={{ color: dropdownText }}
+                                                    onMouseEnter={e => e.currentTarget.style.background = dropdownHoverBg}
+                                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                                     <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" style={{ color: opt.color }}>
                                                         <path d={opt.icon} />
                                                     </svg>
                                                     <span className="flex-1 text-left">{opt.label}</span>
-                                                    <span className="text-[10px] text-slate-300 font-medium">
+                                                    <span className="text-[10px] font-medium" style={{ color: isDark ? '#6B8A7A' : '#cbd5e1' }}>
                                                         {copiedPlatform === opt.label ? '✓ Copied!' : 'Copy link'}
                                                     </span>
                                                 </button>
                                             ) : (
                                                 <a key={opt.label} href={opt.url} target="_blank" rel="noopener noreferrer"
                                                     onClick={() => setShareOpen(false)}
-                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                                                    style={{ color: dropdownText }}
+                                                    onMouseEnter={e => e.currentTarget.style.background = dropdownHoverBg}
+                                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                                     <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" style={{ color: opt.color }}>
                                                         <path d={opt.icon} />
                                                     </svg>
@@ -349,8 +374,11 @@ export default function FeaturedEvent({ featuredEvent = {}, loading }) {
                                                 </a>
                                             ))}
                                             <button onClick={handleCopyLink}
-                                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-50">
-                                                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                                                style={{ color: dropdownText, borderTop: `1px solid ${dropdownBorder}` }}
+                                                onMouseEnter={e => e.currentTarget.style.background = dropdownHoverBg}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                                <svg className="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                                         d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                                 </svg>

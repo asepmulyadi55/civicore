@@ -4,15 +4,49 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dwipapuri - Community Events</title>
-  <meta name="description"
-    content="Dwipapuri Community Events — bringing neighbors together through curated gatherings, cultural celebrations, and digital experiences.">
+
+  {{-- Primary SEO --}}
+  <title>Dwipapuri - Community Events &amp; Residential Living</title>
+  <meta name="title" content="Dwipapuri - Community Events &amp; Residential Living">
+  <meta name="description" content="Dwipapuri Residential Community in Bandung &mdash; discover upcoming events, connect with neighbors, and experience curated residential living.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://dwipapuri.amsite.click">
+
+  {{-- Open Graph --}}
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dwipapuri.amsite.click">
+  <meta property="og:title" content="Dwipapuri - Community Events &amp; Residential Living">
+  <meta property="og:description" content="Dwipapuri Residential Community in Bandung &mdash; discover upcoming events, connect with neighbors, and experience curated residential living.">
+  <meta property="og:locale" content="id_ID">
+
+  {{-- Twitter Card --}}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Dwipapuri - Community Events &amp; Residential Living">
+  <meta name="twitter:description" content="Dwipapuri Residential Community in Bandung &mdash; discover upcoming events, connect with neighbors, and experience curated residential living.">
+
   {{-- API key injected at render-time so it is never in static source files --}}
   <meta name="api-key" content="{{ config('civicore.api_key') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL,GRAD,opsz@300,0,0,24&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #FAF9F6; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+  </style>
   @vite(['resources/css/app.css', 'resources/js/app.jsx'])
+  @php $gaId = \App\Models\Setting::get('ga_measurement_id', ''); @endphp
+  @if($gaId)
+  {{-- Google Analytics --}}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gaId }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '{{ $gaId }}');
+  </script>
+  @endif
 </head>
 
 <body>

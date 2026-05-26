@@ -17,17 +17,12 @@
     <table class="w-full text-left">
       <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
         <tr>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {{ __('app.table_household') }}
-          </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">
-            {{ __('app.table_house_status') }}
-          </th>
+          <x-ui.sort-th column="fullname" :label="__('app.table_household')" />
+          <x-ui.sort-th column="house_status" :label="__('app.table_house_status')" class="hidden sm:table-cell" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
             {{ __('app.table_monthly_fee') }}
           </th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_status') }}
-          </th>
+          <x-ui.sort-th column="is_active" :label="__('app.table_status')" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
             {{ __('app.table_actions') }}
           </th>
@@ -171,8 +166,8 @@
 
   {{-- Pagination --}}
   @if($residents->hasPages())
-    <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-      <p class="text-sm text-slate-500">{{ __('app.showing') }} {{ $residents->firstItem() }}–{{ $residents->lastItem() }}
+    <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center sm:justify-between gap-3">
+      <p class="text-sm text-slate-500 text-center sm:text-left">{{ __('app.showing') }} {{ $residents->firstItem() }}–{{ $residents->lastItem() }}
         {{ __('app.of') }}
         {{ $residents->total() }} {{ __('app.residents_lowercase') }}
       </p>
@@ -188,6 +183,35 @@
             class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
             <span class="material-icons text-sm">chevron_left</span>
           </a>
+        @endif
+
+        @php
+          $lastPage    = $residents->lastPage();
+          $currentPage = $residents->currentPage();
+          $start       = max(1, $currentPage - 2);
+          $end         = min($lastPage, $currentPage + 2);
+        @endphp
+
+        @if ($start > 1)
+          <a href="{{ $residents->url(1) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">1</a>
+          @if ($start > 2)
+            <span class="px-1 text-slate-400 text-sm">&hellip;</span>
+          @endif
+        @endif
+
+        @for ($p = $start; $p <= $end; $p++)
+          @if ($p === $currentPage)
+            <span class="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-semibold">{{ $p }}</span>
+          @else
+            <a href="{{ $residents->url($p) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $p }}</a>
+          @endif
+        @endfor
+
+        @if ($end < $lastPage)
+          @if ($end < $lastPage - 1)
+            <span class="px-1 text-slate-400 text-sm">&hellip;</span>
+          @endif
+          <a href="{{ $residents->url($lastPage) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{{ $lastPage }}</a>
         @endif
 
         @if ($residents->hasMorePages())
