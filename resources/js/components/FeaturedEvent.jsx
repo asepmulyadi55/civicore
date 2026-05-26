@@ -135,8 +135,8 @@ export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = fa
     }
 
     return (
-        <section id="featured" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20" style={{ scrollMarginTop: '80px' }}>
-            <div className="relative rounded-3xl overflow-hidden group h-[480px] sm:h-[580px] md:h-[700px]">
+        <section id="featured" className="relative w-full overflow-hidden" style={{ height: '100svh', minHeight: '560px' }}>
+            <div className="relative h-full w-full group">
                 {/* Background — YouTube embed or fallback image */}
                 {youtubeId ? (
                     <>

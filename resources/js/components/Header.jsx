@@ -32,14 +32,18 @@ export default function Header({ isDark = false, toggleDark }) {
     { label: 'About', href: '#about' },
   ];
 
+  // When not scrolled, overlay the hero transparently with white text
+  const atTop = !scrolled;
+
   return (
     <nav
-      className={`fixed top-0 w-full z-50 transition-all`}
+      className={`fixed top-0 w-full z-50`}
       style={{
-        background: `${C.surface}E6`,
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: `1px solid ${C.surfaceVar}80`,
+        background: atTop ? 'transparent' : `${C.surface}E6`,
+        backdropFilter: atTop ? 'none' : 'blur(16px)',
+        WebkitBackdropFilter: atTop ? 'none' : 'blur(16px)',
+        borderBottom: atTop ? 'none' : `1px solid ${C.surfaceVar}80`,
+        transition: 'background 0.4s ease, border-color 0.4s ease',
       }}
     >
       <div className="flex justify-between items-center max-w-7xl mx-auto px-6 md:px-8 py-4 md:py-5">
@@ -47,7 +51,7 @@ export default function Header({ isDark = false, toggleDark }) {
         {/* Logo */}
         <div
           className="text-xl md:text-2xl font-semibold tracking-tight"
-          style={{ color: C.primary, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+          style={{ color: atTop ? '#ffffff' : C.primary, fontFamily: "'Plus Jakarta Sans', sans-serif", transition: 'color 0.4s ease' }}
         >
           Dwipapuri.
         </div>
@@ -58,7 +62,7 @@ export default function Header({ isDark = false, toggleDark }) {
             <button
               onClick={toggleDark}
               className="p-2 rounded-lg transition-colors"
-              style={{ color: C.onSurfaceVar }}
+              style={{ color: atTop ? 'rgba(255,255,255,0.85)' : C.onSurfaceVar, transition: 'color 0.4s ease' }}
               aria-label="Toggle dark mode"
             >
               <span className="material-symbols-outlined text-[20px]">
@@ -68,7 +72,7 @@ export default function Header({ isDark = false, toggleDark }) {
           )}
           <button
             className="p-2"
-            style={{ color: C.primary }}
+            style={{ color: atTop ? '#ffffff' : C.primary, transition: 'color 0.4s ease' }}
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
           >
@@ -87,9 +91,10 @@ export default function Header({ isDark = false, toggleDark }) {
               className="font-medium tracking-wide text-sm transition-colors"
               style={{
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
-                color: C.onSurfaceVar,
+                color: atTop ? 'rgba(255,255,255,0.85)' : C.onSurfaceVar,
                 borderBottom: '1px solid transparent',
                 paddingBottom: '4px',
+                transition: 'color 0.4s ease',
               }}
               onClick={(e) => {
                 if (link.href.startsWith('#')) {
@@ -98,8 +103,8 @@ export default function Header({ isDark = false, toggleDark }) {
                   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
               }}
-              onMouseEnter={e => { e.currentTarget.style.color = C.primary; e.currentTarget.style.borderBottomColor = C.primary; }}
-              onMouseLeave={e => { e.currentTarget.style.color = C.onSurfaceVar; e.currentTarget.style.borderBottomColor = 'transparent'; }}
+              onMouseEnter={e => { e.currentTarget.style.color = atTop ? '#ffffff' : C.primary; e.currentTarget.style.borderBottomColor = atTop ? '#ffffff' : C.primary; }}
+              onMouseLeave={e => { e.currentTarget.style.color = atTop ? 'rgba(255,255,255,0.85)' : C.onSurfaceVar; e.currentTarget.style.borderBottomColor = 'transparent'; }}
             >
               {link.label}
             </a>
@@ -108,10 +113,10 @@ export default function Header({ isDark = false, toggleDark }) {
             <button
               onClick={toggleDark}
               className="p-2 rounded-lg transition-colors"
-              style={{ color: C.onSurfaceVar }}
+              style={{ color: atTop ? 'rgba(255,255,255,0.85)' : C.onSurfaceVar, transition: 'color 0.4s ease' }}
               aria-label="Toggle dark mode"
-              onMouseEnter={e => e.currentTarget.style.color = C.primary}
-              onMouseLeave={e => e.currentTarget.style.color = C.onSurfaceVar}
+              onMouseEnter={e => e.currentTarget.style.color = atTop ? '#ffffff' : C.primary}
+              onMouseLeave={e => e.currentTarget.style.color = atTop ? 'rgba(255,255,255,0.85)' : C.onSurfaceVar}
             >
               <span className="material-symbols-outlined text-[20px]">
                 {isDark ? 'light_mode' : 'dark_mode'}
