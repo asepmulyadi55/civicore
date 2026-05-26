@@ -244,40 +244,18 @@ class OrganizationController extends Controller
         }
 
         // IDs already assigned in this period
-        $usedResidents = $usedFamilyMembers = [];
+        $usedFamilyMembers = [];
         if ($periodId) {
             $query = OrganizationPosition::where('organization_period_id', $periodId);
-            if ($excludeId) $query->where('id', '!=', $excludeId);
-            $usedResidents     = $query->clone()->whereNotNull('resident_id')->pluck('resident_id')->toArray();
-            $usedFamilyMembers = $query->clone()->whereNotNull('family_member_id')->pluck('family_member_id')->toArray();
+            if ($excludeId) {
+                $query->where('id', '!=', $excludeId);
+            }
+            $usedFamilyMembers = $query->whereNotNull('family_member_id')->pluck('family_member_id')->toArray();
         }
 
         $results = [];
 
-        // Residents
-        Resident::with(['block', 'unit', 'familyMembers' => fn($q2) => $q2->where('is_head', true)->select('id', 'resident_id', 'fullname')])
-            ->where('is_active', true)
-            ->whereNotIn('id', $usedResidents)
-            ->where(function ($query) use ($q) {
-                $query->where('fullname', 'like', "%{$q}%")
-                    ->orWhereHas('familyMembers', fn($f) => $f->where('fullname', 'like', "%{$q}%"))
-                    ->orWhereHas('block', fn($b) => $b->where('name', 'like', "%{$q}%"))
-                    ->orWhereHas('unit', fn($u) => $u->where('unit_number', 'like', "%{$q}%"));
-            })
-            ->limit(10)
-            ->get()
-            ->each(function ($r) use (&$results) {
-                $results[] = [
-                    'id'       => $r->id,
-                    'type'     => 'resident',
-                    'name'     => $r->displayName(),
-                    'location' => ($r->block?->name ?? '') . ($r->unit_number ? ' · ' . $r->unit_number : ''),
-                    'phone'    => $r->phone ?? '',
-                    'photo'    => $r->photoUrl(),
-                ];
-            });
-
-        // Family members
+        // Family members only
         FamilyMember::with(['resident.block', 'resident.unit'])
             ->whereNotIn('id', $usedFamilyMembers)
             ->whereHas('resident', fn($r) => $r->where('is_active', true))
