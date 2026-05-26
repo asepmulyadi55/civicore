@@ -1,13 +1,18 @@
 {{-- finance/_header.blade.php --}}
 <header class="flex-shrink-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 lg:px-8 py-4">
   <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-xl font-bold text-slate-800 dark:text-slate-100">
-        {{ __('app.fin_title') }}
-      </h1>
-      <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-        {{ now()->format('F Y') }}
-      </p>
+    <div class="flex items-center gap-4">
+      <button class="lg:hidden p-2 rounded-lg border border-slate-200 dark:border-slate-700" onclick="toggleSidebar()">
+        <span class="material-icons text-slate-500">menu</span>
+      </button>
+      <div>
+        <h1 class="text-xl font-bold text-slate-800 dark:text-slate-100">
+          {{ __('app.fin_title') }}
+        </h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+          {{ now()->format('F Y') }}
+        </p>
+      </div>
     </div>
 
     <div class="flex items-center gap-2">

@@ -33,7 +33,8 @@
       @endif
 
       {{-- Tab navigation --}}
-      <div class="flex gap-1 border-b border-slate-200 dark:border-slate-700">
+      <div class="overflow-x-auto">
+      <div class="flex gap-1 border-b border-slate-200 dark:border-slate-700 min-w-max">
         @if($canManage)
           @foreach([
             'dashboard'    => ['icon' => 'dashboard',      'label' => __('app.fin_tab_dashboard')],
@@ -58,6 +59,7 @@
             {{ __('app.fin_tab_reports') }}
           </a>
         @endif
+      </div>
       </div>
 
       {{-- Tab content --}}

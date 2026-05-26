@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function FeaturedEvent({ featuredEvent = {}, loading }) {
+export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = false }) {
+    const dropdownBg      = isDark ? '#1A2E28' : '#ffffff';
+    const dropdownBorder  = isDark ? '#1C2D27' : '#f1f5f9';
+    const dropdownText    = isDark ? '#F0EDE8' : '#374151';
+    const dropdownHoverBg = isDark ? '#1C2D27' : '#f8fafc';
+
     const title       = featuredEvent?.title       || 'Dwipapuri Summer Carnival 2026';
     const description = featuredEvent?.description || 'Join us for the most anticipated event of the year! Live music, local food stalls, and community activities for all ages.';
     const date        = featuredEvent?.date        || null;
@@ -296,16 +301,22 @@ export default function FeaturedEvent({ featuredEvent = {}, loading }) {
                                         <span className="sm:hidden">Calendar</span>
                                     </button>
                                     {calOpen && (
-                                        <div className="absolute bottom-full mb-2 left-0 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
+                                        <div className="absolute bottom-full mb-2 left-0 w-52 rounded-2xl shadow-xl overflow-hidden z-50" style={{ background: dropdownBg, border: `1px solid ${dropdownBorder}` }}>
                                             <a href={buildGoogleCalUrl()} target="_blank" rel="noopener noreferrer"
                                                 onClick={() => setCalOpen(false)}
-                                                className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                                className="flex items-center gap-3 px-4 py-3 text-sm transition-colors"
+                                                style={{ color: dropdownText }}
+                                                onMouseEnter={e => e.currentTarget.style.background = dropdownHoverBg}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                                 <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="" />
                                                 Google Calendar
                                             </a>
                                             <button onClick={downloadIcs}
-                                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-50">
-                                                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors"
+                                                style={{ color: dropdownText, borderTop: `1px solid ${dropdownBorder}` }}
+                                                onMouseEnter={e => e.currentTarget.style.background = dropdownHoverBg}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                                <svg className="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                 </svg>
@@ -333,23 +344,29 @@ export default function FeaturedEvent({ featuredEvent = {}, loading }) {
                                         <span className="md:hidden">Share</span>
                                     </button>
                                     {shareOpen && (
-                                        <div className="absolute bottom-full mb-2 right-0 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
-                                            <p className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Share via</p>
+                                        <div className="absolute bottom-full mb-2 right-0 w-56 rounded-2xl shadow-xl overflow-hidden z-50" style={{ background: dropdownBg, border: `1px solid ${dropdownBorder}` }}>
+                                            <p className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: isDark ? '#6B8A7A' : '#94a3b8' }}>Share via</p>
                                             {shareOptions.map(opt => opt.copyOnly ? (
                                                 <button key={opt.label} onClick={() => handleCopyLink(opt.label)}
-                                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                                                    style={{ color: dropdownText }}
+                                                    onMouseEnter={e => e.currentTarget.style.background = dropdownHoverBg}
+                                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                                     <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" style={{ color: opt.color }}>
                                                         <path d={opt.icon} />
                                                     </svg>
                                                     <span className="flex-1 text-left">{opt.label}</span>
-                                                    <span className="text-[10px] text-slate-300 font-medium">
+                                                    <span className="text-[10px] font-medium" style={{ color: isDark ? '#6B8A7A' : '#cbd5e1' }}>
                                                         {copiedPlatform === opt.label ? '✓ Copied!' : 'Copy link'}
                                                     </span>
                                                 </button>
                                             ) : (
                                                 <a key={opt.label} href={opt.url} target="_blank" rel="noopener noreferrer"
                                                     onClick={() => setShareOpen(false)}
-                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                                                    style={{ color: dropdownText }}
+                                                    onMouseEnter={e => e.currentTarget.style.background = dropdownHoverBg}
+                                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                                     <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" style={{ color: opt.color }}>
                                                         <path d={opt.icon} />
                                                     </svg>
@@ -357,8 +374,11 @@ export default function FeaturedEvent({ featuredEvent = {}, loading }) {
                                                 </a>
                                             ))}
                                             <button onClick={handleCopyLink}
-                                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-50">
-                                                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                                                style={{ color: dropdownText, borderTop: `1px solid ${dropdownBorder}` }}
+                                                onMouseEnter={e => e.currentTarget.style.background = dropdownHoverBg}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                                <svg className="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                                         d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                                 </svg>
