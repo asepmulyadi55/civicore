@@ -38,7 +38,7 @@ export default function HomePage() {
     return (
         <div className="font-sans" style={{ backgroundColor: isDark ? '#0D1A17' : '#f8f9fa', color: isDark ? '#F0EDE8' : '#2C2C2C', minHeight: '100vh', transition: 'background-color 0.3s, color 0.3s' }}>
             <Header isDark={isDark} toggleDark={toggleDark} />
-            <main>
+            <main className="pt-20">
                 <FeaturedEvent featuredEvent={data?.featured_event} loading={loading} isDark={isDark} />
                 <UpcomingEvents events={data?.upcoming_events ?? []} loading={loading} isDark={isDark} />
                 <MemorableMoments moments={data?.memorable_moments} pastEvents={data?.past_events ?? []} loading={loading} isDark={isDark} />
