@@ -7,7 +7,12 @@ const PLACEHOLDER_IMAGES = [
     'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80&auto=format',
 ];
 
-export default function MemorableMoments({ moments = {}, pastEvents = [], loading }) {
+export default function MemorableMoments({ moments = {}, pastEvents = [], loading, isDark = false }) {
+    const headingColor = isDark ? '#F0EDE8' : '#1C2D27';
+    const bodyColor    = isDark ? '#9E9C97' : '#595959';
+    const sectionBg    = isDark ? '#0A1510' : '#F4F3EF';
+    const skBg         = isDark ? '#1C2D27' : '#e2e8f0';
+
     const title      = moments?.title       || 'Memorable Moments';
     const subtitle   = moments?.subtitle    || 'A look back at the experiences that define our community.';
     const archiveUrl = moments?.archive_url || null;
@@ -22,23 +27,23 @@ export default function MemorableMoments({ moments = {}, pastEvents = [], loadin
 
     if (loading) {
         return (
-            <section className="py-32" style={{ background: '#f3f4f5' }}>
+            <section className="py-32" style={{ background: sectionBg }}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-16 gap-6">
                         <div className="space-y-3">
-                            <div className="h-9 w-64 bg-slate-200 animate-pulse rounded-xl" />
-                            <div className="h-4 w-80 bg-slate-200 animate-pulse rounded-lg" />
+                            <div className="h-9 w-64 rounded-xl animate-pulse" style={{ background: skBg }} />
+                            <div className="h-4 w-80 rounded-lg animate-pulse" style={{ background: skBg }} />
                         </div>
-                        <div className="h-12 w-48 bg-slate-200 animate-pulse rounded-xl" />
+                        <div className="h-12 w-48 rounded-xl animate-pulse" style={{ background: skBg }} />
                     </div>
                     <div
                         className="memorable-bento grid grid-cols-1 md:grid-cols-4 gap-4"
                         style={{ gridAutoRows: '250px' }}
                     >
-                        <div className="memorable-bento__large rounded-2xl bg-slate-200 animate-pulse" />
-                        <div className="memorable-bento__wide rounded-2xl bg-slate-200 animate-pulse" />
-                        <div className="rounded-2xl bg-slate-200 animate-pulse" />
-                        <div className="rounded-2xl bg-slate-200 animate-pulse" />
+                        <div className="memorable-bento__large rounded-2xl animate-pulse" style={{ background: skBg }} />
+                        <div className="memorable-bento__wide rounded-2xl animate-pulse" style={{ background: skBg }} />
+                        <div className="rounded-2xl animate-pulse" style={{ background: skBg }} />
+                        <div className="rounded-2xl animate-pulse" style={{ background: skBg }} />
                     </div>
                 </div>
             </section>
@@ -46,7 +51,7 @@ export default function MemorableMoments({ moments = {}, pastEvents = [], loadin
     }
 
     return (
-        <section id="gallery" className="py-16 md:py-32" style={{ background: '#F4F3EF', scrollMarginTop: '80px' }}>
+        <section id="gallery" className="py-16 md:py-32" style={{ background: sectionBg, scrollMarginTop: '80px' }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 {/* Header */}
@@ -59,11 +64,11 @@ export default function MemorableMoments({ moments = {}, pastEvents = [], loadin
                     </span>
                     <h2
                         className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight mb-3 md:mb-4"
-                        style={{ color: '#1C2D27', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                        style={{ color: headingColor, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                     >
                         {title}
                     </h2>
-                    <p className="font-light text-sm md:text-base leading-relaxed" style={{ color: '#595959' }}>{subtitle}</p>
+                    <p className="font-light text-sm md:text-base leading-relaxed" style={{ color: bodyColor }}>{subtitle}</p>
                 </div>
 
                 {archiveUrl && (

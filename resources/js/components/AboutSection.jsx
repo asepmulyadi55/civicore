@@ -19,7 +19,11 @@ const STAT_CARD_STYLES = [
 
 const STAT_ICONS = ['group', 'shield', 'park', 'event_note'];
 
-export default function AboutSection({ about = {}, loading }) {
+export default function AboutSection({ about = {}, loading, isDark = false }) {
+    const headingColor = isDark ? '#F0EDE8' : '#1C2D27';
+    const bodyColor    = isDark ? '#9E9C97' : '#454652';
+    const skBg         = isDark ? '#1C2D27' : '#f1f5f9';
+
     const rawContent = about?.content || DEFAULT_CONTENT;
     const stats     = (about?.stats?.length > 0) ? about.stats : DEFAULT_STATS;
     const badge     = about?.badge      || 'Our Identity';
@@ -54,19 +58,19 @@ export default function AboutSection({ about = {}, loading }) {
                         </span>
                         <h2
                             className="text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight leading-tight mb-6 lg:mb-8"
-                            style={{ color: '#1C2D27', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                            style={{ color: headingColor, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                         >
                             {heading}
                         </h2>
 
                         {loading ? (
                             <div className="space-y-3">
-                                <div className="h-4 bg-slate-100 rounded animate-pulse" />
-                                <div className="h-4 bg-slate-100 rounded animate-pulse w-5/6" />
-                                <div className="h-4 bg-slate-100 rounded animate-pulse w-4/5" />
+                                <div className="h-4 rounded animate-pulse" style={{ background: skBg }} />
+                                <div className="h-4 rounded animate-pulse w-5/6" style={{ background: skBg }} />
+                                <div className="h-4 rounded animate-pulse w-4/5" style={{ background: skBg }} />
                             </div>
                         ) : (
-                            <div className="space-y-5 leading-relaxed font-light" style={{ color: '#454652', fontSize: '1.0625rem' }}>
+                            <div className="space-y-5 leading-relaxed font-light" style={{ color: bodyColor, fontSize: '1.0625rem' }}>
                                 {paragraphs.map((para, i) => <p key={i}>{para}</p>)}
                             </div>
                         )}

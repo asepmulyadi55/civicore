@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
 
-const C = {
-  primary: '#1C2D27',
-  secondary: '#D4AF37',
-  surface: '#FAF9F6',
-  surfaceVar: '#E8E6E1',
-  onSurface: '#2C2C2C',
-  onSurfaceVar: '#595959',
-};
+export default function Header({ isDark = false, toggleDark }) {
+  const C = isDark ? {
+    primary: '#D4AF37',
+    secondary: '#D4AF37',
+    surface: '#0D1A17',
+    surfaceVar: '#1C2D27',
+    onSurface: '#F0EDE8',
+    onSurfaceVar: '#9E9C97',
+  } : {
+    primary: '#1C2D27',
+    secondary: '#D4AF37',
+    surface: '#FAF9F6',
+    surfaceVar: '#E8E6E1',
+    onSurface: '#2C2C2C',
+    onSurfaceVar: '#595959',
+  };
 
-export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -45,19 +52,33 @@ export default function Header() {
           Dwipapuri.
         </div>
 
-        {/* Mobile hamburger button */}
-        <button
-          className="md:hidden p-2"
-          style={{ color: C.primary }}
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
-        >
-          <span className="material-symbols-outlined">
-            {menuOpen ? 'close' : 'menu'}
-          </span>
-        </button>
+        {/* Mobile: dark toggle + hamburger */}
+        <div className="md:hidden flex items-center gap-2">
+          {toggleDark && (
+            <button
+              onClick={toggleDark}
+              className="p-2 rounded-lg transition-colors"
+              style={{ color: C.onSurfaceVar }}
+              aria-label="Toggle dark mode"
+            >
+              <span className="material-symbols-outlined text-[20px]">
+                {isDark ? 'light_mode' : 'dark_mode'}
+              </span>
+            </button>
+          )}
+          <button
+            className="p-2"
+            style={{ color: C.primary }}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+          >
+            <span className="material-symbols-outlined">
+              {menuOpen ? 'close' : 'menu'}
+            </span>
+          </button>
+        </div>
 
-        {/* Desktop nav links */}
+        {/* Desktop nav links + dark toggle */}
         <div className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (
             <a
@@ -83,6 +104,20 @@ export default function Header() {
               {link.label}
             </a>
           ))}
+          {toggleDark && (
+            <button
+              onClick={toggleDark}
+              className="p-2 rounded-lg transition-colors"
+              style={{ color: C.onSurfaceVar }}
+              aria-label="Toggle dark mode"
+              onMouseEnter={e => e.currentTarget.style.color = C.primary}
+              onMouseLeave={e => e.currentTarget.style.color = C.onSurfaceVar}
+            >
+              <span className="material-symbols-outlined text-[20px]">
+                {isDark ? 'light_mode' : 'dark_mode'}
+              </span>
+            </button>
+          )}
         </div>
 
       </div>

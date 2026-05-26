@@ -6,7 +6,7 @@ const C = {
   surface:  '#FAF9F6',
 };
 
-export default function Footer({ footer = {} }) {
+export default function Footer({ footer = {}, isDark = false }) {
   const brandName   = footer.brand_name    || 'Dwipapuri.';
   const tagline     = footer.tagline       || 'Defining the gold standard of modern residential living through curation, privacy, and community.';
   const quickLinks  = (footer.links?.length ? footer.links : [
