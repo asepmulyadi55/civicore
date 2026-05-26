@@ -88,8 +88,9 @@ class ReportExport implements
       'paymentRecords' => fn($q) => $q->whereYear('payment_month', $this->year),
     ])->where('residents.is_active', true)
       ->leftJoin('units', 'units.id', '=', 'residents.unit_id')
-      ->orderBy('residents.block_id')
-      ->orderBy('units.unit_number')
+      ->leftJoin('blocks', 'blocks.id', '=', 'residents.block_id')
+      ->orderBy('blocks.name')
+      ->orderByRaw('CAST(units.unit_number AS UNSIGNED)')
       ->select('residents.*');
 
     if ($this->blockId) {
