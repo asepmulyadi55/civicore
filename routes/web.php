@@ -33,6 +33,13 @@ use App\Http\Controllers\Api\HomepageController as ApiHomepageController;
 Route::get('/', fn() => view('spa'))->name('home');
 Route::get('/events', fn() => view('spa'))->name('events');
 
+// ── Sitemap ───────────────────────────────────────────────────────────────────
+Route::get('/sitemap.xml', function () {
+    $content = view('sitemap')->render();
+    return response($content, 200)
+        ->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
 // ── Internal API — Homepage content for React SPA ───────────────────────────
 // Protected by X-Api-Key header (key injected into SPA via Blade meta tag).
 Route::get('/api/homepage', [ApiHomepageController::class, 'index'])
