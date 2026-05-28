@@ -10,7 +10,7 @@
   <meta name="title" content="Dwipapuri - Community Events &amp; Residential Living">
   <meta name="description" content="Dwipapuri Residential Community in Bandung &mdash; discover upcoming events, connect with neighbors, and experience curated residential living.">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://dwipapuri.amsite.click">
+  <link rel="canonical" href="https://dwipapuri.amsite.click{{ request()->getPathInfo() === '/' ? '' : request()->getPathInfo() }}">
 
   {{-- Open Graph --}}
   <meta property="og:type" content="website">
@@ -51,6 +51,11 @@
 
 <body>
   <div id="root"></div>
+  {{-- Static fallback text for crawlers — hidden visually, readable by Googlebot --}}
+  <noscript>
+    <h1>Dwipapuri Residential Community</h1>
+    <p>Discover upcoming community events, connect with neighbors, and experience curated residential living in Bandung. Visit our events calendar and resident portal.</p>
+  </noscript>
 </body>
 
 </html>
