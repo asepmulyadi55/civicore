@@ -1,9 +1,8 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-const CATEGORIES = ['wellness', 'meetings', 'education', 'cultural', 'sports', 'other'];
 const PER_PAGE = 9;
 
 const PLACEHOLDER_IMAGES = [
@@ -42,14 +41,12 @@ function SkeletonCard({ isDark }) {
     );
 }
 
-export default function EventsPage() {
-    const [data, setData]         = useState(null);
-    const [loading, setLoading]   = useState(true);
-    const [search, setSearch]     = useState('');
-    const [category, setCategory] = useState('');
-    const [status, setStatus]     = useState('');
-    const [page, setPage]         = useState(1);
-    const [isDark, setIsDark]     = useState(() => {
+export default function BuletinPage() {
+    const [data, setData]       = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch]   = useState('');
+    const [page, setPage]       = useState(1);
+    const [isDark, setIsDark]   = useState(() => {
         try { return localStorage.getItem('homepageDark') === 'true'; } catch { return false; }
     });
 
@@ -84,7 +81,7 @@ export default function EventsPage() {
     useEffect(() => {
         const basePath = import.meta.env.VITE_APP_BASE ?? '';
         const apiKey   = document.querySelector('meta[name="api-key"]')?.content ?? '';
-        fetch(`${basePath}/api/events`, {
+        fetch(`${basePath}/api/buletin`, {
             headers: { 'X-Api-Key': apiKey },
         })
             .then(res => res.json())
@@ -92,33 +89,21 @@ export default function EventsPage() {
             .catch(() => setLoading(false));
     }, []);
 
-    // Filter
-    const allEvents = data?.events ?? [];
-    const today     = new Date().toISOString().slice(0, 10);
+    const allBuletin = data?.buletin ?? [];
 
-    const filtered = allEvents.filter(e => {
-        const matchSearch   = !search ||
-            (e.title       ?? '').toLowerCase().includes(search.toLowerCase()) ||
-            (e.description ?? '').toLowerCase().includes(search.toLowerCase());
-        const matchCategory = !category || (e.category ?? '').toLowerCase() === category;
-
-        let matchStatus = true;
-        if (status === 'upcoming') matchStatus = (e.status === 'ongoing') || !e.date || e.date >= today;
-        if (status === 'past')     matchStatus = (e.status !== 'ongoing') && !!e.date && e.date < today;
-        if (status === 'ongoing')  matchStatus = e.status === 'ongoing';
-
-        return matchSearch && matchCategory && matchStatus;
-    });
+    const filtered = allBuletin.filter(b =>
+        !search ||
+        (b.title       ?? '').toLowerCase().includes(search.toLowerCase()) ||
+        (b.description ?? '').toLowerCase().includes(search.toLowerCase())
+    );
 
     const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
     const paginated  = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
     const pages      = getPaginationPages(page, totalPages);
 
-    // Reset page on filter change
-    useEffect(() => { setPage(1); }, [search, category, status]);
+    useEffect(() => { setPage(1); }, [search]);
 
-    const clearFilters = () => { setSearch(''); setCategory(''); setStatus(''); };
-    const hasFilters   = !!(search || category || status);
+    const hasFilters = !!search;
 
     return (
         <div className="font-sans" style={{ backgroundColor: C.surface, color: C.primary, minHeight: '100vh', transition: 'background-color 0.3s, color 0.3s' }}>
@@ -140,13 +125,12 @@ export default function EventsPage() {
                             className="text-3xl md:text-5xl font-medium tracking-tight"
                             style={{ color: C.primary, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                         >
-                            All Events
+                            All Bulletins
                         </h1>
                     </div>
 
-                    {/* Filters */}
+                    {/* Search filter */}
                     <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                        {/* Search */}
                         <div className="relative flex-1 sm:max-w-sm">
                             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base pointer-events-none"
                                 style={{ color: C.muted }}>search</span>
@@ -154,40 +138,13 @@ export default function EventsPage() {
                                 type="text"
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
-                                placeholder="Search events…"
+                                placeholder="Search bulletins…"
                                 className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-all"
                                 style={{ borderColor: C.border, background: C.cardBg, color: C.primary, fontFamily: "'Inter', sans-serif" }}
                             />
                         </div>
-
-                        {/* Category */}
-                        <select
-                            value={category}
-                            onChange={e => setCategory(e.target.value)}
-                            className="px-4 py-2.5 rounded-xl border text-sm focus:outline-none w-full sm:w-auto"
-                            style={{ borderColor: C.border, background: C.cardBg, color: C.muted, fontFamily: "'Inter', sans-serif" }}
-                        >
-                            <option value="">All Categories</option>
-                            {CATEGORIES.map(c => (
-                                <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
-                            ))}
-                        </select>
-
-                        {/* Status */}
-                        <select
-                            value={status}
-                            onChange={e => setStatus(e.target.value)}
-                            className="px-4 py-2.5 rounded-xl border text-sm focus:outline-none w-full sm:w-auto"
-                            style={{ borderColor: C.border, background: C.cardBg, color: C.muted, fontFamily: "'Inter', sans-serif" }}
-                        >
-                            <option value="">All Status</option>
-                            <option value="upcoming">Upcoming</option>
-                            <option value="ongoing">Ongoing</option>
-                            <option value="past">Past</option>
-                        </select>
-
                         {hasFilters && (
-                            <button onClick={clearFilters}
+                            <button onClick={() => setSearch('')}
                                 className="px-4 py-2.5 rounded-xl border text-sm transition-all w-full sm:w-auto"
                                 style={{ borderColor: C.border, background: C.cardBg, color: C.muted }}>
                                 Clear
@@ -198,7 +155,7 @@ export default function EventsPage() {
                     {/* Result count */}
                     {!loading && (
                         <p className="text-sm mb-6" style={{ color: C.muted }}>
-                            {filtered.length} event{filtered.length > 1 || filtered.length === 0 ? 's' : ''}
+                            {filtered.length} bulletin{filtered.length !== 1 ? 's' : ''}
                             {hasFilters ? ' found' : ' total'}
                         </p>
                     )}
@@ -211,91 +168,71 @@ export default function EventsPage() {
                     ) : null}
                     {!loading && paginated.length === 0 ? (
                         <div className="text-center py-20 rounded-2xl" style={{ background: C.cardBg, border: `1px solid ${C.border}` }}>
-                            <span className="material-symbols-outlined text-5xl mb-3 block" style={{ color: C.border }}>event_busy</span>
-                            <p className="font-semibold text-sm" style={{ color: C.muted }}>No events found</p>
+                            <span className="material-symbols-outlined text-5xl mb-3 block" style={{ color: C.border }}>article</span>
+                            <p className="font-semibold text-sm" style={{ color: C.muted }}>No bulletins found</p>
                             {hasFilters && (
-                                <button onClick={clearFilters}
+                                <button onClick={() => setSearch('')}
                                     className="mt-3 text-sm underline transition-opacity hover:opacity-70"
                                     style={{ color: C.secondary }}>
-                                    Clear filters
+                                    Clear search
                                 </button>
                             )}
                         </div>
                     ) : null}
                     {!loading && paginated.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {paginated.map((event, i) => {
-                                const cat     = (event.category || 'other').toLowerCase();
-                                const image   = event.image_url || PLACEHOLDER_IMAGES[i % PLACEHOLDER_IMAGES.length];
-                                const isPast  = (event.status !== 'ongoing') && !!event.date && event.date < today;
+                            {paginated.map((item, i) => {
+                                const image = item.image_url || PLACEHOLDER_IMAGES[i % PLACEHOLDER_IMAGES.length];
 
                                 return (
                                     <article
-                                        key={event.id || i}
-                                        className="rounded-2xl overflow-hidden flex flex-col transition-all duration-300 hover:shadow-lg"
+                                        key={item.id || i}
+                                        className="rounded-2xl overflow-hidden flex flex-col transition-all duration-300 hover:shadow-lg group"
                                         style={{ background: C.cardBg, border: `1px solid ${C.border}` }}
                                     >
                                         {/* Image */}
                                         <div className="relative h-48 overflow-hidden flex-shrink-0">
                                             <img
                                                 src={image}
-                                                alt={event.title}
+                                                alt={item.title}
                                                 loading="lazy"
-                                                className={`w-full h-full object-cover transition-transform duration-700 hover:scale-105${isPast ? ' grayscale opacity-75' : ''}`}
+                                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                             />
-                                            <div className="absolute top-3 left-3 flex gap-2">
-                                                <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest"
-                                                    style={{ background: 'rgba(255,255,255,0.88)', color: '#1C2D27', backdropFilter: 'blur(12px)' }}>
-                                                    {cat}
-                                                </span>
-                                                {isPast && (
-                                                    <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest"
-                                                        style={{ background: 'rgba(28,45,39,0.82)', color: '#fff', backdropFilter: 'blur(12px)' }}>
-                                                        Past
-                                                    </span>
-                                                )}
-                                                {event.status === 'ongoing' && (
-                                                    <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest"
-                                                        style={{ background: 'rgba(212,175,55,0.9)', color: '#fff', backdropFilter: 'blur(12px)' }}>
-                                                        Ongoing
-                                                    </span>
-                                                )}
-                                            </div>
                                         </div>
 
                                         {/* Body */}
                                         <div className="p-6 flex flex-col flex-grow">
                                             <h3 className="text-base font-semibold mb-2 leading-snug"
                                                 style={{ color: C.primary, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                                                {event.title}
+                                                {item.title}
                                             </h3>
-                                            {event.description && (
+                                            {item.description && (
                                                 <p className="text-sm leading-relaxed mb-4 flex-grow font-light line-clamp-3"
                                                     style={{ color: C.muted }}>
-                                                    {event.description}
+                                                    {item.description}
                                                 </p>
                                             )}
 
                                             {/* Footer row */}
                                             <div className="flex items-center justify-between mt-auto pt-4"
                                                 style={{ borderTop: `1px solid ${C.border}` }}>
-                                                {event.url ? (
+                                                {item.url ? (
                                                     <a
-                                                        href={event.url}
+                                                        href={item.url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="font-semibold text-xs flex items-center gap-1 tracking-wide transition-opacity hover:opacity-70"
                                                         style={{ color: C.secondary }}
                                                     >
-                                                        {isPast ? 'Learn More' : 'RSVP'}
+                                                        READ MORE
                                                         <span className="material-symbols-outlined text-sm">arrow_right_alt</span>
                                                     </a>
                                                 ) : (
                                                     <span className="text-xs font-light" style={{ color: C.muted }}>Details TBA</span>
                                                 )}
-                                                {event.date && (
+                                                {item.date && (
                                                     <span className="text-xs font-light" style={{ color: C.muted }}>
-                                                        {new Date(event.date + 'T00:00:00').toLocaleDateString('en-US', {
+                                                        {new Date(item.date + 'T00:00:00').toLocaleDateString('en-US', {
                                                             month: 'short', day: 'numeric', year: 'numeric',
                                                         })}
                                                     </span>

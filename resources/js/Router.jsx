@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import AdminRedirect from './pages/AdminRedirect';
 import EventsPage from './pages/EventsPage';
+import BuletinPage from './pages/BuletinPage';
 import ScrollToTop from './components/ScrollToTop';
 
 function GaTracker() {
@@ -26,6 +27,7 @@ export default function Router() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/events" element={<EventsPage />} />
+        <Route path="/buletin" element={<BuletinPage />} />
         <Route path="/admin" element={<AdminRedirect />} />
       </Routes>
     </BrowserRouter>

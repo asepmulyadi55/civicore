@@ -32,6 +32,7 @@ use App\Http\Controllers\Api\HomepageController as ApiHomepageController;
 // ── Public homepage (React SPA) ───────────────────────────────────────────────
 Route::get('/', fn() => view('spa'))->name('home');
 Route::get('/events', fn() => view('spa'))->name('events');
+Route::get('/buletin', fn() => view('spa'))->name('buletin');
 
 // ── Sitemap ───────────────────────────────────────────────────────────────────
 Route::get('/sitemap.xml', function () {
@@ -48,6 +49,9 @@ Route::get('/api/homepage', [ApiHomepageController::class, 'index'])
 Route::get('/api/events', [ApiHomepageController::class, 'events'])
     ->middleware('api.key')
     ->name('api.events');
+Route::get('/api/buletin', [ApiHomepageController::class, 'buletin'])
+    ->middleware('api.key')
+    ->name('api.buletin');
 
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -97,8 +101,16 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:homepage.edit')->name('homepage.events.update');
     Route::delete('/homepage/events/{id}', [HomepageController::class, 'destroyEvent'])
         ->middleware('permission:homepage.delete')->name('homepage.events.destroy');
+    Route::post('/homepage/buletin', [HomepageController::class, 'storeBuletin'])
+        ->middleware('permission:homepage.create')->name('homepage.buletin.store');
+    Route::put('/homepage/buletin/{id}', [HomepageController::class, 'updateBuletin'])
+        ->middleware('permission:homepage.edit')->name('homepage.buletin.update');
+    Route::delete('/homepage/buletin/{id}', [HomepageController::class, 'destroyBuletin'])
+        ->middleware('permission:homepage.delete')->name('homepage.buletin.destroy');
     Route::post('/homepage/about', [HomepageController::class, 'updateAbout'])
         ->middleware('permission:homepage.edit')->name('homepage.about');
+    Route::post('/homepage/section-labels', [HomepageController::class, 'updateSectionLabels'])
+        ->middleware('permission:homepage.edit')->name('homepage.section-labels');
     Route::post('/homepage/footer', [HomepageController::class, 'updateFooter'])
         ->middleware('permission:homepage.edit')->name('homepage.footer');
     Route::post('/homepage/memorable-moments', [HomepageController::class, 'updateMemorableMoments'])

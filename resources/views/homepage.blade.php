@@ -57,6 +57,14 @@
               <span class="px-1.5 py-0.5 text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full">{{ $totalEvents }}</span>
             </button>
 
+            <button type="button" id="hp-tab-btn-buletin" onclick="switchHpTab('buletin')"
+              class="hp-tab-btn flex items-center gap-2 px-5 py-4 text-sm font-semibold whitespace-nowrap border-b-2 transition-all
+                     border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/40">
+              <span class="material-icons text-[18px]">article</span>
+              {{ __('app.hp_section_buletin') }}
+              <span class="px-1.5 py-0.5 text-[10px] font-bold bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400 rounded-full">{{ $totalBuletin }}</span>
+            </button>
+
             <button type="button" id="hp-tab-btn-moments" onclick="switchHpTab('moments')"
               class="hp-tab-btn flex items-center gap-2 px-5 py-4 text-sm font-semibold whitespace-nowrap border-b-2 transition-all
                      border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/40">
@@ -89,6 +97,9 @@
       <div id="hp-tab-events" class="hp-tab-panel hidden">
         @include('homepage._events')
       </div>
+      <div id="hp-tab-buletin" class="hp-tab-panel hidden">
+        @include('homepage._buletin')
+      </div>
       <div id="hp-tab-moments" class="hp-tab-panel hidden">
         @include('homepage._memorable_moments')
       </div>
@@ -118,7 +129,7 @@
       if (updateHistory !== false) history.replaceState(null, null, location.pathname + location.search + '#' + tab);
     }
     (function () {
-      var validTabs = ['featured', 'events', 'moments', 'about', 'footer'];
+      var validTabs = ['featured', 'events', 'buletin', 'moments', 'about', 'footer'];
       var stored    = sessionStorage.getItem('hp_active_tab');
       var hash      = location.hash.slice(1);
       sessionStorage.removeItem('hp_active_tab');

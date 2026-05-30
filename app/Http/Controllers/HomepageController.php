@@ -18,9 +18,14 @@ class HomepageController extends Controller
         $hero = json_decode(Setting::get('homepage_hero', '{}'), true) ?? [];
         $featuredEvent = json_decode(Setting::get('homepage_featured_event', '{}'), true) ?? [];
         $allEvents = json_decode(Setting::get('homepage_events', '[]'), true) ?? [];
+        $allBuletin = json_decode(Setting::get('homepage_buletin', '[]'), true) ?? [];
         $about = json_decode(Setting::get('homepage_about', '{}'), true) ?? [];
         $memorableMoments = json_decode(Setting::get('homepage_memorable_moments', '{}'), true) ?? [];
         $footer = json_decode(Setting::get('homepage_footer', '{}'), true) ?? [];
+        $sectionLabels = array_merge(
+            ['featured_eyebrow' => 'Featured Event', 'events_eyebrow' => 'Discover More', 'events_heading' => 'Upcoming Community Events', 'buletin_eyebrow' => 'Informasi', 'buletin_heading' => 'Buletin'],
+            json_decode(Setting::get('homepage_section_labels', '{}'), true) ?? []
+        );
 
         // ── Event filters ────────────────────────────────────────────────────
         $search = trim($request->input('event_search', ''));
@@ -63,10 +68,62 @@ class HomepageController extends Controller
 
         $totalEvents = count($allEvents);
 
-        return view('homepage', compact('hero', 'featuredEvent', 'events', 'pagination', 'about', 'totalEvents', 'memorableMoments', 'footer'));
+        // ── Buletin filters ──────────────────────────────────────────────────
+        $buletinSearch = trim($request->input('buletin_search', ''));
+        $filteredBuletin = $allBuletin;
+
+        if ($buletinSearch !== '') {
+            $s = mb_strtolower($buletinSearch);
+            $filteredBuletin = array_values(array_filter(
+                $filteredBuletin,
+                fn($b) =>
+                str_contains(mb_strtolower($b['title'] ?? ''), $s) ||
+                str_contains(mb_strtolower($b['description'] ?? ''), $s)
+            ));
+        }
+
+        usort($filteredBuletin, fn($a, $b) => strcmp($b['date'] ?? '', $a['date'] ?? ''));
+
+        $buletinPerPage = 10;
+        $buletinPage = max(1, (int) $request->input('buletin_page', 1));
+        $buletinTotal = count($filteredBuletin);
+        $buletin = array_slice($filteredBuletin, ($buletinPage - 1) * $buletinPerPage, $buletinPerPage);
+        $buletinPagination = [
+            'total'        => $buletinTotal,
+            'per_page'     => $buletinPerPage,
+            'current_page' => $buletinPage,
+            'last_page'    => max(1, (int) ceil($buletinTotal / $buletinPerPage)),
+            'search'       => $buletinSearch,
+        ];
+        $totalBuletin = count($allBuletin);
+
+        return view('homepage', compact(
+            'hero', 'featuredEvent', 'events', 'pagination', 'about',
+            'totalEvents', 'memorableMoments', 'footer',
+            'buletin', 'buletinPagination', 'totalBuletin', 'sectionLabels'
+        ));
     }
 
     // ── Hero Section ──────────────────────────────────────────────────────────
+
+    public function updateSectionLabels(Request $request)
+    {
+        $validated = $request->validate([
+            'featured_eyebrow' => 'nullable|string|max:60',
+            'events_eyebrow'  => 'nullable|string|max:60',
+            'events_heading'  => 'nullable|string|max:120',
+            'buletin_eyebrow' => 'nullable|string|max:60',
+            'buletin_heading' => 'nullable|string|max:120',
+        ]);
+
+        $existing = json_decode(Setting::get('homepage_section_labels', '{}'), true) ?? [];
+        foreach ($validated as $k => $v) {
+            if (!is_null($v)) $existing[$k] = $v;
+        }
+        $this->saveSetting('homepage_section_labels', json_encode($existing), 'Section Labels');
+
+        return redirect()->route('homepage.index')->with('success', 'Section labels updated.');
+    }
 
     public function updateHero(Request $request)
     {
@@ -120,13 +177,50 @@ class HomepageController extends Controller
     public function updateFeaturedEvent(Request $request)
     {
         $data = $request->validate([
-            'title' => 'required|string|max:200',
-            'description' => 'nullable|string|max:1000',
+            'type'       => 'required|string|in:full,simple',
+            'title'      => 'required|string|max:200',
             'youtube_id' => 'nullable|string|max:20',
-            'date' => 'nullable|date',
-            'status' => 'nullable|string|in:upcoming,past,ongoing',
+            'date'       => 'nullable|date',
+            'image_file' => 'nullable|image|max:5120',
         ]);
 
+        $existing = json_decode(Setting::get('homepage_featured_event', '{}'), true) ?? [];
+
+        if ($request->hasFile('image_file')) {
+            // Delete old stored file if it exists
+            if (!empty($existing['image_path'])) {
+                Storage::disk('public')->delete($existing['image_path']);
+                MediaFile::where('path', $existing['image_path'])->delete();
+            }
+
+            $file = $request->file('image_file');
+            $path = $file->store('homepage/featured', 'public');
+            $publicUrl = Storage::disk('public')->url($path);
+
+            MediaFile::create([
+                'disk'          => 'public',
+                'path'          => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type'     => $file->getMimeType(),
+                'size'          => $file->getSize(),
+                'uploaded_by'   => auth()->id(),
+            ]);
+
+            $data['image_url']  = $publicUrl;
+            $data['image_path'] = $path;
+        } else {
+            // Keep existing image values
+            $data['image_url']  = $existing['image_url']  ?? null;
+            $data['image_path'] = $existing['image_path'] ?? null;
+        }
+
+        // Clear YouTube/date fields when type is simple
+        if ($data['type'] === 'simple') {
+            $data['youtube_id'] = null;
+            $data['date']       = null;
+        }
+
+        unset($data['image_file']);
         $this->saveSetting('homepage_featured_event', json_encode($data), 'Featured Event');
 
         return redirect()->route('homepage.index')->with('success', 'Featured event saved.');
@@ -239,6 +333,111 @@ class HomepageController extends Controller
         $this->saveSetting('homepage_events', json_encode($events), 'Events List');
 
         return redirect()->route('homepage.index')->with('success', 'Event removed.');
+    }
+
+    // ── Buletin ───────────────────────────────────────────────────────────────
+
+    public function storeBuletin(Request $request)
+    {
+        $validated = $request->validate([
+            'title'       => 'required|string|max:200',
+            'description' => 'nullable|string|max:500',
+            'date'        => 'nullable|date',
+            'url'         => 'nullable|url|max:500',
+            'image_file'  => 'nullable|image|max:5120',
+        ]);
+
+        $imageUrl  = null;
+        $imagePath = null;
+        if ($request->hasFile('image_file')) {
+            $file      = $request->file('image_file');
+            $path      = $file->store('homepage/buletin', 'public');
+            $imageUrl  = Storage::disk('public')->url($path);
+            $imagePath = $path;
+            MediaFile::create([
+                'disk'          => 'public',
+                'path'          => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type'     => $file->getMimeType(),
+                'size'          => $file->getSize(),
+                'uploaded_by'   => auth()->id(),
+            ]);
+        }
+
+        $buletin = json_decode(Setting::get('homepage_buletin', '[]'), true) ?? [];
+        $buletin[] = array_merge(
+            array_diff_key($validated, ['image_file' => null]),
+            ['id' => (string) Str::uuid(), 'image_url' => $imageUrl, 'image_path' => $imagePath]
+        );
+
+        $this->saveSetting('homepage_buletin', json_encode(array_values($buletin)), 'Buletin');
+
+        return redirect()->route('homepage.index')->with('success', 'Buletin added.');
+    }
+
+    public function updateBuletin(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'title'       => 'required|string|max:200',
+            'description' => 'nullable|string|max:500',
+            'date'        => 'nullable|date',
+            'url'         => 'nullable|url|max:500',
+            'image_file'  => 'nullable|image|max:5120',
+        ]);
+
+        $buletin = json_decode(Setting::get('homepage_buletin', '[]'), true) ?? [];
+        $found   = false;
+        foreach ($buletin as &$item) {
+            if (($item['id'] ?? '') === $id) {
+                if ($request->hasFile('image_file')) {
+                    if (!empty($item['image_path'])) {
+                        Storage::disk('public')->delete($item['image_path']);
+                        MediaFile::where('path', $item['image_path'])->delete();
+                    }
+                    $file            = $request->file('image_file');
+                    $path            = $file->store('homepage/buletin', 'public');
+                    $url             = Storage::disk('public')->url($path);
+                    $item['image_url']  = $url;
+                    $item['image_path'] = $path;
+                    MediaFile::create([
+                        'disk'          => 'public',
+                        'path'          => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                        'mime_type'     => $file->getMimeType(),
+                        'size'          => $file->getSize(),
+                        'uploaded_by'   => auth()->id(),
+                    ]);
+                }
+                $item  = array_merge($item, array_diff_key($validated, ['image_file' => null]));
+                $found = true;
+                break;
+            }
+        }
+        unset($item);
+
+        if (!$found) {
+            return redirect()->route('homepage.index')->with('error', 'Buletin not found.');
+        }
+
+        $this->saveSetting('homepage_buletin', json_encode(array_values($buletin)), 'Buletin');
+
+        return redirect()->route('homepage.index')->with('success', 'Buletin updated.');
+    }
+
+    public function destroyBuletin(string $id)
+    {
+        $buletin = json_decode(Setting::get('homepage_buletin', '[]'), true) ?? [];
+        foreach ($buletin as $item) {
+            if (($item['id'] ?? '') === $id && !empty($item['image_path'])) {
+                Storage::disk('public')->delete($item['image_path']);
+                MediaFile::where('path', $item['image_path'])->delete();
+            }
+        }
+        $buletin = array_values(array_filter($buletin, fn($b) => ($b['id'] ?? '') !== $id));
+
+        $this->saveSetting('homepage_buletin', json_encode($buletin), 'Buletin');
+
+        return redirect()->route('homepage.index')->with('success', 'Buletin removed.');
     }
 
     // ── About Section ─────────────────────────────────────────────────────────

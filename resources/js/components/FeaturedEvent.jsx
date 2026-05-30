@@ -1,27 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = false }) {
+export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = false, eyebrow = 'Featured Event' }) {
     const dropdownBg      = isDark ? '#1A2E28' : '#ffffff';
     const dropdownBorder  = isDark ? '#1C2D27' : '#f1f5f9';
     const dropdownText    = isDark ? '#F0EDE8' : '#374151';
     const dropdownHoverBg = isDark ? '#1C2D27' : '#f8fafc';
 
     const title       = featuredEvent?.title       || 'Dwipapuri Summer Carnival 2026';
-    const description = featuredEvent?.description || 'Join us for the most anticipated event of the year! Live music, local food stalls, and community activities for all ages.';
     const date        = featuredEvent?.date        || null;
     const youtubeId   = featuredEvent?.youtube_id  || null;
-    const status      = featuredEvent?.status      || 'upcoming';
+    const type        = featuredEvent?.type        || 'full';
+    const imageUrl    = featuredEvent?.image_url   || null;
 
     const formattedDate = date
         ? new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
         : 'Saturday, August 25th • 4:00 PM';
 
-    const isLive = status === 'ongoing';
+    const isSimple = type === 'simple';
 
     const youtubeUrl = youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : null;
-    const bgImage    = youtubeId
-        ? `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`
-        : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1920&q=80&auto=format';
+    const bgImage    = isSimple
+        ? (imageUrl || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1920&q=80&auto=format')
+        : (youtubeId
+            ? `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`
+            : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1920&q=80&auto=format');
     const shareUrl   = youtubeUrl || window.location.href;
 
     // ── Dropdown state ──────────────────────────────────────────────────────
@@ -137,8 +139,8 @@ export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = fa
     return (
         <section id="featured" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20" style={{ scrollMarginTop: '80px' }}>
             <div className="relative rounded-3xl overflow-hidden group h-[480px] sm:h-[580px] md:h-[700px]">
-                {/* Background — YouTube embed or fallback image */}
-                {youtubeId ? (
+                {/* Background — YouTube embed (full type) or image */}
+                {!isSimple && youtubeId ? (
                     <>
                         {/* Poster: shown when not playing */}
                         <img
@@ -204,15 +206,6 @@ export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = fa
                 <div className="absolute inset-0"
                     style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.30) 50%, transparent 100%)' }} />
 
-                {/* Live indicator */}
-                {isLive && (
-                    <div className="absolute top-6 md:top-8 left-6 md:left-8 flex items-center gap-2 md:gap-3 px-3 md:px-4 py-1.5 md:py-2 rounded-full"
-                        style={{ background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.20)' }}>
-                        <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse" style={{ background: '#f87171' }} />
-                        <span className="text-[9px] md:text-[10px] font-semibold uppercase tracking-widest text-white">Live Now</span>
-                    </div>
-                )}
-
                 {/* Glassmorphic card — bottom left */}
                 <div
                     className="absolute inset-x-3 bottom-3 md:inset-auto md:bottom-12 md:left-12 md:max-w-xl p-5 sm:p-7 md:p-12 rounded-xl shadow-glass"
@@ -239,7 +232,7 @@ export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = fa
                                 className="font-semibold uppercase tracking-widest text-xs mb-3 md:mb-4 block drop-shadow-md"
                                 style={{ color: '#D4AF37', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                             >
-                                Featured Event
+                                {eyebrow}
                             </span>
                             <h1
                                 className="text-xl sm:text-2xl md:text-4xl md:text-5xl font-semibold text-white tracking-tight leading-tight mb-4 md:mb-6 drop-shadow-md"
@@ -248,7 +241,8 @@ export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = fa
                                 {title}
                             </h1>
 
-                            {/* Date row */}
+                            {/* Date row — full type only */}
+                            {!isSimple && (
                             <div className="flex flex-wrap items-center gap-4 mb-4 md:mb-8" style={{ color: 'rgba(255,255,255,0.75)' }}>
                                 <div className="flex items-center gap-2">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -258,11 +252,13 @@ export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = fa
                                     <span className="font-medium text-sm">{formattedDate}</span>
                                 </div>
                             </div>
+                            )}
 
                             {/* Buttons */}
                             {/* Buttons */}
                             <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:gap-3">
-                                {/* Watch Now */}
+                                {/* Watch Now — full type only */}
+                                {!isSimple && (
                                 <button
                                     onClick={handleWatchNow}
                                     disabled={!youtubeUrl}
@@ -278,8 +274,10 @@ export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = fa
                                     </svg>
                                     Watch Now
                                 </button>
+                                )}
 
-                                {/* Add to Calendar */}
+                                {/* Add to Calendar — full type only */}
+                                {!isSimple && (
                                 <div className="relative" ref={calRef}>
                                     <button
                                         onClick={() => { setCalOpen(o => !o); setShareOpen(false); }}
@@ -325,9 +323,10 @@ export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = fa
                                         </div>
                                     )}
                                 </div>
+                                )}
 
                                 {/* Share */}
-                                <div className="relative" ref={shareRef}>
+                                {!isSimple && <div className="relative" ref={shareRef}>
                                     <button
                                         onClick={() => { setShareOpen(o => !o); setCalOpen(false); }}
                                         className="w-full flex items-center justify-center gap-2 px-4 py-2.5 md:p-3.5 rounded-xl font-bold text-sm transition-all"
@@ -386,7 +385,7 @@ export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = fa
                                             </button>
                                         </div>
                                     )}
-                                </div>
+                                </div>}
                             </div>
                         </>
                     )}
