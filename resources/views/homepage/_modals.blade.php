@@ -143,25 +143,32 @@
     clearHpErr(errId); return true;
   }
   document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('form-hp-hero').addEventListener('submit', function(e) {
+    var formHero = document.getElementById('form-hp-hero');
+    if (formHero) formHero.addEventListener('submit', function(e) {
       if (!validateHpRequired('hp-hero-title', 'err-hp-hero-title', 'Title')) e.preventDefault();
     });
-    document.getElementById('form-hp-featured').addEventListener('submit', function(e) {
+    var formFeatured = document.getElementById('form-hp-featured');
+    if (formFeatured) formFeatured.addEventListener('submit', function(e) {
       if (!validateHpRequired('hp-featured-title', 'err-hp-featured-title', 'Event title')) e.preventDefault();
     });
-    document.getElementById('form-hp-event-add').addEventListener('submit', function(e) {
+    var formEventAdd = document.getElementById('form-hp-event-add');
+    if (formEventAdd) formEventAdd.addEventListener('submit', function(e) {
       if (!validateHpRequired('hp-event-title', 'err-hp-event-title', 'Title')) e.preventDefault();
     });
-    document.getElementById('form-hp-about').addEventListener('submit', function(e) {
+    var formAbout = document.getElementById('form-hp-about');
+    if (formAbout) formAbout.addEventListener('submit', function(e) {
       if (!validateHpRequired('hp-about-content', 'err-hp-about-content', 'About content')) e.preventDefault();
     });
-    document.getElementById('event-edit-form').addEventListener('submit', function(e) {
+    var eventEditForm = document.getElementById('event-edit-form');
+    if (eventEditForm) eventEditForm.addEventListener('submit', function(e) {
       if (!validateHpRequired('edit-event-title', 'err-hp-edit-title', 'Title')) e.preventDefault();
     });
-    document.getElementById('event-edit-modal').addEventListener('click', function (e) {
+    var eventEditModal = document.getElementById('event-edit-modal');
+    if (eventEditModal) eventEditModal.addEventListener('click', function (e) {
       if (e.target === this) closeEventEditModal();
     });
-    document.getElementById('event-delete-modal').addEventListener('click', function (e) {
+    var eventDeleteModal = document.getElementById('event-delete-modal');
+    if (eventDeleteModal) eventDeleteModal.addEventListener('click', function (e) {
       if (e.target === this) closeEventDeleteModal();
     });
   });
@@ -399,13 +406,16 @@
 </div>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('buletin-edit-form').addEventListener('submit', function(e) {
+    var buletinEditForm = document.getElementById('buletin-edit-form');
+    if (buletinEditForm) buletinEditForm.addEventListener('submit', function(e) {
       if (!validateHpRequired('edit-buletin-title', 'err-hp-edit-buletin-title', 'Title')) e.preventDefault();
     });
-    document.getElementById('buletin-edit-modal').addEventListener('click', function(e) {
+    var buletinEditModal = document.getElementById('buletin-edit-modal');
+    if (buletinEditModal) buletinEditModal.addEventListener('click', function(e) {
       if (e.target === this) closeBuletinEditModal();
     });
-    document.getElementById('buletin-delete-modal').addEventListener('click', function(e) {
+    var buletinDeleteModal = document.getElementById('buletin-delete-modal');
+    if (buletinDeleteModal) buletinDeleteModal.addEventListener('click', function(e) {
       if (e.target === this) closeBuletinDeleteModal();
     });
     var formBuletinAdd = document.getElementById('form-hp-buletin-add');

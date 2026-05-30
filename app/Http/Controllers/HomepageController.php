@@ -504,6 +504,7 @@ class HomepageController extends Controller
     public function updateMemorableMoments(Request $request)
     {
         $request->validate([
+            'eyebrow' => 'nullable|string|max:60',
             'title' => 'nullable|string|max:200',
             'subtitle' => 'nullable|string|max:500',
             'archive_url' => 'nullable|url|max:500',
@@ -544,6 +545,7 @@ class HomepageController extends Controller
         }
 
         $data = [
+            'eyebrow' => $request->input('eyebrow', $existing['eyebrow'] ?? 'The Gallery'),
             'title' => $request->input('title', $existing['title'] ?? ''),
             'subtitle' => $request->input('subtitle', $existing['subtitle'] ?? ''),
             'archive_url' => $request->input('archive_url', $existing['archive_url'] ?? null),
