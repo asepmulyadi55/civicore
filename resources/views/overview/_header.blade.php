@@ -6,12 +6,12 @@
       onclick="toggleSidebar()">
       <span class="material-icons text-slate-500">menu</span>
     </button>
-    <h1 class="text-xl font-bold">{{ $pageTitle ?? 'Overview' }}</h1>
+    <h1 class="text-xl font-bold">{{ $pageTitle ?? __('app.nav_overview') }}</h1>
   </div>
   <div class="flex items-center gap-4">
     @if($showSync ?? true)
     <div class="text-xs text-slate-400 text-right hidden sm:block">
-      <p>Last Sync</p>
+      <p>{{ __('app.overview_last_sync') }}</p>
       <p class="font-medium">{{ now()->format('M d, Y • h:i A') }}</p>
     </div>
     <button onclick="window.location.reload()" class="p-2 text-slate-400 hover:text-primary transition-colors"

@@ -3,6 +3,7 @@ import Header from '../components/Header';
 import FeaturedEvent from '../components/FeaturedEvent';
 import UpcomingEvents from '../components/UpcomingEvents';
 import Buletin from '../components/Buletin';
+import PropertyListings from '../components/PropertyListings';
 import MemorableMoments from '../components/MemorableMoments';
 import AboutSection from '../components/AboutSection';
 import Footer from '../components/Footer';
@@ -44,6 +45,7 @@ export default function HomePage() {
                 <UpcomingEvents events={data?.upcoming_events ?? []} loading={loading} isDark={isDark} eyebrow={data?.section_labels?.events_eyebrow} heading={data?.section_labels?.events_heading} />
                 <MemorableMoments moments={data?.memorable_moments} pastEvents={data?.past_events ?? []} loading={loading} isDark={isDark} />
                 <Buletin buletin={data?.buletin ?? []} loading={loading} isDark={isDark} eyebrow={data?.section_labels?.buletin_eyebrow} heading={data?.section_labels?.buletin_heading} />
+                <PropertyListings listings={data?.property_listings ?? []} loading={loading} isDark={isDark} />
                 <AboutSection about={data?.about} loading={loading} isDark={isDark} />
             </main>
             <Footer footer={data?.footer} isDark={isDark} />

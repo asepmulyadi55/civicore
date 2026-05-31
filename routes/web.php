@@ -28,11 +28,13 @@ use App\Http\Controllers\SensitiveDataController;
 use App\Http\Controllers\Api\BlockController as ApiBlockController;
 use App\Http\Controllers\Api\HouseholderController as ApiHouseholderController;
 use App\Http\Controllers\Api\HomepageController as ApiHomepageController;
+use App\Http\Controllers\PropertyListingController;
 
 // ── Public homepage (React SPA) ───────────────────────────────────────────────
 Route::get('/', fn() => view('spa'))->name('home');
 Route::get('/events', fn() => view('spa'))->name('events');
 Route::get('/buletin', fn() => view('spa'))->name('buletin');
+Route::get('/property', fn() => view('spa'))->name('property');
 
 // ── Sitemap ───────────────────────────────────────────────────────────────────
 Route::get('/sitemap.xml', function () {
@@ -52,6 +54,9 @@ Route::get('/api/events', [ApiHomepageController::class, 'events'])
 Route::get('/api/buletin', [ApiHomepageController::class, 'buletin'])
     ->middleware('api.key')
     ->name('api.buletin');
+Route::get('/api/property', [ApiHomepageController::class, 'property'])
+    ->middleware('api.key')
+    ->name('api.property');
 
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -87,6 +92,18 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:dashboard.view')->name('dashboard');
     Route::post('/dashboard/notifications/read', [DashboardController::class, 'markNotificationsRead'])
         ->name('notifications.read');
+
+    // ── Property Listings ─────────────────────────────────────────────────────
+    Route::get('/property-listings', [PropertyListingController::class, 'index'])
+        ->middleware('permission:property.view')->name('property.index');
+    Route::post('/property-listings', [PropertyListingController::class, 'store'])
+        ->middleware('permission:property.create')->name('property.store');
+    Route::put('/property-listings/{property}', [PropertyListingController::class, 'update'])
+        ->middleware('permission:property.edit')->name('property.update');
+    Route::delete('/property-listings/{property}', [PropertyListingController::class, 'destroy'])
+        ->middleware('permission:property.delete')->name('property.destroy');
+    Route::patch('/property-listings/{property}/toggle-active', [PropertyListingController::class, 'toggleActive'])
+        ->middleware('permission:property.edit')->name('property.toggle-active');
 
     // ── Homepage CMS ─────────────────────────────────────────────────────────
     Route::get('/homepage', [HomepageController::class, 'index'])

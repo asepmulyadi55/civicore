@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\PropertyListing;
 use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 
@@ -57,16 +58,42 @@ class HomepageController extends Controller
         ));
         $latestBuletin = array_slice($upcomingBuletin, 0, 3);
 
+        $propertyListings = PropertyListing::with(['block'])
+            ->where('is_active', true)
+            ->where('status', 'available')
+            ->latest()
+            ->take(6)
+            ->get()
+            ->map(fn($l) => [
+                'id'              => $l->id,
+                'title'           => $l->title,
+                'type'            => $l->type,
+                'type_label'      => $l->typeLabel(),
+                'status'          => $l->status,
+                'status_label'    => $l->statusLabel(),
+                'price'           => $l->price,
+                'formatted_price' => $l->formattedPrice(),
+                'location_label'  => $l->location_label,
+                'bedrooms'        => $l->bedrooms,
+                'bathrooms'       => $l->bathrooms,
+                'land_area'       => $l->land_area,
+                'building_area'   => $l->building_area,
+                'contact_name'    => $l->contact_name,
+                'contact_phone'   => $l->contact_phone,
+                'images'          => $l->imageUrls(),
+            ]);
+
         return response()->json([
-            'hero'              => $hero,
-            'featured_event'    => $featuredEvent,
-            'upcoming_events'   => $upcomingEvents,
-            'past_events'       => $pastEvents,
-            'buletin'           => $latestBuletin,
-            'memorable_moments' => $memorableMoments,
-            'about'             => $about,
-            'footer'            => $footer,
-            'section_labels'    => $sectionLabels,
+            'hero'               => $hero,
+            'featured_event'     => $featuredEvent,
+            'upcoming_events'    => $upcomingEvents,
+            'past_events'        => $pastEvents,
+            'buletin'            => $latestBuletin,
+            'memorable_moments'  => $memorableMoments,
+            'about'              => $about,
+            'footer'             => $footer,
+            'section_labels'     => $sectionLabels,
+            'property_listings'  => $propertyListings,
         ]);
     }
 
@@ -143,6 +170,46 @@ class HomepageController extends Controller
         return response()->json([
             'buletin' => array_values($buletin),
             'footer'  => $footer,
+        ]);
+    }
+
+    /**
+     * Active property listings for the public property page.
+     *
+     * GET /api/property
+     */
+    public function property(): JsonResponse
+    {
+        $footer = json_decode(Setting::get('homepage_footer', '{}'), true) ?? [];
+
+        $listings = PropertyListing::with(['block'])
+            ->where('is_active', true)
+            ->latest()
+            ->get()
+            ->map(fn($l) => [
+                'id'              => $l->id,
+                'title'           => $l->title,
+                'type'            => $l->type,
+                'type_label'      => $l->typeLabel(),
+                'price'           => $l->price,
+                'formatted_price' => $l->formattedPrice(),
+                'location_label'  => $l->location_label,
+                'bedrooms'        => $l->bedrooms,
+                'bathrooms'       => $l->bathrooms,
+                'land_area'       => $l->land_area,
+                'building_area'   => $l->building_area,
+                'description'     => $l->description,
+                'contact_name'    => $l->contact_name,
+                'contact_phone'   => $l->contact_phone,
+                'images'          => $l->imageUrls(),
+                'status'          => $l->status,
+            ])
+            ->values()
+            ->all();
+
+        return response()->json([
+            'listings' => $listings,
+            'footer'   => $footer,
         ]);
     }
 }

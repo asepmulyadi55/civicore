@@ -34,6 +34,7 @@
           <x-ui.sort-th column="age_category" :label="__('app.posyandu_col_cat')" />
           <x-ui.sort-th column="gender" :label="__('app.posyandu_col_gender')" class="hidden sm:table-cell" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">{{ __('app.posyandu_col_rel') }}</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">{{ __('app.posyandu_col_block_unit') }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -48,9 +49,9 @@
               default  => '—',
             };
             $genderIcon = $member->gender === 'male' ? 'male' : ($member->gender === 'female' ? 'female' : 'help_outline');
-            $resident = $member->resident;
-            $block    = $resident?->block?->name ?? '—';
-            $unit     = $resident?->unit_number ?? '—';
+            $householder = $member->householder;
+            $block       = $householder?->block?->name ?? '—';
+            $unit        = $householder?->unit_number ?? '—';
 
             // Translated relationship label
             $relKey   = 'rel_' . ($member->relationship ?? 'other');
@@ -115,12 +116,22 @@
               {{ $relLabel }}
             </td>
 
-
+            {{-- Block · Unit --}}
+            <td class="px-6 py-4 hidden lg:table-cell">
+              @if($block !== '—')
+                <span class="text-sm font-medium text-slate-900 dark:text-white">{{ $block }}</span>
+                @if($unit !== '—')
+                  <span class="text-xs text-slate-400 block mt-0.5">Unit {{ $unit }}</span>
+                @endif
+              @else
+                <span class="text-slate-400 text-sm">—</span>
+              @endif
+            </td>
 
           </tr>
         @empty
           <tr>
-            <td colspan="6" class="px-6 py-16 text-center">
+            <td colspan="7" class="px-6 py-16 text-center">
               <div class="flex flex-col items-center gap-3 text-slate-400">
                 <span class="material-icons text-5xl">health_and_safety</span>
                 <p class="text-sm font-medium">{{ __('app.posyandu_no_members') }}</p>
