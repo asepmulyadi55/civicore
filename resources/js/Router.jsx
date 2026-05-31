@@ -5,6 +5,7 @@ import AdminRedirect from './pages/AdminRedirect';
 import EventsPage from './pages/EventsPage';
 import BuletinPage from './pages/BuletinPage';
 import PropertyPage from './pages/PropertyPage';
+import PropertyDetailPage from './pages/PropertyDetailPage';
 import ScrollToTop from './components/ScrollToTop';
 
 function GaTracker() {
@@ -30,6 +31,7 @@ export default function Router() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/buletin" element={<BuletinPage />} />
         <Route path="/property" element={<PropertyPage />} />
+        <Route path="/property/:id" element={<PropertyDetailPage />} />
         <Route path="/admin" element={<AdminRedirect />} />
       </Routes>
     </BrowserRouter>

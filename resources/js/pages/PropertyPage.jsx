@@ -206,7 +206,7 @@ export default function PropertyPage() {
                                         style={{ background: C.card, border: `1px solid ${C.cardBorder}` }}
                                     >
                                         {/* Image gallery (first image large, dots for rest) */}
-                                        <div className="relative w-full h-56 overflow-hidden flex-shrink-0">
+                                        <Link to={`/property/${listing.id}`} className="block relative w-full h-56 overflow-hidden flex-shrink-0">
                                             <img
                                                 src={image}
                                                 alt={listing.title}
@@ -227,13 +227,13 @@ export default function PropertyPage() {
                                                     +{listing.images.length - 1} foto
                                                 </span>
                                             )}
-                                        </div>
+                                        </Link>
 
                                         {/* Body */}
                                         <div className="p-5 flex flex-col flex-1 gap-2">
-                                            <p className="font-semibold text-base leading-snug" style={{ color: C.primary, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                            <Link to={`/property/${listing.id}`} className="font-semibold text-base leading-snug hover:underline" style={{ color: C.primary, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                                                 {listing.title}
-                                            </p>
+                                            </Link>
 
                                             <p className="text-xl font-bold" style={{ color: '#D4AF37', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                                                 {listing.formatted_price || '—'}

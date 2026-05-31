@@ -38,12 +38,6 @@ class PropertyListingController extends Controller
         return view('property', compact('listings', 'blocks', 'total'));
     }
 
-    public function show(PropertyListing $property)
-    {
-        $property->load(['block', 'unit', 'creator']);
-        return view('property.show', compact('property'));
-    }
-
     public function store(Request $request)
     {
         $validated = $request->validate([
