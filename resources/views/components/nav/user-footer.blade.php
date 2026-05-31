@@ -13,12 +13,13 @@ Automatically shows:
   $initials = strtoupper(substr($user->name, 0, 2));
 
   if ($user->isHouseholder()) {
-    // Try to find the resident record linked to this user account
-    $residentRecord = \App\Models\Resident::where('user_id', $user->id)
-      ->with('block')
-      ->first();
-    $subtext = $residentRecord
-      ? ($residentRecord->block?->name . ' · ' . $residentRecord->unit_number)
+    // Resolve the householder linked to this user account (block + unit info lives on householder)
+    $householder = $user->resolveHouseholder();
+    if ($householder) {
+      $householder->load('block', 'unit');
+    }
+    $subtext = $householder
+      ? ($householder->block?->name . ' · ' . $householder->unit_number)
       : ($user->role?->label ?? $user->email);
   } else {
     $subtext = $user->role?->label ?? $user->email;
