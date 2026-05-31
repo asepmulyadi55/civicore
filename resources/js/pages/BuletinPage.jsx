@@ -90,6 +90,7 @@ export default function BuletinPage() {
     }, []);
 
     const allBuletin = data?.buletin ?? [];
+    const today = new Date().toISOString().slice(0, 10);
 
     const filtered = allBuletin.filter(b =>
         !search ||
@@ -182,7 +183,8 @@ export default function BuletinPage() {
                     {!loading && paginated.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {paginated.map((item, i) => {
-                                const image = item.image_url || PLACEHOLDER_IMAGES[i % PLACEHOLDER_IMAGES.length];
+                                const image  = item.image_url || PLACEHOLDER_IMAGES[i % PLACEHOLDER_IMAGES.length];
+                                const isPast = !!item.date && item.date < today;
 
                                 return (
                                     <article
@@ -196,8 +198,16 @@ export default function BuletinPage() {
                                                 src={image}
                                                 alt={item.title}
                                                 loading="lazy"
-                                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                                className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105${isPast ? ' grayscale opacity-75' : ''}`}
                                             />
+                                            {isPast && (
+                                                <div className="absolute top-3 left-3">
+                                                    <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest"
+                                                        style={{ background: 'rgba(28,45,39,0.82)', color: '#fff', backdropFilter: 'blur(12px)' }}>
+                                                        Past
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Body */}

@@ -50,9 +50,12 @@ class HomepageController extends Controller
             $e['date'] < $today
         )), 0, 4);
 
-        // Sort buletin ascending by date (same as events)
+        // Sort buletin ascending by date (same as events), then filter to upcoming only
         usort($buletin, fn($a, $b) => strcmp($a['date'] ?? '', $b['date'] ?? ''));
-        $latestBuletin = array_slice(array_values($buletin), 0, 3);
+        $upcomingBuletin = array_values(array_filter($buletin, fn($item) =>
+            empty($item['date']) || $item['date'] >= $today
+        ));
+        $latestBuletin = array_slice($upcomingBuletin, 0, 3);
 
         return response()->json([
             'hero'              => $hero,
