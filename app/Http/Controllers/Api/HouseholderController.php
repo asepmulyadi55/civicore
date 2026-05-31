@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Resident;
+use App\Models\Householder;
 use Illuminate\Http\Request;
 
-class ResidentController extends Controller
+class HouseholderController extends Controller
 {
     /**
-     * AJAX — check if a resident exists by email (for user approval modal).
+     * AJAX — check if a householder exists by email (for user approval modal).
      *
      * POST /users/check-resident-email
      */
@@ -17,17 +17,17 @@ class ResidentController extends Controller
     {
         $request->validate(['email' => ['required', 'email']]);
 
-        $resident = Resident::where('email', $request->email)->with('block')->first();
+        $householder = Householder::where('email', $request->email)->with('block')->first();
 
-        if (!$resident) {
+        if (!$householder) {
             return response()->json(['found' => false]);
         }
 
         return response()->json([
             'found'       => true,
-            'block_id'    => $resident->block_id,
-            'block_name'  => $resident->block?->name ?? '—',
-            'unit_number' => $resident->unit_number,
+            'block_id'    => $householder->block_id,
+            'block_name'  => $householder->block?->name ?? '—',
+            'unit_number' => $householder->unit_number,
         ]);
     }
 }

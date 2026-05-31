@@ -4,7 +4,7 @@ namespace App\Exports;
 
 use App\Http\Controllers\PosyanduController;
 use App\Models\Block;
-use App\Models\FamilyMember;
+use App\Models\Resident;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -50,17 +50,17 @@ class PosyanduExport implements
 
     public function collection(): Collection
     {
-        $query = FamilyMember::with(['resident.block', 'resident.unit'])
+        $query = Resident::with(['householder.block', 'householder.unit'])
             ->orderBy('fullname');
 
         if ($this->blockId) {
-            $query->whereHas('resident', fn($q) => $q->where('block_id', $this->blockId));
+            $query->whereHas('householder', fn($q) => $q->where('block_id', $this->blockId));
         }
 
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('fullname', 'like', "%{$this->search}%")
-                  ->orWhereHas('resident', fn($r) => $r->where('fullname', 'like', "%{$this->search}%"));
+                  ->orWhereHas('householder', fn($r) => $r->where('fullname', 'like', "%{$this->search}%"));
             });
         }
 
@@ -84,7 +84,7 @@ class PosyanduExport implements
 
         return $all->map(function (FamilyMember $m) use ($isId) {
             $cat      = $this->translatedCats[$m->age_category] ?? $this->translatedCats['unknown'];
-            $resident = $m->resident;
+            $resident = $m->householder;
 
             $gender = match($m->gender) {
                 'male'   => $isId ? 'Laki-laki' : 'Male',
@@ -95,7 +95,7 @@ class PosyanduExport implements
             $relKey   = 'rel_' . ($m->relationship ?? 'other');
             $relLabel = __('app.' . $relKey);
             if ($relLabel === 'app.' . $relKey) {
-                $relLabel = \App\Models\FamilyMember::$relationships[$m->relationship] ?? 'Other';
+                $relLabel = \App\Models\Resident::$relationships[$m->relationship] ?? 'Other';
             }
 
             return [
@@ -249,3 +249,6 @@ class PosyanduExport implements
         return $years . ' thn ' . $months . ' bln';
     }
 }
+
+
+

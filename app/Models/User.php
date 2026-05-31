@@ -61,39 +61,39 @@ class User extends Authenticatable
     return $this->belongsTo(Block::class);
   }
 
-  // If this user is also a resident (linked account)
-  public function resident(): HasOne
+  // If this user is also a householder (linked account)
+  public function householder(): HasOne
   {
-    return $this->hasOne(Resident::class);
+    return $this->hasOne(Householder::class);
   }
 
   /**
-   * Resolve the linked resident with a three-level fallback:
+   * Resolve the linked householder with a three-level fallback:
    * 1. By user_id (fast path, already linked)
    * 2. By email (if emails match)
    * 3. By block_id + unit_number (if neither user_id nor email matched)
-   * Auto-repairs residents.user_id on match so future lookups use the fast path.
+   * Auto-repairs householders.user_id on match so future lookups use the fast path.
    */
-  public function resolveResident(): ?Resident
+  public function resolveHouseholder(): ?Householder
   {
-    $resident = $this->hasOne(Resident::class)->first();
+    $householder = $this->hasOne(Householder::class)->first();
 
-    if (!$resident && $this->email) {
-      $resident = Resident::where('email', $this->email)->first();
+    if (!$householder && $this->email) {
+      $householder = Householder::where('email', $this->email)->first();
     }
 
-    if (!$resident && $this->block_id && $this->unit_number) {
-      $resident = Resident::whereHas('unit', fn($q) =>
+    if (!$householder && $this->block_id && $this->unit_number) {
+      $householder = Householder::whereHas('unit', fn($q) =>
           $q->where('block_id', $this->block_id)
             ->where('unit_number', $this->unit_number)
       )->first();
     }
 
-    if ($resident && !$resident->user_id) {
-      $resident->update(['user_id' => $this->id]);
+    if ($householder && !$householder->user_id) {
+      $householder->update(['user_id' => $this->id]);
     }
 
-    return $resident;
+    return $householder;
   }
 
   // ── Role Helpers ────────────────────────────────────────────
@@ -113,9 +113,9 @@ class User extends Authenticatable
     return $this->role?->name === 'block_coordinator';
   }
 
-  public function isResident(): bool
+  public function isHouseholder(): bool
   {
-    return $this->role?->name === 'resident';
+    return $this->role?->name === 'householder';
   }
 
   public function isPosyandu(): bool

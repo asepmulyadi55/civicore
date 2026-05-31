@@ -100,7 +100,7 @@
             @php
               // $hasResident → resident is linked (used for: resident name display + delete guard)
               // $isNotVacant → house_status is not vacant (used for: icon + border color)
-              $hasResident = $unit->resident !== null;
+              $hasResident = $unit->householder !== null;
               $isNotVacant = $unit->house_status !== 'vacant';
               $houseStatusColors = [
                 'owner_occupied' => 'bg-primary/10 text-primary',
@@ -138,9 +138,9 @@
                 @if($hasResident)
                   <div class="flex items-center gap-2">
                     <span class="material-icons text-sm text-slate-400">person_outline</span>
-                    <a href="{{ route('residents.index', ['search' => $unit->resident->fullname]) }}"
+                    <a href="{{ route('householders.index', ['search' => $unit->householder->fullname]) }}"
                       class="text-xs text-slate-700 dark:text-slate-300 font-medium hover:text-primary transition-colors truncate">
-                      {{ $unit->resident->fullname }}
+                      {{ $unit->householder->fullname }}
                     </a>
                   </div>
                 @else
@@ -371,7 +371,7 @@
   {{-- Session-triggered delete-blocked modal (from redirect) --}}
   @if(session('error_delete_unit'))
     @php
-      $blockedUnit = \App\Models\Unit::with('resident')->find(session('error_delete_unit'));
+      $blockedUnit = \App\Models\Unit::with('householder')->find(session('error_delete_unit'));
     @endphp
     @if($blockedUnit)
     <script>
@@ -477,3 +477,4 @@
   </script>
 
 </x-layouts.app>
+

@@ -15,10 +15,19 @@
         <p class="text-xs text-slate-400 leading-none">{{ __('app.posyandu_subtitle') }}</p>
       </div>
     </div>
-    <button class="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-primary/50 transition-all"
-      onclick="toggleDark()" title="Toggle dark mode">
-      <span class="material-icons text-slate-500 text-[20px]">dark_mode</span>
-    </button>
+    <div class="flex items-center gap-3">
+      <a href="{{ route('posyandu.export', request()->query()) }}"
+        class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-400
+               bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800
+               hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-lg transition-all">
+        <span class="material-icons text-sm">download</span>
+        <span class="hidden sm:inline">{{ __('app.posyandu_export') }}</span>
+      </a>
+      <button class="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-primary/50 transition-all"
+        onclick="toggleDark()" title="Toggle dark mode">
+        <span class="material-icons text-slate-500 text-[20px]">dark_mode</span>
+      </button>
+    </div>
   </div>
 
   {{-- Category pills --}}

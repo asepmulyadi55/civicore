@@ -207,7 +207,7 @@ class RoleModelTest extends TestCase
       'role_id' => $role->id,
     ]);
 
-    $this->assertTrue($user->isResident());
+    $this->assertTrue($user->isHouseholder());
     $this->assertFalse($user->isAdmin());
   }
 
@@ -251,3 +251,4 @@ class RoleModelTest extends TestCase
     $this->assertFalse($user->can('payments.approve'));
   }
 }
+

@@ -11,7 +11,7 @@
     if ($user->can('overview.view')) {
       $flatItems[] = ['key' => 'overview', 'label_raw' => __('app.nav_overview'), 'icon' => 'dashboard', 'route' => 'overview', 'permission' => 'overview.view'];
     }
-    if ($user->resolveResident()) {
+    if ($user->resolveHouseholder()) {
       $flatItems[] = ['key' => 'household', 'label_raw' => __('app.nav_household'), 'icon' => 'home', 'route' => 'household.show', 'permission' => null];
     }
     if ($user->can('posyandu.view')) {
@@ -42,7 +42,7 @@
         'label' => __('app.nav_group_community'),
         'group_icon' => 'groups',
         'items' => [
-          ['key' => 'residents', 'label' => __('app.nav_residents'), 'icon' => 'people', 'route' => 'residents.index', 'permission' => 'residents.view'],
+          ['key' => 'householders', 'label' => __('app.nav_residents'), 'icon' => 'people', 'route' => 'householders.index', 'permission' => 'householders.view'],
           ['key' => 'blocks', 'label' => __('app.nav_blocks'), 'icon' => 'domain', 'route' => 'blocks.index', 'permission' => 'blocks.view'],
           ['key' => 'posyandu', 'label' => 'Posyandu', 'icon' => 'health_and_safety', 'route' => 'posyandu.index', 'permission' => 'posyandu.view'],
           ['key' => 'organization', 'label' => __('app.nav_organization'), 'icon' => 'account_tree', 'route' => 'organization.index', 'permission' => null],
@@ -77,7 +77,7 @@
     ];
 
     // Add Household link for non-resident roles that are also linked to a resident record
-    if ($user->resolveResident()) {
+    if ($user->resolveHouseholder()) {
       array_splice($allGroups, 1, 0, [
         [
           'label' => null,
@@ -190,3 +190,5 @@
   }
 </script>
 </script>
+
+

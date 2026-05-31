@@ -10,7 +10,7 @@ class FeeHistory extends Model
 {
     use HasUuids;
     protected $fillable = [
-        'resident_id',
+        'householder_id',
         'amount',
         'effective_from',
         'created_by',
@@ -22,9 +22,9 @@ class FeeHistory extends Model
         'effective_from' => 'date',
     ];
 
-    public function resident(): BelongsTo
+    public function householder(): BelongsTo
     {
-        return $this->belongsTo(Resident::class);
+        return $this->belongsTo(Householder::class, 'householder_id');
     }
 
     public function createdBy(): BelongsTo

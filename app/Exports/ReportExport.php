@@ -3,7 +3,7 @@
 namespace App\Exports;
 
 use App\Models\PaymentRecord;
-use App\Models\Resident;
+use App\Models\Householder;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -82,19 +82,19 @@ class ReportExport implements
 
   public function collection(): Collection
   {
-    $query = Resident::with([
+    $query = Householder::with([
       'block',
       'unit',
       'paymentRecords' => fn($q) => $q->whereYear('payment_month', $this->year),
-    ])->where('residents.is_active', true)
-      ->leftJoin('units', 'units.id', '=', 'residents.unit_id')
-      ->leftJoin('blocks', 'blocks.id', '=', 'residents.block_id')
+    ])->where('householders.is_active', true)
+      ->leftJoin('units', 'units.id', '=', 'householders.unit_id')
+      ->leftJoin('blocks', 'blocks.id', '=', 'householders.block_id')
       ->orderBy('blocks.name')
       ->orderByRaw('CAST(units.unit_number AS UNSIGNED)')
-      ->select('residents.*');
+      ->select('householders.*');
 
     if ($this->blockId) {
-      $query->where('residents.block_id', $this->blockId);
+      $query->where('householders.block_id', $this->blockId);
     }
 
     $rows = collect();
@@ -231,3 +231,4 @@ class ReportExport implements
     return (string) $status;
   }
 }
+

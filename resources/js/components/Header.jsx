@@ -29,6 +29,7 @@ export default function Header({ isDark = false, toggleDark }) {
   const navLinks = [
     { label: 'Events', href: '#events' },
     { label: 'Gallery', href: '#gallery' },
+    { label: 'Bulletins', href: '#bulletins' },
     { label: 'About', href: '#about' },
   ];
 

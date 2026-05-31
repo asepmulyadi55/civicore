@@ -1,15 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const CATEGORY_BADGE_STYLES = {
-    wellness:  { background: 'rgba(255,255,255,0.85)', color: '#1C2D27' },
-    meetings:  { background: 'rgba(255,255,255,0.85)', color: '#1C2D27' },
-    education: { background: 'rgba(255,255,255,0.85)', color: '#1C2D27' },
-    cultural:  { background: 'rgba(255,255,255,0.85)', color: '#1C2D27' },
-    sports:    { background: 'rgba(255,255,255,0.85)', color: '#1C2D27' },
-    other:     { background: 'rgba(255,255,255,0.85)', color: '#1C2D27' },
-};
-
 const PLACEHOLDER_IMAGES = [
     'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=80&auto=format',
     'https://images.unsplash.com/photo-1431540015161-0bf868a2d407?w=600&q=80&auto=format',
@@ -33,7 +24,7 @@ function SkeletonCard({ isDark }) {
     );
 }
 
-export default function UpcomingEvents({ events = [], loading, isDark = false, eyebrow = 'Discover More', heading = 'Upcoming Community Events' }) {
+export default function Buletin({ buletin = [], loading, isDark = false, eyebrow = 'Informasi', heading = 'Buletin' }) {
     const headingColor = isDark ? '#F0EDE8' : '#1C2D27';
     const bodyColor    = isDark ? '#9E9C97' : '#595959';
     const cardBg       = isDark ? '#142920' : '#ffffff';
@@ -42,8 +33,18 @@ export default function UpcomingEvents({ events = [], loading, isDark = false, e
     const viewAllColor = isDark ? '#D4AF37' : '#1C2D27';
     const viewAllBorderColor = isDark ? 'rgba(212,175,55,0.4)' : 'rgba(28,45,39,0.3)';
 
+    if (loading && buletin.length === 0) {
+        return (
+            <section id="bulletins" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20" style={{ scrollMarginTop: '80px' }}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <SkeletonCard isDark={isDark} /><SkeletonCard isDark={isDark} /><SkeletonCard isDark={isDark} />
+                </div>
+            </section>
+        );
+    }
+
     return (
-        <section id="events" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20" style={{ scrollMarginTop: '80px' }}>
+        <section id="bulletins" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20" style={{ scrollMarginTop: '80px' }}>
             <div className="flex items-end justify-between mb-10 md:mb-16 gap-6">
                 <div className="max-w-2xl">
                     <span
@@ -59,7 +60,7 @@ export default function UpcomingEvents({ events = [], loading, isDark = false, e
                         {heading}
                     </h2>
                 </div>
-                <Link to="/events"
+                <Link to="/buletin"
                     className="text-sm font-medium flex items-center gap-2 hover:gap-3 transition-all tracking-wide pb-1 border-b self-start sm:self-auto mt-2 sm:mt-0 flex-shrink-0"
                     style={{ color: viewAllColor, borderColor: viewAllBorderColor, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 >
@@ -71,41 +72,25 @@ export default function UpcomingEvents({ events = [], loading, isDark = false, e
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <SkeletonCard isDark={isDark} /><SkeletonCard isDark={isDark} /><SkeletonCard isDark={isDark} />
                 </div>
-            ) : events.length === 0 ? (
+            ) : buletin.length === 0 ? (
                 <div className="text-center py-16 rounded-2xl shadow-sm" style={{ background: cardBg, border: `1px solid ${cardBorder}` }}>
-                    <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: isDark ? '#1C2D27' : '#e2e8f0' }}>
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p className="font-semibold" style={{ color: bodyColor }}>No Upcoming Events</p>
+                    <span className="material-symbols-outlined text-5xl mb-3 block" style={{ color: isDark ? '#1C2D27' : '#e2e8f0' }}>article</span>
+                    <p className="font-semibold" style={{ color: bodyColor }}>No Bulletins Available</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {events.map((event, i) => {
-                        const category   = (event.category || 'other').toLowerCase();
-                        const badgeStyle = CATEGORY_BADGE_STYLES[category] || CATEGORY_BADGE_STYLES.other;
-                        const image      = event.image_url || PLACEHOLDER_IMAGES[i % PLACEHOLDER_IMAGES.length];
+                    {buletin.map((item, i) => {
+                        const image = item.image_url || PLACEHOLDER_IMAGES[i % PLACEHOLDER_IMAGES.length];
 
                         return (
-                            <article key={event.id || i}
+                            <article key={item.id || i}
                                 className="rounded-2xl overflow-hidden group flex flex-col h-full lift-on-hover transition-all duration-500"
                                 style={{ background: cardBg, border: `1px solid ${cardBorder}` }}>
 
-                                {/* Image with category badge overlay */}
+                                {/* Image */}
                                 <div className="relative h-56 md:h-[22rem] overflow-hidden flex-shrink-0">
-                                    <img src={image} alt={event.title}
+                                    <img src={image} alt={item.title}
                                         className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-                                    <div
-                                        className="absolute top-4 md:top-5 left-4 md:left-5 px-3 md:px-4 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-widest shadow-sm"
-                                        style={{
-                                            ...badgeStyle,
-                                            fontFamily: "'Plus Jakarta Sans', sans-serif",
-                                            backdropFilter: 'blur(12px)',
-                                            WebkitBackdropFilter: 'blur(12px)',
-                                        }}
-                                    >
-                                        {category}
-                                    </div>
                                 </div>
 
                                 {/* Card body */}
@@ -114,23 +99,23 @@ export default function UpcomingEvents({ events = [], loading, isDark = false, e
                                         className="text-xl md:text-2xl font-medium mb-3"
                                         style={{ color: headingColor, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                                     >
-                                        {event.title}
+                                        {item.title}
                                     </h3>
-                                    {event.description && (
+                                    {item.description && (
                                         <p
                                             className="text-sm leading-relaxed mb-6 md:mb-8 flex-grow font-light"
                                             style={{ color: bodyColor }}
                                         >
-                                            &ldquo;{event.description}&rdquo;
+                                            &ldquo;{item.description}&rdquo;
                                         </p>
                                     )}
                                     <div className="flex items-center justify-between mt-auto border-t pt-5 md:pt-6" style={{ borderColor: dividerColor }}>
-                                        {event.url ? (
-                                            <a href={event.url} target="_blank" rel="noopener noreferrer"
+                                        {item.url ? (
+                                            <a href={item.url} target="_blank" rel="noopener noreferrer"
                                                 className="font-medium text-xs md:text-sm flex items-center gap-2 hover:gap-3 transition-all tracking-wide"
                                                 style={{ color: '#D4AF37', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                                             >
-                                                RSVP NOW <span className="material-symbols-outlined text-sm">arrow_right_alt</span>
+                                                READ MORE <span className="material-symbols-outlined text-sm">arrow_right_alt</span>
                                             </a>
                                         ) : (
                                             <span
@@ -140,9 +125,9 @@ export default function UpcomingEvents({ events = [], loading, isDark = false, e
                                                 Details TBA
                                             </span>
                                         )}
-                                        {event.date && (
+                                        {item.date && (
                                             <span className="text-xs font-light" style={{ color: bodyColor }}>
-                                                {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                                {new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                             </span>
                                         )}
                                     </div>

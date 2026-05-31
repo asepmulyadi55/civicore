@@ -11,8 +11,10 @@
   </div>
   <div class="flex items-center gap-3">
     <a href="{{ route('reports.export', array_filter(['year' => request('year'), 'block_id' => request('block_id')])) }}"
-      class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-sm shadow-emerald-600/20 text-sm">
-      <span class="material-icons text-sm">table_view</span>
+      class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-400
+             bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800
+             hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-lg transition-all">
+      <span class="material-icons text-sm">download</span>
       <span class="hidden sm:inline">Export Excel</span>
     </a>
     <button

@@ -5,26 +5,26 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateResidentRequest extends FormRequest
+class UpdateHouseholderRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('residents.edit');
+        return $this->user()->can('householders.edit');
     }
 
     public function rules(): array
     {
-        $residentId = $this->route('resident')->id ?? null;
+        $householderId = $this->route('householder')->id ?? null;
 
         return [
             'fullname'           => ['required', 'string', 'max:100'],
             'phone'              => ['nullable', 'string', 'max:25'],
-            'email'              => ['nullable', 'email', 'max:255', Rule::unique('residents', 'email')->ignore($residentId)],
+            'email'              => ['nullable', 'email', 'max:255', Rule::unique('householders', 'email')->ignore($householderId)],
             'block_id'           => ['sometimes', 'exists:blocks,id'],
             'unit_id'            => [
                 'required',
                 'exists:units,id',
-                Rule::unique('residents', 'unit_id')->ignore($residentId),
+                Rule::unique('householders', 'unit_id')->ignore($householderId),
             ],
             'is_active'          => ['boolean'],
             'new_monthly_fee'    => ['nullable', 'numeric', 'min:0'],
@@ -38,11 +38,11 @@ class UpdateResidentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'fullname.required' => 'Please enter the resident\'s full name.',
+            'fullname.required' => 'Please enter the householder\'s full name.',
             'fullname.max'      => 'The name cannot exceed 100 characters.',
             'unit_id.required'  => 'Please select a unit.',
             'unit_id.exists'    => 'The selected unit does not exist.',
-            'unit_id.unique'    => 'This unit is already occupied by another resident.',
+            'unit_id.unique'    => 'This unit is already occupied by another householder.',
         ];
     }
 

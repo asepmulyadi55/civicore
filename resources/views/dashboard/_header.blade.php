@@ -45,7 +45,7 @@
               <span class="material-icons text-amber-500 mt-0.5 text-base flex-shrink-0">payments</span>
               <div class="flex-1 min-w-0">
                 <p class="text-sm text-slate-800 dark:text-white font-medium truncate">
-                  {{ $payment->resident?->fullname ?? 'Unknown' }}
+                  {{ $payment->householder?->fullname ?? 'Unknown' }}
                 </p>
                 <p class="text-xs text-slate-500">
                   Submitted {{ $payment->notif_month_count > 1 ? $payment->notif_month_count . ' month payment' : 'payment for ' . \Carbon\Carbon::parse($payment->payment_month)->format('M Y') }}

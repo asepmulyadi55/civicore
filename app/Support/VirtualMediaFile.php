@@ -57,11 +57,11 @@ class VirtualMediaFile
      */
     public function getDeleteUrlAttribute(): string
     {
-        if (str_starts_with($this->id, 'resident:')) {
-            return route('media.resident-photo.destroy', substr($this->id, 9));
+        if (str_starts_with($this->id, 'householder:')) {
+            return route('media.householder-photo.destroy', substr($this->id, 9));
         }
         // member:
-        return route('media.member-photo.destroy', substr($this->id, 7));
+        return route('media.resident-photo.destroy', substr($this->id, 7));
     }
 
     /** Blade uses $file->human_size */
@@ -84,3 +84,4 @@ class VirtualMediaFile
         return null;
     }
 }
+

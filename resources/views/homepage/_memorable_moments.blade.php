@@ -17,12 +17,18 @@
     {{-- Title / Subtitle / Archive URL --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div class="space-y-1.5">
+        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Eyebrow Label</label>
+        <input type="text" name="eyebrow" value="{{ old('eyebrow', $memorableMoments['eyebrow'] ?? 'The Gallery') }}"
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+          placeholder="e.g. The Gallery">
+      </div>
+      <div class="space-y-1.5">
         <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_moments_title') }}</label>
         <input type="text" name="title" value="{{ old('title', $memorableMoments['title'] ?? '') }}"
           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
           placeholder="e.g. Memorable Moments">
       </div>
-      <div class="space-y-1.5">
+      <div class="space-y-1.5 md:col-span-2">
         <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_moments_subtitle') }}</label>
         <input type="text" name="subtitle" value="{{ old('subtitle', $memorableMoments['subtitle'] ?? '') }}"
           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"

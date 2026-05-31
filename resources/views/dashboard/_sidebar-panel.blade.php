@@ -3,7 +3,7 @@
   class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-6">
   <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('app.quick_actions') }}</h2>
   <div class="grid grid-cols-2 gap-4">
-    <a href="{{ route('residents.index') }}"
+    <a href="{{ route('householders.index') }}"
       class="flex flex-col items-center justify-center p-4 bg-primary text-white rounded-xl hover:bg-blue-600 transition-colors space-y-2 text-center group">
       <span class="material-icons text-2xl group-hover:scale-110 transition-transform">person_add</span>
       <span class="text-xs font-bold">{{ __('app.action_add_resident') }}</span>

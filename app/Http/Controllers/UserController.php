@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Block;
-use App\Models\Resident;
+use App\Models\Householder;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -25,7 +25,7 @@ class UserController extends Controller
     $sort = $request->get('sort');
     $dir  = $request->get('direction', 'asc') === 'desc' ? 'desc' : 'asc';
 
-    $query = User::with(['role', 'resident']);
+    $query = User::with(['role', 'householder']);
     if (isset($sortMap[$sort])) {
       $query->orderBy($sortMap[$sort], $dir);
     } else {
@@ -98,9 +98,9 @@ class UserController extends Controller
       'is_active' => $request->boolean('is_active', true),
     ]);
 
-    // Auto-link to resident if email matches
+    // Auto-link to householder if email matches
     if ($user->email) {
-      Resident::where('email', $user->email)
+      Householder::where('email', $user->email)
         ->whereNull('user_id')
         ->update(['user_id' => $user->id]);
     }
@@ -135,8 +135,8 @@ class UserController extends Controller
       'password.min' => 'New password must be at least 8 characters long.',
     ]);
 
-    // Unlink old resident association if email or block changed
-    Resident::where('user_id', $user->id)->update(['user_id' => null]);
+// Unlink old householder association if email or block changed
+    Householder::where('user_id', $user->id)->update(['user_id' => null]);
 
     $user->name = $validated['name'];
     $user->username = $validated['username'];
@@ -151,11 +151,11 @@ class UserController extends Controller
 
     $user->save();
 
-    // Re-link resident matching the (possibly new) email
+    // Re-link householder matching the (possibly new) email
     if ($user->email) {
-      $resident = Resident::where('email', $user->email)->first();
-      if ($resident) {
-        $resident->update(['user_id' => $user->id]);
+      $householder = Householder::where('email', $user->email)->first();
+      if ($householder) {
+        $householder->update(['user_id' => $user->id]);
       }
     }
 
@@ -182,11 +182,11 @@ class UserController extends Controller
       'unit_number' => $request->input('unit_number'),
     ]);
 
-    // Link matching resident if email found
+    // Link matching householder if email found
     if ($user->email) {
-      $resident = Resident::where('email', $user->email)->first();
-      if ($resident) {
-        $resident->update(['user_id' => $user->id]);
+      $householder = Householder::where('email', $user->email)->first();
+      if ($householder) {
+        $householder->update(['user_id' => $user->id]);
       }
     }
 
@@ -242,7 +242,7 @@ class UserController extends Controller
     }
 
     $name = $user->name;
-    Resident::where('user_id', $user->id)->update(['user_id' => null]);
+    Householder::where('user_id', $user->id)->update(['user_id' => null]);
     $user->delete();
 
     Log::warning('User permanently deleted', [

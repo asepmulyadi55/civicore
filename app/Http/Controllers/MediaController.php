@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FamilyMember;
+use App\Models\Householder;
 use App\Models\MediaFile;
 use App\Models\PaymentRecord;
 use App\Models\Resident;
@@ -26,11 +26,11 @@ class MediaController extends Controller
      *                        virtual folders have their own bulk route.
      */
     private const FOLDERS = [
-        'users'     => ['label' => 'Users',     'icon' => 'person',           'prefixes' => ['avatars/'],    'source' => 'media_files', 'readonly' => false],
-        'payments'  => ['label' => 'Payments',  'icon' => 'receipt_long',     'prefixes' => ['proofs/'],     'source' => 'media_files', 'readonly' => false],
-        'homepage'  => ['label' => 'Homepage',  'icon' => 'home',             'prefixes' => ['homepage/'],   'source' => 'media_files', 'readonly' => false],
-        'residents' => ['label' => 'Residents', 'icon' => 'people',           'prefixes' => ['residents/'],  'source' => 'residents',   'readonly' => true],
-        'members'   => ['label' => 'Members',   'icon' => 'family_restroom',  'prefixes' => ['members/'],    'source' => 'members',     'readonly' => true],
+        'users'        => ['label' => 'Users',        'icon' => 'person',           'prefixes' => ['avatars/'],      'source' => 'media_files', 'readonly' => false],
+        'payments'     => ['label' => 'Payments',     'icon' => 'receipt_long',     'prefixes' => ['proofs/'],       'source' => 'media_files', 'readonly' => false],
+        'homepage'     => ['label' => 'Homepage',     'icon' => 'home',             'prefixes' => ['homepage/'],     'source' => 'media_files', 'readonly' => false],
+        'householders' => ['label' => 'Householders', 'icon' => 'people',           'prefixes' => ['householders/'], 'source' => 'householders','readonly' => true],
+        'residents'    => ['label' => 'Residents',    'icon' => 'family_restroom',  'prefixes' => ['residents/'],    'source' => 'residents',   'readonly' => true],
     ];
 
     /** Display paginated list of media files, optionally filtered by virtual folder. */
@@ -39,7 +39,7 @@ class MediaController extends Controller
         $folder          = $request->input('folder');
         $folderMeta      = (isset($folder, self::FOLDERS[$folder])) ? self::FOLDERS[$folder] : null;
         $readOnly        = $folderMeta['readonly'] ?? false;
-        $isVirtualFolder = $folderMeta && in_array($folderMeta['source'], ['residents', 'members']);
+        $isVirtualFolder = $folderMeta && in_array($folderMeta['source'], ['householders', 'residents']);
 
         // ── Virtual folders (residents / members) served from model queries ──
         if ($isVirtualFolder) {
@@ -87,8 +87,8 @@ class MediaController extends Controller
         $perPage = config('civicore.pagination.media', 24);
         $search  = $request->input('search');
 
-        if ($folderMeta['source'] === 'residents') {
-            $query = Resident::whereNotNull('photo_path');
+        if ($folderMeta['source'] === 'householders') {
+            $query = Householder::whereNotNull('photo_path');
             if ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('fullname', 'like', "%{$search}%")
@@ -98,7 +98,7 @@ class MediaController extends Controller
             $rows = $query->orderByDesc('updated_at')->get();
 
             $items = $rows->map(fn($r) => new VirtualMediaFile([
-                'id'            => 'resident:' . $r->id,
+                'id'            => 'householder:' . $r->id,
                 'disk'          => 'local',
                 'path'          => $r->photo_path,
                 'original_name' => $r->fullname ?: basename($r->photo_path),
@@ -108,8 +108,8 @@ class MediaController extends Controller
                 'created_at'    => $r->updated_at,
             ]));
         } else {
-            // members
-            $query = FamilyMember::whereNotNull('photo_path');
+            // residents
+            $query = Resident::whereNotNull('photo_path');
             if ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('fullname', 'like', "%{$search}%")
@@ -119,7 +119,7 @@ class MediaController extends Controller
             $rows = $query->orderByDesc('updated_at')->get();
 
             $items = $rows->map(fn($m) => new VirtualMediaFile([
-                'id'            => 'member:' . $m->id,
+                'id'            => 'resident:' . $m->id,
                 'disk'          => 'local',
                 'path'          => $m->photo_path,
                 'original_name' => $m->fullname ?: basename($m->photo_path),
@@ -149,14 +149,14 @@ class MediaController extends Controller
     private function buildFolderCounts(): array
     {
         $counts = ['_all' => MediaFile::count()
-            + Resident::whereNotNull('photo_path')->count()
-            + FamilyMember::whereNotNull('photo_path')->count()];
+            + Householder::whereNotNull('photo_path')->count()
+            + Resident::whereNotNull('photo_path')->count()];
 
         foreach (self::FOLDERS as $key => $meta) {
-            if ($meta['source'] === 'residents') {
+            if ($meta['source'] === 'householders') {
+                $counts[$key] = Householder::whereNotNull('photo_path')->count();
+            } elseif ($meta['source'] === 'residents') {
                 $counts[$key] = Resident::whereNotNull('photo_path')->count();
-            } elseif ($meta['source'] === 'members') {
-                $counts[$key] = FamilyMember::whereNotNull('photo_path')->count();
             } else {
                 $q = MediaFile::query()->where(function ($inner) use ($meta) {
                     foreach ($meta['prefixes'] as $i => $prefix) {
@@ -184,6 +184,30 @@ class MediaController extends Controller
      * Blocked if the path is still referenced by a Resident record.
      * (Manage the photo from the Resident profile page to remove it properly.)
      */
+    public function destroyHouseholderPhoto(Householder $householder)
+    {
+        if (!$householder->photo_path) {
+            return redirect()
+                ->route('media.index', ['folder' => 'householders'])
+                ->with('error', 'This householder has no photo to delete.');
+        }
+
+        if (Householder::where('photo_path', $householder->photo_path)->exists()) {
+            return redirect()
+                ->route('media.index', ['folder' => 'householders'])
+                ->with('error', __('app.flash_file_in_use', [
+                    'reason' => "the householder profile of {$householder->fullname}. Remove it from their profile page instead.",
+                ]));
+        }
+
+        Storage::disk('local')->delete($householder->photo_path);
+        $householder->update(['photo_path' => null]);
+
+        return redirect()
+            ->route('media.index', ['folder' => 'householders'])
+            ->with('success', __('app.flash_photo_removed', ['name' => $householder->fullname]));
+    }
+
     public function destroyResidentPhoto(Resident $resident)
     {
         if (!$resident->photo_path) {
@@ -192,7 +216,6 @@ class MediaController extends Controller
                 ->with('error', 'This resident has no photo to delete.');
         }
 
-        // Block deletion if still in use
         if (Resident::where('photo_path', $resident->photo_path)->exists()) {
             return redirect()
                 ->route('media.index', ['folder' => 'residents'])
@@ -210,35 +233,6 @@ class MediaController extends Controller
     }
 
     /**
-     * Remove a family member's profile photo.
-     * Blocked if the path is still referenced by a FamilyMember record.
-     */
-    public function destroyMemberPhoto(FamilyMember $familyMember)
-    {
-        if (!$familyMember->photo_path) {
-            return redirect()
-                ->route('media.index', ['folder' => 'members'])
-                ->with('error', 'This member has no photo to delete.');
-        }
-
-        // Block deletion if still in use
-        if (FamilyMember::where('photo_path', $familyMember->photo_path)->exists()) {
-            return redirect()
-                ->route('media.index', ['folder' => 'members'])
-                ->with('error', __('app.flash_file_in_use', [
-                    'reason' => "the member profile of {$familyMember->fullname}. Remove it from their profile page instead.",
-                ]));
-        }
-
-        Storage::disk('local')->delete($familyMember->photo_path);
-        $familyMember->update(['photo_path' => null]);
-
-        return redirect()
-            ->route('media.index', ['folder' => 'members'])
-            ->with('success', __('app.flash_photo_removed', ['name' => $familyMember->fullname]));
-    }
-
-    /**
      * Bulk delete virtual photos (residents and/or members).
      * Accepts IDs in "resident:uuid" or "member:uuid" format.
      * Files still referenced by a profile record are skipped.
@@ -247,22 +241,21 @@ class MediaController extends Controller
     {
         $request->validate([
             'ids'   => 'required|array|min:1',
-            'ids.*' => ['string', 'regex:/^(resident|member):[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i'],
+            'ids.*' => ['string', 'regex:/^(householder|resident):[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i'],
         ]);
 
         $deleted        = 0;
         $skipped        = 0;
-        $redirectFolder = 'residents';
+        $redirectFolder = 'householders';
 
         foreach ($request->ids as $compositeId) {
             [$type, $uuid] = explode(':', $compositeId, 2);
 
-            if ($type === 'resident') {
-                $redirectFolder = 'residents';
-                $model = Resident::find($uuid);
+            if ($type === 'householder') {
+                $redirectFolder = 'householders';
+                $model = Householder::find($uuid);
                 if ($model && $model->photo_path) {
-                    // Block if still referenced
-                    if (Resident::where('photo_path', $model->photo_path)->exists()) {
+                    if (Householder::where('photo_path', $model->photo_path)->exists()) {
                         $skipped++;
                         continue;
                     }
@@ -270,12 +263,11 @@ class MediaController extends Controller
                     $model->update(['photo_path' => null]);
                     $deleted++;
                 }
-            } elseif ($type === 'member') {
-                $redirectFolder = 'members';
-                $model = FamilyMember::find($uuid);
+            } elseif ($type === 'resident') {
+                $redirectFolder = 'residents';
+                $model = Resident::find($uuid);
                 if ($model && $model->photo_path) {
-                    // Block if still referenced
-                    if (FamilyMember::where('photo_path', $model->photo_path)->exists()) {
+                    if (Resident::where('photo_path', $model->photo_path)->exists()) {
                         $skipped++;
                         continue;
                     }
@@ -290,7 +282,7 @@ class MediaController extends Controller
             $message = __('app.flash_bulk_partial', ['deleted' => $deleted, 'skipped' => $skipped]);
             $type    = 'success';
         } elseif ($skipped > 0) {
-            $message = __('app.flash_file_in_use', ['reason' => 'active resident/member profiles. Remove photos from their profile pages instead.']);
+            $message = __('app.flash_file_in_use', ['reason' => 'active householder/resident profiles. Remove photos from their profile pages instead.']);
             $type    = 'error';
         } else {
             $message = __('app.flash_files_deleted', ['count' => $deleted]);

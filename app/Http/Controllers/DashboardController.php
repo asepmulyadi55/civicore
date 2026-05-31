@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Householder;
 use App\Models\PaymentMethod;
 use App\Models\PaymentRecord;
-use App\Models\Resident;
 use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
@@ -23,14 +23,14 @@ class DashboardController extends Controller
     $totalCollected = PaymentRecord::where('status', 'approved')
       ->whereYear('payment_month', now()->year)
       ->whereMonth('payment_month', now()->month)
-      ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
+      ->when($scopeBlockId, fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId)))
       ->sum('amount');
 
     $pendingCount = PaymentRecord::where('status', 'pending')
-      ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
+      ->when($scopeBlockId, fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId)))
       ->count();
 
-    $unpaidCount = Resident::where('is_active', true)
+    $unpaidCount = Householder::where('is_active', true)
       ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
       ->whereDoesntHave(
         'paymentRecords',
@@ -39,14 +39,14 @@ class DashboardController extends Controller
           ->whereMonth('payment_month', now()->month)
       )->count();
 
-    $activeResidents = Resident::where('is_active', true)
+    $activeResidents = Householder::where('is_active', true)
       ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
       ->count();
 
     // Recent activity: last 7 batches (grouped by batch_id), scoped to block for coordinator
-    $rawActivity = PaymentRecord::with(['resident.block'])
+    $rawActivity = PaymentRecord::with(['householder.block'])
       ->whereIn('status', ['pending', 'approved', 'rejected'])
-      ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
+      ->when($scopeBlockId, fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId)))
       ->orderByDesc('updated_at')
       ->limit(50)
       ->get();
@@ -65,9 +65,9 @@ class DashboardController extends Controller
       ->values();
 
     // Notification: pending payment batches (up to 5 unique batches)
-    $rawPendingPayments = PaymentRecord::with(['resident'])
+    $rawPendingPayments = PaymentRecord::with(['householder'])
       ->where('status', 'pending')
-      ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
+      ->when($scopeBlockId, fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId)))
       ->orderByDesc('created_at')
       ->limit(30)
       ->get();

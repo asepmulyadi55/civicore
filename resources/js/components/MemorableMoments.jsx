@@ -14,6 +14,7 @@ export default function MemorableMoments({ moments = {}, pastEvents = [], loadin
     const skBg         = isDark ? '#1C2D27' : '#e2e8f0';
 
     const title      = moments?.title       || 'Memorable Moments';
+    const eyebrow    = moments?.eyebrow     || 'The Gallery';
     const subtitle   = moments?.subtitle    || 'A look back at the experiences that define our community.';
     const archiveUrl = moments?.archive_url || null;
     const images     = moments?.images      || [];
@@ -60,7 +61,7 @@ export default function MemorableMoments({ moments = {}, pastEvents = [], loadin
                         className="font-semibold tracking-widest uppercase text-xs mb-3 md:mb-4 block"
                         style={{ color: '#D4AF37', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                     >
-                        The Gallery
+                        {eyebrow}
                     </span>
                     <h2
                         className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight mb-3 md:mb-4"

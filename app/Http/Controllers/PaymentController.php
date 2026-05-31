@@ -6,7 +6,7 @@ use App\Enums\PaymentStatus;
 use App\Models\Block;
 use App\Models\MediaFile;
 use App\Models\PaymentRecord;
-use App\Models\Resident;
+use App\Models\Householder;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -25,17 +25,17 @@ class PaymentController extends Controller
 
         // Build base query scoped to coordinator's block if applicable
         $baseQ = PaymentRecord::query()
-            ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)));
+            ->when($scopeBlockId, fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId)));
 
         // Apply search, block, status, and month filters
         if ($search = $request->get('search')) {
-            $baseQ->whereHas('resident', function ($q) use ($search) {
+            $baseQ->whereHas('householder', function ($q) use ($search) {
                 $q->where('fullname', 'like', "%{$search}%")
                     ->orWhereHas('unit', fn($u) => $u->where('unit_number', 'like', "%{$search}%"));
             });
         }
         if (!$scopeBlockId && $blockId = $request->get('block_id')) {
-            $baseQ->whereHas('resident', fn($q) => $q->where('block_id', $blockId));
+            $baseQ->whereHas('householder', fn($q) => $q->where('block_id', $blockId));
         }
         if ($status = $request->get('status')) {
             $baseQ->where('status', $status);
@@ -65,7 +65,7 @@ class PaymentController extends Controller
      */
     private function buildResidentData(?string $scopeBlockId): array
     {
-        $residents = Resident::with(['block', 'feeHistories'])
+        $residents = Householder::with(['block', 'feeHistories'])
             ->where('is_active', true)
             ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
             ->orderBy('fullname')
@@ -86,7 +86,7 @@ class PaymentController extends Controller
         Request $request
     ): \Illuminate\Pagination\LengthAwarePaginator {
         $allRecords = $baseQ
-            ->with(['resident.block', 'paymentMethod', 'submittedBy'])
+            ->with(['householder.block', 'paymentMethod', 'submittedBy'])
             ->orderByRaw("CASE status WHEN 'pending' THEN 0 WHEN 'rejected' THEN 1 ELSE 2 END ASC")
             ->orderByDesc('payment_month')
             ->get();
@@ -111,8 +111,8 @@ class PaymentController extends Controller
         $dir  = $request->get('direction', 'desc');
         if ($sort === 'resident') {
             $flatRows = $dir === 'asc'
-                ? $flatRows->sortBy(fn($p) => $p->resident?->fullname)->values()
-                : $flatRows->sortByDesc(fn($p) => $p->resident?->fullname)->values();
+                ? $flatRows->sortBy(fn($p) => $p->householder?->fullname)->values()
+                : $flatRows->sortByDesc(fn($p) => $p->householder?->fullname)->values();
         } elseif ($sort === 'amount') {
             $flatRows = $dir === 'asc'
                 ? $flatRows->sortBy('total_amount')->values()
@@ -152,7 +152,7 @@ class PaymentController extends Controller
     {
         $statBase = PaymentRecord::when(
             $scopeBlockId,
-            fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId))
+            fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId))
         );
 
         $pendingCount = (clone $statBase)->where('status', 'pending')->count();
@@ -163,7 +163,7 @@ class PaymentController extends Controller
             ->whereMonth('payment_month', now()->month)
             ->sum('amount');
 
-        $unpaidCount = Resident::where('is_active', true)
+        $unpaidCount = Householder::where('is_active', true)
             ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
             ->whereDoesntHave(
                 'paymentRecords',
@@ -179,16 +179,16 @@ class PaymentController extends Controller
             ->values()->all();
 
         $paidMonthsByResident = PaymentRecord::where('status', 'approved')
-            ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
-            ->get(['resident_id', 'payment_month'])
-            ->groupBy('resident_id')
+            ->when($scopeBlockId, fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId)))
+            ->get(['householder_id', 'payment_month'])
+            ->groupBy('householder_id')
             ->map($mapMonths)
             ->toArray();
 
         $pendingMonthsByResident = PaymentRecord::where('status', 'pending')
-            ->when($scopeBlockId, fn($q) => $q->whereHas('resident', fn($r) => $r->where('block_id', $scopeBlockId)))
-            ->get(['resident_id', 'payment_month'])
-            ->groupBy('resident_id')
+            ->when($scopeBlockId, fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId)))
+            ->get(['householder_id', 'payment_month'])
+            ->groupBy('householder_id')
             ->map($mapMonths)
             ->toArray();
 
@@ -205,7 +205,7 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'resident_id' => ['required', 'exists:residents,id'],
+            'householder_id' => ['required', 'exists:householders,id'],
             'months' => ['required', 'array', 'min:1'],
             'months.*' => ['required', 'string', 'regex:/^\d{4}-\d{2}$/'],
             'amount' => ['required', 'numeric', 'min:0'],
@@ -393,7 +393,7 @@ class PaymentController extends Controller
             'rejection_reason' => null,
         ]);
 
-        $residentName = $payment->resident->fullname ?? 'Unknown';
+        $residentName = $payment->householder->fullname ?? 'Unknown';
         Log::info('Payment approved', [
             'payment_id' => $payment->id,
             'resident' => $residentName,
@@ -423,7 +423,7 @@ class PaymentController extends Controller
 
         Log::info('Payment rejected', [
             'payment_id' => $payment->id,
-            'resident' => $payment->resident->fullname ?? 'Unknown',
+            'resident' => $payment->householder->fullname ?? 'Unknown',
             'reason' => $request->rejection_reason,
             'rejected_by' => auth()->id(),
         ]);
@@ -454,7 +454,7 @@ class PaymentController extends Controller
                 'rejection_reason' => null,
             ]);
 
-        $name = $records->first()?->resident?->fullname ?? 'Resident';
+        $name = $records->first()?->householder?->fullname ?? 'Resident';
         Log::info('Batch payments approved', [
             'batch_id' => $batchId,
             'count' => $count,
@@ -485,7 +485,7 @@ class PaymentController extends Controller
             'approved_at' => null,
         ]);
 
-        $name = $records->first()?->resident?->fullname ?? 'Resident';
+        $name = $records->first()?->householder?->fullname ?? 'Resident';
         Log::info('Batch payments rejected', [
             'batch_id' => $batchId,
             'count' => $count,
@@ -536,7 +536,7 @@ class PaymentController extends Controller
 
         // Perform deletion
         $count = 1;
-        $name = $payment->resident->fullname ?? 'Resident';
+        $name = $payment->householder->fullname ?? 'Resident';
         if ($payment->batch_id) {
             $count = PaymentRecord::where('batch_id', $payment->batch_id)->count();
             PaymentRecord::where('batch_id', $payment->batch_id)->delete();
@@ -555,3 +555,4 @@ class PaymentController extends Controller
             ->with('success', "{$count} payment record(s) for {$name} deleted.");
     }
 }
+

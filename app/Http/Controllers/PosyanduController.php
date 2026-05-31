@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\PosyanduExport;
 use App\Models\Block;
-use App\Models\FamilyMember;
+use App\Models\Resident;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -51,23 +51,23 @@ class PosyanduController extends Controller
 
     public function index(Request $request)
     {
-        $query = FamilyMember::with(['resident.block', 'resident.unit']);
+        $query = Resident::with(['householder.block', 'householder.unit']);
 
         if ($blockId = $request->input('block_id')) {
-            $query->whereHas('resident', fn($q) => $q->where('block_id', $blockId));
+            $query->whereHas('householder', fn($q) => $q->where('block_id', $blockId));
         }
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('fullname', 'like', "%{$search}%")
-                  ->orWhereHas('resident', fn($r) => $r->where('fullname', 'like', "%{$search}%"));
+                  ->orwhereHas('householder', fn($r) => $r->where('fullname', 'like', "%{$search}%"));
             });
         }
 
         $all    = $query->get();
         $limits = self::categoryLimits();
 
-        $all->each(function (FamilyMember $m) use ($limits) {
+        $all->each(function (Resident $m) use ($limits) {
             $m->age_category = $this->resolveCategory($m->birth_date, $limits);
             $m->age_label    = $m->birth_date ? $this->ageLabel($m->birth_date) : '---';
         });
