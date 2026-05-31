@@ -63,6 +63,7 @@
         'items' => [
           ['key' => 'users', 'label' => __('app.nav_users'), 'icon' => 'manage_accounts', 'route' => 'users.index', 'permission' => 'users.view'],
           ['key' => 'roles', 'label' => __('app.nav_roles'), 'icon' => 'admin_panel_settings', 'route' => 'roles.index', 'permission' => 'roles.view'],
+          ['key' => 'property', 'label' => __('app.nav_property'), 'icon' => 'home_work', 'route' => 'property.index', 'permission' => 'property.view'],
           ['key' => 'homepage', 'label' => __('app.nav_homepage'), 'icon' => 'public', 'route' => 'homepage.index', 'permission' => 'homepage.view'],
           ['key' => 'media', 'label' => __('app.nav_media'), 'icon' => 'perm_media', 'route' => 'media.index', 'permission' => 'media.view'],
         ],

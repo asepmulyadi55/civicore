@@ -81,7 +81,7 @@
             <span class="material-icons text-primary text-2xl">home</span>
             <div>
               <p class="font-bold text-slate-900 dark:text-white">{{ $householder->block->name }} &middot; Unit {{ $householder->unit_number }}</p>
-              <p class="text-xs text-slate-500 capitalize">{{ str_replace('_', ' ', $householder->house_status) }}</p>
+              <p class="text-xs text-slate-500">{{ __('app.house_status_' . ($householder->house_status ?? 'owner_occupied')) }}</p>
             </div>
           </div>
         @endif
