@@ -319,6 +319,10 @@
      JavaScript
 ═══════════════════════════════════════════════════════════════════════ --}}
 <script>
+// Selected dashboard period (set by Blade)
+const finSelectedMonth = {{ $selectedMonth ?? 'new Date().getMonth() + 1' }};
+const finSelectedYear  = {{ $selectedYear  ?? 'new Date().getFullYear()' }};
+
 // ── Transaction Modal ─────────────────────────────────────────────────────────
 function openAddTransactionModal() {
   const form = document.getElementById('fin-tx-form');
@@ -326,8 +330,13 @@ function openAddTransactionModal() {
   document.getElementById('fin-tx-method').value = 'POST';
   document.getElementById('fin-tx-modal-title').textContent = '{{ __('app.fin_add_transaction') }}';
   form.reset();
-  // Default date = today
-  document.getElementById('fin-tx-date').value = new Date().toISOString().split('T')[0];
+  // Default date: today if selected period is current month, else 1st of selected month
+  const today = new Date();
+  const isCurrent = (finSelectedYear === today.getFullYear() && finSelectedMonth === today.getMonth() + 1);
+  const pad = n => String(n).padStart(2, '0');
+  document.getElementById('fin-tx-date').value = isCurrent
+    ? today.toISOString().split('T')[0]
+    : `${finSelectedYear}-${pad(finSelectedMonth)}-01`;
   document.getElementById('fin-tx-modal').classList.remove('hidden');
   document.getElementById('fin-tx-modal').classList.add('flex');
 }

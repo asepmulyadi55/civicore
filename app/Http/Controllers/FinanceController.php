@@ -37,8 +37,14 @@ class FinanceController extends Controller
         $currentMonth = (int) $now->month;
         $currentYear  = (int) $now->year;
 
+        // Allow viewing a past month's dashboard
+        $selectedMonth = (int) $request->get('dash_month', $currentMonth);
+        $selectedYear  = (int) $request->get('dash_year', $currentYear);
+        if ($selectedMonth < 1 || $selectedMonth > 12) $selectedMonth = $currentMonth;
+        if ($selectedYear < 2020 || $selectedYear > 2099) $selectedYear = $currentYear;
+
         // ── Dashboard aggregates ─────────────────────────────────────────────
-        $dashData = $this->buildDashboardData($currentMonth, $currentYear);
+        $dashData = $this->buildDashboardData($selectedMonth, $selectedYear);
 
         // ── Transactions data ────────────────────────────────────────────────
         $txData = $this->buildTransactionData($request);
@@ -50,7 +56,7 @@ class FinanceController extends Controller
         $categories = FinanceTransaction::distinctCategories();
 
         return view('finance', array_merge(
-            compact('tab', 'currency', 'canManage', 'canApprove', 'currentMonth', 'currentYear', 'categories'),
+            compact('tab', 'currency', 'canManage', 'canApprove', 'currentMonth', 'currentYear', 'selectedMonth', 'selectedYear', 'categories'),
             $dashData,
             $txData,
             $rptData
@@ -401,7 +407,12 @@ class FinanceController extends Controller
         $manualIncome = (float) FinanceTransaction::where('type', 'income')
             ->where('report_month', $month)->where('report_year', $year)->sum('amount');
 
-        $monthIncome  = $manualIncome;
+        $paymentIncome = (float) PaymentRecord::where('status', 'approved')
+            ->whereYear('payment_month', $year)
+            ->whereMonth('payment_month', $month)
+            ->sum('amount');
+
+        $monthIncome = $manualIncome + $paymentIncome;
         $monthExpense = (float) FinanceTransaction::where('type', 'expense')
             ->where('report_month', $month)->where('report_year', $year)->sum('amount');
 

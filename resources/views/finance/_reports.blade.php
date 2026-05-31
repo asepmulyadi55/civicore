@@ -155,7 +155,7 @@
                   @endif
 
                   {{-- Export --}}
-                  @if($report->status === 'approved')
+                  @if(in_array($report->status, ['approved', 'submitted']))
                     <a href="{{ route('finance.reports.export', $report) }}"
                       class="p-1.5 rounded-lg text-slate-400 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
                       title="{{ __('app.fin_export_report') }}">

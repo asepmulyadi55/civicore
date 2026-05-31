@@ -96,6 +96,8 @@ Route::middleware('auth')->group(function () {
     // ── Property Listings ─────────────────────────────────────────────────────
     Route::get('/property-listings', [PropertyListingController::class, 'index'])
         ->middleware('permission:property.view')->name('property.index');
+    Route::get('/property-listings/{property}', [PropertyListingController::class, 'show'])
+        ->middleware('permission:property.view')->name('property.show');
     Route::post('/property-listings', [PropertyListingController::class, 'store'])
         ->middleware('permission:property.create')->name('property.store');
     Route::put('/property-listings/{property}', [PropertyListingController::class, 'update'])
