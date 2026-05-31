@@ -102,7 +102,7 @@ export default function PropertyListings({ listings = [], loading, isDark = fals
                             style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
                         >
                             {/* Image */}
-                            <div className="relative w-full h-52 overflow-hidden flex-shrink-0">
+                            <Link to={`/property/${listing.id}`} className="block relative w-full h-52 overflow-hidden flex-shrink-0">
                                 <img
                                     src={image}
                                     alt={listing.title}
@@ -115,13 +115,18 @@ export default function PropertyListings({ listings = [], loading, isDark = fals
                                 >
                                     {badge.label}
                                 </span>
-                            </div>
+                                {listing.images?.length > 1 && (
+                                    <span className="absolute bottom-3 right-3 px-2 py-1 rounded-lg text-xs font-medium" style={{ background: 'rgba(0,0,0,0.5)', color: '#fff' }}>
+                                        +{listing.images.length - 1} foto
+                                    </span>
+                                )}
+                            </Link>
 
                             {/* Body */}
                             <div className="p-5 flex flex-col flex-1 gap-2">
-                                <p className="font-semibold text-base leading-snug" style={{ color: headingColor, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                <Link to={`/property/${listing.id}`} className="font-semibold text-base leading-snug hover:underline" style={{ color: headingColor, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                                     {listing.title}
-                                </p>
+                                </Link>
 
                                 {/* Price */}
                                 <p className="text-lg font-bold" style={{ color: '#D4AF37', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
@@ -161,19 +166,27 @@ export default function PropertyListings({ listings = [], loading, isDark = fals
                                 {/* Spacer */}
                                 <div className="flex-1" />
 
-                                {/* Contact button */}
-                                {!isSoldOrRented && listing.contact_phone && (
-                                    <a
-                                        href={waLink || `tel:${listing.contact_phone}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="mt-2 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
-                                        style={{ background: isDark ? 'rgba(212,175,55,0.15)' : 'rgba(28,45,39,0.06)', color: viewAllColor, border: `1px solid ${viewAllBorderColor}` }}
+                                <div className="flex gap-2 mt-2">
+                                    <Link
+                                        to={`/property/${listing.id}`}
+                                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
+                                        style={{ background: isDark ? 'rgba(212,175,55,0.15)' : '#fefce8', color: '#D4AF37', border: `1px solid ${isDark ? 'rgba(212,175,55,0.3)' : '#fde68a'}`, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                                     >
-                                        <span className="material-symbols-outlined text-sm">call</span>
-                                        {listing.contact_name || listing.contact_phone}
-                                    </a>
-                                )}
+                                        <span className="material-symbols-outlined text-sm">open_in_new</span>
+                                        Lihat Detail
+                                    </Link>
+                                    {!isSoldOrRented && listing.contact_phone && (
+                                        <a
+                                            href={waLink || `tel:${listing.contact_phone}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
+                                            style={{ background: isDark ? 'rgba(212,175,55,0.15)' : 'rgba(28,45,39,0.06)', color: viewAllColor, border: `1px solid ${viewAllBorderColor}` }}
+                                        >
+                                            <span className="material-symbols-outlined text-sm">call</span>
+                                        </a>
+                                    )}
+                                </div>
                             </div>
                         </article>
                     );
