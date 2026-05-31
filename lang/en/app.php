@@ -284,6 +284,8 @@ return [
   'email_address' => 'Email Address',
   'email_optional_hint' => '(optional — enables resident login)',
   'eg_email' => 'e.g. resident@email.com',
+  'block' => 'Block',
+  'unit' => 'Unit',
   'select_block' => 'Select block',
   'err_block' => 'Please select a block.',
   'unit_no' => 'Unit No.',
