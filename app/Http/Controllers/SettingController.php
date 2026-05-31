@@ -130,7 +130,7 @@ class SettingController extends Controller
     Setting::set('admin_memo', $request->input('admin_memo', ''));
 
     return redirect()->route('settings.index')
-      ->with('success', 'Admin memo updated successfully.');
+      ->with('success', __('app.flash_memo_updated'));
   }
 
   /** Save Posyandu age-category range limits — admin only. */
@@ -159,7 +159,7 @@ class SettingController extends Controller
     Cache::flush();
 
     return redirect()->route('settings.index')
-      ->with('success', 'Posyandu age category ranges updated.');
+      ->with('success', __('app.flash_posyandu_saved'));
   }
 }
 

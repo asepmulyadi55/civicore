@@ -106,7 +106,7 @@ class UserController extends Controller
     }
 
     return redirect()->route('users.index')
-      ->with('success', "\"{$user->name}\" has been created successfully.");
+      ->with('success', __('app.flash_user_created', ['name' => $user->name]));
   }
 
   /**
@@ -160,7 +160,7 @@ class UserController extends Controller
     }
 
     return redirect()->route('users.index')
-      ->with('success', "\"{$user->name}\" has been updated successfully.");
+      ->with('success', __('app.flash_user_updated', ['name' => $user->name]));
   }
 
   /**
@@ -198,14 +198,14 @@ class UserController extends Controller
     ]);
 
     return redirect()->route('users.index')
-      ->with('success', "\"{$user->name}\" has been approved and can now log in.");
+      ->with('success', __('app.flash_user_approved', ['name' => $user->name]));
   }
 
   public function deactivate(User $user)
   {
     if ($user->id === auth()->id()) {
       return redirect()->route('users.index')
-        ->with('error', 'You cannot deactivate your own account.');
+        ->with('error', __('app.flash_cannot_deactivate_self'));
     }
 
     $user->update(['is_active' => false]);
@@ -217,7 +217,7 @@ class UserController extends Controller
     ]);
 
     return redirect()->route('users.index')
-      ->with('success', "\"{$user->name}\" has been deactivated.");
+      ->with('success', __('app.flash_user_deactivated', ['name' => $user->name]));
   }
 
   public function reactivate(User $user)
@@ -231,14 +231,14 @@ class UserController extends Controller
     ]);
 
     return redirect()->route('users.index')
-      ->with('success', "\"{$user->name}\" has been reactivated and can now log in.");
+      ->with('success', __('app.flash_user_reactivated', ['name' => $user->name]));
   }
 
   public function destroy(User $user)
   {
     if ($user->id === auth()->id()) {
       return redirect()->route('users.index')
-        ->with('error', 'You cannot delete your own account.');
+        ->with('error', __('app.flash_cannot_delete_self'));
     }
 
     $name = $user->name;
@@ -253,6 +253,6 @@ class UserController extends Controller
     ]);
 
     return redirect()->route('users.index')
-      ->with('success', "\"{$name}\" has been deleted.");
+      ->with('success', __('app.flash_user_deleted', ['name' => $name]));
   }
 }

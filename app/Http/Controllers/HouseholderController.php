@@ -35,6 +35,7 @@ class HouseholderController extends Controller
             'residents' => fn($q) => $q->where('is_head', true)->select('id', 'householder_id', 'fullname'),
         ])->withCount('residents')
           ->leftJoin('units', 'units.id', '=', 'householders.unit_id')
+          ->leftJoin('blocks', 'blocks.id', '=', 'householders.block_id')
           ->select('householders.*');
 
 
@@ -78,6 +79,7 @@ class HouseholderController extends Controller
             $query->orderBy($sortableColumns[$sort], $dir);
         } else {
             $query->orderByRaw("
+                blocks.name,
                 LEFT(units.unit_number, LOCATE('-', units.unit_number) - 1),
                 CAST(SUBSTRING(units.unit_number, LOCATE('-', units.unit_number) + 1) AS UNSIGNED),
                 units.unit_number
@@ -86,7 +88,6 @@ class HouseholderController extends Controller
 
         $householders = $query->paginate(15)->withQueryString();
         $blocks = Block::active()->orderBy('name')->get();
-
 
         $baseCount   = Householder::when($scopeBlockId, fn($q) => $q->where('householders.block_id', $scopeBlockId));
         $totalCount = (clone $baseCount)->count();
@@ -126,7 +127,7 @@ class HouseholderController extends Controller
         });
 
         return redirect()->route('householders.index')
-            ->with('success', 'Householder added successfully.');
+            ->with('success', __('app.flash_householder_added'));
     }
 
     /**
@@ -283,7 +284,7 @@ class HouseholderController extends Controller
         DB::transaction(function () use ($request, $householder) {
             $data = $request->only([
                 'fullname', 'phone', 'email', 'block_id', 'unit_id', 'is_active',
-                'family_card_number', 'notes',
+                'family_card_number', 'notes', 'rent_start', 'rent_end',
             ]);
 
             // Keep block_id in sync with the selected unit
@@ -325,7 +326,7 @@ class HouseholderController extends Controller
         });
 
         return redirect()->route('householders.edit', $householder)
-            ->with('success', 'Household updated successfully.');
+            ->with('success', __('app.flash_household_updated'));
     }
 
     /**
@@ -342,7 +343,7 @@ class HouseholderController extends Controller
         ]);
 
         return redirect()->route('householders.index')
-            ->with('success', "{$householder->fullname} has been deactivated.");
+            ->with('success', __('app.flash_householder_deactivated', ['name' => $householder->fullname]));
     }
 
     /**
@@ -365,7 +366,7 @@ class HouseholderController extends Controller
         ]);
 
         return redirect()->route('householders.index')
-            ->with('success', "{$name} has been permanently deleted.");
+            ->with('success', __('app.flash_householder_deleted', ['name' => $name]));
     }
 
     /**

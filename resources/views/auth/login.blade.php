@@ -69,7 +69,7 @@
                   <span class="material-icons text-slate-400 text-sm">lock_outline</span>
                 </span>
                 <input
-                  class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none @error('password') border-red-500 dark:border-red-500 @enderror"
+                  class="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 outline-none [&::-ms-reveal]:hidden [&::-webkit-contacts-auto-fill-button]:hidden @error('password') border-red-500 dark:border-red-500 @enderror"
                   id="password" name="password" placeholder="••••••••" type="password"
                   oninput="clearLoginErr('err-password')" />
                 <button

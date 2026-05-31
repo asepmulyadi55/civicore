@@ -20,6 +20,7 @@ class ResidentController extends Controller
             'gender'       => ['nullable', 'in:male,female'],
             'education'    => ['nullable', 'in:none,elementary,junior_high,senior_high,associate,bachelor,master,doctorate,other'],
             'occupation'   => ['nullable', 'string', 'max:100'],
+            'phone'        => ['nullable', 'string', 'max:25'],
             'photo'        => ['nullable', 'image', 'max:5120'],
         ];
     }
@@ -50,7 +51,7 @@ class ResidentController extends Controller
         });
 
         return redirect()->route('householders.edit', $householder)
-            ->with('success', "Resident '{$data['fullname']}' added successfully.");
+            ->with('success', __('app.flash_resident_added', ['name' => $data['fullname']]));
     }
 
     public function update(Request $request, Householder $householder, Resident $resident)
@@ -79,7 +80,7 @@ class ResidentController extends Controller
         });
 
         return redirect()->route('householders.edit', $householder)
-            ->with('success', "Resident '{$data['fullname']}' updated.");
+            ->with('success', __('app.flash_resident_updated', ['name' => $data['fullname']]));
     }
 
     public function destroy(Householder $householder, Resident $resident)
@@ -91,7 +92,7 @@ class ResidentController extends Controller
         $resident->delete();
 
         return redirect()->route('householders.edit', $householder)
-            ->with('success', "'{$name}' has been removed.");
+            ->with('success', __('app.flash_resident_removed', ['name' => $name]));
     }
 
     /**
@@ -109,6 +110,6 @@ class ResidentController extends Controller
         });
 
         return redirect()->route('householders.edit', $householder)
-            ->with('success', "{$resident->fullname} is now the Head of Family.");
+            ->with('success', __('app.flash_resident_set_head', ['name' => $resident->fullname]));
     }
 }

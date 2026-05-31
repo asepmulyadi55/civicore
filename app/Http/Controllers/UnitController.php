@@ -46,7 +46,7 @@ class UnitController extends Controller
 
         return redirect()
             ->route('blocks.units.index', $block)
-            ->with('success', "Unit \"{$request->unit_number}\" added to {$block->name}.");
+            ->with('success', __('app.flash_unit_added', ['unit' => $request->unit_number, 'block' => $block->name]));
     }
 
     /**
@@ -58,7 +58,7 @@ class UnitController extends Controller
 
         return redirect()
             ->route('blocks.units.index', $block)
-            ->with('success', "Unit \"{$unit->unit_number}\" updated.");
+            ->with('success', __('app.flash_unit_updated', ['unit' => $unit->unit_number]));
     }
 
     /**
@@ -79,7 +79,7 @@ class UnitController extends Controller
 
         return redirect()
             ->route('blocks.units.index', $block)
-            ->with('success', "Unit \"{$label}\" deleted.");
+            ->with('success', __('app.flash_unit_deleted', ['unit' => $label]));
     }
 
     /**

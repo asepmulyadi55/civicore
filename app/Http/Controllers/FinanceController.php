@@ -368,7 +368,7 @@ class FinanceController extends Controller
 
         return redirect()
             ->route('finance.index', ['tab' => 'reports'])
-            ->with('success', 'Report deleted successfully.');
+            ->with('success', __('app.flash_report_deleted'));
     }
 
     // ── Category autocomplete ─────────────────────────────────────────────────

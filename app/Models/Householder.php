@@ -22,11 +22,15 @@ class Householder extends Model
         'family_card_number',
         'notes',
         'photo_path',
+        'rent_start',
+        'rent_end',
     ];
 
     protected $casts = [
         'is_active'          => 'boolean',
         'family_card_number' => 'encrypted',
+        'rent_start'         => 'date',
+        'rent_end'           => 'date',
     ];
 
     // ── Backward-compat virtual accessors ────────────────────────────────────

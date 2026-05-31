@@ -165,7 +165,7 @@ Review Modal, and all associated JavaScript.
               <select id="cm-status"
                 class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white">
                 <option value="unpaid">{{ __('app.status_unpaid') }}</option>
-                <option value="pending">{{ __('app.pending_review') }}</option>
+                <option value="pending" selected>{{ __('app.pending_review') }}</option>
                 <option value="approved">{{ __('app.status_approved') }}</option>
               </select>
               <span
