@@ -284,6 +284,8 @@ return [
   'email_address' => 'Alamat Email',
   'email_optional_hint' => '(opsional — memungkinkan log in penghuni)',
   'eg_email' => 'contoh: resident@email.com',
+  'block' => 'Blok',
+  'unit' => 'Unit',
   'select_block' => 'Pilih blok',
   'err_block' => 'Silakan pilih blok.',
   'unit_no' => 'No. Unit',
