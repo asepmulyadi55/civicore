@@ -35,6 +35,7 @@ Route::get('/', fn() => view('spa'))->name('home');
 Route::get('/events', fn() => view('spa'))->name('events');
 Route::get('/buletin', fn() => view('spa'))->name('buletin');
 Route::get('/property', fn() => view('spa'))->name('property');
+Route::get('/property/{id}', fn() => view('spa'))->name('property.detail');
 
 // ── Sitemap ───────────────────────────────────────────────────────────────────
 Route::get('/sitemap.xml', function () {
@@ -57,6 +58,9 @@ Route::get('/api/buletin', [ApiHomepageController::class, 'buletin'])
 Route::get('/api/property', [ApiHomepageController::class, 'property'])
     ->middleware('api.key')
     ->name('api.property');
+Route::get('/api/property/{id}', [ApiHomepageController::class, 'propertyDetail'])
+    ->middleware('api.key')
+    ->name('api.property.detail');
 
 // ── Auth (public) ─────────────────────────────────────────────────────────────
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -96,8 +100,6 @@ Route::middleware('auth')->group(function () {
     // ── Property Listings ─────────────────────────────────────────────────────
     Route::get('/property-listings', [PropertyListingController::class, 'index'])
         ->middleware('permission:property.view')->name('property.index');
-    Route::get('/property-listings/{property}', [PropertyListingController::class, 'show'])
-        ->middleware('permission:property.view')->name('property.show');
     Route::post('/property-listings', [PropertyListingController::class, 'store'])
         ->middleware('permission:property.create')->name('property.store');
     Route::put('/property-listings/{property}', [PropertyListingController::class, 'update'])

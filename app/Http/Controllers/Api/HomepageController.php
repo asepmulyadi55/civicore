@@ -212,4 +212,47 @@ class HomepageController extends Controller
             'footer'   => $footer,
         ]);
     }
+
+    /**
+     * Single property detail.
+     *
+     * GET /api/property/{id}
+     */
+    public function propertyDetail(string $id): JsonResponse
+    {
+        $l = PropertyListing::with(['block'])
+            ->where('is_active', true)
+            ->where('id', $id)
+            ->first();
+
+        if (!$l) {
+            return response()->json(['error' => 'not_found'], 404);
+        }
+
+        $footer = json_decode(Setting::get('homepage_footer', '{}'), true) ?? [];
+
+        return response()->json([
+            'listing' => [
+                'id'              => $l->id,
+                'title'           => $l->title,
+                'type'            => $l->type,
+                'type_label'      => $l->typeLabel(),
+                'price'           => $l->price,
+                'formatted_price' => $l->formattedPrice(),
+                'location_label'  => $l->location_label,
+                'bedrooms'        => $l->bedrooms,
+                'bathrooms'       => $l->bathrooms,
+                'land_area'       => $l->land_area,
+                'building_area'   => $l->building_area,
+                'description'     => $l->description,
+                'contact_name'    => $l->contact_name,
+                'contact_phone'   => $l->contact_phone,
+                'images'          => $l->imageUrls(),
+                'status'          => $l->status,
+                'status_label'    => $l->statusLabel(),
+                'block_name'      => $l->block?->name,
+            ],
+            'footer' => $footer,
+        ]);
+    }
 }
