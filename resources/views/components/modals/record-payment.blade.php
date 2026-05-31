@@ -159,18 +159,29 @@ Review Modal, and all associated JavaScript.
           {{-- Status --}}
           <div class="flex flex-col gap-2">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.status') }}</label>
-            <div class="relative">
-              <span
-                class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">verified</span>
-              <select id="cm-status"
-                class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white">
-                <option value="unpaid">{{ __('app.status_unpaid') }}</option>
-                <option value="pending" selected>{{ __('app.pending_review') }}</option>
-                <option value="approved">{{ __('app.status_approved') }}</option>
-              </select>
-              <span
-                class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
-            </div>
+            @if($canApprove)
+              <div class="relative">
+                <span
+                  class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">verified</span>
+                <select id="cm-status"
+                  class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white">
+                  <option value="unpaid">{{ __('app.status_unpaid') }}</option>
+                  <option value="pending" selected>{{ __('app.pending_review') }}</option>
+                  <option value="approved">{{ __('app.status_approved') }}</option>
+                </select>
+                <span
+                  class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
+              </div>
+            @else
+              <input type="hidden" id="cm-status" value="pending">
+              <div class="flex items-center gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                <span class="material-icons text-amber-500 text-xl">hourglass_top</span>
+                <div>
+                  <p class="text-sm font-semibold text-amber-700 dark:text-amber-400">{{ __('app.pending_review') }}</p>
+                  <p class="text-xs text-amber-600/70 dark:text-amber-400/70">{{ __('app.payment_auto_pending_hint') }}</p>
+                </div>
+              </div>
+            @endif
           </div>
 
           {{-- Notes --}}
@@ -661,7 +672,8 @@ Review Modal, and all associated JavaScript.
     closeCmResidentDropdown();
     document.getElementById('cm-year-select').value = '{{ now()->year }}';
     document.getElementById('cm-method').value = '';
-    document.getElementById('cm-status').value = 'unpaid';
+    const _cmStatusEl = document.getElementById('cm-status');
+    if (_cmStatusEl.tagName === 'SELECT') _cmStatusEl.value = 'unpaid';
     document.getElementById('cm-notes').value = '';
     document.getElementById('cm-amount').value = '';
     document.getElementById('cm-proof-input').value = '';

@@ -1,7 +1,40 @@
 {{-- finance/_dashboard.blade.php --}}
 @php
   $fmt = fn($n) => number_format((float)$n, 0, ',', '.');
+  $selectedPeriodLabel = \Carbon\Carbon::create($selectedYear, $selectedMonth)->format('F Y');
 @endphp
+
+{{-- Period selector --}}
+<div class="flex items-center gap-3">
+  <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ __('app.fin_viewing_period') }}</span>
+  <form method="GET" action="{{ route('finance.index') }}" class="flex items-center gap-2">
+    <input type="hidden" name="tab" value="dashboard">
+    <div class="relative">
+      <select name="dash_month" onchange="this.form.submit()"
+        class="appearance-none pl-3 pr-8 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer">
+        @foreach(range(1,12) as $m)
+          <option value="{{ $m }}" {{ $m == $selectedMonth ? 'selected' : '' }}>
+            {{ \Carbon\Carbon::create(null, $m)->format('F') }}
+          </option>
+        @endforeach
+      </select>
+      <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px]">expand_more</span>
+    </div>
+    <div class="relative">
+      <select name="dash_year" onchange="this.form.submit()"
+        class="appearance-none pl-3 pr-8 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer">
+        @foreach(range(now()->year + 1, 2020) as $y)
+          <option value="{{ $y }}" {{ $y == $selectedYear ? 'selected' : '' }}>{{ $y }}</option>
+        @endforeach
+      </select>
+      <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px]">expand_more</span>
+    </div>
+  </form>
+  @if($selectedMonth != $currentMonth || $selectedYear != $currentYear)
+    <a href="{{ route('finance.index', ['tab' => 'dashboard']) }}"
+      class="text-xs text-primary hover:underline font-medium">{{ __('app.fin_back_to_current') }}</a>
+  @endif
+</div>
 
 {{-- Summary cards --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -27,7 +60,7 @@
     <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
       {{ $currency }} {{ $fmt($monthIncome) }}
     </p>
-    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">{{ now()->format('F Y') }}</p>
+    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">{{ $selectedPeriodLabel }}</p>
   </div>
 
   {{-- Monthly Expense --}}
@@ -39,7 +72,7 @@
     <p class="text-2xl font-bold text-rose-600 dark:text-rose-400">
       {{ $currency }} {{ $fmt($monthExpense) }}
     </p>
-    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">{{ now()->format('F Y') }}</p>
+    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">{{ $selectedPeriodLabel }}</p>
   </div>
 
   {{-- Pending Payments --}}

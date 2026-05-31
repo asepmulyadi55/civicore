@@ -38,6 +38,12 @@ class PropertyListingController extends Controller
         return view('property', compact('listings', 'blocks', 'total'));
     }
 
+    public function show(PropertyListing $property)
+    {
+        $property->load(['block', 'unit', 'creator']);
+        return view('property.show', compact('property'));
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -133,7 +139,11 @@ class PropertyListingController extends Controller
 
         $property->update($validated);
 
-        return redirect()->route('property.index')
+        $redirectTo = $request->input('_stay_on_show')
+            ? route('property.show', $property)
+            : route('property.index');
+
+        return redirect($redirectTo)
             ->with('success', __('app.flash_property_updated'));
     }
 
