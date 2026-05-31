@@ -20,7 +20,7 @@
           <span class="material-icons">arrow_back</span>
         </a>
         <div>
-          <h1 class="text-xl font-bold text-slate-900 dark:text-white leading-tight">Edit Household</h1>
+          <h1 class="text-xl font-bold text-slate-900 dark:text-white leading-tight">{{ __('app.edit_household') }}</h1>
           <p class="text-xs text-slate-400">{{ $householder->block->name }} &middot; Unit {{ $householder->unit_number }}</p>
         </div>
       </div>

@@ -693,6 +693,7 @@ return [
   // Residents table & household edit
   'table_household' => 'Household',
   'table_house_status' => 'House Status',
+  'edit_household' => 'Edit Household',
   'save_household' => 'Save Household',
   'family_members' => 'Residents',
   'people_living_hint' => 'People living in this household.',
@@ -861,6 +862,7 @@ return [
   'org_period_activated'          => 'Period ":name" is now active.',
   'org_period_deleted'            => 'Period deleted.',
   'org_period_delete_active_error'=> 'Cannot delete the active period. Activate another period first.',
+  'org_positions_count'           => ':count position|:count positions',
   'org_position_added'            => 'Position added.',
   'org_position_updated'          => 'Position updated.',
   'org_position_deleted'          => 'Position removed.',

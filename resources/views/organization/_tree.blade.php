@@ -14,7 +14,7 @@
           </span>
         @endif
       </div>
-      <span class="text-xs text-slate-400">{{ $positions->count() }} {{ $positions->count() === 1 ? 'position' : 'positions' }}</span>
+      <span class="text-xs text-slate-400">{{ trans_choice('app.org_positions_count', $positions->count(), ['count' => $positions->count()]) }}</span>
     </div>
   @endif
 
