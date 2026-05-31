@@ -221,7 +221,7 @@ return [
   'max_size' => 'PDF, JPG, PNG (Maks 5MB)',
   'status' => 'Status',
   'pending_review' => 'Menunggu (menunggu tinjauan)',
-  'payment_auto_pending_hint' => 'Pembayaran yang dikirim memerlukan persetujuan dari pengguna yang berwenang.',,
+  'payment_auto_pending_hint' => 'Pembayaran yang dikirim memerlukan persetujuan dari pengguna yang berwenang.',
   'notes' => 'Catatan',
   'any_additional_notes' => 'Catatan tambahan...',
   'amount_per_month' => 'Jumlah per Bulan',
