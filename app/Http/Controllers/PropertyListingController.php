@@ -33,8 +33,9 @@ class PropertyListingController extends Controller
 
         $listings = $query->paginate(15)->withQueryString();
         $blocks   = Block::where('is_active', true)->orderBy('name')->get();
+        $total    = PropertyListing::count();
 
-        return view('property.index', compact('listings', 'blocks'));
+        return view('property.index', compact('listings', 'blocks', 'total'));
     }
 
     public function store(Request $request)

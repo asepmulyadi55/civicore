@@ -7,21 +7,29 @@
   <div class="lg:pl-64 min-h-screen bg-background-light dark:bg-background-dark flex flex-col">
 
     {{-- Page Header --}}
-    <header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 lg:px-8">
-      <div class="flex items-center gap-3">
-        <button class="lg:hidden p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg"
+    <header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 lg:px-8">
+      <div class="flex items-center gap-4">
+        <button class="lg:hidden p-2 rounded-lg border border-slate-200 dark:border-slate-800"
           onclick="toggleSidebar()">
           <span class="material-icons text-slate-500">menu</span>
         </button>
-        <h1 class="text-xl font-bold">{{ __('app.property_title') }}</h1>
+        <h1 class="text-xl font-bold text-slate-900 dark:text-white">{{ __('app.property_title') }}</h1>
+        <span class="px-2 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg hidden sm:inline">{{ $total }} {{ __('app.nav_property') }}</span>
       </div>
-      @can('property.create')
-      <button onclick="openPropertyModal()"
-        class="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-xl transition-all shadow-sm">
-        <span class="material-icons text-base">add</span>
-        {{ __('app.property_add') }}
-      </button>
-      @endcan
+      <div class="flex items-center gap-3">
+        @can('property.create')
+        <button onclick="openPropertyModal()"
+          class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-sm shadow-primary/20 text-sm">
+          <span class="material-icons text-sm">add</span>
+          <span class="hidden sm:inline">{{ __('app.property_add') }}</span>
+        </button>
+        @endcan
+        <button
+          class="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-primary/50 transition-all"
+          onclick="toggleDark()" title="{{ __('app.toggle_dark_mode') }}">
+          <span class="material-icons text-slate-500 text-[20px]">dark_mode</span>
+        </button>
+      </div>
     </header>
 
     <main class="flex-1 p-6 lg:p-8 space-y-6">
@@ -46,22 +54,28 @@
       <form method="GET" action="{{ route('property.index') }}" class="flex flex-wrap gap-3">
         <div class="relative flex-1 min-w-[200px]">
           <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
-          <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('app.search') }}..."
+          <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('app.btn_search') }}..."
             class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
         </div>
-        <select name="type"
-          class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
-          <option value="">{{ __('app.property_filter_all_types') }}</option>
-          <option value="sell" {{ request('type') === 'sell' ? 'selected' : '' }}>{{ __('app.property_type_sell') }}</option>
-          <option value="rent" {{ request('type') === 'rent' ? 'selected' : '' }}>{{ __('app.property_type_rent') }}</option>
-        </select>
-        <select name="status"
-          class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
-          <option value="">{{ __('app.property_filter_all_status') }}</option>
-          <option value="available" {{ request('status') === 'available' ? 'selected' : '' }}>{{ __('app.property_status_available') }}</option>
-          <option value="sold" {{ request('status') === 'sold' ? 'selected' : '' }}>{{ __('app.property_status_sold') }}</option>
-          <option value="rented" {{ request('status') === 'rented' ? 'selected' : '' }}>{{ __('app.property_status_rented') }}</option>
-        </select>
+        <div class="relative">
+          <select name="type"
+            class="appearance-none pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all cursor-pointer">
+            <option value="">{{ __('app.property_filter_all_types') }}</option>
+            <option value="sell" {{ request('type') === 'sell' ? 'selected' : '' }}>{{ __('app.property_type_sell') }}</option>
+            <option value="rent" {{ request('type') === 'rent' ? 'selected' : '' }}>{{ __('app.property_type_rent') }}</option>
+          </select>
+          <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[18px]">expand_more</span>
+        </div>
+        <div class="relative">
+          <select name="status"
+            class="appearance-none pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all cursor-pointer">
+            <option value="">{{ __('app.property_filter_all_status') }}</option>
+            <option value="available" {{ request('status') === 'available' ? 'selected' : '' }}>{{ __('app.property_status_available') }}</option>
+            <option value="sold" {{ request('status') === 'sold' ? 'selected' : '' }}>{{ __('app.property_status_sold') }}</option>
+            <option value="rented" {{ request('status') === 'rented' ? 'selected' : '' }}>{{ __('app.property_status_rented') }}</option>
+          </select>
+          <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[18px]">expand_more</span>
+        </div>
         <button type="submit"
           class="px-4 py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-semibold rounded-xl transition-all">
           {{ __('app.btn_filter') }}
