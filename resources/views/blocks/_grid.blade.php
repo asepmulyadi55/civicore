@@ -70,7 +70,7 @@
             </div>
             <span class="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">{{ $coord->name }}</span>
           @empty
-            <span class="text-xs text-slate-400 italic">No coordinator assigned</span>
+            <span class="text-xs text-slate-400 italic">{{ __('app.no_coordinator_assigned') }}</span>
           @endforelse
         </div>
 

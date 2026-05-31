@@ -122,7 +122,7 @@ class HomepageController extends Controller
         }
         $this->saveSetting('homepage_section_labels', json_encode($existing), 'Section Labels');
 
-        return redirect()->route('homepage.index')->with('success', 'Section labels updated.');
+        return redirect()->route('homepage.index')->with('success', __('app.flash_hp_display_saved'));
     }
 
     public function updateHero(Request $request)
@@ -169,7 +169,7 @@ class HomepageController extends Controller
 
         $this->saveSetting('homepage_hero', json_encode($data), 'Hero Section');
 
-        return redirect()->route('homepage.index')->with('success', 'Hero section saved.');
+        return redirect()->route('homepage.index')->with('success', __('app.flash_hp_hero_saved'));
     }
 
     // ── Featured Event ────────────────────────────────────────────────────────
@@ -223,7 +223,7 @@ class HomepageController extends Controller
         unset($data['image_file']);
         $this->saveSetting('homepage_featured_event', json_encode($data), 'Featured Event');
 
-        return redirect()->route('homepage.index')->with('success', 'Featured event saved.');
+        return redirect()->route('homepage.index')->with('success', __('app.flash_hp_featured_saved'));
     }
 
     // ── Events List ───────────────────────────────────────────────────────────
@@ -266,7 +266,7 @@ class HomepageController extends Controller
 
         $this->saveSetting('homepage_events', json_encode(array_values($events)), 'Events List');
 
-        return redirect()->route('homepage.index')->with('success', 'Event added.');
+        return redirect()->route('homepage.index')->with('success', __('app.flash_hp_event_added'));
     }
 
     public function updateEvent(Request $request, string $id)
@@ -317,12 +317,12 @@ class HomepageController extends Controller
         unset($event);
 
         if (!$found) {
-            return redirect()->route('homepage.index')->with('error', 'Event not found.');
+            return redirect()->route('homepage.index')->with('error', __('app.flash_hp_event_not_found'));
         }
 
         $this->saveSetting('homepage_events', json_encode(array_values($events)), 'Events List');
 
-        return redirect()->route('homepage.index')->with('success', 'Event updated.');
+        return redirect()->route('homepage.index')->with('success', __('app.flash_hp_event_updated'));
     }
 
     public function destroyEvent(string $id)
@@ -332,7 +332,7 @@ class HomepageController extends Controller
 
         $this->saveSetting('homepage_events', json_encode($events), 'Events List');
 
-        return redirect()->route('homepage.index')->with('success', 'Event removed.');
+        return redirect()->route('homepage.index')->with('success', __('app.flash_hp_event_removed'));
     }
 
     // ── Buletin ───────────────────────────────────────────────────────────────
@@ -372,7 +372,7 @@ class HomepageController extends Controller
 
         $this->saveSetting('homepage_buletin', json_encode(array_values($buletin)), 'Buletin');
 
-        return redirect()->route('homepage.index')->with('success', 'Buletin added.');
+        return redirect()->route('homepage.index')->with('success', __('app.flash_hp_buletin_added'));
     }
 
     public function updateBuletin(Request $request, string $id)
@@ -416,12 +416,12 @@ class HomepageController extends Controller
         unset($item);
 
         if (!$found) {
-            return redirect()->route('homepage.index')->with('error', 'Buletin not found.');
+            return redirect()->route('homepage.index')->with('error', __('app.flash_hp_buletin_not_found'));
         }
 
         $this->saveSetting('homepage_buletin', json_encode(array_values($buletin)), 'Buletin');
 
-        return redirect()->route('homepage.index')->with('success', 'Buletin updated.');
+        return redirect()->route('homepage.index')->with('success', __('app.flash_hp_buletin_updated'));
     }
 
     public function destroyBuletin(string $id)
@@ -437,7 +437,7 @@ class HomepageController extends Controller
 
         $this->saveSetting('homepage_buletin', json_encode($buletin), 'Buletin');
 
-        return redirect()->route('homepage.index')->with('success', 'Buletin removed.');
+        return redirect()->route('homepage.index')->with('success', __('app.flash_hp_buletin_removed'));
     }
 
     // ── About Section ─────────────────────────────────────────────────────────
@@ -467,7 +467,7 @@ class HomepageController extends Controller
 
         $this->saveSetting('homepage_about', json_encode($data), 'About Section');
 
-        return redirect()->route('homepage.index')->with('success', 'About section saved.');
+        return redirect()->route('homepage.index')->with('success', __('app.flash_hp_about_saved'));
     }
 
     // ── Footer Section ────────────────────────────────────────────────────────
@@ -498,7 +498,7 @@ class HomepageController extends Controller
 
         $this->saveSetting('homepage_footer', json_encode($data), 'Footer Section');
 
-        return redirect()->route('homepage.index')->with('success', 'Footer saved.');
+        return redirect()->route('homepage.index')->with('success', __('app.flash_hp_footer_saved'));
     }
 
     public function updateMemorableMoments(Request $request)
@@ -554,7 +554,7 @@ class HomepageController extends Controller
 
         $this->saveSetting('homepage_memorable_moments', json_encode($data), 'Memorable Moments');
 
-        return redirect()->route('homepage.index')->with('success', 'Memorable Moments saved.');
+        return redirect()->route('homepage.index')->with('success', __('app.flash_hp_moments_saved'));
     }
 
     // ── Private helper ────────────────────────────────────────────────────────

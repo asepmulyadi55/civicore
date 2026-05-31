@@ -12,7 +12,7 @@ class Resident extends Model
 
     protected $fillable = [
         'householder_id', 'fullname', 'relationship', 'nik',
-        'birth_date', 'gender', 'education', 'occupation', 'is_head', 'photo_path',
+        'birth_date', 'gender', 'education', 'occupation', 'phone', 'is_head', 'photo_path',
     ];
 
     protected $casts = [
@@ -49,12 +49,12 @@ class Resident extends Model
 
     public function relationshipLabel(): string
     {
-        return self::$relationships[$this->relationship] ?? 'Other';
+        return __('app.rel_' . ($this->relationship ?? 'other'));
     }
 
     public function educationLabel(): string
     {
-        return self::$educationLevels[$this->education ?? 'none'] ?? '—';
+        return __('app.edu_' . ($this->education ?? 'none'));
     }
 
     public function maskedNik(): string

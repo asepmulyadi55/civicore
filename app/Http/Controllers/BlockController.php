@@ -47,7 +47,7 @@ class BlockController extends Controller
 
         Block::create(array_merge($data, ['is_active' => true]));
 
-        return redirect()->route('blocks.index')->with('success', "Block \"{$data['name']}\" has been added.");
+        return redirect()->route('blocks.index')->with('success', __('app.flash_block_added', ['name' => $data['name']]));
     }
 
     /**
@@ -151,7 +151,7 @@ class BlockController extends Controller
             'is_active' => $request->boolean('is_active'),
         ]));
 
-        return redirect()->route('blocks.index')->with('success', "Block \"{$block->name}\" has been updated.");
+        return redirect()->route('blocks.index')->with('success', __('app.flash_block_updated', ['name' => $block->name]));
     }
 
     public function destroy(Block $block)
@@ -159,12 +159,12 @@ class BlockController extends Controller
         $residentCount = $block->householders()->count();
         if ($residentCount > 0) {
             return redirect()->route('blocks.index')
-                ->with('error', "Cannot delete \"{$block->name}\" — it has {$residentCount} resident(s) linked to it. Reassign or remove them first.");
+                ->with('error', __('app.flash_block_delete_residents', ['name' => $block->name, 'count' => $residentCount]));
         }
 
         $name = $block->name;
         $block->delete();
 
-        return redirect()->route('blocks.index')->with('success', "\"{$name}\" has been deleted.");
+        return redirect()->route('blocks.index')->with('success', __('app.flash_block_deleted', ['name' => $name]));
     }
 }

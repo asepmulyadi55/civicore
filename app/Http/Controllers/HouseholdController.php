@@ -55,6 +55,7 @@ class HouseholdController extends Controller
             'gender'       => ['nullable', 'in:male,female'],
             'education'    => ['nullable', 'in:none,elementary,junior_high,senior_high,associate,bachelor,master,doctorate,other'],
             'occupation'   => ['nullable', 'string', 'max:100'],
+            'phone'        => ['nullable', 'string', 'max:25'],
             'photo'        => ['nullable', 'image', 'max:5120'],
         ];
     }
@@ -129,7 +130,7 @@ class HouseholdController extends Controller
         });
 
         return redirect()->route('household.show')
-            ->with('success', 'Household information updated successfully.');
+            ->with('success', __('app.flash_household_updated'));
     }
 
     // -------------------------------------------------------------------------
@@ -155,7 +156,7 @@ class HouseholdController extends Controller
         });
 
         return redirect()->route('household.show')
-            ->with('success', "Resident '{$data['fullname']}' added successfully.");
+            ->with('success', __('app.flash_resident_added', ['name' => $data['fullname']]));
     }
 
     public function updateResident(Request $request, Resident $resident)
@@ -187,7 +188,7 @@ class HouseholdController extends Controller
         });
 
         return redirect()->route('household.show')
-            ->with('success', "Resident '{$data['fullname']}' updated.");
+            ->with('success', __('app.flash_resident_updated', ['name' => $data['fullname']]));
     }
 
     public function destroyResident(Resident $resident)
@@ -202,7 +203,7 @@ class HouseholdController extends Controller
         $resident->delete();
 
         return redirect()->route('household.show')
-            ->with('success', "'{$name}' has been removed from your household.");
+            ->with('success', __('app.flash_resident_removed_household', ['name' => $name]));
     }
 
     public function setResidentHead(Resident $resident)
@@ -219,6 +220,6 @@ class HouseholdController extends Controller
         });
 
         return redirect()->route('household.show')
-            ->with('success', "{$resident->fullname} is now the Head of Family.");
+            ->with('success', __('app.flash_resident_set_head', ['name' => $resident->fullname]));
     }
 }

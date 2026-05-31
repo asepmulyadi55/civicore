@@ -190,6 +190,17 @@
                 @if($householder->family_card_number)
                   <p class="text-xs text-slate-400 mt-1">{{ __('app.fcn_leave_blank') }}</p>
                 @endif
+                @if(($householder->house_status ?? 'owner_occupied') === 'rented')
+                  <p id="fcn-rent-hint" class="text-xs text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
+                    <span class="material-icons text-xs">info</span>
+                    {{ __('app.fcn_rent_hint') }}
+                  </p>
+                @else
+                  <p id="fcn-rent-hint" class="text-xs text-amber-600 dark:text-amber-400 mt-1 items-center gap-1 hidden">
+                    <span class="material-icons text-xs">info</span>
+                    {{ __('app.fcn_rent_hint') }}
+                  </p>
+                @endif
                 @error('family_card_number') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
               </div>
 
@@ -259,6 +270,33 @@
                 </label>
               </div>
               @endif {{-- /!$isOwnHousehold is_active --}}
+            </div>
+
+            {{-- Rental Period (shown when rented) --}}
+            <div id="rent-period-section" class="{{ ($householder->house_status ?? 'owner_occupied') === 'rented' ? '' : 'hidden' }}">
+              <div class="border-t border-slate-100 dark:border-slate-800 pt-5">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                  <span class="material-icons text-sm text-amber-500">event</span>
+                  {{ __('app.rent_period') }}
+                </h4>
+                <p class="text-xs text-slate-400 mb-3">{{ __('app.rent_period_hint') }}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ __('app.rent_start') }}</label>
+                    <input type="date" name="rent_start"
+                      value="{{ old('rent_start', $householder->rent_start?->format('Y-m-d')) }}"
+                      class="{{ $ib }} {{ $errors->has('rent_start') ? $ie : $in }} dark:[color-scheme:dark]">
+                    @error('rent_start') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
+                  </div>
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ __('app.rent_end') }}</label>
+                    <input type="date" name="rent_end"
+                      value="{{ old('rent_end', $householder->rent_end?->format('Y-m-d')) }}"
+                      class="{{ $ib }} {{ $errors->has('rent_end') ? $ie : $in }} dark:[color-scheme:dark]">
+                    @error('rent_end') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
+                  </div>
+                </div>
+              </div>
             </div>
 
             {{-- Notes --}}
@@ -452,14 +490,14 @@
                           </button>
                         @endif
                       </td>
-                      <td class="px-5 py-4 text-slate-500 hidden lg:table-cell capitalize">{{ $member->gender ?? '—' }}</td>
+                      <td class="px-5 py-4 text-slate-500 hidden lg:table-cell capitalize">{{ $member->gender ? __('app.mf_gender_' . $member->gender) : '—' }}</td>
                       <td class="px-5 py-4 text-slate-500 text-xs hidden xl:table-cell">{{ $member->educationLabel() }}</td>
                       @if($canManageResidents)
                         <td class="px-5 py-4">
                           <div class="flex items-center justify-center gap-1">
                             {{-- Edit --}}
                             <button type="button"
-                              onclick="openMemberModal({{ json_encode(['id' => $member->id, 'fullname' => $member->fullname, 'relationship' => $member->relationship, 'nik_masked' => $member->maskedNik(), 'birth_date' => $member->birth_date?->format('Y-m-d'), 'gender' => $member->gender, 'education' => $member->education, 'occupation' => $member->occupation, 'photo_url' => $member->photoUrl()]) }})"
+                              onclick="openMemberModal({{ json_encode(['id' => $member->id, 'fullname' => $member->fullname, 'relationship' => $member->relationship, 'nik_masked' => $member->maskedNik(), 'birth_date' => $member->birth_date?->format('Y-m-d'), 'gender' => $member->gender, 'education' => $member->education, 'occupation' => $member->occupation, 'phone' => $member->phone, 'photo_url' => $member->photoUrl()]) }})"
                               class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                               title="Edit member">
                               <span class="material-icons text-lg">edit</span>
@@ -543,6 +581,15 @@
             <input type="text" name="fullname" id="mf-fullname" placeholder="{{ __('app.mf_full_name') }}"
               class="{{ $ib }} @error('fullname') border-rose-400 @enderror">
             @error('fullname') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
+          </div>
+
+          {{-- Phone Number --}}
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              {{ __('app.mf_phone') }} <span class="text-xs font-normal text-slate-400">{{ __('app.optional') }}</span>
+            </label>
+            <input type="tel" name="phone" id="mf-phone" placeholder="{{ __('app.mf_phone_ph') }}"
+              class="{{ $ib }}">
           </div>
 
           {{-- Photo --}}
@@ -732,6 +779,16 @@
       (hsBadgeClasses[info.house_status] ?? hsBadgeClasses.owner_occupied)
         .split(' ').forEach(c => badge.classList.add(c));
       badge.textContent = info.house_status_label;
+
+      // Show/hide rent period section and FCN rent hint based on house status
+      const isRented = info.house_status === 'rented';
+      const rentSection = document.getElementById('rent-period-section');
+      const fcnHint     = document.getElementById('fcn-rent-hint');
+      if (rentSection) rentSection.classList.toggle('hidden', !isRented);
+      if (fcnHint) {
+        fcnHint.classList.toggle('hidden', !isRented);
+        fcnHint.classList.toggle('flex', isRented);
+      }
     }
 
     async function loadUnitsOnEdit(blockId, selectedUnitId) {
@@ -880,6 +937,7 @@
       document.getElementById('member-submit-label').textContent = i18nAddMember;
       document.getElementById('mf-nik').placeholder = i18nNikPlaceholder;
       document.getElementById('mf-nik-hint').classList.add('hidden');
+      document.getElementById('mf-phone').value = '';
 
       if (data) {
         // Edit mode
@@ -897,6 +955,7 @@
         document.getElementById('mf-gender').value        = data.gender      || '';
         document.getElementById('mf-education').value     = data.education   || '';
         document.getElementById('mf-occupation').value    = data.occupation  || '';
+        document.getElementById('mf-phone').value         = data.phone       || '';
         resetMemberPhotoPreview(data.photo_url || null);
       }
 
@@ -983,6 +1042,7 @@
           gender:       '{{ old("gender") }}',
           education:    '{{ old("education") }}',
           occupation:   '{{ old("occupation") }}',
+          phone:        '{{ old("phone") }}',
         });
       });
     @endif

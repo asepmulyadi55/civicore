@@ -272,9 +272,9 @@ class PaymentController extends Controller
             $created++;
         }
 
-        $msg = "Created {$created} payment record" . ($created !== 1 ? 's' : '') . '.';
+        $msg = __('app.flash_payment_created', ['count' => $created]);
         if ($skipped) {
-            $msg .= " {$skipped} skipped (already exist).";
+            $msg .= ' ' . __('app.flash_payment_skipped', ['count' => $skipped]);
         }
 
         return redirect()->route('payments.index')->with('success', $msg);
@@ -373,12 +373,12 @@ class PaymentController extends Controller
             $created++;
         }
 
-        $msg = 'Payment updated successfully.';
+        $msg = __('app.flash_payment_updated');
         if ($created) {
-            $msg .= " {$created} additional month(s) added.";
+            $msg .= ' ' . __('app.flash_payment_months_added', ['count' => $created]);
         }
         if ($skipped) {
-            $msg .= " {$skipped} month(s) skipped (already exist).";
+            $msg .= ' ' . __('app.flash_payment_months_skipped', ['count' => $skipped]);
         }
 
         return redirect()->route('payments.index')->with('success', $msg);
@@ -402,7 +402,7 @@ class PaymentController extends Controller
             'approved_by' => auth()->id(),
         ]);
         return redirect()->route('payments.index')
-            ->with('success', "Payment from {$residentName} has been approved.");
+            ->with('success', __('app.flash_payment_approved', ['name' => $residentName]));
     }
 
     public function reject(Request $request, PaymentRecord $payment)
@@ -428,7 +428,7 @@ class PaymentController extends Controller
             'rejected_by' => auth()->id(),
         ]);
         return redirect()->route('payments.index')
-            ->with('success', 'Payment rejected and resident has been notified.');
+            ->with('success', __('app.flash_payment_rejected'));
     }
 
     // ── Batch approve / reject ─────────────────────────────────────────
@@ -441,7 +441,7 @@ class PaymentController extends Controller
         $count = $records->count();
         if ($count === 0) {
             return redirect()->route('payments.index')
-                ->with('info', 'No pending records found in this batch.');
+                ->with('info', __('app.flash_payment_no_pending'));
         }
 
         // Bulk update in a single query — avoids N+1 and is safe without model observers
@@ -462,7 +462,7 @@ class PaymentController extends Controller
             'approved_by' => auth()->id(),
         ]);
         return redirect()->route('payments.index')
-            ->with('success', "{$count} payment(s) from {$name} approved.");
+            ->with('success', __('app.flash_payments_approved', ['count' => $count, 'name' => $name]));
     }
 
     public function rejectBatch(Request $request, string $batchId)
@@ -494,7 +494,7 @@ class PaymentController extends Controller
             'rejected_by' => auth()->id(),
         ]);
         return redirect()->route('payments.index')
-            ->with('success', "{$count} payment(s) from {$name} rejected.");
+            ->with('success', __('app.flash_payments_rejected', ['count' => $count, 'name' => $name]));
     }
 
     /**
@@ -525,7 +525,7 @@ class PaymentController extends Controller
         // this extra check enforces the admin-only business rule explicitly)
         if (!auth()->user()->isAdmin()) {
             return redirect()->route('payments.index')
-                ->with('error', 'Only administrators can delete payments.');
+                ->with('error', __('app.flash_payment_admin_only'));
         }
 
         // Validate deletion is safe (not approved, batch not partially approved)
@@ -552,7 +552,7 @@ class PaymentController extends Controller
         ]);
 
         return redirect()->route('payments.index')
-            ->with('success', "{$count} payment record(s) for {$name} deleted.");
+            ->with('success', __('app.flash_payments_deleted', ['count' => $count, 'name' => $name]));
     }
 }
 

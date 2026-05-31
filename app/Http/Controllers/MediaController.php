@@ -189,7 +189,7 @@ class MediaController extends Controller
         if (!$householder->photo_path) {
             return redirect()
                 ->route('media.index', ['folder' => 'householders'])
-                ->with('error', 'This householder has no photo to delete.');
+                ->with('error', __('app.flash_no_householder_photo'));
         }
 
         if (Householder::where('photo_path', $householder->photo_path)->exists()) {
@@ -213,7 +213,7 @@ class MediaController extends Controller
         if (!$resident->photo_path) {
             return redirect()
                 ->route('media.index', ['folder' => 'residents'])
-                ->with('error', 'This resident has no photo to delete.');
+                ->with('error', __('app.flash_no_resident_photo'));
         }
 
         if (Resident::where('photo_path', $resident->photo_path)->exists()) {

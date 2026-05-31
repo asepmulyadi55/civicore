@@ -32,6 +32,8 @@ class UpdateHouseholderRequest extends FormRequest
             'family_card_number' => ['nullable', 'string', 'max:20'],
             'notes'              => ['nullable', 'string', 'max:1000'],
             'photo'              => ['nullable', 'image', 'max:5120'],
+            'rent_start'         => ['nullable', 'date'],
+            'rent_end'           => ['nullable', 'date', 'after_or_equal:rent_start'],
         ];
     }
 
