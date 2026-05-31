@@ -34,7 +34,6 @@
           <x-ui.sort-th column="age_category" :label="__('app.posyandu_col_cat')" />
           <x-ui.sort-th column="gender" :label="__('app.posyandu_col_gender')" class="hidden sm:table-cell" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">{{ __('app.posyandu_col_rel') }}</th>
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">{{ __('app.posyandu_col_household') }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -116,22 +115,12 @@
               {{ $relLabel }}
             </td>
 
-            {{-- Household --}}
-            <td class="px-6 py-4 hidden lg:table-cell">
-              @if($resident)
-                <div class="text-sm">
-                  <span class="font-medium text-slate-900 dark:text-white">{{ $resident->displayName() }}</span>
-                  <div class="text-xs text-slate-400 mt-0.5">{{ $block }} · {{ $unit }}</div>
-                </div>
-              @else
-                <span class="text-slate-400 text-sm">—</span>
-              @endif
-            </td>
+
 
           </tr>
         @empty
           <tr>
-            <td colspan="7" class="px-6 py-16 text-center">
+            <td colspan="6" class="px-6 py-16 text-center">
               <div class="flex flex-col items-center gap-3 text-slate-400">
                 <span class="material-icons text-5xl">health_and_safety</span>
                 <p class="text-sm font-medium">{{ __('app.posyandu_no_members') }}</p>

@@ -5,8 +5,8 @@ return [
   'nav_dashboard' => 'Dasbor',
   'nav_payments' => 'Pembayaran',
   'nav_overview' => 'Ringkasan',
-  'nav_household' => 'Rumah Tangga',
-  'nav_my_household' => 'Rumah Tangga Saya',
+  'nav_household' => 'Rumah Saya',
+  'nav_my_household' => 'Rumah Saya',
   'nav_group_community' => 'Komunitas',
   'nav_group_finance' => 'Keuangan',
   'nav_group_administration' => 'Administrasi',
@@ -75,14 +75,14 @@ return [
   'flash_posyandu_saved'  => 'Rentang kategori usia Posyandu berhasil diperbarui.',
   // Householder / household
   'flash_householder_added'          => 'Penghuni berhasil ditambahkan.',
-  'flash_household_updated'          => 'Informasi rumah tangga berhasil diperbarui.',
+  'flash_household_updated'          => 'Informasi pemilik rumah berhasil diperbarui.',
   'flash_householder_deactivated'    => ':name telah dinonaktifkan.',
   'flash_householder_deleted'        => ':name telah dihapus secara permanen.',
   // Resident (family member)
   'flash_resident_added'             => "Penghuni ':name' berhasil ditambahkan.",
   'flash_resident_updated'           => "Penghuni ':name' berhasil diperbarui.",
   'flash_resident_removed'           => "':name' telah dihapus.",
-  'flash_resident_removed_household' => "':name' telah dihapus dari rumah tangga Anda.",
+  'flash_resident_removed_household' => "':name' telah dihapus dari unit pemilik rumah Anda.",
   'flash_resident_set_head'          => ':name sekarang menjadi Kepala Keluarga.',
   // Block
   'flash_block_added'                => 'Blok ":name" telah ditambahkan.',
@@ -697,9 +697,9 @@ return [
   'save_household' => 'Simpan Pemilik Rumah',
   'family_members' => 'Penghuni',
   'people_living_hint' => 'Orang yang tinggal di unit ini.',
-  'btn_add_member' => 'Tambah Anggota',
+  'btn_add_member' => 'Tambah Penghuni',
   'no_family_members' => 'Belum ada penghuni.',
-  'add_first_member' => '+ Tambah anggota pertama',
+  'add_first_member' => '+ Tambah penghuni pertama',
   'fee_update_hint' => 'Untuk memperbarui iuran, isi kolom di bawah. Biarkan kosong untuk mempertahankan iuran saat ini.',
   'no_fee_history' => 'Belum ada riwayat iuran.',
   'fee_effective_from' => 'Berlaku sejak',
@@ -781,7 +781,7 @@ return [
   'mf_phone_ph'            => '+62 812 xxxx xxxx',
   'mf_cancel'              => 'Batal',
   'mf_remove'              => 'Hapus',
-  'mf_remove_member_title' => 'Hapus Anggota?',
+  'mf_remove_member_title' => 'Hapus Penghuni?',
 
   // Family member relationships (used in dropdowns)
   'rel_head'               => 'Kepala Keluarga',
