@@ -221,7 +221,7 @@ return [
   'max_size' => 'PDF, JPG, PNG (Max 5MB)',
   'status' => 'Status',
   'pending_review' => 'Pending (awaiting review)',
-  'payment_auto_pending_hint' => 'Submitted payments require approval from an authorized user.',,
+  'payment_auto_pending_hint' => 'Submitted payments require approval from an authorized user.',
   'notes' => 'Notes',
   'any_additional_notes' => 'Any additional notes...',
   'amount_per_month' => 'Amount per Month',
