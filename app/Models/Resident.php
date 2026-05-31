@@ -2,123 +2,71 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Resident extends Model
 {
     use HasUuids;
+
     protected $fillable = [
-        'user_id',
-        'block_id',
-        'unit_id',
-        'fullname',
-        'phone',
-        'email',
-        'is_active',
-        'family_card_number',
-        'notes',
-        'photo_path',
+        'householder_id', 'fullname', 'relationship', 'nik',
+        'birth_date', 'gender', 'education', 'occupation', 'is_head', 'photo_path',
     ];
 
     protected $casts = [
-        'is_active'          => 'boolean',
-        'family_card_number' => 'encrypted',
+        'birth_date' => 'date',
+        'is_head'    => 'boolean',
+        'nik'        => 'encrypted',
     ];
 
-    // ── Backward-compat virtual accessors ────────────────────────────────────
+    public static array $relationships = [
+        'head'   => 'Head of Family',
+        'spouse' => 'Spouse',
+        'child'  => 'Child',
+        'parent' => 'Parent',
+        'tenant' => 'Tenant',
+        'other'  => 'Other',
+    ];
 
-    /** Returns the unit_number from the linked unit (read-only). */
-    public function getUnitNumberAttribute(): ?string
+    public static array $educationLevels = [
+        'none'        => 'None / Not Stated',
+        'elementary'  => 'Elementary School',
+        'junior_high' => 'Junior High School',
+        'senior_high' => 'Senior High School',
+        'associate'   => 'Associate Degree (D1–D3)',
+        'bachelor'    => "Bachelor's Degree (S1)",
+        'master'      => "Master's Degree (S2)",
+        'doctorate'   => 'Doctorate (S3)',
+        'other'       => 'Other',
+    ];
+
+    public function householder(): BelongsTo
     {
-        return $this->unit?->unit_number;
+        return $this->belongsTo(Householder::class, 'householder_id');
     }
 
-    /** Returns house_status from the linked unit (read-only). */
-    public function getHouseStatusAttribute(): ?string
+    public function relationshipLabel(): string
     {
-        return $this->unit?->house_status ?? 'owner_occupied';
+        return self::$relationships[$this->relationship] ?? 'Other';
     }
 
-    // Optional linked user account
-    public function user(): BelongsTo
+    public function educationLabel(): string
     {
-        return $this->belongsTo(User::class);
+        return self::$educationLevels[$this->education ?? 'none'] ?? '—';
     }
 
-    public function block(): BelongsTo
+    public function maskedNik(): string
     {
-        return $this->belongsTo(Block::class);
-    }
-
-    public function unit(): BelongsTo
-    {
-        return $this->belongsTo(Unit::class);
-    }
-
-    public function familyMembers(): HasMany
-    {
-        return $this->hasMany(FamilyMember::class)->orderByDesc('is_head')->orderBy('fullname');
-    }
-
-    /**
-     * Returns the head-of-family member.
-     * Uses the in-memory collection when already eager-loaded to avoid extra queries.
-     */
-    public function headOfFamily(): ?FamilyMember
-    {
-        return $this->relationLoaded('familyMembers')
-            ? $this->familyMembers->firstWhere('is_head', true)
-            : $this->familyMembers()->where('is_head', true)->first();
-    }
-
-    /**
-     * Display name: head of family name, or fallback to fullname.
-     */
-    public function displayName(): string
-    {
-        return $this->headOfFamily()?->fullname ?? $this->fullname;
+        if (!$this->nik) return '—';
+        $val = $this->nik;
+        return str_repeat('•', max(0, strlen($val) - 4)) . substr($val, -4);
     }
 
     public function photoUrl(): ?string
     {
         if (!$this->photo_path) return null;
         return route('private.file', ['path' => $this->photo_path]);
-    }
-
-    public function paymentRecords(): HasMany
-    {
-        return $this->hasMany(PaymentRecord::class)->orderBy('payment_month');
-    }
-
-    public function feeHistories(): HasMany
-    {
-        return $this->hasMany(FeeHistory::class)->orderByDesc('effective_from');
-    }
-
-    /**
-     * Get the currently active monthly fee for this resident.
-     * Returns the most recent fee history entry with effective_from <= today.
-     */
-    public function currentFee(): ?FeeHistory
-    {
-        return $this->feeHistories()
-            ->where('effective_from', '<=', now()->startOfMonth())
-            ->first();
-    }
-
-    public function scopeActive(Builder $query): Builder
-    {
-        return $query->where('is_active', true);
-    }
-
-    public function maskedFamilyCardNumber(): string
-    {
-        if (!$this->family_card_number) return '—';
-        $val = $this->family_card_number;
-        return str_repeat('•', max(0, strlen($val) - 4)) . substr($val, -4);
     }
 }

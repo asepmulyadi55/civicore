@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Block;
-use App\Models\FamilyMember;
-use App\Models\Resident;
+use App\Models\Householder;
+use App\Models\Householder;
 use App\Models\Role;
 use App\Models\Unit;
 use App\Models\User;
@@ -53,7 +53,7 @@ class SensitiveDataTest extends TestCase
         $block = Block::create(['name' => $blockName, 'is_active' => true]);
         $unit  = Unit::create(['block_id' => $block->id, 'unit_number' => $unitNumber, 'is_active' => true]);
 
-        return Resident::create([
+        return Householder::create([
             'unit_id'            => $unit->id,
             'fullname'           => 'Ahmad Fauzi',
             'phone'              => '081234567890',
@@ -103,7 +103,7 @@ class SensitiveDataTest extends TestCase
         $admin    = $this->createAdmin();
         $block    = Block::create(['name' => 'Block B', 'is_active' => true]);
         $unit     = Unit::create(['block_id' => $block->id, 'unit_number' => 'B-01', 'is_active' => true]);
-        $resident = Resident::create([
+        $resident = Householder::create([
             'unit_id'   => $unit->id,
             'fullname'  => 'No KK Resident',
             'is_active' => true,
@@ -121,14 +121,14 @@ class SensitiveDataTest extends TestCase
     public function guest_cannot_reveal_nik()
     {
         $resident = $this->createResident();
-        $member   = FamilyMember::create([
+        $member   = Householder::create([
             'resident_id'  => $resident->id,
             'fullname'     => self::SPOUSE_NAME,
             'relationship' => 'spouse',
             'nik'          => self::SPOUSE_NIK,
         ]);
 
-        $this->get(route('residents.family-members.reveal-nik', [$resident, $member]))
+        $this->get(route('residents.residents.reveal-nik', [$resident, $member]))
             ->assertRedirect(route('login'));
     }
 
@@ -137,7 +137,7 @@ class SensitiveDataTest extends TestCase
     {
         $user     = $this->createResidentUser();
         $resident = $this->createResident();
-        $member   = FamilyMember::create([
+        $member   = Householder::create([
             'resident_id'  => $resident->id,
             'fullname'     => self::SPOUSE_NAME,
             'relationship' => 'spouse',
@@ -145,7 +145,7 @@ class SensitiveDataTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get(route('residents.family-members.reveal-nik', [$resident, $member]))
+            ->get(route('residents.residents.reveal-nik', [$resident, $member]))
             ->assertForbidden();
     }
 
@@ -154,7 +154,7 @@ class SensitiveDataTest extends TestCase
     {
         $admin    = $this->createAdmin();
         $resident = $this->createResident();
-        $member   = FamilyMember::create([
+        $member   = Householder::create([
             'resident_id'  => $resident->id,
             'fullname'     => self::SPOUSE_NAME,
             'relationship' => 'spouse',
@@ -162,25 +162,25 @@ class SensitiveDataTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get(route('residents.family-members.reveal-nik', [$resident, $member]))
+            ->get(route('residents.residents.reveal-nik', [$resident, $member]))
             ->assertOk()
             ->assertJsonStructure(['value'])
             ->assertJson(['value' => self::SPOUSE_NIK]);
     }
 
     /** @test */
-    public function reveal_nik_returns_404_when_family_member_belongs_to_different_resident()
+    public function reveal_nik_returns_404_when_resident_belongs_to_different_resident()
     {
         $admin      = $this->createAdmin();
         $resident   = $this->createResident('Block A', 'A-01');
         $otherBlock = Block::create(['name' => 'Block B', 'is_active' => true]);
         $otherUnit  = Unit::create(['block_id' => $otherBlock->id, 'unit_number' => 'B-01', 'is_active' => true]);
-        $other      = Resident::create([
+        $other      = Householder::create([
             'unit_id'   => $otherUnit->id,
             'fullname'  => 'Other Resident',
             'is_active' => true,
         ]);
-        $member = FamilyMember::create([
+        $member = Householder::create([
             'resident_id'  => $other->id, // belongs to OTHER resident
             'fullname'     => 'Budi Santoso',
             'relationship' => 'child',
@@ -189,7 +189,8 @@ class SensitiveDataTest extends TestCase
 
         // Passing $resident but $member belongs to $other → 404
         $this->actingAs($admin)
-            ->get(route('residents.family-members.reveal-nik', [$resident, $member]))
+            ->get(route('residents.residents.reveal-nik', [$resident, $member]))
             ->assertNotFound();
     }
 }
+

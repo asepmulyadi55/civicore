@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PaymentRecord;
-use App\Models\Resident;
+use App\Models\Householder;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -16,14 +16,14 @@ class OverviewController extends Controller
         $user = Auth::user();
 
         // Primary: find resident linked by user_id
-        $resident = $user->resident()
+        $resident = $user->householder()
             ->with(['block', 'feeHistories' => fn($q) => $q->orderByDesc('effective_from')])
             ->first();
 
         // Fallback 1: find by email (covers the case where resident was created
         // after the user was already approved, so user_id was never set)
         if (!$resident && $user->email) {
-            $resident = Resident::where('email', $user->email)
+            $resident = Householder::where('email', $user->email)
                 ->with(['block', 'feeHistories' => fn($q) => $q->orderByDesc('effective_from')])
                 ->first();
 
@@ -36,7 +36,7 @@ class OverviewController extends Controller
         // Fallback 2: find by block_id + unit_number (covers admin-assigned accounts
         // where neither user_id nor email was matched to a resident record)
         if (!$resident && $user->block_id && $user->unit_number) {
-            $resident = Resident::whereHas('unit', fn($q) =>
+            $resident = Householder::whereHas('unit', fn($q) =>
                     $q->where('block_id', $user->block_id)
                       ->where('unit_number', $user->unit_number)
                 )
@@ -74,14 +74,14 @@ class OverviewController extends Controller
         $currentFee = $currentFeeHistory?->amount ?? 0;
 
         // Payment records for current year (Jan–Dec), keyed by month number
-        $currentRecords = PaymentRecord::where('resident_id', $resident->id)
+        $currentRecords = PaymentRecord::where('householder_id', $resident->id)
             ->whereYear('payment_month', $currentYear)
             ->orderBy('payment_month')
             ->get()
             ->keyBy(fn($r) => Carbon::parse($r->payment_month)->month);
 
         // Payment records for previous year
-        $previousRecords = PaymentRecord::where('resident_id', $resident->id)
+        $previousRecords = PaymentRecord::where('householder_id', $resident->id)
             ->whereYear('payment_month', $previousYear)
             ->orderBy('payment_month')
             ->get()
@@ -105,3 +105,4 @@ class OverviewController extends Controller
         ));
     }
 }
+

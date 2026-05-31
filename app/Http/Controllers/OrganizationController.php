@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FamilyMember;
+use App\Models\Householder;
 use App\Models\OrganizationPeriod;
 use App\Models\OrganizationPosition;
 use App\Models\Resident;
@@ -35,13 +35,13 @@ class OrganizationController extends Controller
         if ($selectedPeriod) {
             $positions = OrganizationPosition::where('organization_period_id', $selectedPeriod->id)
                 ->with([
+                    'householder',
+                    'householder.block',
+                    'householder.unit',
                     'resident',
-                    'resident.block',
-                    'resident.unit',
-                    'familyMember',
-                    'familyMember.resident',
-                    'familyMember.resident.block',
-                    'familyMember.resident.unit',
+                    'resident.householder',
+                    'resident.householder.block',
+                    'resident.householder.unit',
                 ])
                 ->orderBy('sort_order')
                 ->orderBy('created_at')
@@ -136,7 +136,7 @@ class OrganizationController extends Controller
             'position_name'    => 'required|string|max:100',
             'parent_id'        => 'nullable|string|max:36',
             'resident_id'      => 'nullable|string|max:36',
-            'family_member_id' => 'nullable|string|max:36',
+            'householder_id'   => 'nullable|string|max:36',
             'sort_order'       => 'nullable|integer|min:0',
         ]);
 
@@ -147,14 +147,14 @@ class OrganizationController extends Controller
             }
         }
 
-        $error = $this->checkPersonConflict($period->id, $data['resident_id'] ?? null, $data['family_member_id'] ?? null);
+        $error = $this->checkPersonConflict($period->id, $data['householder_id'] ?? null, $data['resident_id'] ?? null);
         if ($error) return back()->withErrors($error)->withInput();
 
         OrganizationPosition::create([
             'organization_period_id' => $period->id,
             'parent_id'              => $data['parent_id'] ?: null,
+            'householder_id'         => $data['householder_id'] ?: null,
             'resident_id'            => $data['resident_id'] ?: null,
-            'family_member_id'       => $data['family_member_id'] ?: null,
             'position_name'          => $data['position_name'],
             'sort_order'             => $data['sort_order'] ?? 0,
         ]);
@@ -174,7 +174,7 @@ class OrganizationController extends Controller
             'position_name'    => 'required|string|max:100',
             'parent_id'        => 'nullable|string|max:36',
             'resident_id'      => 'nullable|string|max:36',
-            'family_member_id' => 'nullable|string|max:36',
+            'householder_id'   => 'nullable|string|max:36',
             'sort_order'       => 'nullable|integer|min:0',
         ]);
 
@@ -196,8 +196,8 @@ class OrganizationController extends Controller
 
         $error = $this->checkPersonConflict(
             $position->organization_period_id,
+            $data['householder_id'] ?? null,
             $data['resident_id'] ?? null,
-            $data['family_member_id'] ?? null,
             $position->id
         );
         if ($error) return back()->withErrors($error)->withInput();
@@ -205,8 +205,8 @@ class OrganizationController extends Controller
         $position->update([
             'position_name'    => $data['position_name'],
             'parent_id'        => $newParentId,
+            'householder_id'   => $data['householder_id'] ?: null,
             'resident_id'      => $data['resident_id'] ?: null,
-            'family_member_id' => $data['family_member_id'] ?: null,
             'sort_order'       => $data['sort_order'] ?? $position->sort_order,
         ]);
 
@@ -244,29 +244,29 @@ class OrganizationController extends Controller
         }
 
         // IDs already assigned in this period
-        $usedFamilyMembers = [];
+        $usedResidents = [];
         if ($periodId) {
             $query = OrganizationPosition::where('organization_period_id', $periodId);
             if ($excludeId) {
                 $query->where('id', '!=', $excludeId);
             }
-            $usedFamilyMembers = $query->whereNotNull('family_member_id')->pluck('family_member_id')->toArray();
+            $usedResidents = $query->whereNotNull('resident_id')->pluck('resident_id')->toArray();
         }
 
         $results = [];
 
-        // Family members only
-        FamilyMember::with(['resident.block', 'resident.unit'])
-            ->whereNotIn('id', $usedFamilyMembers)
-            ->whereHas('resident', fn($r) => $r->where('is_active', true))
+        // Residents only
+        Resident::with(['householder.block', 'householder.unit'])
+            ->whereNotIn('id', $usedResidents)
+            ->whereHas('householder', fn($r) => $r->where('is_active', true))
             ->where('fullname', 'like', "%{$q}%")
             ->limit(10)
             ->get()
             ->each(function ($fm) use (&$results) {
-                $r = $fm->resident;
+                $r = $fm->householder;
                 $results[] = [
                     'id'       => $fm->id,
-                    'type'     => 'family_member',
+                    'type'     => 'resident',
                     'name'     => $fm->fullname,
                     'location' => ($r?->block?->name ?? '') . ($r?->unit_number ? ' · ' . $r->unit_number : ''),
                     'phone'    => '',
@@ -325,12 +325,21 @@ class OrganizationController extends Controller
      */
     private function checkPersonConflict(
         string $periodId,
+        ?string $householderId,
         ?string $residentId,
-        ?string $familyMemberId,
         ?string $excludePositionId = null
     ): ?array {
-        if ($residentId && $familyMemberId) {
+        if ($householderId && $residentId) {
             return ['person' => __('app.org_person_conflict_both')];
+        }
+
+        if ($householderId) {
+            $q = OrganizationPosition::where('organization_period_id', $periodId)
+                ->where('householder_id', $householderId);
+            if ($excludePositionId) $q->where('id', '!=', $excludePositionId);
+            if ($q->exists()) {
+                return ['householder_id' => __('app.org_person_conflict_resident')];
+            }
         }
 
         if ($residentId) {
@@ -338,16 +347,7 @@ class OrganizationController extends Controller
                 ->where('resident_id', $residentId);
             if ($excludePositionId) $q->where('id', '!=', $excludePositionId);
             if ($q->exists()) {
-                return ['resident_id' => __('app.org_person_conflict_resident')];
-            }
-        }
-
-        if ($familyMemberId) {
-            $q = OrganizationPosition::where('organization_period_id', $periodId)
-                ->where('family_member_id', $familyMemberId);
-            if ($excludePositionId) $q->where('id', '!=', $excludePositionId);
-            if ($q->exists()) {
-                return ['family_member_id' => __('app.org_person_conflict_member')];
+                return ['resident_id' => __('app.org_person_conflict_member')];
             }
         }
 

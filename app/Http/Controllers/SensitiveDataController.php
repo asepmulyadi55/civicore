@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FamilyMember;
+use App\Models\Householder;
 use App\Models\Resident;
 use Illuminate\Http\JsonResponse;
 
@@ -31,10 +31,10 @@ class SensitiveDataController extends Controller
             abort(403);
         }
 
-        if ($familyMember->resident_id !== $resident->id) {
+        if ($resident->householder_id !== $householder->id) {
             abort(404);
         }
 
-        return response()->json(['value' => $familyMember->nik ?? '']);
+        return response()->json(['value' => $resident->nik ?? '']);
     }
 }

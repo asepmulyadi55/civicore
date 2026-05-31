@@ -11,7 +11,7 @@ class PaymentRecord extends Model
 {
     use HasUuids;
     protected $fillable = [
-        'resident_id',
+        'householder_id',
         'batch_id',
         'payment_month',
         'amount',
@@ -37,9 +37,9 @@ class PaymentRecord extends Model
 
     // ── Relationships ───────────────────────────────────────────
 
-    public function resident(): BelongsTo
+    public function householder(): BelongsTo
     {
-        return $this->belongsTo(Resident::class);
+        return $this->belongsTo(Householder::class, 'householder_id');
     }
 
     public function paymentMethod(): BelongsTo

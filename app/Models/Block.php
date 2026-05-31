@@ -26,10 +26,10 @@ class Block extends Model
         ");
     }
 
-    // Residents who live in this block (denormalized FK)
-    public function residents(): HasMany
+    // Householders who live in this block (denormalized FK)
+    public function householders(): HasMany
     {
-        return $this->hasMany(Resident::class);
+        return $this->hasMany(Householder::class);
     }
 
     // Users (block coordinators) assigned to this block
@@ -43,3 +43,4 @@ class Block extends Model
         return $query->where('is_active', true);
     }
 }
+

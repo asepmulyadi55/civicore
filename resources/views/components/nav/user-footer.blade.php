@@ -12,7 +12,7 @@ Automatically shows:
   $user = auth()->user();
   $initials = strtoupper(substr($user->name, 0, 2));
 
-  if ($user->isResident()) {
+  if ($user->isHouseholder()) {
     // Try to find the resident record linked to this user account
     $residentRecord = \App\Models\Resident::where('user_id', $user->id)
       ->with('block')

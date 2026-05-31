@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Block;
-use App\Models\Resident;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -13,8 +12,8 @@ class BlockController extends Controller
     public function index(Request $request)
     {
         $query = Block::withCount([
-            'residents',
-            'residents as active_residents_count' => fn($q) => $q->where('is_active', true),
+            'householders',
+            'householders as active_residents_count' => fn($q) => $q->where('is_active', true),
             'units',
             'units as owner_occupied_units_count' => fn($q) => $q->where('house_status', 'owner_occupied'),
             'units as rented_units_count'         => fn($q) => $q->where('house_status', 'rented'),
@@ -157,7 +156,7 @@ class BlockController extends Controller
 
     public function destroy(Block $block)
     {
-        $residentCount = $block->residents()->count();
+        $residentCount = $block->householders()->count();
         if ($residentCount > 0) {
             return redirect()->route('blocks.index')
                 ->with('error', "Cannot delete \"{$block->name}\" — it has {$residentCount} resident(s) linked to it. Reassign or remove them first.");

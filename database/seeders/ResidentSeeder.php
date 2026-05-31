@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Block;
-use App\Models\FamilyMember;
+use App\Models\Householder;
 use App\Models\FeeHistory;
-use App\Models\Resident;
+use App\Models\Householder;
 use App\Models\Unit;
 use App\Models\User;
 use Carbon\Carbon;
@@ -32,7 +32,7 @@ class ResidentSeeder extends Seeder
 
     $wantedUnitNumbers = array_merge(...array_values(array_map(fn($r) => array_column($r, 0), $data)));
     $wantedUnitIds = Unit::whereIn('unit_number', $wantedUnitNumbers)->pluck('id');
-    Resident::whereNotIn('unit_id', $wantedUnitIds)->delete();
+    Householder::whereNotIn('unit_id', $wantedUnitIds)->delete();
 
     $residentUser = User::where('username', 'resident')->first();
 
@@ -48,7 +48,7 @@ class ResidentSeeder extends Seeder
 
         $userId = ($blockName === 'Block A' && $unitNum === 'A-101') ? $residentUser?->id : null;
 
-        $resident = Resident::updateOrCreate(
+        $resident = Householder::updateOrCreate(
           ['unit_id' => $unit->id],
           [
             'block_id' => $block->id,
@@ -60,7 +60,7 @@ class ResidentSeeder extends Seeder
         );
 
         FeeHistory::firstOrCreate(
-          ['resident_id' => $resident->id, 'effective_from' => '2023-01-01'],
+          ['householder_id' => $resident->id, 'effective_from' => '2023-01-01'],
           [
             'amount'     => $fee,
             'created_by' => $admin?->id,
@@ -72,7 +72,7 @@ class ResidentSeeder extends Seeder
 
     // ── Family members: covers all Posyandu age categories (Block A) ────────
     $unitA101  = Unit::where('unit_number', 'A-101')->first();
-    $residentA = $unitA101 ? Resident::where('unit_id', $unitA101->id)->first() : null;
+    $residentA = $unitA101 ? Householder::where('unit_id', $unitA101->id)->first() : null;
 
     if ($residentA) {
       $members = [
@@ -85,8 +85,8 @@ class ResidentSeeder extends Seeder
       ];
 
       foreach ($members as $m) {
-        FamilyMember::updateOrCreate(
-          ['resident_id' => $residentA->id, 'fullname' => $m['fullname']],
+        Householder::updateOrCreate(
+          ['householder_id' => $residentA->id, 'fullname' => $m['fullname']],
           $m
         );
       }
@@ -94,7 +94,7 @@ class ResidentSeeder extends Seeder
 
     // ── Block B: teen (Remaja) + adult head ─────────────────────────────────
     $unitB201  = Unit::where('unit_number', 'B-201')->first();
-    $residentB = $unitB201 ? Resident::where('unit_id', $unitB201->id)->first() : null;
+    $residentB = $unitB201 ? Householder::where('unit_id', $unitB201->id)->first() : null;
 
     if ($residentB) {
       $bMembers = [
@@ -103,11 +103,12 @@ class ResidentSeeder extends Seeder
       ];
 
       foreach ($bMembers as $m) {
-        FamilyMember::updateOrCreate(
-          ['resident_id' => $residentB->id, 'fullname' => $m['fullname']],
+        Householder::updateOrCreate(
+          ['householder_id' => $residentB->id, 'fullname' => $m['fullname']],
           $m
         );
       }
     }
   }
 }
+
