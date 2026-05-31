@@ -271,18 +271,27 @@ export default function PropertyPage() {
 
                                             <div className="flex-1" />
 
-                                            {!isSoldOrRented && listing.contact_phone && (
-                                                <a
-                                                    href={waLink || `tel:${listing.contact_phone}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
-                                                    style={{ background: isDark ? 'rgba(212,175,55,0.15)' : '#f8f9fa', color: C.primary, border: `1px solid ${C.cardBorder}`, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                                            <div className="flex gap-2 mt-3">
+                                                <Link
+                                                    to={`/property/${listing.id}`}
+                                                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
+                                                    style={{ background: isDark ? 'rgba(212,175,55,0.15)' : '#fefce8', color: '#D4AF37', border: `1px solid ${isDark ? 'rgba(212,175,55,0.3)' : '#fde68a'}`, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                                                 >
-                                                    <span className="material-symbols-outlined text-sm">call</span>
-                                                    {listing.contact_name || listing.contact_phone}
-                                                </a>
-                                            )}
+                                                    <span className="material-symbols-outlined text-sm">open_in_new</span>
+                                                    Lihat Detail
+                                                </Link>
+                                                {!isSoldOrRented && listing.contact_phone && (
+                                                    <a
+                                                        href={waLink || `tel:${listing.contact_phone}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
+                                                        style={{ background: isDark ? 'rgba(212,175,55,0.15)' : '#f8f9fa', color: C.primary, border: `1px solid ${C.cardBorder}`, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                                                    >
+                                                        <span className="material-symbols-outlined text-sm">call</span>
+                                                    </a>
+                                                )}
+                                            </div>
                                         </div>
                                     </article>
                                 );
