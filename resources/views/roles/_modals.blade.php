@@ -137,6 +137,7 @@
             'posyandu' => 'Posyandu',
             'users' => __('app.nav_users'),
             'roles' => __('app.nav_roles'),
+            'property' => __('app.nav_property'),
             'media' => __('app.nav_media'),
           ];
         @endphp

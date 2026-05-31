@@ -1,4 +1,4 @@
-{{-- Property Listings Admin Page --}}
+{{-- This file is superseded. The entry-point is now resources/views/property.blade.php --}}
 <x-layouts.app :title="__('app.nav_property')"
   class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 antialiased min-h-screen">
 
@@ -17,13 +17,13 @@
         <span class="px-2 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-lg hidden sm:inline">{{ $total }} {{ __('app.nav_property') }}</span>
       </div>
       <div class="flex items-center gap-3">
-        @can('property.create')
+        @if(auth()->user()->can('property.create'))
         <button onclick="openPropertyModal()"
           class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-sm shadow-primary/20 text-sm">
           <span class="material-icons text-sm">add</span>
           <span class="hidden sm:inline">{{ __('app.property_add') }}</span>
         </button>
-        @endcan
+        @endif
         <button
           class="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-primary/50 transition-all"
           onclick="toggleDark()" title="{{ __('app.toggle_dark_mode') }}">
@@ -182,7 +182,7 @@
 
                   {{-- Active toggle --}}
                   <td class="px-6 py-4">
-                    @can('property.edit')
+                    @if(auth()->user()->can('property.edit'))
                     <form method="POST" action="{{ route('property.toggle-active', $listing) }}">
                       @csrf @method('PATCH')
                       <button type="submit"
@@ -195,28 +195,28 @@
                       <span class="px-2 py-1 text-xs rounded-full {{ $listing->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
                         {{ $listing->is_active ? __('app.active') : __('app.inactive') }}
                       </span>
-                    @endcan
+                    @endif
                   </td>
 
                   {{-- Actions --}}
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-2">
-                      @can('property.edit')
+                      @if(auth()->user()->can('property.edit'))
                       <button type="button"
                         onclick="openPropertyModal(@json($listing))"
                         class="p-2 text-slate-400 hover:text-primary dark:hover:text-secondary transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
                         title="{{ __('app.btn_edit') }}">
                         <span class="material-icons text-[18px]">edit</span>
                       </button>
-                      @endcan
-                      @can('property.delete')
+                      @endif
+                      @if(auth()->user()->can('property.delete'))
                       <button type="button"
                         onclick="confirmDeleteProperty('{{ $listing->id }}', {{ json_encode($listing->title) }})"
                         class="p-2 text-slate-400 hover:text-rose-500 transition-colors rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20"
                         title="{{ __('app.btn_delete') }}">
                         <span class="material-icons text-[18px]">delete</span>
                       </button>
-                      @endcan
+                      @endif
                     </div>
                   </td>
                 </tr>
