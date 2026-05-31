@@ -35,7 +35,7 @@ class PropertyListingController extends Controller
         $blocks   = Block::where('is_active', true)->orderBy('name')->get();
         $total    = PropertyListing::count();
 
-        return view('property.index', compact('listings', 'blocks', 'total'));
+        return view('property', compact('listings', 'blocks', 'total'));
     }
 
     public function store(Request $request)
