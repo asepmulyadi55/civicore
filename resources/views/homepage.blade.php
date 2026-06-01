@@ -86,6 +86,13 @@
               {{ __('app.hp_section_footer') }}
             </button>
 
+            <button type="button" id="hp-tab-btn-metadata" onclick="switchHpTab('metadata')"
+              class="hp-tab-btn flex items-center gap-2 px-5 py-4 text-sm font-semibold whitespace-nowrap border-b-2 transition-all
+                     border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/40">
+              <span class="material-icons text-[18px]">manage_search</span>
+              {{ __('app.hp_section_metadata') }}
+            </button>
+
           </nav>
         </div>
       </div>
@@ -109,6 +116,9 @@
       <div id="hp-tab-footer" class="hp-tab-panel hidden">
         @include('homepage._footer')
       </div>
+      <div id="hp-tab-metadata" class="hp-tab-panel hidden">
+        @include('homepage._metadata')
+      </div>
 
     </main>
 
@@ -129,7 +139,7 @@
       if (updateHistory !== false) history.replaceState(null, null, location.pathname + location.search + '#' + tab);
     }
     (function () {
-      var validTabs = ['featured', 'events', 'buletin', 'moments', 'about', 'footer'];
+      var validTabs = ['featured', 'events', 'buletin', 'moments', 'about', 'footer', 'metadata'];
       var stored    = sessionStorage.getItem('hp_active_tab');
       var hash      = location.hash.slice(1);
       sessionStorage.removeItem('hp_active_tab');

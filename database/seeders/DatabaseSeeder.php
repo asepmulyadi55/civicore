@@ -12,21 +12,14 @@ class DatabaseSeeder extends Seeder
   public function run(): void
   {
     $this->call([
-        // Lookup tables first (no dependencies)
+      // Core lookups (no dependencies)
       RoleSeeder::class,
       RolePermissionSeeder::class,
-      BlockSeeder::class,
       PaymentMethodSeeder::class,
       SettingSeeder::class,
 
-        // Users depend on roles + blocks
+      // Admin user (depends on roles)
       UserSeeder::class,
-
-        // Residents depend on blocks + users; creates fee histories inline
-      ResidentSeeder::class,
-
-        // Payment records depend on residents, payment methods, users
-      PaymentRecordSeeder::class,
     ]);
   }
 }

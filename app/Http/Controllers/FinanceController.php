@@ -274,7 +274,7 @@ class FinanceController extends Controller
         $user = auth()->user();
         if (!$user->can('finance.create')) abort(403);
 
-        if (!in_array($report->status, ['draft', 'revised'])) {
+        if (!in_array($report->status, ['draft', 'revised', 'rejected'])) {
             return back()->withErrors(['general' => 'Report cannot be submitted in its current state.']);
         }
 
@@ -345,6 +345,33 @@ class FinanceController extends Controller
             ->with('success', __('app.fin_report_revised'));
     }
 
+    // ── Reject a submitted report ─────────────────────────────────────────────
+
+    public function rejectReport(Request $request, FinanceReport $report): RedirectResponse
+    {
+        $user = auth()->user();
+        if (!$user->can('finance.approve')) abort(403);
+
+        if ($report->status !== 'submitted') {
+            return back()->withErrors(['general' => 'Only submitted reports can be rejected.']);
+        }
+
+        $request->validate(['rejection_notes' => ['nullable', 'string', 'max:1000']]);
+
+        $report->status          = 'rejected';
+        $report->rejected_by     = $user->id;
+        $report->rejected_at     = now();
+        $report->rejection_notes = $request->input('rejection_notes');
+        $report->updated_by      = $user->id;
+        $report->save();
+
+        Log::info('Finance report rejected', ['id' => $report->id, 'by' => $user->id]);
+
+        return redirect()
+            ->route('finance.index', ['tab' => 'reports'])
+            ->with('success', __('app.fin_report_rejected'));
+    }
+
     // ── Export a report as Excel ─────────────────────────────────────────────
 
     public function exportReport(FinanceReport $report)
@@ -364,8 +391,8 @@ class FinanceController extends Controller
         $user = auth()->user();
         if (!$user->can('finance.delete')) abort(403);
 
-        if (!in_array($report->status, ['draft', 'revised'])) {
-            return back()->withErrors(['general' => 'Only draft or revised reports can be deleted.']);
+        if (!in_array($report->status, ['draft', 'revised', 'rejected'])) {
+            return back()->withErrors(['general' => 'Only draft, revised, or rejected reports can be deleted.']);
         }
 
         $report->delete();
@@ -482,8 +509,11 @@ class FinanceController extends Controller
             $q->where('category', 'like', "%{$cat}%");
         }
         if ($ym = $request->get('tx_month')) {
-            [$fy, $fm] = explode('-', $ym . '-1');
-            $q->where('report_year', (int)$fy)->where('report_month', (int)$fm);
+            // New format: tx_month is a plain integer (1–12), tx_year is a separate param
+            $q->where('report_month', (int)$ym);
+        }
+        if ($yy = $request->get('tx_year')) {
+            $q->where('report_year', (int)$yy);
         }
 
         $transactions = $q->orderByDesc('transaction_date')

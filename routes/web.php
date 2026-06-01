@@ -136,6 +136,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:homepage.edit')->name('homepage.footer');
     Route::post('/homepage/memorable-moments', [HomepageController::class, 'updateMemorableMoments'])
         ->middleware('permission:homepage.edit')->name('homepage.memorable-moments');
+    Route::post('/homepage/metadata', [HomepageController::class, 'updateMetadata'])
+        ->middleware('permission:homepage.edit')->name('homepage.metadata');
 
     // ── Private file serving (auth-protected) ─────────────────────────────────
     Route::get('/private/{path}', [PrivateFileController::class, 'serve'])
@@ -245,6 +247,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:finance.create')->name('finance.reports.submit');
     Route::patch('/finance/reports/{report}/approve', [FinanceController::class, 'approveReport'])
         ->middleware('permission:finance.approve')->name('finance.reports.approve');
+    Route::patch('/finance/reports/{report}/reject', [FinanceController::class, 'rejectReport'])
+        ->middleware('permission:finance.approve')->name('finance.reports.reject');
     Route::patch('/finance/reports/{report}/revise', [FinanceController::class, 'reviseReport'])
         ->middleware('permission:finance.approve')->name('finance.reports.revise');
     Route::get('/finance/reports/{report}/export', [FinanceController::class, 'exportReport'])

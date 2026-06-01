@@ -283,14 +283,12 @@ class PaymentController extends Controller
     public function update(Request $request, PaymentRecord $payment)
     {
         $request->validate([
-            'months' => ['required', 'array', 'min:1'],
-            'months.*' => ['required', 'string', 'regex:/^\d{4}-\d{2}$/'],
-            'amount' => ['required', 'numeric', 'min:0'],
+            'months'            => ['required', 'array', 'min:1'],
+            'months.*'          => ['required', 'string', 'regex:/^\d{4}-\d{2}$/'],
+            'amount'            => ['required', 'numeric', 'min:0'],
             'payment_method_id' => ['nullable', 'exists:payment_methods,id'],
-            'status' => ['required', 'in:unpaid,pending,approved,rejected'],
-            'rejection_reason' => ['nullable', 'string', 'max:1000'],
-            'notes' => ['nullable', 'string', 'max:1000'],
-            'proof' => ['nullable', 'file', 'mimetypes:image/jpeg,image/png,image/webp,application/pdf', 'max:5120'],
+            'notes'             => ['nullable', 'string', 'max:1000'],
+            'proof'             => ['nullable', 'file', 'mimetypes:image/jpeg,image/png,image/webp,application/pdf', 'max:5120'],
         ]);
 
         // Handle proof replacement
@@ -312,26 +310,16 @@ class PaymentController extends Controller
             ]);
         }
 
-        $status = $request->status;
-        $approvedBy = $payment->approved_by;
-        $approvedAt = $payment->approved_at;
-        if ($status === 'approved' && $payment->status !== 'approved') {
-            $approvedBy = auth()->id();
-            $approvedAt = now();
-        } elseif ($status !== 'approved') {
-            $approvedBy = null;
-            $approvedAt = null;
-        }
-
+        // Editing a payment always resets it to pending so it gets re-reviewed.
         $baseData = [
-            'amount' => $request->amount,
+            'amount'            => $request->amount,
             'payment_method_id' => $request->payment_method_id ?: null,
-            'status' => $status,
-            'rejection_reason' => $status === 'rejected' ? $request->rejection_reason : null,
-            'notes' => $request->notes,
-            'proof_path' => $proofPath,
-            'approved_by' => $approvedBy,
-            'approved_at' => $approvedAt,
+            'status'            => 'pending',
+            'rejection_reason'  => null,
+            'notes'             => $request->notes,
+            'proof_path'        => $proofPath,
+            'approved_by'       => null,
+            'approved_at'       => null,
         ];
 
         $months = $request->months;

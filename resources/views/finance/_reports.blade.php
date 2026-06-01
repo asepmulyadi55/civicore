@@ -9,13 +9,16 @@
   <input type="hidden" name="tab" value="reports">
   <div class="flex flex-col gap-1">
     <label class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('app.fin_filter_year') }}</label>
-    <select name="rpt_year"
-      class="text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30">
-      <option value="">{{ __('app.fin_all_years') }}</option>
-      @foreach(range(now()->year, 2020) as $y)
-        <option value="{{ $y }}" {{ $currentFilterYear == $y ? 'selected' : '' }}>{{ $y }}</option>
-      @endforeach
-    </select>
+    <div class="relative overflow-hidden">
+      <select name="rpt_year"
+        class="appearance-none text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 pl-3 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 w-full">
+        <option value="">{{ __('app.fin_all_years') }}</option>
+        @foreach(range(now()->year, 2020) as $y)
+          <option value="{{ $y }}" {{ $currentFilterYear == $y ? 'selected' : '' }}>{{ $y }}</option>
+        @endforeach
+      </select>
+      <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px] bg-white dark:bg-slate-700 rounded">expand_more</span>
+    </div>
   </div>
   <button type="submit"
     class="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:opacity-90 transition-opacity">
@@ -73,6 +76,12 @@
                     {{ __('app.fin_approved_by') }}: {{ $report->approvedBy?->name ?? '—' }}
                   </p>
                 @endif
+                @if($report->status === 'rejected' && $report->rejection_notes)
+                  <div class="mt-1.5 flex items-start gap-1.5 p-2 bg-rose-50 dark:bg-rose-900/20 rounded-lg border border-rose-200 dark:border-rose-800">
+                    <span class="material-icons text-rose-500 text-[14px] mt-0.5 flex-shrink-0">info</span>
+                    <p class="text-xs text-rose-700 dark:text-rose-400">{{ $report->rejection_notes }}</p>
+                  </div>
+                @endif
               </td>
               <td class="px-4 py-3 text-right text-slate-600 dark:text-slate-400 whitespace-nowrap">
                 {{ $currency }} {{ $fmt($report->opening_balance) }}
@@ -96,8 +105,8 @@
               <td class="px-4 py-3 text-right">
                 <div class="flex items-center justify-end gap-1 flex-wrap">
 
-                  {{-- Refresh (recalculate) —  draft / revised / submitted only --}}
-                  @if($canManage && in_array($report->status, ['draft', 'revised']))
+                  {{-- Refresh (recalculate) — draft / revised / rejected only --}}
+                  @if($canManage && in_array($report->status, ['draft', 'revised', 'rejected']))
                     <form method="POST" action="{{ route('finance.reports.generate') }}" class="inline">
                       @csrf
                       <input type="hidden" name="month" value="{{ $report->month }}">
@@ -121,7 +130,7 @@
                   @endif
 
                   {{-- Submit --}}
-                  @if($canManage && in_array($report->status, ['draft', 'revised']))
+                  @if($canManage && in_array($report->status, ['draft', 'revised', 'rejected']))
                     <form method="POST" action="{{ route('finance.reports.submit', $report) }}" class="inline">
                       @csrf @method('PATCH')
                       <button type="submit"
@@ -144,6 +153,16 @@
                     </form>
                   @endif
 
+                  {{-- Reject --}}
+                  @if($canApprove && $report->status === 'submitted')
+                    <button type="button"
+                      onclick="openRejectReportModal('{{ $report->id }}', {{ json_encode($report->periodLabel()) }})"
+                      class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                      title="{{ __('app.fin_reject_report') }}">
+                      <span class="material-icons text-[18px]">cancel</span>
+                    </button>
+                  @endif
+
                   {{-- Revise --}}
                   @if($canApprove && $report->status === 'approved')
                     <button type="button"
@@ -163,8 +182,8 @@
                     </a>
                   @endif
 
-                  {{-- Delete (draft / revised only) --}}
-                  @if($canManage && in_array($report->status, ['draft', 'revised']))
+                  {{-- Delete (draft / revised / rejected only) --}}
+                  @if($canManage && in_array($report->status, ['draft', 'revised', 'rejected']))
                     <button type="button"
                       onclick="openDeleteReportModal('{{ $report->id }}', {{ json_encode($report->periodLabel()) }})"
                       class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
