@@ -205,7 +205,7 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'householder_id' => ['required', 'exists:householders,id'],
+            'resident_id' => ['required', 'exists:householders,id'],
             'months' => ['required', 'array', 'min:1'],
             'months.*' => ['required', 'string', 'regex:/^\d{4}-\d{2}$/'],
             'amount' => ['required', 'numeric', 'min:0'],

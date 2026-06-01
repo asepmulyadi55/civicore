@@ -890,6 +890,8 @@ return [
   'fin_tab_reports'               => 'Laporan Bulanan',
 
   // Kartu dasbor
+  'fin_viewing_period'            => 'Periode yang dilihat',
+  'fin_back_to_current'           => 'Kembali ke saat ini',
   'fin_current_balance'           => 'Saldo Saat Ini',
   'fin_month_income'              => 'Pemasukan Bulan Ini',
   'fin_month_expense'             => 'Pengeluaran Bulan Ini',

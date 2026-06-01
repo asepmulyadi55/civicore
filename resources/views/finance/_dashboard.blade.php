@@ -10,7 +10,7 @@
   <form method="GET" action="{{ route('finance.index') }}" class="flex items-center gap-2">
     <input type="hidden" name="tab" value="dashboard">
     <div class="relative">
-      <select name="dash_month" onchange="this.form.submit()"
+      <select name="dash_month"
         class="appearance-none pl-3 pr-8 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer">
         @foreach(range(1,12) as $m)
           <option value="{{ $m }}" {{ $m == $selectedMonth ? 'selected' : '' }}>
@@ -21,7 +21,7 @@
       <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px]">expand_more</span>
     </div>
     <div class="relative">
-      <select name="dash_year" onchange="this.form.submit()"
+      <select name="dash_year"
         class="appearance-none pl-3 pr-8 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer">
         @foreach(range(now()->year + 1, 2020) as $y)
           <option value="{{ $y }}" {{ $y == $selectedYear ? 'selected' : '' }}>{{ $y }}</option>
@@ -29,6 +29,10 @@
       </select>
       <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px]">expand_more</span>
     </div>
+    <button type="submit" class="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors">
+      <span class="material-icons text-[16px]">filter_alt</span>
+      {{ __('app.btn_filter') }}
+    </button>
   </form>
   @if($selectedMonth != $currentMonth || $selectedYear != $currentYear)
     <a href="{{ route('finance.index', ['tab' => 'dashboard']) }}"
