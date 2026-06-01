@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('total_income', 15, 2)->default(0);
             $table->decimal('total_expense', 15, 2)->default(0);
             $table->decimal('closing_balance', 15, 2)->default(0);
-            $table->enum('status', ['draft', 'submitted', 'approved', 'revised'])->default('draft');
+            $table->enum('status', ['draft', 'submitted', 'approved', 'revised', 'rejected'])->default('draft');
             $table->text('notes')->nullable();
             $table->foreignUuid('submitted_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('submitted_at')->nullable();
