@@ -230,7 +230,7 @@ class PaymentController extends Controller
         }
 
         $baseData = [
-            'resident_id' => $request->resident_id,
+            'householder_id' => $request->resident_id,
             'amount' => $request->amount,
             'payment_method_id' => $request->payment_method_id ?: null,
             'status' => $request->status,
@@ -258,7 +258,7 @@ class PaymentController extends Controller
         $batchId = (string) Str::uuid(); // shared across all months in this submission
         foreach ($request->months as $monthStr) {
             $paymentMonth = $monthStr . '-01';
-            $exists = PaymentRecord::where('resident_id', $request->resident_id)
+            $exists = PaymentRecord::where('householder_id', $request->resident_id)
                 ->where('payment_month', $paymentMonth)
                 ->exists();
             if ($exists) {
