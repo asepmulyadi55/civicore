@@ -123,10 +123,27 @@ class FinanceReport extends Model
             ->where('report_year', $this->year)
             ->sum('amount');
 
-        // Include approved payment records for this month (by the month they are FOR)
+        // Include approved payment records: attribute income to whichever is later —
+        // the month being paid FOR, or the month payment was actually received (updated_at).
+        // e.g. pay May in June → June income (not May). Pay June in May → June income (advance).
+        $periodStart = \Carbon\Carbon::create($this->year, $this->month, 1)->startOfDay();
+        $periodEnd   = \Carbon\Carbon::create($this->year, $this->month, 1)->endOfMonth()->endOfDay();
+
         $paymentIncome = \App\Models\PaymentRecord::where('status', 'approved')
-            ->whereYear('payment_month', $this->year)
-            ->whereMonth('payment_month', $this->month)
+            ->where(function ($q) use ($periodStart, $periodEnd) {
+                // Case A: paying for THIS month, and was approved on or before end of this month
+                $q->where(function ($q2) use ($periodStart, $periodEnd) {
+                    $q2->whereYear('payment_month', $periodStart->year)
+                       ->whereMonth('payment_month', $periodStart->month)
+                       ->where('updated_at', '<=', $periodEnd);
+                })
+                // Case B: paying for a PAST month, but approval happened in THIS month (backdated)
+                ->orWhere(function ($q2) use ($periodStart, $periodEnd) {
+                    $q2->where('payment_month', '<', $periodStart)
+                       ->where('updated_at', '>=', $periodStart)
+                       ->where('updated_at', '<=', $periodEnd);
+                });
+            })
             ->sum('amount');
 
         $totalExpense = FinanceTransaction::where('type', 'expense')

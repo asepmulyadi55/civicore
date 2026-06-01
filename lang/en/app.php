@@ -890,6 +890,8 @@ return [
   'fin_tab_reports'               => 'Monthly Reports',
 
   // Dashboard cards
+  'fin_viewing_period'            => 'Viewing period',
+  'fin_back_to_current'           => 'Back to current',
   'fin_current_balance'           => 'Current Balance',
   'fin_month_income'              => 'Monthly Income',
   'fin_month_expense'             => 'Monthly Expense',

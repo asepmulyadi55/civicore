@@ -49,7 +49,7 @@
             <a href="{{ route('login') }}"
               class="w-full flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 px-6 py-3 rounded-xl font-semibold transition-all text-sm">
               <span class="material-icons text-base">arrow_back</span>
-              Cancel —” Go Back to Login
+              Cancel - Go Back to Login
             </a>
 
           </div>
