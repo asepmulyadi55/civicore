@@ -9,9 +9,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Expand the status ENUM to include 'rejected'
-        DB::statement("ALTER TABLE finance_reports MODIFY COLUMN status ENUM('draft','submitted','approved','revised','rejected') NOT NULL DEFAULT 'draft'");
-
         Schema::table('finance_reports', function (Blueprint $table) {
             $table->string('rejected_by')->nullable()->after('revised_at');
             $table->timestamp('rejected_at')->nullable()->after('rejected_by');
