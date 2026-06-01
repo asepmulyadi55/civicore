@@ -9,25 +9,25 @@
   <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ __('app.fin_viewing_period') }}</span>
   <form method="GET" action="{{ route('finance.index') }}" class="flex items-center gap-2">
     <input type="hidden" name="tab" value="dashboard">
-    <div class="relative">
+    <div class="relative overflow-hidden">
       <select name="dash_month"
-        class="appearance-none pl-3 pr-8 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer">
+        class="appearance-none pl-3 pr-8 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer w-full">
         @foreach(range(1,12) as $m)
           <option value="{{ $m }}" {{ $m == $selectedMonth ? 'selected' : '' }}>
             {{ \Carbon\Carbon::create(null, $m)->format('F') }}
           </option>
         @endforeach
       </select>
-      <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px]">expand_more</span>
+      <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px] bg-white dark:bg-slate-800 rounded">expand_more</span>
     </div>
-    <div class="relative">
+    <div class="relative overflow-hidden">
       <select name="dash_year"
-        class="appearance-none pl-3 pr-8 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer">
+        class="appearance-none pl-3 pr-8 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer w-full">
         @foreach(range(now()->year + 1, 2020) as $y)
           <option value="{{ $y }}" {{ $y == $selectedYear ? 'selected' : '' }}>{{ $y }}</option>
         @endforeach
       </select>
-      <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px]">expand_more</span>
+      <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px] bg-white dark:bg-slate-800 rounded">expand_more</span>
     </div>
     <button type="submit" class="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors">
       <span class="material-icons text-[16px]">filter_alt</span>

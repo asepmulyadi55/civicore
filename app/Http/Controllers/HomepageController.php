@@ -22,6 +22,7 @@ class HomepageController extends Controller
         $about = json_decode(Setting::get('homepage_about', '{}'), true) ?? [];
         $memorableMoments = json_decode(Setting::get('homepage_memorable_moments', '{}'), true) ?? [];
         $footer = json_decode(Setting::get('homepage_footer', '{}'), true) ?? [];
+        $metadata = json_decode(Setting::get('homepage_metadata', '{}'), true) ?? [];
         $sectionLabels = array_merge(
             ['featured_eyebrow' => 'Featured Event', 'events_eyebrow' => 'Discover More', 'events_heading' => 'Upcoming Community Events', 'buletin_eyebrow' => 'Informasi', 'buletin_heading' => 'Buletin'],
             json_decode(Setting::get('homepage_section_labels', '{}'), true) ?? []
@@ -99,7 +100,7 @@ class HomepageController extends Controller
 
         return view('homepage', compact(
             'hero', 'featuredEvent', 'events', 'pagination', 'about',
-            'totalEvents', 'memorableMoments', 'footer',
+            'totalEvents', 'memorableMoments', 'footer', 'metadata',
             'buletin', 'buletinPagination', 'totalBuletin', 'sectionLabels'
         ));
     }
@@ -555,6 +556,42 @@ class HomepageController extends Controller
         $this->saveSetting('homepage_memorable_moments', json_encode($data), 'Memorable Moments');
 
         return redirect()->route('homepage.index')->with('success', __('app.flash_hp_moments_saved'));
+    }
+
+    // ── Metadata (SEO) Section ──────────────────────────────────────────────
+
+    public function updateMetadata(Request $request)
+    {
+        $validated = $request->validate([
+            'page_title'       => 'nullable|string|max:120',
+            'meta_description' => 'nullable|string|max:300',
+            'meta_keywords'    => 'nullable|string|max:500',
+            'og_title'         => 'nullable|string|max:120',
+            'og_description'   => 'nullable|string|max:300',
+            'og_image'         => 'nullable|image|max:5120',
+        ]);
+
+        $existing = json_decode(Setting::get('homepage_metadata', '{}'), true) ?? [];
+
+        foreach (['page_title', 'meta_description', 'meta_keywords', 'og_title', 'og_description'] as $field) {
+            if (!is_null($validated[$field] ?? null)) {
+                $existing[$field] = $validated[$field];
+            }
+        }
+
+        // Handle OG image upload
+        if ($request->hasFile('og_image')) {
+            // Remove old image if stored
+            if (!empty($existing['og_image'])) {
+                Storage::disk('public')->delete($existing['og_image']);
+            }
+            $path = $request->file('og_image')->store('homepage', 'public');
+            $existing['og_image'] = $path;
+        }
+
+        $this->saveSetting('homepage_metadata', json_encode($existing), 'SEO Metadata');
+
+        return redirect()->route('homepage.index')->with('success', __('app.flash_hp_metadata_saved'));
     }
 
     // ── Private helper ────────────────────────────────────────────────────────
