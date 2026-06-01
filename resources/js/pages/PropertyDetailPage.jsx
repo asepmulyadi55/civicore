@@ -110,8 +110,8 @@ export default function PropertyDetailPage() {
     const images = listing?.images?.length ? listing.images : [PLACEHOLDER];
 
     const typeBadgeStyle = listing?.type === 'sell'
-        ? (isDark ? { bg: 'rgba(212,175,55,0.2)', color: '#D4AF37' } : { bg: '#fefce8', color: '#b45309' })
-        : (isDark ? { bg: 'rgba(99,202,183,0.2)', color: '#63CAB7' } : { bg: '#f0fdf4', color: '#15803d' });
+        ? (isDark ? { bg: '#92711a', color: '#fde68a' } : { bg: '#fefce8', color: '#b45309' })
+        : (isDark ? { bg: '#0e5c4a', color: '#6ee7b7' } : { bg: '#f0fdf4', color: '#15803d' });
 
     const isSoldOrRented = listing?.status === 'sold' || listing?.status === 'rented';
     const waLink = listing?.contact_phone
