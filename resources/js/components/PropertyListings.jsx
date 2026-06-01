@@ -31,9 +31,9 @@ export default function PropertyListings({ listings = [], loading, isDark = fals
     const viewAllColor       = isDark ? '#D4AF37' : '#1C2D27';
     const viewAllBorderColor = isDark ? 'rgba(212,175,55,0.4)' : 'rgba(28,45,39,0.3)';
     const mutedColor         = isDark ? '#9E9C97' : '#6b7280';
-    const badgeSell          = isDark ? { background: 'rgba(212,175,55,0.2)', color: '#D4AF37' } : { background: '#fefce8', color: '#b45309' };
-    const badgeRent          = isDark ? { background: 'rgba(99,202,183,0.2)', color: '#63CAB7' } : { background: '#f0fdf4', color: '#15803d' };
-    const badgeSold          = isDark ? { background: 'rgba(255,255,255,0.1)', color: '#9E9C97' } : { background: '#f1f5f9', color: '#64748b' };
+    const badgeSell          = isDark ? { background: '#92711a', color: '#fde68a' } : { background: '#fefce8', color: '#b45309' };
+    const badgeRent          = isDark ? { background: '#0e5c4a', color: '#6ee7b7' } : { background: '#f0fdf4', color: '#15803d' };
+    const badgeSold          = isDark ? { background: '#374151', color: '#d1d5db' } : { background: '#f1f5f9', color: '#64748b' };
 
     if (loading && listings.length === 0) {
         return (
@@ -47,7 +47,7 @@ export default function PropertyListings({ listings = [], loading, isDark = fals
 
     if (!listings || listings.length === 0) return null;
 
-    const displayed = listings.slice(0, 6);
+    const displayed = listings.slice(0, 3);
 
     const typeBadge = (listing) => {
         if (listing.status === 'sold')   return { label: 'Terjual',    style: badgeSold };

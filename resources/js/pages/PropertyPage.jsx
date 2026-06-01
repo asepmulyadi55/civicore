@@ -77,13 +77,13 @@ export default function PropertyPage() {
     };
 
     const badgeSell = isDark
-        ? { background: 'rgba(212,175,55,0.2)', color: '#D4AF37' }
+        ? { background: '#92711a', color: '#fde68a' }
         : { background: '#fefce8', color: '#b45309' };
     const badgeRent = isDark
-        ? { background: 'rgba(99,202,183,0.2)', color: '#63CAB7' }
+        ? { background: '#0e5c4a', color: '#6ee7b7' }
         : { background: '#f0fdf4', color: '#15803d' };
     const badgeSold = isDark
-        ? { background: 'rgba(255,255,255,0.1)', color: '#9E9C97' }
+        ? { background: '#374151', color: '#d1d5db' }
         : { background: '#f1f5f9', color: '#64748b' };
 
     const allListings = data?.listings ?? [];
