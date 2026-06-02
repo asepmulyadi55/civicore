@@ -345,6 +345,8 @@ Review Modal, and all associated JavaScript.
             </div>
           </div>
 
+        </div>{{-- end grid --}}
+
         {{-- Current Proof --}}
         <div id="em-proof-wrap" class="hidden">
           <label
