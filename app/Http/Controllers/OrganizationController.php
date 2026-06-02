@@ -152,9 +152,9 @@ class OrganizationController extends Controller
 
         OrganizationPosition::create([
             'organization_period_id' => $period->id,
-            'parent_id'              => $data['parent_id'] ?: null,
-            'householder_id'         => $data['householder_id'] ?: null,
-            'resident_id'            => $data['resident_id'] ?: null,
+            'parent_id'              => $data['parent_id'] ?? null,
+            'householder_id'         => $data['householder_id'] ?? null,
+            'resident_id'            => $data['resident_id'] ?? null,
             'position_name'          => $data['position_name'],
             'sort_order'             => $data['sort_order'] ?? 0,
         ]);
@@ -178,7 +178,7 @@ class OrganizationController extends Controller
             'sort_order'       => 'nullable|integer|min:0',
         ]);
 
-        $newParentId = $data['parent_id'] ?: null;
+        $newParentId = $data['parent_id'] ?? null;
 
         // Prevent self-reference and circular hierarchy
         if ($newParentId) {
@@ -205,8 +205,8 @@ class OrganizationController extends Controller
         $position->update([
             'position_name'    => $data['position_name'],
             'parent_id'        => $newParentId,
-            'householder_id'   => $data['householder_id'] ?: null,
-            'resident_id'      => $data['resident_id'] ?: null,
+            'householder_id'   => $data['householder_id'] ?? null,
+            'resident_id'      => $data['resident_id'] ?? null,
             'sort_order'       => $data['sort_order'] ?? $position->sort_order,
         ]);
 
