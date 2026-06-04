@@ -165,9 +165,24 @@ class PaymentController extends Controller
         $pendingCount = (clone $statBase)->where('status', 'pending')->count();
         $pendingTotal = (clone $statBase)->where('status', 'pending')->sum('amount');
 
+        $periodStart = now()->startOfMonth()->startOfDay();
+        $periodEnd   = now()->endOfMonth()->endOfDay();
+
         $collectedMonth = (clone $statBase)->where('status', 'approved')
-            ->whereYear('payment_month', now()->year)
-            ->whereMonth('payment_month', now()->month)
+            ->where(function ($q) use ($periodStart, $periodEnd) {
+                // Payments FOR this month, approved by end of this month
+                $q->where(function ($q2) use ($periodStart, $periodEnd) {
+                    $q2->whereYear('payment_month', now()->year)
+                       ->whereMonth('payment_month', now()->month)
+                       ->where('updated_at', '<=', $periodEnd);
+                })
+                // Payments for past months, but approved IN this month (backdated)
+                ->orWhere(function ($q2) use ($periodStart, $periodEnd) {
+                    $q2->where('payment_month', '<', $periodStart)
+                       ->where('updated_at', '>=', $periodStart)
+                       ->where('updated_at', '<=', $periodEnd);
+                });
+            })
             ->sum('amount');
 
         $unpaidCount = Householder::where('is_active', true)
@@ -351,7 +366,7 @@ class PaymentController extends Controller
         $skipped = 0;
         foreach (array_slice($months, 1) as $monthStr) {
             $paymentMonth = $monthStr . '-01';
-            $exists = PaymentRecord::where('resident_id', $payment->resident_id)
+            $exists = PaymentRecord::where('householder_id', $payment->householder_id)
                 ->where('payment_month', $paymentMonth)
                 ->where('id', '!=', $payment->id)
                 ->exists();
@@ -360,10 +375,10 @@ class PaymentController extends Controller
                 continue;
             }
             PaymentRecord::create(array_merge($baseData, [
-                'resident_id' => $payment->resident_id,
-                'payment_month' => $paymentMonth,
-                'batch_id' => $batchId,
-                'submitted_by' => $payment->submitted_by,
+                'householder_id' => $payment->householder_id,
+                'payment_month'  => $paymentMonth,
+                'batch_id'       => $batchId,
+                'submitted_by'   => $payment->submitted_by,
             ]));
             $created++;
         }
