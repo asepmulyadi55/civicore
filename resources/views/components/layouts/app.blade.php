@@ -106,6 +106,31 @@
       cursor: not-allowed !important;
       opacity: 0.55 !important;
     }
+
+    /* ── Hide native browser picker icon (date / time / month) ──────────
+       opacity:0 hides the icon visually; stretching it to 100% width/height
+       keeps the click target alive so the picker still opens on click.      */
+    input[type="date"],
+    input[type="time"],
+    input[type="month"] {
+      position: relative;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator,
+    input[type="month"]::-webkit-calendar-picker-indicator {
+      opacity: 0;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    /* Ensure the custom Material Icon is always visible above the input overlay */
+    .relative > span.material-icons {
+      z-index: 1;
+      pointer-events: none;
+    }
   </style>
 
   {{-- Extra head content (per-page scripts, meta tags, etc.) --}}

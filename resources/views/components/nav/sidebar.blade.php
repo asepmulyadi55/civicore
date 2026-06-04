@@ -27,6 +27,9 @@
       $flatItems[] = ['key' => 'reports', 'label_raw' => __('app.nav_reports'), 'icon' => 'bar_chart', 'route' => 'reports.index', 'permission' => 'reports.view'];
     }
     $flatItems[] = ['key' => 'organization', 'label_raw' => __('app.nav_organization'), 'icon' => 'account_tree', 'route' => 'organization.index', 'permission' => null];
+    if ($user->can('meetings.view')) {
+      $flatItems[] = ['key' => 'meetings', 'label_raw' => __('app.nav_meetings'), 'icon' => 'event_note', 'route' => 'meetings.index', 'permission' => 'meetings.view'];
+    }
     $flatItems[] = ['key' => 'settings', 'label_raw' => __('app.nav_settings'), 'icon' => 'settings', 'route' => 'settings.index', 'permission' => null];
     $navGroups = [['label' => null, 'group_icon' => null, 'items' => $flatItems]];
   } else {
@@ -46,6 +49,7 @@
           ['key' => 'blocks', 'label' => __('app.nav_blocks'), 'icon' => 'domain', 'route' => 'blocks.index', 'permission' => 'blocks.view'],
           ['key' => 'posyandu', 'label' => 'Posyandu', 'icon' => 'health_and_safety', 'route' => 'posyandu.index', 'permission' => 'posyandu.view'],
           ['key' => 'organization', 'label' => __('app.nav_organization'), 'icon' => 'account_tree', 'route' => 'organization.index', 'permission' => null],
+          ['key' => 'meetings', 'label' => __('app.nav_meetings'), 'icon' => 'event_note', 'route' => 'meetings.index', 'permission' => 'meetings.view'],
         ],
       ],
       [
