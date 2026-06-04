@@ -43,6 +43,13 @@ class PaymentController extends Controller
         if ($month = $request->get('month')) {
             $baseQ->where('payment_month', 'like', $month . '%');
         }
+        // Filter by the month/year the payment was RECORDED (created_at) — for validating finance reports
+        if ($recordedMonth = $request->get('recorded_month')) {
+            $baseQ->whereMonth('created_at', $recordedMonth);
+        }
+        if ($recordedYear = $request->get('recorded_year')) {
+            $baseQ->whereYear('created_at', $recordedYear);
+        }
 
         $payments = $this->buildBatchedPaginator($baseQ, $request);
         $stats = $this->buildStats($scopeBlockId);

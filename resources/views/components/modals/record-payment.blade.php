@@ -953,26 +953,10 @@ Review Modal, and all associated JavaScript.
     document.getElementById('em-amount').value = fee;
     updateEmSummary();
     document.getElementById('em-notes').value = notes;
-    document.getElementById('em-rejection').value = rejection;
+    // em-rejection and em-status elements were removed — status always resets to pending on save
     document.getElementById('em-method').value = methodId ?? '';
     document.getElementById('em-proof-name').textContent = 'Click to upload new file';
 
-    const isLocked = !canApprove && status === 'approved';
-    const readonlyEl = document.getElementById('em-status-readonly');
-    const selectEl   = document.getElementById('em-status');
-    const chevronEl  = document.getElementById('em-status-chevron');
-    if (readonlyEl) {
-      const labels = { approved: 'Approved — cannot be changed' };
-      readonlyEl.classList.toggle('hidden', !isLocked);
-      document.getElementById('em-status-readonly-label').textContent = labels[status] ?? status;
-      selectEl.classList.toggle('hidden', isLocked);
-      if (chevronEl) chevronEl.classList.toggle('hidden', isLocked);
-    }
-    if (!isLocked) {
-      selectEl.value = (!canApprove && status === 'rejected') ? 'pending' : status;
-    }
-
-    toggleEditRejection(status);
     const proofWrap = document.getElementById('em-proof-wrap');
     if (proofUrl) { document.getElementById('em-proof-link').href = proofUrl; proofWrap.classList.remove('hidden'); }
     else { proofWrap.classList.add('hidden'); }
@@ -987,7 +971,7 @@ Review Modal, and all associated JavaScript.
     document.body.classList.remove('overflow-hidden');
   }
   function toggleEditRejection(status) {
-    document.getElementById('em-rejection-wrap').classList.toggle('hidden', status !== 'rejected');
+    // No-op: rejection field removed from edit modal
   }
 
   // ── Proof lightbox ─────────────────────────────────────────────────

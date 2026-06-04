@@ -9,6 +9,7 @@
           <x-ui.sort-th column="month" :label="__('app.table_months')" />
           <x-ui.sort-th column="amount" :label="__('app.table_amount')" />
           <x-ui.sort-th column="status" :label="__('app.table_status')" />
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_recorded') }}</th>
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">{{ __('app.table_actions') }}</th>
         </tr>
       </thead>
@@ -57,6 +58,13 @@
                 @default
                   <span class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full text-xs font-bold uppercase">{{ __('app.status_unpaid') }}</span>
               @endswitch
+            </td>
+            {{-- Recorded date --}}
+            <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">
+              <div class="flex flex-col">
+                <span class="font-medium text-slate-700 dark:text-slate-300">{{ $payment->created_at->format('d M Y') }}</span>
+                <span class="text-xs text-slate-400">{{ $payment->created_at->format('H:i') }}</span>
+              </div>
             </td>
             <td class="px-6 py-4">
               <div class="flex items-center justify-end gap-1">
