@@ -42,6 +42,7 @@ class Role extends Model
         'media'         => ['view', 'delete'],
         'organization'  => ['view', 'create', 'edit', 'delete'],
         'finance'       => ['view', 'create', 'edit', 'delete', 'approve'],
+        'meetings'      => ['view', 'create', 'edit', 'delete'],
     ];
 
     public function users(): HasMany
