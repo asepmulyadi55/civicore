@@ -275,6 +275,48 @@ async function loadAttendanceSummary(meetingId, container) {
 }
 
 // ── Image upload ────────────────────────────────────────────────────────────
+
+/**
+ * Compress a single File using canvas (JPEG, 85% quality, max 1920px).
+ * Files already under 1 MB are returned as-is.
+ * Mirrors the global compressFile() in app.blade.php but works with Promises
+ * so it can be awaited for each file in a multi-file upload.
+ */
+function compressMeetingImage(file) {
+  const SIZE_LIMIT = 1 * 1024 * 1024; // 1 MB
+  const MAX_SIDE   = 1920;
+  const QUALITY    = 0.85;
+
+  return new Promise(resolve => {
+    if (!file.type.startsWith('image/') || file.size <= SIZE_LIMIT) {
+      resolve(file);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        // If already within bounds, skip canvas step
+        if (w <= MAX_SIDE && h <= MAX_SIDE) { resolve(file); return; }
+        const ratio  = Math.min(MAX_SIDE / w, MAX_SIDE / h);
+        const canvas = document.createElement('canvas');
+        canvas.width  = Math.round(w * ratio);
+        canvas.height = Math.round(h * ratio);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(blob => {
+          if (!blob || blob.size >= file.size) { resolve(file); return; }
+          resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+            type: 'image/jpeg', lastModified: Date.now()
+          }));
+        }, 'image/jpeg', QUALITY);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 async function uploadMeetingImages(meetingId, input) {
   if (!input.files.length) return;
 
@@ -283,9 +325,13 @@ async function uploadMeetingImages(meetingId, input) {
   const empty    = document.getElementById('img-empty-' + meetingId);
   progress.classList.remove('hidden');
 
+  // Compress each file (>1 MB) before building FormData
+  const files = await Promise.all([...input.files].map(compressMeetingImage));
+
   const form = new FormData();
-  [...input.files].forEach(f => form.append('images[]', f));
+  files.forEach(f => form.append('images[]', f));
   form.append('_token', '{{ csrf_token() }}');
+
 
   try {
     const res  = await fetch(`{{ url('/meetings') }}/${meetingId}/images`, { method: 'POST', body: form });
