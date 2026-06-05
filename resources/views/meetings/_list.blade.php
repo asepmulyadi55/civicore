@@ -145,6 +145,55 @@
               </div>
             </div>
 
+            {{-- Evidence images --}}
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  {{ __('app.meeting_images_label') }}
+                </p>
+                @if($canManage)
+                  <label for="img-upload-{{ $meeting->id }}"
+                    class="cursor-pointer inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition">
+                    <span class="material-icons text-sm">add_photo_alternate</span>
+                    {{ __('app.meeting_upload_images') }}
+                  </label>
+                  <input type="file" id="img-upload-{{ $meeting->id }}"
+                    multiple accept="image/jpeg,image/png,image/webp"
+                    class="hidden"
+                    onchange="uploadMeetingImages('{{ $meeting->id }}', this)">
+                @endif
+              </div>
+
+              {{-- Image grid --}}
+              <div id="img-grid-{{ $meeting->id }}" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                @forelse($meeting->images as $img)
+                  <div id="img-item-{{ $img->id }}" class="relative group aspect-square rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800">
+                    <img src="{{ $img->url() }}"
+                      alt="{{ $img->original_name }}"
+                      class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition"
+                      onclick="openLightbox('{{ $img->url() }}', '{{ e($img->original_name) }}')" />
+                    @if($canManage)
+                      <button type="button"
+                        onclick="deleteMeetingImage('{{ $meeting->id }}', '{{ $img->id }}')"
+                        class="absolute top-1 right-1 p-0.5 bg-black/50 hover:bg-red-600 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span class="material-icons text-xs">close</span>
+                      </button>
+                    @endif
+                  </div>
+                @empty
+                  <p id="img-empty-{{ $meeting->id }}" class="col-span-full text-xs text-slate-400 dark:text-slate-500 italic">
+                    {{ __('app.meeting_no_images') }}
+                  </p>
+                @endforelse
+              </div>
+
+              {{-- Upload progress --}}
+              <div id="img-progress-{{ $meeting->id }}" class="hidden mt-2 flex items-center gap-2 text-xs text-slate-400">
+                <span class="material-icons animate-spin text-sm">refresh</span>
+                {{ __('app.meeting_uploading') }}
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -158,6 +207,18 @@
   @endif
 
 @endif
+
+{{-- Lightbox --}}
+<div id="lightbox" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4"
+  onclick="if(event.target===this) closeLightbox()">
+  <div class="relative max-w-3xl w-full">
+    <button onclick="closeLightbox()" class="absolute -top-10 right-0 text-white/70 hover:text-white transition">
+      <span class="material-icons text-2xl">close</span>
+    </button>
+    <img id="lightbox-img" src="" alt="" class="w-full max-h-[80vh] object-contain rounded-xl" />
+    <p id="lightbox-caption" class="mt-2 text-center text-xs text-white/50"></p>
+  </div>
+</div>
 
 <script>
 function toggleMeetingDetail(id) {
@@ -187,4 +248,87 @@ async function loadAttendanceSummary(meetingId, container) {
     container.innerHTML = '<span class="text-slate-400">—</span>';
   }
 }
+
+// ── Image upload ────────────────────────────────────────────────────────────
+async function uploadMeetingImages(meetingId, input) {
+  if (!input.files.length) return;
+
+  const progress = document.getElementById('img-progress-' + meetingId);
+  const grid     = document.getElementById('img-grid-' + meetingId);
+  const empty    = document.getElementById('img-empty-' + meetingId);
+  progress.classList.remove('hidden');
+
+  const form = new FormData();
+  [...input.files].forEach(f => form.append('images[]', f));
+  form.append('_token', '{{ csrf_token() }}');
+
+  try {
+    const res  = await fetch(`{{ url('/meetings') }}/${meetingId}/images`, { method: 'POST', body: form });
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || 'Upload gagal.');
+      return;
+    }
+
+    // Remove empty placeholder if present
+    if (empty) empty.remove();
+
+    // Append new thumbnails
+    data.images.forEach(img => {
+      const div = document.createElement('div');
+      div.id        = 'img-item-' + img.id;
+      div.className = 'relative group aspect-square rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800';
+      div.innerHTML = `
+        <img src="${img.url}" alt="${img.original_name}"
+          class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition"
+          onclick="openLightbox('${img.url}', '${img.original_name.replace(/'/g,"\\'")}')" />
+        <button type="button"
+          onclick="deleteMeetingImage('${meetingId}', '${img.id}')"
+          class="absolute top-1 right-1 p-0.5 bg-black/50 hover:bg-red-600 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+          <span class="material-icons text-xs">close</span>
+        </button>
+      `;
+      grid.appendChild(div);
+    });
+  } catch (e) {
+    alert('Upload gagal. Coba lagi.');
+  } finally {
+    progress.classList.add('hidden');
+    input.value = '';
+  }
+}
+
+async function deleteMeetingImage(meetingId, imageId) {
+  if (!confirm('{{ __("app.meeting_image_delete_confirm") }}')) return;
+
+  try {
+    const res = await fetch(`{{ url('/meetings') }}/${meetingId}/images/${imageId}`, {
+      method: 'DELETE',
+      headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    if (res.ok) {
+      document.getElementById('img-item-' + imageId)?.remove();
+    }
+  } catch (e) {}
+}
+
+// ── Lightbox ────────────────────────────────────────────────────────────────
+function openLightbox(src, caption) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-caption').textContent = caption;
+  const lb = document.getElementById('lightbox');
+  lb.classList.remove('hidden');
+  lb.classList.add('flex');
+  document.body.classList.add('overflow-hidden');
+}
+function closeLightbox() {
+  const lb = document.getElementById('lightbox');
+  lb.classList.add('hidden');
+  lb.classList.remove('flex');
+  document.body.classList.remove('overflow-hidden');
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+});
 </script>

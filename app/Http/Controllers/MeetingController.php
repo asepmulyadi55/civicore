@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Meeting;
 use App\Models\MeetingAttendance;
+use App\Models\MeetingImage;
 use App\Models\Resident;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class MeetingController extends Controller
@@ -24,7 +26,8 @@ class MeetingController extends Controller
         $query = Meeting::withCount([
             'attendances',
             'attendances as present_count' => fn ($q) => $q->where('present', true),
-        ])->orderByDesc('meeting_date')->orderByDesc('meeting_time');
+            'images',
+        ])->with('images')->orderByDesc('meeting_date')->orderByDesc('meeting_time');
 
         // Filter: topic search
         if ($search = trim($request->get('q', ''))) {
@@ -246,5 +249,61 @@ class MeetingController extends Controller
         if (!auth()->user()->can($permission)) {
             abort(403, 'Unauthorized.');
         }
+    }
+
+    // ── Meeting Images ────────────────────────────────────────────────────────
+
+    /**
+     * POST /meetings/{meeting}/images
+     * Upload one or more evidence images for a meeting.
+     */
+    public function storeImage(Request $request, Meeting $meeting): JsonResponse
+    {
+        $request->validate([
+            'images'   => ['required', 'array', 'max:10'],
+            'images.*' => ['required', 'file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'], // 5 MB each
+        ]);
+
+        $stored = [];
+
+        foreach ($request->file('images') as $file) {
+            $ext      = $file->getClientOriginalExtension();
+            $filename = (string) \Illuminate\Support\Str::uuid() . '.' . strtolower($ext);
+            $path     = 'meetings/' . $meeting->id . '/' . $filename;
+
+            Storage::disk('local')->put($path, file_get_contents($file->getRealPath()));
+
+            $image = MeetingImage::create([
+                'meeting_id'    => $meeting->id,
+                'path'          => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'size'          => $file->getSize(),
+                'mime_type'     => $file->getMimeType() ?? 'image/jpeg',
+            ]);
+
+            $stored[] = [
+                'id'  => $image->id,
+                'url' => $image->url(),
+                'original_name' => $image->original_name,
+            ];
+        }
+
+        return response()->json(['images' => $stored]);
+    }
+
+    /**
+     * DELETE /meetings/{meeting}/images/{image}
+     * Delete a single evidence image.
+     */
+    public function deleteImage(Meeting $meeting, MeetingImage $image): JsonResponse
+    {
+        if ($image->meeting_id !== $meeting->id) {
+            abort(403, 'Image does not belong to this meeting.');
+        }
+
+        $image->deleteFile();
+        $image->delete();
+
+        return response()->json(['success' => true]);
     }
 }
