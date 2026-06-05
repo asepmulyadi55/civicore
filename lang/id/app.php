@@ -1106,6 +1106,8 @@ return [
   'meeting_no_images'             => 'Belum ada foto bukti.',
   'meeting_uploading'             => 'Mengunggah...',
   'meeting_image_delete_confirm'  => 'Hapus foto ini?',
+  'meeting_image_delete_title'    => 'Hapus Foto Bukti?',
+  'meeting_image_delete_body'     => 'Foto ini akan dihapus permanen dan tidak bisa dikembalikan.',
   // Flash
   'meeting_created'               => 'Rapat berhasil dibuat.',
   'meeting_updated'               => 'Rapat berhasil diperbarui.',

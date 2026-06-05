@@ -1106,6 +1106,8 @@ return [
   'meeting_no_images'             => 'No evidence photos yet.',
   'meeting_uploading'             => 'Uploading...',
   'meeting_image_delete_confirm'  => 'Delete this photo?',
+  'meeting_image_delete_title'    => 'Delete Evidence Photo?',
+  'meeting_image_delete_body'     => 'This photo will be permanently deleted and cannot be recovered.',
   // Flash
   'meeting_created'               => 'Meeting created successfully.',
   'meeting_updated'               => 'Meeting updated successfully.',

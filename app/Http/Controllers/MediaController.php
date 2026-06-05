@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Householder;
 use App\Models\MediaFile;
+use App\Models\MeetingImage;
 use App\Models\PaymentRecord;
 use App\Models\Resident;
 use App\Models\Setting;
@@ -31,6 +32,7 @@ class MediaController extends Controller
         'homepage'     => ['label' => 'Homepage',     'icon' => 'home',             'prefixes' => ['homepage/'],     'source' => 'media_files', 'readonly' => false],
         'householders' => ['label' => 'Householders', 'icon' => 'people',           'prefixes' => ['householders/'], 'source' => 'householders','readonly' => true],
         'residents'    => ['label' => 'Residents',    'icon' => 'family_restroom',  'prefixes' => ['residents/'],    'source' => 'residents',   'readonly' => true],
+        'meetings'     => ['label' => 'Meetings',     'icon' => 'event_note',       'prefixes' => ['meetings/'],     'source' => 'meetings',    'readonly' => true],
     ];
 
     /** Display paginated list of media files, optionally filtered by virtual folder. */
@@ -39,7 +41,7 @@ class MediaController extends Controller
         $folder          = $request->input('folder');
         $folderMeta      = (isset($folder, self::FOLDERS[$folder])) ? self::FOLDERS[$folder] : null;
         $readOnly        = $folderMeta['readonly'] ?? false;
-        $isVirtualFolder = $folderMeta && in_array($folderMeta['source'], ['householders', 'residents']);
+        $isVirtualFolder = $folderMeta && in_array($folderMeta['source'], ['householders', 'residents', 'meetings']);
 
         // ── Virtual folders (residents / members) served from model queries ──
         if ($isVirtualFolder) {
@@ -107,6 +109,21 @@ class MediaController extends Controller
                                     ? Storage::disk('local')->size($r->photo_path) : 0,
                 'created_at'    => $r->updated_at,
             ]));
+        } elseif ($folderMeta['source'] === 'meetings') {
+            $query = MeetingImage::with('meeting')->latest();
+            if ($search) {
+                $query->where('original_name', 'like', "%{$search}%");
+            }
+            $rows  = $query->get();
+            $items = $rows->map(fn($img) => new VirtualMediaFile([
+                'id'            => 'meeting_image:' . $img->id,
+                'disk'          => 'local',
+                'path'          => $img->path,
+                'original_name' => $img->original_name,
+                'mime_type'     => $img->mime_type,
+                'size'          => $img->size,
+                'created_at'    => $img->created_at,
+            ]));
         } else {
             // residents
             $query = Resident::whereNotNull('photo_path');
@@ -150,13 +167,16 @@ class MediaController extends Controller
     {
         $counts = ['_all' => MediaFile::count()
             + Householder::whereNotNull('photo_path')->count()
-            + Resident::whereNotNull('photo_path')->count()];
+            + Resident::whereNotNull('photo_path')->count()
+            + MeetingImage::count()];
 
         foreach (self::FOLDERS as $key => $meta) {
             if ($meta['source'] === 'householders') {
                 $counts[$key] = Householder::whereNotNull('photo_path')->count();
             } elseif ($meta['source'] === 'residents') {
                 $counts[$key] = Resident::whereNotNull('photo_path')->count();
+            } elseif ($meta['source'] === 'meetings') {
+                $counts[$key] = MeetingImage::count();
             } else {
                 $q = MediaFile::query()->where(function ($inner) use ($meta) {
                     foreach ($meta['prefixes'] as $i => $prefix) {

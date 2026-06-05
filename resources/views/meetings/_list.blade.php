@@ -151,9 +151,9 @@
                 <p class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                   {{ __('app.meeting_images_label') }}
                 </p>
-                @if($canManage)
+                 @if($canManage)
                   <label for="img-upload-{{ $meeting->id }}"
-                    class="cursor-pointer inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition">
+                    class="cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg border border-slate-200 dark:border-slate-700 transition-all">
                     <span class="material-icons text-sm">add_photo_alternate</span>
                     {{ __('app.meeting_upload_images') }}
                   </label>
@@ -174,9 +174,9 @@
                       onclick="openLightbox('{{ $img->url() }}', '{{ e($img->original_name) }}')" />
                     @if($canManage)
                       <button type="button"
-                        onclick="deleteMeetingImage('{{ $meeting->id }}', '{{ $img->id }}')"
-                        class="absolute top-1 right-1 p-0.5 bg-black/50 hover:bg-red-600 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span class="material-icons text-xs">close</span>
+                        onclick="openDeleteImageModal('{{ $meeting->id }}', '{{ $img->id }}')"
+                        class="absolute top-1.5 right-1.5 w-6 h-6 flex items-center justify-center bg-black/60 hover:bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow">
+                        <span class="material-icons" style="font-size:14px">close</span>
                       </button>
                     @endif
                   </div>
@@ -207,6 +207,31 @@
   @endif
 
 @endif
+
+{{-- Delete Image Confirm Modal --}}
+<div id="modal-delete-image"
+  class="fixed inset-0 z-[110] bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4"
+  onclick="if(event.target===this) closeDeleteImageModal()">
+  <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden">
+    <div class="flex flex-col items-center pt-8 pb-5 px-6 text-center">
+      <div class="w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
+        <span class="material-icons text-red-500 text-2xl">delete_forever</span>
+      </div>
+      <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-2">{{ __('app.meeting_image_delete_title') }}</h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{{ __('app.meeting_image_delete_body') }}</p>
+    </div>
+    <div class="flex gap-3 px-6 pb-6">
+      <button type="button" onclick="closeDeleteImageModal()"
+        class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+        {{ __('app.btn_cancel') }}
+      </button>
+      <button type="button" id="delete-image-confirm-btn"
+        class="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition-all">
+        {{ __('app.btn_yes_delete') }}
+      </button>
+    </div>
+  </div>
+</div>
 
 {{-- Lightbox --}}
 <div id="lightbox" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4"
@@ -282,11 +307,11 @@ async function uploadMeetingImages(meetingId, input) {
       div.innerHTML = `
         <img src="${img.url}" alt="${img.original_name}"
           class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition"
-          onclick="openLightbox('${img.url}', '${img.original_name.replace(/'/g,"\\'")}')" />
+          onclick="openLightbox('${img.url}', '${img.original_name.replace(/'/g,"\\'")}')" />
         <button type="button"
-          onclick="deleteMeetingImage('${meetingId}', '${img.id}')"
-          class="absolute top-1 right-1 p-0.5 bg-black/50 hover:bg-red-600 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
-          <span class="material-icons text-xs">close</span>
+          onclick="openDeleteImageModal('${meetingId}', '${img.id}')"
+          class="absolute top-1.5 right-1.5 w-6 h-6 flex items-center justify-center bg-black/60 hover:bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow">
+          <span class="material-icons" style="font-size:14px">close</span>
         </button>
       `;
       grid.appendChild(div);
@@ -313,6 +338,42 @@ async function deleteMeetingImage(meetingId, imageId) {
   } catch (e) {}
 }
 
+// ── Delete image modal ──────────────────────────────────────────────────────
+let _delImgMeetingId = null;
+let _delImgId        = null;
+
+function openDeleteImageModal(meetingId, imageId) {
+  _delImgMeetingId = meetingId;
+  _delImgId        = imageId;
+  const m = document.getElementById('modal-delete-image');
+  m.classList.remove('hidden');
+  m.classList.add('flex');
+}
+function closeDeleteImageModal() {
+  const m = document.getElementById('modal-delete-image');
+  m.classList.add('hidden');
+  m.classList.remove('flex');
+  _delImgMeetingId = null;
+  _delImgId        = null;
+}
+document.getElementById('delete-image-confirm-btn').addEventListener('click', async () => {
+  if (!_delImgMeetingId || !_delImgId) return;
+  const meetingId = _delImgMeetingId;
+  const imageId   = _delImgId;
+  closeDeleteImageModal();
+  await deleteMeetingImage(meetingId, imageId);
+});
+
+async function deleteMeetingImage(meetingId, imageId) {
+  try {
+    const res = await fetch(`{{ url('/meetings') }}/${meetingId}/images/${imageId}`, {
+      method: 'DELETE',
+      headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    if (res.ok) document.getElementById('img-item-' + imageId)?.remove();
+  } catch (e) {}
+}
+
 // ── Lightbox ────────────────────────────────────────────────────────────────
 function openLightbox(src, caption) {
   document.getElementById('lightbox-img').src = src;
@@ -329,6 +390,6 @@ function closeLightbox() {
   document.body.classList.remove('overflow-hidden');
 }
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'Escape') { closeLightbox(); closeDeleteImageModal(); }
 });
 </script>
