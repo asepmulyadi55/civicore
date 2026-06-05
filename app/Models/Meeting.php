@@ -31,6 +31,11 @@ class Meeting extends Model
         return $this->hasMany(MeetingAttendance::class)->orderBy('created_at');
     }
 
+    public function images(): HasMany
+    {
+        return $this->hasMany(MeetingImage::class)->orderBy('created_at');
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

@@ -1100,6 +1100,12 @@ return [
   'meeting_present_label'         => 'present',
   'meeting_remarks_ph'            => 'Remarks (optional)',
   'meeting_save_attendance'       => 'Save Attendance',
+  // Evidence images
+  'meeting_images_label'          => 'Evidence Photos',
+  'meeting_upload_images'         => 'Upload Photos',
+  'meeting_no_images'             => 'No evidence photos yet.',
+  'meeting_uploading'             => 'Uploading...',
+  'meeting_image_delete_confirm'  => 'Delete this photo?',
   // Flash
   'meeting_created'               => 'Meeting created successfully.',
   'meeting_updated'               => 'Meeting updated successfully.',

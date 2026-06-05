@@ -1100,6 +1100,12 @@ return [
   'meeting_present_label'         => 'hadir',
   'meeting_remarks_ph'            => 'Keterangan (opsional)',
   'meeting_save_attendance'       => 'Simpan Kehadiran',
+  // Evidence images
+  'meeting_images_label'          => 'Foto Bukti',
+  'meeting_upload_images'         => 'Unggah Foto',
+  'meeting_no_images'             => 'Belum ada foto bukti.',
+  'meeting_uploading'             => 'Mengunggah...',
+  'meeting_image_delete_confirm'  => 'Hapus foto ini?',
   // Flash
   'meeting_created'               => 'Rapat berhasil dibuat.',
   'meeting_updated'               => 'Rapat berhasil diperbarui.',

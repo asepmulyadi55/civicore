@@ -297,6 +297,10 @@ Route::middleware('auth')->group(function () {
         ->middleware(['permission:meetings.edit', 'throttle:60,1'])->name('meetings.attendance.data');
     Route::get('/meetings/{meeting}/attendance-summary', [MeetingController::class, 'attendanceSummary'])
         ->middleware(['permission:meetings.view', 'throttle:60,1'])->name('meetings.attendance.summary');
+    Route::post('/meetings/{meeting}/images', [MeetingController::class, 'storeImage'])
+        ->middleware(['permission:meetings.edit', 'throttle:20,1'])->name('meetings.images.store');
+    Route::delete('/meetings/{meeting}/images/{image}', [MeetingController::class, 'deleteImage'])
+        ->middleware('permission:meetings.edit')->name('meetings.images.destroy');
 
     // ── Organization ─────────────────────────────────────────────────────────
     // View: all authenticated users. Manage (create/edit/delete): admin only (checked in controller)
