@@ -14,8 +14,8 @@ class OrganizationPosition extends Model
     protected $fillable = [
         'organization_period_id',
         'parent_id',
+        'householder_id',
         'resident_id',
-        'family_member_id',
         'position_name',
         'sort_order',
     ];
@@ -41,28 +41,28 @@ class OrganizationPosition extends Model
         return $this->hasMany(OrganizationPosition::class, 'parent_id')->orderBy('sort_order');
     }
 
-    public function resident(): BelongsTo
+    public function householder(): BelongsTo
     {
-        return $this->belongsTo(Resident::class);
+        return $this->belongsTo(Householder::class, 'householder_id');
     }
 
-    public function familyMember(): BelongsTo
+    public function resident(): BelongsTo
     {
-        return $this->belongsTo(FamilyMember::class);
+        return $this->belongsTo(Resident::class, 'resident_id');
     }
 
     // ── Display helpers ───────────────────────────────────────────────────────
 
     /**
-     * Full name of the assigned person (resident head-of-family or family member).
+     * Full name of the assigned person (householder head-of-family or resident).
      */
     public function personName(): string
     {
-        if ($this->resident_id && $this->relationLoaded('resident') && $this->resident) {
-            return $this->resident->displayName();
+        if ($this->householder_id && $this->relationLoaded('householder') && $this->householder) {
+            return $this->householder->displayName();
         }
-        if ($this->family_member_id && $this->relationLoaded('familyMember') && $this->familyMember) {
-            return $this->familyMember->fullname;
+        if ($this->resident_id && $this->relationLoaded('resident') && $this->resident) {
+            return $this->resident->fullname;
         }
         return '';
     }
@@ -72,11 +72,11 @@ class OrganizationPosition extends Model
      */
     public function personPhotoUrl(): ?string
     {
+        if ($this->householder_id && $this->relationLoaded('householder') && $this->householder) {
+            return $this->householder->photoUrl();
+        }
         if ($this->resident_id && $this->relationLoaded('resident') && $this->resident) {
             return $this->resident->photoUrl();
-        }
-        if ($this->family_member_id && $this->relationLoaded('familyMember') && $this->familyMember) {
-            return $this->familyMember->photoUrl();
         }
         return null;
     }
@@ -86,25 +86,25 @@ class OrganizationPosition extends Model
      */
     public function personLocation(): string
     {
-        $resident = null;
-        if ($this->resident_id && $this->relationLoaded('resident')) {
-            $resident = $this->resident;
-        } elseif ($this->family_member_id && $this->relationLoaded('familyMember') && $this->familyMember) {
-            $resident = $this->familyMember->relationLoaded('resident') ? $this->familyMember->resident : null;
+        $householder = null;
+        if ($this->householder_id && $this->relationLoaded('householder')) {
+            $householder = $this->householder;
+        } elseif ($this->resident_id && $this->relationLoaded('resident') && $this->resident) {
+            $householder = $this->resident->relationLoaded('householder') ? $this->resident->householder : null;
         }
-        if (!$resident) return '';
-        $block = $resident->block?->name ?? '';
-        $unit  = $resident->unit_number ?? '';
+        if (!$householder) return '';
+        $block = $householder->block?->name ?? '';
+        $unit  = $householder->unit_number ?? '';
         return $block . ($unit ? ' · ' . $unit : '');
     }
 
     /**
-     * Phone number (residents only; family members typically don't have separate phone).
+     * Phone number (householders only; residents typically don't have separate phone).
      */
     public function personPhone(): string
     {
-        if ($this->resident_id && $this->relationLoaded('resident') && $this->resident) {
-            return $this->resident->phone ?? '';
+        if ($this->householder_id && $this->relationLoaded('householder') && $this->householder) {
+            return $this->householder->phone ?? '';
         }
         return '';
     }

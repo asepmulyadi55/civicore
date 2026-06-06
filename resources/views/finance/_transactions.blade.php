@@ -10,12 +10,15 @@
   {{-- Type filter --}}
   <div class="flex flex-col gap-1">
     <label class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('app.fin_filter_type') }}</label>
-    <select name="tx_type"
-      class="text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30">
-      <option value="">{{ __('app.fin_all_types') }}</option>
-      <option value="income"  {{ request('tx_type') === 'income'  ? 'selected' : '' }}>{{ __('app.fin_type_income') }}</option>
-      <option value="expense" {{ request('tx_type') === 'expense' ? 'selected' : '' }}>{{ __('app.fin_type_expense') }}</option>
-    </select>
+    <div class="relative overflow-hidden">
+      <select name="tx_type"
+        class="appearance-none text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 pl-3 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 w-full">
+        <option value="">{{ __('app.fin_all_types') }}</option>
+        <option value="income"  {{ request('tx_type') === 'income'  ? 'selected' : '' }}>{{ __('app.fin_type_income') }}</option>
+        <option value="expense" {{ request('tx_type') === 'expense' ? 'selected' : '' }}>{{ __('app.fin_type_expense') }}</option>
+      </select>
+      <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px] bg-white dark:bg-slate-700 rounded">expand_more</span>
+    </div>
   </div>
 
   {{-- Category filter --}}
@@ -32,19 +35,46 @@
     </datalist>
   </div>
 
-  {{-- Month filter --}}
-  <div class="flex flex-col gap-1">
-    <label class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('app.fin_filter_month') }}</label>
-    <input type="month" name="tx_month" value="{{ request('tx_month') }}"
-      class="text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30">
+  {{-- Month/Year filter --}}
+  <div class="flex items-end gap-2">
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('app.fin_filter_month') }}</label>
+      <div class="relative overflow-hidden">
+        <select name="tx_month"
+          class="appearance-none text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 pl-3 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 w-full">
+          <option value="">{{ __('app.fin_select_month') }}</option>
+          @php $txMonthVal = request('tx_month') ? (int)request('tx_month') : ''; @endphp
+          @foreach(range(1,12) as $m)
+            <option value="{{ $m }}" {{ (string)$txMonthVal === (string)$m ? 'selected' : '' }}>
+              {{ \Carbon\Carbon::create(null, $m)->format('F') }}
+            </option>
+          @endforeach
+        </select>
+        <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px] bg-white dark:bg-slate-700 rounded">expand_more</span>
+      </div>
+    </div>
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('app.fin_report_year') }}</label>
+      <div class="relative overflow-hidden">
+        <select name="tx_year"
+          class="appearance-none text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 pl-3 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 w-full">
+          <option value="">{{ __('app.fin_all_years') }}</option>
+          @foreach(range(now()->year, 2020) as $y)
+            <option value="{{ $y }}" {{ request('tx_year') == $y ? 'selected' : '' }}>{{ $y }}</option>
+          @endforeach
+        </select>
+        <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px] bg-white dark:bg-slate-700 rounded">expand_more</span>
+      </div>
+    </div>
   </div>
+
 
   <button type="submit"
     class="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:opacity-90 transition-opacity">
     {{ __('app.btn_search') }}
   </button>
 
-  @if(request()->hasAny(['tx_type', 'tx_category', 'tx_month']))
+  @if(request()->hasAny(['tx_type', 'tx_category', 'tx_month', 'tx_year']))
     <a href="{{ route('finance.index', ['tab' => 'transactions']) }}"
        class="px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-lg hover:opacity-80 transition-opacity">
       {{ __('app.btn_clear') }}

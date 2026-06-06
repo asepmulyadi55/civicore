@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateHouseholdRequest;
 use App\Models\Block;
-use App\Models\FamilyMember;
+use App\Models\Householder;
 use App\Models\Resident;
 use App\Models\Setting;
 use App\Models\Unit;
@@ -14,38 +14,38 @@ use Illuminate\Support\Facades\Storage;
 
 class HouseholdController extends Controller
 {
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // Private helpers
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
 
     /**
-     * Resolve the authenticated user's linked resident, or abort 403.
+     * Resolve the authenticated user's linked householder, or abort 403.
      */
-    private function getOwnResident(): Resident
+    private function getOwnHouseholder(): Householder
     {
-        $resident = auth()->user()->resolveResident();
+        $householder = auth()->user()->resolveHouseholder();
 
-        if (!$resident) {
+        if (!$householder) {
             abort(403, 'No household record is linked to your account. Please contact your administrator.');
         }
 
-        return $resident;
+        return $householder;
     }
 
     /**
-     * Ensure the given FamilyMember belongs to the linked resident, or abort 403.
+     * Ensure the given Resident belongs to the linked householder, or abort 403.
      */
-    private function authorizeOwnMember(Resident $resident, FamilyMember $familyMember): void
+    private function authorizeOwnResident(Householder $householder, Resident $resident): void
     {
-        if ($familyMember->resident_id !== $resident->id) {
-            abort(403, 'This family member does not belong to your household.');
+        if ($resident->householder_id !== $householder->id) {
+            abort(403, 'This resident does not belong to your household.');
         }
     }
 
     /**
-     * Shared validation rules for family members.
+     * Shared validation rules for residents.
      */
-    private function memberRules(): array
+    private function residentRules(): array
     {
         return [
             'fullname'     => ['required', 'string', 'max:100'],
@@ -55,60 +55,61 @@ class HouseholdController extends Controller
             'gender'       => ['nullable', 'in:male,female'],
             'education'    => ['nullable', 'in:none,elementary,junior_high,senior_high,associate,bachelor,master,doctorate,other'],
             'occupation'   => ['nullable', 'string', 'max:100'],
+            'phone'        => ['nullable', 'string', 'max:25'],
             'photo'        => ['nullable', 'image', 'max:5120'],
         ];
     }
 
-    private function handleMemberPhoto(Request $request, FamilyMember $member = null): ?string
+    private function handleResidentPhoto(Request $request, Resident $resident = null): ?string
     {
         if (!$request->hasFile('photo')) return null;
-        if ($member?->photo_path) {
-            Storage::disk('local')->delete($member->photo_path);
+        if ($resident?->photo_path) {
+            Storage::disk('local')->delete($resident->photo_path);
         }
-        return $request->file('photo')->store('members', 'local');
+        return $request->file('photo')->store('residents', 'local');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // Household info
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
 
     public function show()
     {
-        $user     = auth()->user();
-        $resident = $this->getOwnResident();
+        $user        = auth()->user();
+        $householder = $this->getOwnHouseholder();
 
-        $resident->load([
+        $householder->load([
             'block',
             'unit',
-            'familyMembers',
+            'residents',
             'feeHistories' => fn($q) => $q->orderByDesc('effective_from'),
         ]);
 
-        $canManageInfo        = $resident->unit?->house_status === 'owner_occupied';
-        $canManageFamilyMembers = true;
+        $canManageInfo      = $householder->unit?->house_status === 'owner_occupied';
+        $canManageResidents = true;
 
-        $blocks             = Block::active()->orderBy('name')->get();
-        $units              = collect(); // residents cannot change their unit
-        $currency           = Setting::get('currency_symbol', 'Rp');
-        $updateRoute        = route('household.update');
-        $familyMembersBase  = url('/household/family-members');
-        $backRoute          = route('overview');
-        $showRevealButtons  = false;
-        $isOwnHousehold     = true;
+        $blocks            = Block::active()->orderBy('name')->get();
+        $units             = collect(); // householders cannot change their unit
+        $currency          = Setting::get('currency_symbol', 'Rp');
+        $updateRoute       = route('household.update');
+        $residentsBase     = url('/household/residents');
+        $backRoute         = route('overview');
+        $showRevealButtons = false;
+        $isOwnHousehold    = true;
 
-        return view('residents.edit', compact(
-            'resident', 'blocks', 'units', 'currency',
-            'canManageInfo', 'canManageFamilyMembers',
-            'updateRoute', 'familyMembersBase',
+        return view('householders.edit', compact(
+            'householder', 'blocks', 'units', 'currency',
+            'canManageInfo', 'canManageResidents',
+            'updateRoute', 'residentsBase',
             'backRoute', 'showRevealButtons', 'isOwnHousehold'
         ));
     }
 
     public function update(UpdateHouseholdRequest $request)
     {
-        $resident = $this->getOwnResident();
+        $householder = $this->getOwnHouseholder();
 
-        DB::transaction(function () use ($request, $resident) {
+        DB::transaction(function () use ($request, $householder) {
             $data = $request->only(['fullname', 'phone', 'email', 'family_card_number', 'notes']);
 
             // Preserve existing encrypted Family Card Number if left blank
@@ -118,52 +119,52 @@ class HouseholdController extends Controller
 
             // Handle optional photo upload
             if ($request->hasFile('photo')) {
-                if ($resident->photo_path) {
-                    Storage::disk('local')->delete($resident->photo_path);
+                if ($householder->photo_path) {
+                    Storage::disk('local')->delete($householder->photo_path);
                 }
-                $data['photo_path'] = $request->file('photo')->store('residents', 'local');
+                $data['photo_path'] = $request->file('photo')->store('householders', 'local');
             }
 
-            // Residents may not change block / unit / is_active / house_status / fee
-            $resident->update($data);
+            // Householders may not change block / unit / is_active / house_status / fee
+            $householder->update($data);
         });
 
         return redirect()->route('household.show')
-            ->with('success', 'Household information updated successfully.');
+            ->with('success', __('app.flash_household_updated'));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Family Members
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
+    // Residents
+    // -------------------------------------------------------------------------
 
-    public function storeFamilyMember(Request $request)
+    public function storeResident(Request $request)
     {
-        $resident = $this->getOwnResident();
-        $data     = $request->validate($this->memberRules());
+        $householder = $this->getOwnHouseholder();
+        $data        = $request->validate($this->residentRules());
 
-        $data['resident_id'] = $resident->id;
-        $data['is_head']     = $data['relationship'] === 'head';
-        $photoPath = $this->handleMemberPhoto($request);
+        $data['householder_id'] = $householder->id;
+        $data['is_head']        = $data['relationship'] === 'head';
+        $photoPath = $this->handleResidentPhoto($request);
         if ($photoPath) $data['photo_path'] = $photoPath;
         unset($data['photo']);
 
-        DB::transaction(function () use ($data, $resident) {
+        DB::transaction(function () use ($data, $householder) {
             if ($data['is_head']) {
-                $resident->familyMembers()->where('is_head', true)->update(['is_head' => false]);
+                $householder->residents()->where('is_head', true)->update(['is_head' => false]);
             }
-            FamilyMember::create($data);
+            Resident::create($data);
         });
 
         return redirect()->route('household.show')
-            ->with('success', "Family member '{$data['fullname']}' added successfully.");
+            ->with('success', __('app.flash_resident_added', ['name' => $data['fullname']]));
     }
 
-    public function updateFamilyMember(Request $request, FamilyMember $familyMember)
+    public function updateResident(Request $request, Resident $resident)
     {
-        $resident = $this->getOwnResident();
-        $this->authorizeOwnMember($resident, $familyMember);
+        $householder = $this->getOwnHouseholder();
+        $this->authorizeOwnResident($householder, $resident);
 
-        $data         = $request->validate($this->memberRules());
+        $data         = $request->validate($this->residentRules());
         $becomingHead = $data['relationship'] === 'head';
         $data['is_head'] = $becomingHead;
 
@@ -172,53 +173,53 @@ class HouseholdController extends Controller
             unset($data['nik']);
         }
 
-        $photoPath = $this->handleMemberPhoto($request, $familyMember);
+        $photoPath = $this->handleResidentPhoto($request, $resident);
         if ($photoPath) $data['photo_path'] = $photoPath;
         unset($data['photo']);
 
-        DB::transaction(function () use ($data, $resident, $familyMember, $becomingHead) {
+        DB::transaction(function () use ($data, $householder, $resident, $becomingHead) {
             if ($becomingHead) {
-                $resident->familyMembers()
-                    ->where('id', '!=', $familyMember->id)
+                $householder->residents()
+                    ->where('id', '!=', $resident->id)
                     ->where('is_head', true)
                     ->update(['is_head' => false]);
             }
-            $familyMember->update($data);
+            $resident->update($data);
         });
 
         return redirect()->route('household.show')
-            ->with('success', "Family member '{$data['fullname']}' updated.");
+            ->with('success', __('app.flash_resident_updated', ['name' => $data['fullname']]));
     }
 
-    public function destroyFamilyMember(FamilyMember $familyMember)
+    public function destroyResident(Resident $resident)
     {
-        $resident = $this->getOwnResident();
-        $this->authorizeOwnMember($resident, $familyMember);
+        $householder = $this->getOwnHouseholder();
+        $this->authorizeOwnResident($householder, $resident);
 
-        $name = $familyMember->fullname;
-        if ($familyMember->photo_path) {
-            Storage::disk('local')->delete($familyMember->photo_path);
+        $name = $resident->fullname;
+        if ($resident->photo_path) {
+            Storage::disk('local')->delete($resident->photo_path);
         }
-        $familyMember->delete();
+        $resident->delete();
 
         return redirect()->route('household.show')
-            ->with('success', "'{$name}' has been removed from your household.");
+            ->with('success', __('app.flash_resident_removed_household', ['name' => $name]));
     }
 
-    public function setFamilyMemberHead(FamilyMember $familyMember)
+    public function setResidentHead(Resident $resident)
     {
-        $resident = $this->getOwnResident();
-        $this->authorizeOwnMember($resident, $familyMember);
+        $householder = $this->getOwnHouseholder();
+        $this->authorizeOwnResident($householder, $resident);
 
-        DB::transaction(function () use ($resident, $familyMember) {
-            $resident->familyMembers()
-                ->where('id', '!=', $familyMember->id)
+        DB::transaction(function () use ($householder, $resident) {
+            $householder->residents()
+                ->where('id', '!=', $resident->id)
                 ->update(['is_head' => false]);
 
-            $familyMember->update(['is_head' => true, 'relationship' => 'head']);
+            $resident->update(['is_head' => true, 'relationship' => 'head']);
         });
 
         return redirect()->route('household.show')
-            ->with('success', "{$familyMember->fullname} is now the Head of Family.");
+            ->with('success', __('app.flash_resident_set_head', ['name' => $resident->fullname]));
     }
 }

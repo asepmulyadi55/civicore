@@ -156,20 +156,16 @@ Review Modal, and all associated JavaScript.
             </label>
           </div>
 
-          {{-- Status --}}
+          {{-- Status: always auto-pending --}}
           <div class="flex flex-col gap-2">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.status') }}</label>
-            <div class="relative">
-              <span
-                class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">verified</span>
-              <select id="cm-status"
-                class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white">
-                <option value="unpaid">{{ __('app.status_unpaid') }}</option>
-                <option value="pending">{{ __('app.pending_review') }}</option>
-                <option value="approved">{{ __('app.status_approved') }}</option>
-              </select>
-              <span
-                class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
+            <input type="hidden" id="cm-status" value="pending">
+            <div class="flex items-center gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+              <span class="material-icons text-amber-500 text-xl">hourglass_top</span>
+              <div>
+                <p class="text-sm font-semibold text-amber-700 dark:text-amber-400">{{ __('app.pending_review') }}</p>
+                <p class="text-xs text-amber-600/70 dark:text-amber-400/70">{{ __('app.payment_auto_pending_hint') }}</p>
+              </div>
             </div>
           </div>
 
@@ -337,42 +333,19 @@ Review Modal, and all associated JavaScript.
             </div>
           </div>
 
-          {{-- Status --}}
+          {{-- Status: always resets to pending on save --}}
           <div class="flex flex-col gap-2">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.status') }}</label>
-            <div class="relative">
-              <span
-                class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">verified</span>
-              @unless($canApprove)
-              {{-- Read-only badge: shown by JS when status is approved/rejected for coordinator --}}
-              <div id="em-status-readonly"
-                class="hidden pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm italic">
-                <span id="em-status-readonly-label" class="text-slate-500 dark:text-slate-400"></span>
+            <div class="flex items-center gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+              <span class="material-icons text-amber-500 text-xl">restart_alt</span>
+              <div>
+                <p class="text-sm font-semibold text-amber-700 dark:text-amber-400">{{ __('app.pending_review') }}</p>
+                <p class="text-xs text-amber-600/70 dark:text-amber-400/70">{{ __('app.payment_edit_pending_hint') }}</p>
               </div>
-              @endunless
-              <select id="em-status" name="status"
-                class="w-full appearance-none pl-10 pr-9 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white"
-                onchange="toggleEditRejection(this.value)">
-                <option value="unpaid">{{ __('app.status_unpaid') }}</option>
-                <option value="pending">{{ __('app.pending_review') }}</option>
-                @if($canApprove)
-                  <option value="approved">{{ __('app.status_approved') }}</option>
-                  <option value="rejected">{{ __('app.status_rejected') }}</option>
-                @endif
-              </select>
-              <span id="em-status-chevron"
-                class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
             </div>
           </div>
-        </div>
 
-        {{-- Rejection reason (read-only for coordinators) --}}
-        <div id="em-rejection-wrap" class="flex flex-col gap-2 hidden">
-          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.rejection_reason') }}</label>
-          <textarea id="em-rejection" name="rejection_reason" rows="3"
-            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white resize-none"
-            {{ $canApprove ? '' : 'disabled placeholder="__(\'app.rejection_from_treasurer\')"' }}></textarea>
-        </div>
+        </div>{{-- end grid --}}
 
         {{-- Current Proof --}}
         <div id="em-proof-wrap" class="hidden">
@@ -661,7 +634,8 @@ Review Modal, and all associated JavaScript.
     closeCmResidentDropdown();
     document.getElementById('cm-year-select').value = '{{ now()->year }}';
     document.getElementById('cm-method').value = '';
-    document.getElementById('cm-status').value = 'unpaid';
+    const _cmStatusEl = document.getElementById('cm-status');
+    if (_cmStatusEl.tagName === 'SELECT') _cmStatusEl.value = 'unpaid';
     document.getElementById('cm-notes').value = '';
     document.getElementById('cm-amount').value = '';
     document.getElementById('cm-proof-input').value = '';
@@ -979,26 +953,10 @@ Review Modal, and all associated JavaScript.
     document.getElementById('em-amount').value = fee;
     updateEmSummary();
     document.getElementById('em-notes').value = notes;
-    document.getElementById('em-rejection').value = rejection;
+    // em-rejection and em-status elements were removed — status always resets to pending on save
     document.getElementById('em-method').value = methodId ?? '';
     document.getElementById('em-proof-name').textContent = 'Click to upload new file';
 
-    const isLocked = !canApprove && status === 'approved';
-    const readonlyEl = document.getElementById('em-status-readonly');
-    const selectEl   = document.getElementById('em-status');
-    const chevronEl  = document.getElementById('em-status-chevron');
-    if (readonlyEl) {
-      const labels = { approved: 'Approved — cannot be changed' };
-      readonlyEl.classList.toggle('hidden', !isLocked);
-      document.getElementById('em-status-readonly-label').textContent = labels[status] ?? status;
-      selectEl.classList.toggle('hidden', isLocked);
-      if (chevronEl) chevronEl.classList.toggle('hidden', isLocked);
-    }
-    if (!isLocked) {
-      selectEl.value = (!canApprove && status === 'rejected') ? 'pending' : status;
-    }
-
-    toggleEditRejection(status);
     const proofWrap = document.getElementById('em-proof-wrap');
     if (proofUrl) { document.getElementById('em-proof-link').href = proofUrl; proofWrap.classList.remove('hidden'); }
     else { proofWrap.classList.add('hidden'); }
@@ -1013,7 +971,7 @@ Review Modal, and all associated JavaScript.
     document.body.classList.remove('overflow-hidden');
   }
   function toggleEditRejection(status) {
-    document.getElementById('em-rejection-wrap').classList.toggle('hidden', status !== 'rejected');
+    // No-op: rejection field removed from edit modal
   }
 
   // ── Proof lightbox ─────────────────────────────────────────────────

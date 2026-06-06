@@ -1,6 +1,6 @@
 {{-- payments/_filters.blade.php --}}
 <form method="GET" action="{{ route('payments.index') }}"
-  class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
+  class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:flex-wrap sm:items-end gap-3">
 
   {{-- Search --}}
   <div class="relative w-full sm:flex-grow sm:max-w-sm">
@@ -38,7 +38,7 @@
     <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
   </div>
 
-  {{-- Month filter --}}
+  {{-- Payment period month filter --}}
   <div class="relative w-full sm:w-auto">
     <select name="month"
       class="appearance-none w-full sm:w-auto bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-sm py-2 pl-4 pr-9 outline-none transition-all text-slate-600 dark:text-slate-300">
@@ -53,6 +53,35 @@
     <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
   </div>
 
+  {{-- Recorded date filter (month + year) — to cross-validate with finance reports --}}
+  <div class="flex flex-col gap-1">
+    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ __('app.filter_recorded') }}</label>
+    <div class="flex gap-2">
+      <div class="relative overflow-hidden">
+        <select name="recorded_month"
+          class="appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-sm py-2 pl-3 pr-8 outline-none transition-all text-slate-600 dark:text-slate-300 w-full">
+          <option value="">{{ __('app.all_months') }}</option>
+          @foreach(range(1, 12) as $m)
+            <option value="{{ $m }}" {{ request('recorded_month') == $m ? 'selected' : '' }}>
+              {{ \Carbon\Carbon::create(null, $m)->format('M') }}
+            </option>
+          @endforeach
+        </select>
+        <span class="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px] bg-slate-50 dark:bg-slate-800">expand_more</span>
+      </div>
+      <div class="relative overflow-hidden">
+        <select name="recorded_year"
+          class="appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-sm py-2 pl-3 pr-8 outline-none transition-all text-slate-600 dark:text-slate-300 w-full">
+          <option value="">{{ __('app.all_years') }}</option>
+          @foreach(range(now()->year, 2024) as $y)
+            <option value="{{ $y }}" {{ request('recorded_year') == $y ? 'selected' : '' }}>{{ $y }}</option>
+          @endforeach
+        </select>
+        <span class="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px] bg-slate-50 dark:bg-slate-800">expand_more</span>
+      </div>
+    </div>
+  </div>
+
   {{-- Search button --}}
   <button type="submit"
     class="flex justify-center items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-semibold transition-all shadow-sm shadow-primary/20 w-full sm:w-auto">
@@ -61,7 +90,7 @@
   </button>
 
   {{-- Clear --}}
-  @if(request()->hasAny(['search', 'block_id', 'status', 'month']))
+  @if(request()->hasAny(['search', 'block_id', 'status', 'month', 'recorded_month', 'recorded_year']))
     <a href="{{ route('payments.index') }}"
       class="flex justify-center items-center gap-1 px-3 py-2 text-sm font-medium text-slate-500 hover:text-primary transition-colors w-full sm:w-auto">
       <span class="material-icons text-sm">close</span>

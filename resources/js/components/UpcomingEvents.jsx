@@ -33,7 +33,7 @@ function SkeletonCard({ isDark }) {
     );
 }
 
-export default function UpcomingEvents({ events = [], loading, isDark = false }) {
+export default function UpcomingEvents({ events = [], loading, isDark = false, eyebrow = 'Discover More', heading = 'Upcoming Community Events' }) {
     const headingColor = isDark ? '#F0EDE8' : '#1C2D27';
     const bodyColor    = isDark ? '#9E9C97' : '#595959';
     const cardBg       = isDark ? '#142920' : '#ffffff';
@@ -50,13 +50,13 @@ export default function UpcomingEvents({ events = [], loading, isDark = false })
                         className="font-semibold tracking-widest uppercase text-xs mb-2 md:mb-4 block"
                         style={{ color: '#D4AF37', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                     >
-                        Discover More
+                        {eyebrow}
                     </span>
                     <h2
                         className="text-2xl md:text-4xl font-medium tracking-tight"
                         style={{ color: headingColor, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                     >
-                        Upcoming Community Events
+                        {heading}
                     </h2>
                 </div>
                 <Link to="/events"

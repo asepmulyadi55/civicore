@@ -19,11 +19,11 @@ class BlockController extends Controller
 
         $units = $block->units()
             ->active()
-            ->with('resident:id,unit_id,fullname')
+            ->with('householder:id,unit_id,fullname')
             ->orderBy('unit_number')
             ->get(['id', 'unit_number', 'house_status'])
             ->map(function (Unit $unit) use ($currentUnitId) {
-                $isOccupied = $unit->resident !== null;
+                $isOccupied = $unit->householder !== null;
                 $isCurrent  = $unit->id === $currentUnitId;
 
                 return [
@@ -32,7 +32,7 @@ class BlockController extends Controller
                     'house_status'       => $unit->house_status,
                     'house_status_label' => __('app.house_status_' . $unit->house_status),
                     'is_occupied'        => $isOccupied && !$isCurrent,
-                    'occupied_by'        => ($isOccupied && !$isCurrent) ? $unit->resident->fullname : null,
+                    'occupied_by'        => ($isOccupied && !$isCurrent) ? $unit->householder->fullname : null,
                 ];
             });
 

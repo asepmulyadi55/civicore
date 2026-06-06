@@ -18,7 +18,7 @@ class UnitController extends Controller
         abort_if(auth()->user()->cannot('blocks.view'), 403);
 
         $units = $block->units()
-            ->with('resident')
+            ->with('householder')
             ->orderByRaw("
                 LEFT(unit_number, LOCATE('-', unit_number) - 1),
                 CAST(SUBSTRING(unit_number, LOCATE('-', unit_number) + 1) AS UNSIGNED),
@@ -46,7 +46,7 @@ class UnitController extends Controller
 
         return redirect()
             ->route('blocks.units.index', $block)
-            ->with('success', "Unit \"{$request->unit_number}\" added to {$block->name}.");
+            ->with('success', __('app.flash_unit_added', ['unit' => $request->unit_number, 'block' => $block->name]));
     }
 
     /**
@@ -58,17 +58,17 @@ class UnitController extends Controller
 
         return redirect()
             ->route('blocks.units.index', $block)
-            ->with('success', "Unit \"{$unit->unit_number}\" updated.");
+            ->with('success', __('app.flash_unit_updated', ['unit' => $unit->unit_number]));
     }
 
     /**
-     * Delete a unit — blocked if a resident is linked.
+     * Delete a unit — blocked if a householder is linked.
      */
     public function destroy(Block $block, Unit $unit)
     {
         abort_if(auth()->user()->cannot('blocks.edit'), 403);
 
-        if ($unit->resident) {
+        if ($unit->householder) {
             return redirect()
                 ->route('blocks.units.index', $block)
                 ->with('error_delete_unit', $unit->id);
@@ -79,11 +79,11 @@ class UnitController extends Controller
 
         return redirect()
             ->route('blocks.units.index', $block)
-            ->with('success', "Unit \"{$label}\" deleted.");
+            ->with('success', __('app.flash_unit_deleted', ['unit' => $label]));
     }
 
     /**
-     * AJAX — return units for a block (for resident form dropdown).
+     * AJAX — return units for a block (for householder form dropdown).
      * Marks each unit whether it is already occupied.
      * Accepts optional ?current_unit_id=xxx to always include the current unit.
      */
@@ -93,11 +93,11 @@ class UnitController extends Controller
 
         $units = $block->units()
             ->active()
-            ->with('resident:id,unit_id,fullname')
+            ->with('householder:id,unit_id,fullname')
             ->orderBy('unit_number')
             ->get(['id', 'unit_number', 'house_status'])
             ->map(function (Unit $unit) use ($currentUnitId) {
-                $isOccupied = $unit->resident !== null;
+                $isOccupied = $unit->householder !== null;
                 $isCurrent  = $unit->id === $currentUnitId;
 
                 return [
@@ -106,7 +106,7 @@ class UnitController extends Controller
                     'house_status'       => $unit->house_status,
                     'house_status_label' => __('app.house_status_' . $unit->house_status),
                     'is_occupied'        => $isOccupied && !$isCurrent,
-                    'occupied_by'        => ($isOccupied && !$isCurrent) ? $unit->resident->fullname : null,
+                    'occupied_by'        => ($isOccupied && !$isCurrent) ? $unit->householder->fullname : null,
                 ];
             });
 

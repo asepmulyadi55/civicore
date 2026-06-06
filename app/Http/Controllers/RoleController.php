@@ -45,13 +45,13 @@ class RoleController extends Controller
             'permissions' => [],
         ]));
 
-        return redirect()->back()->with('success', "Role '{$data['label']}' created successfully.");
+        return redirect()->back()->with('success', __('app.flash_role_created', ['name' => $data['label']]));
     }
 
     public function update(Request $request, Role $role)
     {
         if ($role->name === 'admin') {
-            return redirect()->back()->with('error', 'The Admin role cannot be modified.');
+            return redirect()->back()->with('error', __('app.flash_role_admin_no_modify'));
         }
 
         $data = $request->validate([
@@ -62,13 +62,13 @@ class RoleController extends Controller
 
         $role->update($data);
 
-        return redirect()->back()->with('success', "Role '{$role->label}' updated.");
+        return redirect()->back()->with('success', __('app.flash_role_updated', ['name' => $role->label]));
     }
 
     public function updatePermissions(Request $request, Role $role)
     {
         if ($role->name === 'admin') {
-            return redirect()->back()->with('error', 'Admin permissions cannot be modified.');
+            return redirect()->back()->with('error', __('app.flash_role_admin_perms_no_modify'));
         }
 
         // Build permissions array from submitted checkboxes.
@@ -97,21 +97,21 @@ class RoleController extends Controller
         ]);
 
         return redirect()->route('roles.index')
-            ->with('success', "Permissions for \"{$role->label}\" updated.");
+            ->with('success', __('app.flash_role_permissions_updated', ['name' => $role->label]));
     }
 
     public function destroy(Role $role)
     {
         if ($role->name === 'admin') {
-            return redirect()->back()->with('error', 'The Admin role cannot be deleted.');
+            return redirect()->back()->with('error', __('app.flash_role_admin_no_delete'));
         }
         if ($role->users()->count() > 0) {
-            return redirect()->back()->with('error', "Cannot delete '{$role->label}' — it has users assigned.");
+            return redirect()->back()->with('error', __('app.flash_role_has_users', ['name' => $role->label]));
         }
 
         $label = $role->label;
         $role->delete();
 
-        return redirect()->back()->with('success', "Role '{$label}' deleted.");
+        return redirect()->back()->with('success', __('app.flash_role_deleted', ['name' => $label]));
     }
 }

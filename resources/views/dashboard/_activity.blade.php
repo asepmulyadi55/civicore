@@ -30,7 +30,7 @@
                 <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <span class="material-icons text-primary text-sm">person</span>
                 </div>
-                <span class="text-sm font-semibold truncate max-w-[140px]">{{ $activity->resident->fullname }}</span>
+                <span class="text-sm font-semibold truncate max-w-[140px]">{{ $activity->householder->fullname }}</span>
               </div>
             </td>
             <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 max-w-[200px]" title="{{ $allMonthLabels->implode(', ') }}">
@@ -40,7 +40,7 @@
               @endif
             </td>
             <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 min-w-[140px] whitespace-nowrap">
-              {{ $activity->resident->block?->name ?? '—' }} · {{ $activity->resident->unit_number }}
+              {{ $activity->householder->block?->name ?? '—' }} · {{ $activity->householder->unit_number }}
             </td>
             <td class="px-6 py-4 text-sm text-slate-500 min-w-[140px] whitespace-nowrap">
               {{ $activity->updated_at->format('M d, g:i A') }}

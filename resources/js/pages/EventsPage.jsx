@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -14,8 +14,6 @@ const PLACEHOLDER_IMAGES = [
 
 const SKELETON_KEYS = ['sk-a', 'sk-b', 'sk-c', 'sk-d', 'sk-e', 'sk-f'];
 
-const C = { primary: '#1C2D27', secondary: '#D4AF37', surface: '#FAF9F6', border: '#E8E6E1', muted: '#595959' };
-
 function getPaginationPages(current, total) {
     if (total <= 7) return new Array(total).fill(null).map((_, i) => i + 1);
     const pages = [1];
@@ -28,15 +26,17 @@ function getPaginationPages(current, total) {
     return pages;
 }
 
-function SkeletonCard() {
+function SkeletonCard({ isDark }) {
+    const skBg   = isDark ? '#1C2D27' : '#f1f5f9';
+    const cardBg = isDark ? '#142920' : '#ffffff';
     return (
-        <div className="bg-white rounded-2xl overflow-hidden animate-pulse" style={{ border: `1px solid ${C.border}` }}>
-            <div className="w-full h-48 bg-slate-100" />
+        <div className="rounded-2xl overflow-hidden animate-pulse" style={{ background: cardBg, border: `1px solid ${isDark ? '#1C2D27' : '#E8E6E1'}` }}>
+            <div className="w-full h-48" style={{ background: skBg }} />
             <div className="p-6 space-y-3">
-                <div className="h-3 bg-slate-100 rounded w-1/4" />
-                <div className="h-5 bg-slate-100 rounded w-3/4" />
-                <div className="h-3 bg-slate-100 rounded w-full" />
-                <div className="h-3 bg-slate-100 rounded w-5/6" />
+                <div className="h-3 rounded w-1/4" style={{ background: skBg }} />
+                <div className="h-5 rounded w-3/4" style={{ background: skBg }} />
+                <div className="h-3 rounded w-full" style={{ background: skBg }} />
+                <div className="h-3 rounded w-5/6" style={{ background: skBg }} />
             </div>
         </div>
     );
@@ -49,6 +49,37 @@ export default function EventsPage() {
     const [category, setCategory] = useState('');
     const [status, setStatus]     = useState('');
     const [page, setPage]         = useState(1);
+    const [isDark, setIsDark]     = useState(() => {
+        try { return localStorage.getItem('homepageDark') === 'true'; } catch { return false; }
+    });
+
+    const toggleDark = () => {
+        setIsDark(prev => {
+            const next = !prev;
+            try { localStorage.setItem('homepageDark', String(next)); } catch {}
+            return next;
+        });
+    };
+
+    useEffect(() => { window.scrollTo(0, 0); }, []);
+
+    const C = isDark ? {
+        primary:    '#F0EDE8',
+        secondary:  '#D4AF37',
+        surface:    '#0D1A17',
+        surfaceVar: '#1C2D27',
+        border:     '#1C2D27',
+        muted:      '#9E9C97',
+        cardBg:     '#142920',
+    } : {
+        primary:    '#1C2D27',
+        secondary:  '#D4AF37',
+        surface:    '#FAF9F6',
+        surfaceVar: '#E8E6E1',
+        border:     '#E8E6E1',
+        muted:      '#595959',
+        cardBg:     '#ffffff',
+    };
 
     useEffect(() => {
         const basePath = import.meta.env.VITE_APP_BASE ?? '';
@@ -90,8 +121,8 @@ export default function EventsPage() {
     const hasFilters   = !!(search || category || status);
 
     return (
-        <div className="font-sans" style={{ backgroundColor: '#f8f9fa', color: C.primary }}>
-            <Header />
+        <div className="font-sans" style={{ backgroundColor: C.surface, color: C.primary, minHeight: '100vh', transition: 'background-color 0.3s, color 0.3s' }}>
+            <Header isDark={isDark} toggleDark={toggleDark} />
 
             <main className="pt-20 pb-20">
                 <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
@@ -105,12 +136,6 @@ export default function EventsPage() {
                             <span className="material-symbols-outlined text-sm">arrow_back</span>
                             {' '}Back to Home
                         </Link>
-                        <span
-                            className="font-semibold tracking-widest uppercase text-xs mb-3 block"
-                            style={{ color: C.secondary, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                        >
-                            Community Calendar
-                        </span>
                         <h1
                             className="text-3xl md:text-5xl font-medium tracking-tight"
                             style={{ color: C.primary, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
@@ -130,8 +155,8 @@ export default function EventsPage() {
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search events…"
-                                className="w-full pl-9 pr-4 py-2.5 rounded-xl border bg-white text-sm focus:outline-none focus:ring-2 transition-all"
-                                style={{ borderColor: C.border, fontFamily: "'Inter', sans-serif" }}
+                                className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-all"
+                                style={{ borderColor: C.border, background: C.cardBg, color: C.primary, fontFamily: "'Inter', sans-serif" }}
                             />
                         </div>
 
@@ -139,8 +164,8 @@ export default function EventsPage() {
                         <select
                             value={category}
                             onChange={e => setCategory(e.target.value)}
-                            className="px-4 py-2.5 rounded-xl border bg-white text-sm focus:outline-none w-full sm:w-auto"
-                            style={{ borderColor: C.border, color: C.muted, fontFamily: "'Inter', sans-serif" }}
+                            className="px-4 py-2.5 rounded-xl border text-sm focus:outline-none w-full sm:w-auto"
+                            style={{ borderColor: C.border, background: C.cardBg, color: C.muted, fontFamily: "'Inter', sans-serif" }}
                         >
                             <option value="">All Categories</option>
                             {CATEGORIES.map(c => (
@@ -152,8 +177,8 @@ export default function EventsPage() {
                         <select
                             value={status}
                             onChange={e => setStatus(e.target.value)}
-                            className="px-4 py-2.5 rounded-xl border bg-white text-sm focus:outline-none w-full sm:w-auto"
-                            style={{ borderColor: C.border, color: C.muted, fontFamily: "'Inter', sans-serif" }}
+                            className="px-4 py-2.5 rounded-xl border text-sm focus:outline-none w-full sm:w-auto"
+                            style={{ borderColor: C.border, background: C.cardBg, color: C.muted, fontFamily: "'Inter', sans-serif" }}
                         >
                             <option value="">All Status</option>
                             <option value="upcoming">Upcoming</option>
@@ -163,8 +188,8 @@ export default function EventsPage() {
 
                         {hasFilters && (
                             <button onClick={clearFilters}
-                                className="px-4 py-2.5 rounded-xl border text-sm transition-all hover:bg-slate-50 w-full sm:w-auto"
-                                style={{ borderColor: C.border, color: C.muted }}>
+                                className="px-4 py-2.5 rounded-xl border text-sm transition-all w-full sm:w-auto"
+                                style={{ borderColor: C.border, background: C.cardBg, color: C.muted }}>
                                 Clear
                             </button>
                         )}
@@ -181,12 +206,12 @@ export default function EventsPage() {
                     {/* Grid */}
                     {loading ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {SKELETON_KEYS.map(k => <SkeletonCard key={k} />)}
+                            {SKELETON_KEYS.map(k => <SkeletonCard key={k} isDark={isDark} />)}
                         </div>
                     ) : null}
                     {!loading && paginated.length === 0 ? (
-                        <div className="text-center py-20 bg-white rounded-2xl" style={{ border: `1px solid ${C.border}` }}>
-                            <span className="material-symbols-outlined text-5xl mb-3 block" style={{ color: '#E8E6E1' }}>event_busy</span>
+                        <div className="text-center py-20 rounded-2xl" style={{ background: C.cardBg, border: `1px solid ${C.border}` }}>
+                            <span className="material-symbols-outlined text-5xl mb-3 block" style={{ color: C.border }}>event_busy</span>
                             <p className="font-semibold text-sm" style={{ color: C.muted }}>No events found</p>
                             {hasFilters && (
                                 <button onClick={clearFilters}
@@ -207,8 +232,8 @@ export default function EventsPage() {
                                 return (
                                     <article
                                         key={event.id || i}
-                                        className="bg-white rounded-2xl overflow-hidden flex flex-col transition-all duration-300 hover:shadow-lg"
-                                        style={{ border: `1px solid ${C.border}` }}
+                                        className="rounded-2xl overflow-hidden flex flex-col transition-all duration-300 hover:shadow-lg"
+                                        style={{ background: C.cardBg, border: `1px solid ${C.border}` }}
                                     >
                                         {/* Image */}
                                         <div className="relative h-48 overflow-hidden flex-shrink-0">
@@ -220,7 +245,7 @@ export default function EventsPage() {
                                             />
                                             <div className="absolute top-3 left-3 flex gap-2">
                                                 <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest"
-                                                    style={{ background: 'rgba(255,255,255,0.88)', color: C.primary, backdropFilter: 'blur(12px)' }}>
+                                                    style={{ background: 'rgba(255,255,255,0.88)', color: '#1C2D27', backdropFilter: 'blur(12px)' }}>
                                                     {cat}
                                                 </span>
                                                 {isPast && (
@@ -289,8 +314,8 @@ export default function EventsPage() {
                             <button
                                 disabled={page === 1}
                                 onClick={() => setPage(p => p - 1)}
-                                className="p-2 rounded-lg border disabled:opacity-30 transition-all hover:bg-slate-50"
-                                style={{ borderColor: C.border }}
+                                className="p-2 rounded-lg border disabled:opacity-30 transition-all"
+                                style={{ borderColor: C.border, background: C.cardBg }}
                                 aria-label="Previous page"
                             >
                                 <span className="material-symbols-outlined text-base" style={{ color: C.muted }}>chevron_left</span>
@@ -305,9 +330,9 @@ export default function EventsPage() {
                                         onClick={() => setPage(p)}
                                         className="w-9 h-9 rounded-lg text-sm font-medium transition-all"
                                         style={{
-                                            background:  page === p ? C.primary : 'white',
-                                            color:       page === p ? C.surface : C.muted,
-                                            border:      `1px solid ${page === p ? C.primary : C.border}`,
+                                            background: page === p ? C.primary : C.cardBg,
+                                            color:      page === p ? C.surface : C.muted,
+                                            border:     `1px solid ${page === p ? C.primary : C.border}`,
                                         }}
                                     >
                                         {p}
@@ -318,8 +343,8 @@ export default function EventsPage() {
                             <button
                                 disabled={page === totalPages}
                                 onClick={() => setPage(p => p + 1)}
-                                className="p-2 rounded-lg border disabled:opacity-30 transition-all hover:bg-slate-50"
-                                style={{ borderColor: C.border }}
+                                className="p-2 rounded-lg border disabled:opacity-30 transition-all"
+                                style={{ borderColor: C.border, background: C.cardBg }}
                                 aria-label="Next page"
                             >
                                 <span className="material-symbols-outlined text-base" style={{ color: C.muted }}>chevron_right</span>
@@ -330,7 +355,7 @@ export default function EventsPage() {
                 </section>
             </main>
 
-            <Footer footer={data?.footer} />
+            <Footer footer={data?.footer} isDark={isDark} />
         </div>
     );
 }

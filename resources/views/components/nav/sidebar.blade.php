@@ -11,7 +11,7 @@
     if ($user->can('overview.view')) {
       $flatItems[] = ['key' => 'overview', 'label_raw' => __('app.nav_overview'), 'icon' => 'dashboard', 'route' => 'overview', 'permission' => 'overview.view'];
     }
-    if ($user->resolveResident()) {
+    if ($user->resolveHouseholder()) {
       $flatItems[] = ['key' => 'household', 'label_raw' => __('app.nav_household'), 'icon' => 'home', 'route' => 'household.show', 'permission' => null];
     }
     if ($user->can('posyandu.view')) {
@@ -27,6 +27,9 @@
       $flatItems[] = ['key' => 'reports', 'label_raw' => __('app.nav_reports'), 'icon' => 'bar_chart', 'route' => 'reports.index', 'permission' => 'reports.view'];
     }
     $flatItems[] = ['key' => 'organization', 'label_raw' => __('app.nav_organization'), 'icon' => 'account_tree', 'route' => 'organization.index', 'permission' => null];
+    if ($user->can('meetings.view')) {
+      $flatItems[] = ['key' => 'meetings', 'label_raw' => __('app.nav_meetings'), 'icon' => 'event_note', 'route' => 'meetings.index', 'permission' => 'meetings.view'];
+    }
     $flatItems[] = ['key' => 'settings', 'label_raw' => __('app.nav_settings'), 'icon' => 'settings', 'route' => 'settings.index', 'permission' => null];
     $navGroups = [['label' => null, 'group_icon' => null, 'items' => $flatItems]];
   } else {
@@ -42,10 +45,11 @@
         'label' => __('app.nav_group_community'),
         'group_icon' => 'groups',
         'items' => [
-          ['key' => 'residents', 'label' => __('app.nav_residents'), 'icon' => 'people', 'route' => 'residents.index', 'permission' => 'residents.view'],
+          ['key' => 'householders', 'label' => __('app.nav_residents'), 'icon' => 'people', 'route' => 'householders.index', 'permission' => 'householders.view'],
           ['key' => 'blocks', 'label' => __('app.nav_blocks'), 'icon' => 'domain', 'route' => 'blocks.index', 'permission' => 'blocks.view'],
           ['key' => 'posyandu', 'label' => 'Posyandu', 'icon' => 'health_and_safety', 'route' => 'posyandu.index', 'permission' => 'posyandu.view'],
           ['key' => 'organization', 'label' => __('app.nav_organization'), 'icon' => 'account_tree', 'route' => 'organization.index', 'permission' => null],
+          ['key' => 'meetings', 'label' => __('app.nav_meetings'), 'icon' => 'event_note', 'route' => 'meetings.index', 'permission' => 'meetings.view'],
         ],
       ],
       [
@@ -63,6 +67,7 @@
         'items' => [
           ['key' => 'users', 'label' => __('app.nav_users'), 'icon' => 'manage_accounts', 'route' => 'users.index', 'permission' => 'users.view'],
           ['key' => 'roles', 'label' => __('app.nav_roles'), 'icon' => 'admin_panel_settings', 'route' => 'roles.index', 'permission' => 'roles.view'],
+          ['key' => 'property', 'label' => __('app.nav_property'), 'icon' => 'home_work', 'route' => 'property.index', 'permission' => 'property.view'],
           ['key' => 'homepage', 'label' => __('app.nav_homepage'), 'icon' => 'public', 'route' => 'homepage.index', 'permission' => 'homepage.view'],
           ['key' => 'media', 'label' => __('app.nav_media'), 'icon' => 'perm_media', 'route' => 'media.index', 'permission' => 'media.view'],
         ],
@@ -77,7 +82,7 @@
     ];
 
     // Add Household link for non-resident roles that are also linked to a resident record
-    if ($user->resolveResident()) {
+    if ($user->resolveHouseholder()) {
       array_splice($allGroups, 1, 0, [
         [
           'label' => null,
@@ -190,3 +195,5 @@
   }
 </script>
 </script>
+
+

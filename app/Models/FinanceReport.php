@@ -27,6 +27,9 @@ class FinanceReport extends Model
         'approved_at',
         'revised_by',
         'revised_at',
+        'rejected_by',
+        'rejected_at',
+        'rejection_notes',
         'created_by',
         'updated_by',
     ];
@@ -41,6 +44,7 @@ class FinanceReport extends Model
             'submitted_at'    => 'datetime',
             'approved_at'     => 'datetime',
             'revised_at'      => 'datetime',
+            'rejected_at'     => 'datetime',
             'month'           => 'integer',
             'year'            => 'integer',
         ];
@@ -73,6 +77,11 @@ class FinanceReport extends Model
         return $this->belongsTo(User::class, 'revised_by');
     }
 
+    public function rejectedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
+    }
+
     public function transactions(): HasMany
     {
         return $this->hasMany(FinanceTransaction::class, 'report_month', 'month')
@@ -102,6 +111,14 @@ class FinanceReport extends Model
     }
 
     /**
+     * Whether this report can be re-submitted (draft, revised, or rejected).
+     */
+    public function canBeSubmitted(): bool
+    {
+        return in_array($this->status, ['draft', 'revised', 'rejected']);
+    }
+
+    /**
      * Whether a given user can modify this report's transactions.
      */
     public function canEdit(User $user): bool
@@ -123,12 +140,35 @@ class FinanceReport extends Model
             ->where('report_year', $this->year)
             ->sum('amount');
 
+        // Include approved payment records: attribute income to whichever is later —
+        // the month being paid FOR, or the month payment was actually received (updated_at).
+        // e.g. pay May in June → June income (not May). Pay June in May → June income (advance).
+        $periodStart = \Carbon\Carbon::create($this->year, $this->month, 1)->startOfDay();
+        $periodEnd   = \Carbon\Carbon::create($this->year, $this->month, 1)->endOfMonth()->endOfDay();
+
+        $paymentIncome = \App\Models\PaymentRecord::where('status', 'approved')
+            ->where(function ($q) use ($periodStart, $periodEnd) {
+                // Case A: paying for THIS month, and was approved on or before end of this month
+                $q->where(function ($q2) use ($periodStart, $periodEnd) {
+                    $q2->whereYear('payment_month', $periodStart->year)
+                       ->whereMonth('payment_month', $periodStart->month)
+                       ->where('updated_at', '<=', $periodEnd);
+                })
+                // Case B: paying for a PAST month, but approval happened in THIS month (backdated)
+                ->orWhere(function ($q2) use ($periodStart, $periodEnd) {
+                    $q2->where('payment_month', '<', $periodStart)
+                       ->where('updated_at', '>=', $periodStart)
+                       ->where('updated_at', '<=', $periodEnd);
+                });
+            })
+            ->sum('amount');
+
         $totalExpense = FinanceTransaction::where('type', 'expense')
             ->where('report_month', $this->month)
             ->where('report_year', $this->year)
             ->sum('amount');
 
-        $this->total_income   = (float) $manualIncome;
+        $this->total_income   = (float) $manualIncome + (float) $paymentIncome;
         $this->total_expense  = (float) $totalExpense;
         $this->closing_balance = (float) $this->opening_balance + $this->total_income - $this->total_expense;
 
@@ -145,6 +185,7 @@ class FinanceReport extends Model
             'submitted' => ['label' => __('app.fin_status_submitted'), 'class' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'],
             'approved'  => ['label' => __('app.fin_status_approved'),  'class' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'],
             'revised'   => ['label' => __('app.fin_status_revised'),   'class' => 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400'],
+            'rejected'  => ['label' => __('app.fin_status_rejected'),  'class' => 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'],
             default     => ['label' => ucfirst($this->status), 'class' => 'bg-slate-100 text-slate-600'],
         };
     }

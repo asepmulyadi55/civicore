@@ -5,11 +5,11 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreResidentRequest extends FormRequest
+class StoreHouseholderRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('residents.create');
+        return $this->user()->can('householders.create');
     }
 
     public function rules(): array
@@ -17,12 +17,12 @@ class StoreResidentRequest extends FormRequest
         return [
             'fullname'           => ['required', 'string', 'max:100'],
             'phone'              => ['nullable', 'string', 'max:25'],
-            'email'              => ['nullable', 'email', 'max:255', 'unique:residents,email'],
+            'email'              => ['nullable', 'email', 'max:255', 'unique:householders,email'],
             'block_id'           => ['required', 'exists:blocks,id'],
             'unit_id'            => [
                 'required',
                 'exists:units,id',
-                'unique:residents,unit_id',
+                'unique:householders,unit_id',
             ],
             'monthly_fee'        => ['required', 'numeric', 'min:0'],
             'fee_start'          => ['required', 'date_format:Y-m'],
@@ -33,13 +33,13 @@ class StoreResidentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'fullname.required'  => 'Please enter the resident\'s full name.',
+            'fullname.required'  => 'Please enter the householder\'s full name.',
             'fullname.max'       => 'The name cannot exceed 100 characters.',
-            'block_id.required'  => 'Please select a block for this resident.',
+            'block_id.required'  => 'Please select a block for this householder.',
             'block_id.exists'    => 'The selected block does not exist.',
             'unit_id.required'   => 'Please select a unit.',
             'unit_id.exists'     => 'The selected unit does not exist.',
-            'unit_id.unique'     => 'This unit is already occupied by another resident.',
+            'unit_id.unique'     => 'This unit is already occupied by another householder.',
             'monthly_fee.required' => 'Please enter the monthly fee amount.',
             'monthly_fee.numeric'  => 'The monthly fee must be a valid number.',
             'monthly_fee.min'      => 'The monthly fee cannot be negative.',

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\ReportExport;
 use App\Models\Block;
 use App\Models\PaymentRecord;
-use App\Models\Resident;
+use App\Models\Householder;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -30,22 +30,22 @@ class ReportController extends Controller
         $blocks = Block::active()->orderBy('name')->get();
 
         // Build resident query
-        $residentQuery = Resident::with([
+        $residentQuery = Householder::with([
             'block',
             'unit',
             'paymentRecords' => fn($q) => $q->whereYear('payment_month', $year)->orderBy('payment_month'),
-        ])->where('residents.is_active', true)
-            ->leftJoin('units', 'units.id', '=', 'residents.unit_id')
-            ->orderBy('residents.block_id')
+        ])->where('householders.is_active', true)
+            ->leftJoin('units', 'units.id', '=', 'householders.unit_id')
+            ->orderBy('householders.block_id')
             ->orderByRaw('CAST(units.unit_number AS UNSIGNED)')
-            ->select('residents.*');
+            ->select('householders.*');
 
         if ($blockId) {
-            $residentQuery->where('residents.block_id', $blockId);
+            $residentQuery->where('householders.block_id', $blockId);
         }
         if ($search) {
             $residentQuery->where(function ($q) use ($search) {
-                $q->where('residents.fullname', 'like', "%{$search}%")
+                $q->where('householders.fullname', 'like', "%{$search}%")
                     ->orWhere('units.unit_number', 'like', "%{$search}%");
             });
         }
@@ -56,7 +56,7 @@ class ReportController extends Controller
         // Summary stats for the selected year + block
         $baseQuery = PaymentRecord::whereYear('payment_month', $year);
         if ($blockId) {
-            $baseQuery->whereHas('resident', fn($q) => $q->where('block_id', $blockId));
+            $baseQuery->whereHas('householder', fn($q) => $q->where('block_id', $blockId));
         }
 
         $paidCount = (clone $baseQuery)->where('status', 'approved')->count();
@@ -102,3 +102,4 @@ class ReportController extends Controller
         return Excel::download(new ReportExport($year, $blockId), $filename);
     }
 }
+

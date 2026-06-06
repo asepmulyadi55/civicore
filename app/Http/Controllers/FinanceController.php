@@ -37,8 +37,14 @@ class FinanceController extends Controller
         $currentMonth = (int) $now->month;
         $currentYear  = (int) $now->year;
 
+        // Allow viewing a past month's dashboard
+        $selectedMonth = (int) $request->get('dash_month', $currentMonth);
+        $selectedYear  = (int) $request->get('dash_year', $currentYear);
+        if ($selectedMonth < 1 || $selectedMonth > 12) $selectedMonth = $currentMonth;
+        if ($selectedYear < 2020 || $selectedYear > 2099) $selectedYear = $currentYear;
+
         // ── Dashboard aggregates ─────────────────────────────────────────────
-        $dashData = $this->buildDashboardData($currentMonth, $currentYear);
+        $dashData = $this->buildDashboardData($selectedMonth, $selectedYear);
 
         // ── Transactions data ────────────────────────────────────────────────
         $txData = $this->buildTransactionData($request);
@@ -50,7 +56,7 @@ class FinanceController extends Controller
         $categories = FinanceTransaction::distinctCategories();
 
         return view('finance', array_merge(
-            compact('tab', 'currency', 'canManage', 'canApprove', 'currentMonth', 'currentYear', 'categories'),
+            compact('tab', 'currency', 'canManage', 'canApprove', 'currentMonth', 'currentYear', 'selectedMonth', 'selectedYear', 'categories'),
             $dashData,
             $txData,
             $rptData
@@ -268,7 +274,7 @@ class FinanceController extends Controller
         $user = auth()->user();
         if (!$user->can('finance.create')) abort(403);
 
-        if (!in_array($report->status, ['draft', 'revised'])) {
+        if (!in_array($report->status, ['draft', 'revised', 'rejected'])) {
             return back()->withErrors(['general' => 'Report cannot be submitted in its current state.']);
         }
 
@@ -339,6 +345,33 @@ class FinanceController extends Controller
             ->with('success', __('app.fin_report_revised'));
     }
 
+    // ── Reject a submitted report ─────────────────────────────────────────────
+
+    public function rejectReport(Request $request, FinanceReport $report): RedirectResponse
+    {
+        $user = auth()->user();
+        if (!$user->can('finance.approve')) abort(403);
+
+        if ($report->status !== 'submitted') {
+            return back()->withErrors(['general' => 'Only submitted reports can be rejected.']);
+        }
+
+        $request->validate(['rejection_notes' => ['nullable', 'string', 'max:1000']]);
+
+        $report->status          = 'rejected';
+        $report->rejected_by     = $user->id;
+        $report->rejected_at     = now();
+        $report->rejection_notes = $request->input('rejection_notes');
+        $report->updated_by      = $user->id;
+        $report->save();
+
+        Log::info('Finance report rejected', ['id' => $report->id, 'by' => $user->id]);
+
+        return redirect()
+            ->route('finance.index', ['tab' => 'reports'])
+            ->with('success', __('app.fin_report_rejected'));
+    }
+
     // ── Export a report as Excel ─────────────────────────────────────────────
 
     public function exportReport(FinanceReport $report)
@@ -358,8 +391,8 @@ class FinanceController extends Controller
         $user = auth()->user();
         if (!$user->can('finance.delete')) abort(403);
 
-        if (!in_array($report->status, ['draft', 'revised'])) {
-            return back()->withErrors(['general' => 'Only draft or revised reports can be deleted.']);
+        if (!in_array($report->status, ['draft', 'revised', 'rejected'])) {
+            return back()->withErrors(['general' => 'Only draft, revised, or rejected reports can be deleted.']);
         }
 
         $report->delete();
@@ -368,7 +401,7 @@ class FinanceController extends Controller
 
         return redirect()
             ->route('finance.index', ['tab' => 'reports'])
-            ->with('success', 'Report deleted successfully.');
+            ->with('success', __('app.flash_report_deleted'));
     }
 
     // ── Category autocomplete ─────────────────────────────────────────────────
@@ -401,7 +434,26 @@ class FinanceController extends Controller
         $manualIncome = (float) FinanceTransaction::where('type', 'income')
             ->where('report_month', $month)->where('report_year', $year)->sum('amount');
 
-        $monthIncome  = $manualIncome;
+        $paymentIncome = (float) PaymentRecord::where('status', 'approved')
+            ->where(function ($q) use ($month, $year) {
+                $periodStart = Carbon::create($year, $month, 1)->startOfDay();
+                $periodEnd   = Carbon::create($year, $month, 1)->endOfMonth()->endOfDay();
+                // Case A: for this month, approved by end of this month
+                $q->where(function ($q2) use ($year, $month, $periodEnd) {
+                    $q2->whereYear('payment_month', $year)
+                       ->whereMonth('payment_month', $month)
+                       ->where('updated_at', '<=', $periodEnd);
+                })
+                // Case B: for a past month, but approved this month (backdated)
+                ->orWhere(function ($q2) use ($periodStart, $periodEnd) {
+                    $q2->where('payment_month', '<', $periodStart)
+                       ->where('updated_at', '>=', $periodStart)
+                       ->where('updated_at', '<=', $periodEnd);
+                });
+            })
+            ->sum('amount');
+
+        $monthIncome = $manualIncome + $paymentIncome;
         $monthExpense = (float) FinanceTransaction::where('type', 'expense')
             ->where('report_month', $month)->where('report_year', $year)->sum('amount');
 
@@ -457,8 +509,11 @@ class FinanceController extends Controller
             $q->where('category', 'like', "%{$cat}%");
         }
         if ($ym = $request->get('tx_month')) {
-            [$fy, $fm] = explode('-', $ym . '-1');
-            $q->where('report_year', (int)$fy)->where('report_month', (int)$fm);
+            // New format: tx_month is a plain integer (1–12), tx_year is a separate param
+            $q->where('report_month', (int)$ym);
+        }
+        if ($yy = $request->get('tx_year')) {
+            $q->where('report_year', (int)$yy);
         }
 
         $transactions = $q->orderByDesc('transaction_date')

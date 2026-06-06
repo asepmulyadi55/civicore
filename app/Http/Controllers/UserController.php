@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Block;
-use App\Models\Resident;
+use App\Models\Householder;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -25,7 +25,7 @@ class UserController extends Controller
     $sort = $request->get('sort');
     $dir  = $request->get('direction', 'asc') === 'desc' ? 'desc' : 'asc';
 
-    $query = User::with(['role', 'resident']);
+    $query = User::with(['role', 'householder']);
     if (isset($sortMap[$sort])) {
       $query->orderBy($sortMap[$sort], $dir);
     } else {
@@ -98,15 +98,15 @@ class UserController extends Controller
       'is_active' => $request->boolean('is_active', true),
     ]);
 
-    // Auto-link to resident if email matches
+    // Auto-link to householder if email matches
     if ($user->email) {
-      Resident::where('email', $user->email)
+      Householder::where('email', $user->email)
         ->whereNull('user_id')
         ->update(['user_id' => $user->id]);
     }
 
     return redirect()->route('users.index')
-      ->with('success', "\"{$user->name}\" has been created successfully.");
+      ->with('success', __('app.flash_user_created', ['name' => $user->name]));
   }
 
   /**
@@ -135,8 +135,8 @@ class UserController extends Controller
       'password.min' => 'New password must be at least 8 characters long.',
     ]);
 
-    // Unlink old resident association if email or block changed
-    Resident::where('user_id', $user->id)->update(['user_id' => null]);
+// Unlink old householder association if email or block changed
+    Householder::where('user_id', $user->id)->update(['user_id' => null]);
 
     $user->name = $validated['name'];
     $user->username = $validated['username'];
@@ -151,16 +151,16 @@ class UserController extends Controller
 
     $user->save();
 
-    // Re-link resident matching the (possibly new) email
+    // Re-link householder matching the (possibly new) email
     if ($user->email) {
-      $resident = Resident::where('email', $user->email)->first();
-      if ($resident) {
-        $resident->update(['user_id' => $user->id]);
+      $householder = Householder::where('email', $user->email)->first();
+      if ($householder) {
+        $householder->update(['user_id' => $user->id]);
       }
     }
 
     return redirect()->route('users.index')
-      ->with('success', "\"{$user->name}\" has been updated successfully.");
+      ->with('success', __('app.flash_user_updated', ['name' => $user->name]));
   }
 
   /**
@@ -182,11 +182,11 @@ class UserController extends Controller
       'unit_number' => $request->input('unit_number'),
     ]);
 
-    // Link matching resident if email found
+    // Link matching householder if email found
     if ($user->email) {
-      $resident = Resident::where('email', $user->email)->first();
-      if ($resident) {
-        $resident->update(['user_id' => $user->id]);
+      $householder = Householder::where('email', $user->email)->first();
+      if ($householder) {
+        $householder->update(['user_id' => $user->id]);
       }
     }
 
@@ -198,14 +198,14 @@ class UserController extends Controller
     ]);
 
     return redirect()->route('users.index')
-      ->with('success', "\"{$user->name}\" has been approved and can now log in.");
+      ->with('success', __('app.flash_user_approved', ['name' => $user->name]));
   }
 
   public function deactivate(User $user)
   {
     if ($user->id === auth()->id()) {
       return redirect()->route('users.index')
-        ->with('error', 'You cannot deactivate your own account.');
+        ->with('error', __('app.flash_cannot_deactivate_self'));
     }
 
     $user->update(['is_active' => false]);
@@ -217,7 +217,7 @@ class UserController extends Controller
     ]);
 
     return redirect()->route('users.index')
-      ->with('success', "\"{$user->name}\" has been deactivated.");
+      ->with('success', __('app.flash_user_deactivated', ['name' => $user->name]));
   }
 
   public function reactivate(User $user)
@@ -231,18 +231,18 @@ class UserController extends Controller
     ]);
 
     return redirect()->route('users.index')
-      ->with('success', "\"{$user->name}\" has been reactivated and can now log in.");
+      ->with('success', __('app.flash_user_reactivated', ['name' => $user->name]));
   }
 
   public function destroy(User $user)
   {
     if ($user->id === auth()->id()) {
       return redirect()->route('users.index')
-        ->with('error', 'You cannot delete your own account.');
+        ->with('error', __('app.flash_cannot_delete_self'));
     }
 
     $name = $user->name;
-    Resident::where('user_id', $user->id)->update(['user_id' => null]);
+    Householder::where('user_id', $user->id)->update(['user_id' => null]);
     $user->delete();
 
     Log::warning('User permanently deleted', [
@@ -253,6 +253,6 @@ class UserController extends Controller
     ]);
 
     return redirect()->route('users.index')
-      ->with('success', "\"{$name}\" has been deleted.");
+      ->with('success', __('app.flash_user_deleted', ['name' => $name]));
   }
 }

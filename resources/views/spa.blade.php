@@ -5,24 +5,44 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+@php
+  $spaMeta    = json_decode(\App\Models\Setting::get('homepage_metadata', '{}'), true) ?? [];
+  $spaTitle   = $spaMeta['page_title']    ?? 'Dwipapuri - Community Events & Residential Living';
+  $spaDesc    = $spaMeta['meta_description'] ?? 'Dwipapuri Residential Community in Bandung — discover upcoming events, connect with neighbors, and experience curated residential living.';
+  $spaKeywords= $spaMeta['meta_keywords']  ?? '';
+  $spaOgTitle = $spaMeta['og_title']       ?? $spaTitle;
+  $spaOgDesc  = $spaMeta['og_description'] ?? $spaDesc;
+  $spaOgImage = !empty($spaMeta['og_image']) ? Storage::url($spaMeta['og_image']) : null;
+  $spaUrl     = rtrim(config('app.url'), '/') . (request()->getPathInfo() === '/' ? '' : request()->getPathInfo());
+@endphp
+
   {{-- Primary SEO --}}
-  <title>Dwipapuri - Community Events &amp; Residential Living</title>
-  <meta name="title" content="Dwipapuri - Community Events &amp; Residential Living">
-  <meta name="description" content="Dwipapuri Residential Community in Bandung &mdash; discover upcoming events, connect with neighbors, and experience curated residential living.">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://dwipapuri.amsite.click">
+  <title>{{ $spaTitle }}</title>
+  <meta name="title"       content="{{ $spaTitle }}">
+  <meta name="description" content="{{ $spaDesc }}">
+  @if($spaKeywords)
+  <meta name="keywords"    content="{{ $spaKeywords }}">
+  @endif
+  <meta name="robots"      content="index, follow">
+  <link rel="canonical"    href="{{ $spaUrl }}">
 
   {{-- Open Graph --}}
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://dwipapuri.amsite.click">
-  <meta property="og:title" content="Dwipapuri - Community Events &amp; Residential Living">
-  <meta property="og:description" content="Dwipapuri Residential Community in Bandung &mdash; discover upcoming events, connect with neighbors, and experience curated residential living.">
-  <meta property="og:locale" content="id_ID">
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="{{ $spaUrl }}">
+  <meta property="og:title"       content="{{ $spaOgTitle }}">
+  <meta property="og:description" content="{{ $spaOgDesc }}">
+  <meta property="og:locale"      content="id_ID">
+  @if($spaOgImage)
+  <meta property="og:image"       content="{{ $spaOgImage }}">
+  @endif
 
   {{-- Twitter Card --}}
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Dwipapuri - Community Events &amp; Residential Living">
-  <meta name="twitter:description" content="Dwipapuri Residential Community in Bandung &mdash; discover upcoming events, connect with neighbors, and experience curated residential living.">
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="{{ $spaOgTitle }}">
+  <meta name="twitter:description" content="{{ $spaOgDesc }}">
+  @if($spaOgImage)
+  <meta name="twitter:image"       content="{{ $spaOgImage }}">
+  @endif
 
   {{-- API key injected at render-time so it is never in static source files --}}
   <meta name="api-key" content="{{ config('civicore.api_key') }}">
@@ -51,6 +71,11 @@
 
 <body>
   <div id="root"></div>
+  {{-- Static fallback text for crawlers — hidden visually, readable by Googlebot --}}
+  <noscript>
+    <h1>Dwipapuri Residential Community</h1>
+    <p>Discover upcoming community events, connect with neighbors, and experience curated residential living in Bandung. Visit our events calendar and resident portal.</p>
+  </noscript>
 </body>
 
 </html>

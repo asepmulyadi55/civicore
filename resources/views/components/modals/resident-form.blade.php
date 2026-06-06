@@ -32,7 +32,7 @@
 
     {{-- Body --}}
     <div class="flex-1 overflow-y-auto px-8 py-6">
-      <form id="form-add-resident" method="POST" action="{{ route('residents.store') }}" class="space-y-5" novalidate>
+      <form id="form-add-resident" method="POST" action="{{ route('householders.store') }}" class="space-y-5" novalidate>
         @csrf
         <input type="hidden" name="_form" value="add" />
 
@@ -494,3 +494,4 @@
     if (!valid) e.preventDefault();
   });
 </script>
+

@@ -316,9 +316,62 @@
 </div>
 
 {{-- ══════════════════════════════════════════════════════════════════
+     6. Reject Report Modal
+═══════════════════════════════════════════════════════════════════════ --}}
+<div id="fin-reject-modal"
+  class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+  role="dialog" aria-modal="true">
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-6"
+       onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
+          <span class="material-icons text-rose-500 text-[20px]">cancel</span>
+        </div>
+        <h3 class="text-base font-semibold text-slate-800 dark:text-slate-100">{{ __('app.fin_reject_report') }}</h3>
+      </div>
+      <button type="button" onclick="closeRejectReportModal()"
+        class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
+        <span class="material-icons text-[20px]">close</span>
+      </button>
+    </div>
+    <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
+      {{ __('app.fin_period') }}: <span id="fin-reject-period" class="font-medium text-slate-700 dark:text-slate-300"></span>
+    </p>
+    <form id="fin-reject-form" method="POST" class="space-y-4">
+      @csrf @method('PATCH')
+      <div>
+        <label for="fin-reject-notes" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+          {{ __('app.fin_rejection_notes') }}
+          <span class="font-normal text-slate-400">({{ __('app.optional') }})</span>
+        </label>
+        <textarea id="fin-reject-notes" name="rejection_notes" rows="3" maxlength="1000"
+          placeholder="{{ __('app.fin_rejection_notes_ph') }}"
+          class="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-400/30 placeholder-slate-400 resize-none"></textarea>
+      </div>
+      <div class="flex gap-3 justify-end pt-1">
+        <button type="button" onclick="closeRejectReportModal()"
+          class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-lg hover:opacity-80">
+          {{ __('app.btn_cancel') }}
+        </button>
+        <button type="submit"
+          class="px-5 py-2 text-sm font-medium bg-rose-600 text-white rounded-lg hover:opacity-90 transition-opacity shadow-sm flex items-center gap-1.5">
+          <span class="material-icons text-[16px]">cancel</span>
+          {{ __('app.fin_reject_report') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- ══════════════════════════════════════════════════════════════════
      JavaScript
 ═══════════════════════════════════════════════════════════════════════ --}}
 <script>
+// Selected dashboard period (set by Blade)
+const finSelectedMonth = {{ $selectedMonth ?? 'new Date().getMonth() + 1' }};
+const finSelectedYear  = {{ $selectedYear  ?? 'new Date().getFullYear()' }};
+
 // ── Transaction Modal ─────────────────────────────────────────────────────────
 function openAddTransactionModal() {
   const form = document.getElementById('fin-tx-form');
@@ -326,8 +379,13 @@ function openAddTransactionModal() {
   document.getElementById('fin-tx-method').value = 'POST';
   document.getElementById('fin-tx-modal-title').textContent = '{{ __('app.fin_add_transaction') }}';
   form.reset();
-  // Default date = today
-  document.getElementById('fin-tx-date').value = new Date().toISOString().split('T')[0];
+  // Default date: today if selected period is current month, else 1st of selected month
+  const today = new Date();
+  const isCurrent = (finSelectedYear === today.getFullYear() && finSelectedMonth === today.getMonth() + 1);
+  const pad = n => String(n).padStart(2, '0');
+  document.getElementById('fin-tx-date').value = isCurrent
+    ? today.toISOString().split('T')[0]
+    : `${finSelectedYear}-${pad(finSelectedMonth)}-01`;
   document.getElementById('fin-tx-modal').classList.remove('hidden');
   document.getElementById('fin-tx-modal').classList.add('flex');
 }
@@ -432,8 +490,23 @@ function closeReviseReportModal() {
   document.getElementById('fin-revise-modal').classList.remove('flex');
 }
 
+// ── Reject Report Modal ───────────────────────────────────────────────────────
+function openRejectReportModal(id, period) {
+  const form = document.getElementById('fin-reject-form');
+  form.action = '{{ url('/finance/reports') }}/' + id + '/reject';
+  document.getElementById('fin-reject-period').textContent = period;
+  document.getElementById('fin-reject-notes').value = '';
+  document.getElementById('fin-reject-modal').classList.remove('hidden');
+  document.getElementById('fin-reject-modal').classList.add('flex');
+}
+
+function closeRejectReportModal() {
+  document.getElementById('fin-reject-modal').classList.add('hidden');
+  document.getElementById('fin-reject-modal').classList.remove('flex');
+}
+
 // ── Close on backdrop click ───────────────────────────────────────────────────
-['fin-tx-modal','fin-delete-modal','fin-gen-modal','fin-ob-modal','fin-revise-modal'].forEach(id => {
+['fin-tx-modal','fin-delete-modal','fin-gen-modal','fin-ob-modal','fin-revise-modal','fin-reject-modal'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('click', function(e) {
     if (e.target === this) {

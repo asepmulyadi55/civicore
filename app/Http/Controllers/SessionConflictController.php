@@ -32,14 +32,14 @@ class SessionConflictController extends Controller
     // hash_equals prevents timing attacks on the comparison.
     if (!$expected || !hash_equals((string) $expected, (string) $userId)) {
       return redirect()->route('login')
-        ->with('error', 'Session expired. Please log in again.');
+        ->with('error', __('app.flash_session_expired'));
     }
 
     $user = User::find($userId);
 
     if (!$user) {
       return redirect()->route('login')
-        ->with('error', 'Account not found. Please log in again.');
+        ->with('error', __('app.flash_account_not_found'));
     }
 
     // Consume the stored value — one-time use only.
@@ -55,6 +55,6 @@ class SessionConflictController extends Controller
     $user->save();
 
     return redirect($user->homeUrl())
-      ->with('success', 'You are now using this device. Other sessions have been logged out.');
+      ->with('success', __('app.flash_device_session_cleared'));
   }
 }

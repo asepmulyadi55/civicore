@@ -35,9 +35,9 @@ class Unit extends Model
         return $this->belongsTo(Block::class);
     }
 
-    public function resident(): HasOne
+    public function householder(): HasOne
     {
-        return $this->hasOne(Resident::class);
+        return $this->hasOne(Householder::class);
     }
 
     public function scopeActive(Builder $query): Builder
@@ -47,6 +47,6 @@ class Unit extends Model
 
     public function isOccupied(): bool
     {
-        return $this->resident()->exists();
+        return $this->householder()->exists();
     }
 }

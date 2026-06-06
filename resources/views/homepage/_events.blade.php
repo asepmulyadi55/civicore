@@ -13,6 +13,35 @@
     </span>
   </div>
 
+  {{-- Display Settings form --}}
+  <div class="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/30">
+    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">{{ __('app.hp_display_settings') }}</p>
+    <form method="POST" action="{{ route('homepage.section-labels') }}" class="space-y-3">
+      @csrf
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-1.5">
+          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_eyebrow_label') }} <span class="text-slate-400 font-normal text-xs">{{ __('app.hp_eyebrow_hint') }}</span></label>
+          <input type="text" name="events_eyebrow" value="{{ $sectionLabels['events_eyebrow'] ?? 'Discover More' }}"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+            placeholder="e.g. Discover More">
+        </div>
+        <div class="space-y-1.5">
+          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_section_heading_label') }}</label>
+          <input type="text" name="events_heading" value="{{ $sectionLabels['events_heading'] ?? 'Upcoming Community Events' }}"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+            placeholder="e.g. Upcoming Community Events">
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <button type="submit"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white text-sm font-bold rounded-xl transition-all">
+          <span class="material-icons text-base">save</span>
+          {{ __('app.hp_save_display') }}
+        </button>
+      </div>
+    </form>
+  </div>
+
   {{-- Add Event form --}}
   <div class="p-6 border-b border-slate-100 dark:border-slate-800">
     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">{{ __('app.hp_add_event') }}</p>
