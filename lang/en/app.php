@@ -1129,5 +1129,7 @@ return [
   'optional'                      => 'optional',
   'clear_filters'                 => 'Clear filters',
   'btn_search'                    => 'Search',
+  'coordinators'                  => 'Coordinators',
+  'no_coordinators_available'     => 'No coordinators available',
 ];
 

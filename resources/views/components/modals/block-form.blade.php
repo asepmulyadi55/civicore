@@ -3,7 +3,7 @@ components/modals/block-form.blade.php
 Add Block Modal + Edit Block Modal
 Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
 ============================================================ --}}
-@props(['blocksCount' => 0])
+@props(['blocksCount' => 0, 'coordinatorUsers' => []])
 
 {{-- ════════════════════════════════════════════════════════════════ --}}
 {{-- ADD BLOCK MODAL --}}
@@ -136,6 +136,23 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none dark:text-white resize-none"></textarea>
         </div>
 
+        {{-- Coordinators --}}
+        <div class="flex flex-col gap-2">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            {{ __('app.coordinators') }} <span class="font-normal text-slate-400 normal-case">{{ __('app.optional') }}</span>
+          </label>
+          <div class="max-h-48 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-xl p-3 space-y-1 bg-slate-50 dark:bg-slate-800">
+            @forelse($coordinatorUsers ?? [] as $coord)
+              <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-white dark:hover:bg-slate-700 transition-colors shadow-sm border border-transparent hover:border-slate-200 dark:hover:border-slate-600">
+                <input type="checkbox" name="coordinator_ids[]" value="{{ $coord->id }}" class="edit-coord-checkbox w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary/20" />
+                <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ $coord->name }}</span>
+              </label>
+            @empty
+              <p class="text-xs text-slate-500 italic text-center py-2">{{ __('app.no_coordinators_available') }}</p>
+            @endforelse
+          </div>
+        </div>
+
         {{-- Active status --}}
         <label
           class="flex items-center gap-3 cursor-pointer p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
@@ -181,12 +198,18 @@ Trigger: openAddBlockModal() / openEditBlockModal(id, name, desc, isActive)
   function openBlockDrawer() { openAddBlockModal(); }
 
   // ── Edit Block Modal ──────────────────────────────────────────────
-  function openEditBlockDrawer(id, name, description, isActive) {
+  function openEditBlockDrawer(id, name, description, isActive, coordIds = []) {
     document.getElementById('edit-block-name').value = name;
     document.getElementById('edit-block-description').value = description;
     document.getElementById('edit-block-active').checked = isActive;
     document.getElementById('ebm-name-badge').textContent = name;
     document.getElementById('form-edit-block').action = `{{ url('/blocks') }}/${id}`;
+    
+    // Pre-check assigned coordinators
+    document.querySelectorAll('.edit-coord-checkbox').forEach(cb => {
+      cb.checked = coordIds.includes(cb.value);
+    });
+
     const el = document.getElementById('edit-block-modal');
     el.classList.remove('hidden'); el.classList.add('flex');
     document.body.classList.add('overflow-hidden');

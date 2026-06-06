@@ -3,7 +3,7 @@
   class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 antialiased min-h-screen">
 
   <x-nav.sidebar active="blocks" />
-  <x-modals.block-form />
+  <x-modals.block-form :coordinator-users="$coordinatorUsers" />
 
   <div class="lg:pl-64 min-h-screen bg-background-light dark:bg-background-dark flex flex-col">
     @include('blocks._header')

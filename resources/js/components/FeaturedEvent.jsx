@@ -11,6 +11,7 @@ export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = fa
     const youtubeId = featuredEvent?.youtube_id || null;
     const type = featuredEvent?.type || 'full';
     const imageUrl = featuredEvent?.image_url || null;
+    const mobileImageUrl = featuredEvent?.mobile_image_url || null;
 
     const formattedDate = date
         ? new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
@@ -230,11 +231,14 @@ export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = fa
                         </button>
                     </>
                 ) : (
-                    <img
-                        src={bgImage}
-                        alt={title}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
+                    <picture>
+                        {mobileImageUrl && <source media="(max-width: 767px)" srcSet={mobileImageUrl} />}
+                        <img
+                            src={bgImage}
+                            alt={title}
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                    </picture>
                 )}
 
                 {/* Dark gradient overlay */}

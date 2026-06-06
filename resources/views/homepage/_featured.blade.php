@@ -68,33 +68,68 @@
     </div>
 
     {{-- Simple-type fields: Image upload --}}
-    <div id="featured-simple-fields" class="{{ $featuredType === 'full' ? 'hidden' : '' }} space-y-1.5">
-      <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_featured_image_label') }}</label>
-      @if(!empty($featuredEvent['image_url']) && ($featuredType === 'simple'))
-        <div class="flex items-center gap-4 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 mb-2">
-          <img src="{{ $featuredEvent['image_url'] }}" alt="Current" class="w-20 h-14 object-cover rounded-lg border border-slate-200 dark:border-slate-700 flex-shrink-0">
-          <div class="flex-1 min-w-0">
-            <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ __('app.hp_current_image') }}</p>
-            <p class="text-xs text-slate-400 truncate">{{ $featuredEvent['image_url'] }}</p>
+    <div id="featured-simple-fields" class="{{ $featuredType === 'full' ? 'hidden' : '' }} space-y-4">
+      
+      {{-- Desktop Image --}}
+      <div class="space-y-1.5">
+        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Desktop Image (≥768px)</label>
+        @if(!empty($featuredEvent['image_url']) && ($featuredType === 'simple'))
+          <div class="flex items-center gap-4 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 mb-2">
+            <img src="{{ $featuredEvent['image_url'] }}" alt="Current" class="w-20 h-14 object-cover rounded-lg border border-slate-200 dark:border-slate-700 flex-shrink-0">
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ __('app.hp_current_image') }}</p>
+              <p class="text-xs text-slate-400 truncate">{{ $featuredEvent['image_url'] }}</p>
+            </div>
           </div>
+        @endif
+        <label id="featured-img-label" class="flex flex-col items-center justify-center gap-2 w-full h-24 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 hover:border-primary/60 hover:bg-primary/5 transition-all cursor-pointer">
+          <span class="material-icons text-slate-400 text-2xl">cloud_upload</span>
+          <span class="text-xs font-semibold text-slate-500">{{ __('app.hp_upload_new_image') }} <span class="text-slate-400 font-normal">{{ __('app.hp_upload_optional_hint') }}</span></span>
+          <input type="file" name="image_file" id="featured-img-input" accept="image/*" class="sr-only"
+            onchange="previewImage(this,'featured-img-preview','featured-img-label')">
+        </label>
+        <div id="featured-img-preview" class="hidden items-center gap-3 p-3 rounded-xl border border-primary/30 bg-primary/5">
+          <img src="" alt="Preview" class="w-16 h-12 object-cover rounded-lg flex-shrink-0">
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-semibold text-primary">{{ __('app.hp_ready_to_upload') }}</p>
+            <p class="text-xs text-slate-400 truncate"></p>
+          </div>
+          <button type="button" onclick="clearImageInput('featured-img-input','featured-img-preview','featured-img-label')" class="text-slate-400 hover:text-rose-500 transition-colors">
+            <span class="material-icons text-lg">close</span>
+          </button>
         </div>
-      @endif
-      <label id="featured-img-label" class="flex flex-col items-center justify-center gap-2 w-full h-24 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 hover:border-primary/60 hover:bg-primary/5 transition-all cursor-pointer">
-        <span class="material-icons text-slate-400 text-2xl">cloud_upload</span>
-        <span class="text-xs font-semibold text-slate-500">{{ __('app.hp_upload_new_image') }} <span class="text-slate-400 font-normal">{{ __('app.hp_upload_optional_hint') }}</span></span>
-        <input type="file" name="image_file" id="featured-img-input" accept="image/*" class="sr-only"
-          onchange="previewImage(this,'featured-img-preview','featured-img-label')">
-      </label>
-      <div id="featured-img-preview" class="hidden items-center gap-3 p-3 rounded-xl border border-primary/30 bg-primary/5">
-        <img src="" alt="Preview" class="w-16 h-12 object-cover rounded-lg flex-shrink-0">
-        <div class="flex-1 min-w-0">
-          <p class="text-xs font-semibold text-primary">{{ __('app.hp_ready_to_upload') }}</p>
-          <p class="text-xs text-slate-400 truncate"></p>
-        </div>
-        <button type="button" onclick="clearImageInput('featured-img-input','featured-img-preview','featured-img-label')" class="text-slate-400 hover:text-rose-500 transition-colors">
-          <span class="material-icons text-lg">close</span>
-        </button>
       </div>
+
+      {{-- Mobile Image --}}
+      <div class="space-y-1.5">
+        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Mobile Image (<768px)</label>
+        @if(!empty($featuredEvent['mobile_image_url']) && ($featuredType === 'simple'))
+          <div class="flex items-center gap-4 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 mb-2">
+            <img src="{{ $featuredEvent['mobile_image_url'] }}" alt="Current Mobile" class="w-14 h-20 object-cover rounded-lg border border-slate-200 dark:border-slate-700 flex-shrink-0">
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ __('app.hp_current_image') }}</p>
+              <p class="text-xs text-slate-400 truncate">{{ $featuredEvent['mobile_image_url'] }}</p>
+            </div>
+          </div>
+        @endif
+        <label id="featured-mobile-img-label" class="flex flex-col items-center justify-center gap-2 w-full h-24 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 hover:border-primary/60 hover:bg-primary/5 transition-all cursor-pointer">
+          <span class="material-icons text-slate-400 text-2xl">cloud_upload</span>
+          <span class="text-xs font-semibold text-slate-500">{{ __('app.hp_upload_new_image') }} <span class="text-slate-400 font-normal">{{ __('app.hp_upload_optional_hint') }}</span></span>
+          <input type="file" name="mobile_image_file" id="featured-mobile-img-input" accept="image/*" class="sr-only"
+            onchange="previewImage(this,'featured-mobile-img-preview','featured-mobile-img-label')">
+        </label>
+        <div id="featured-mobile-img-preview" class="hidden items-center gap-3 p-3 rounded-xl border border-primary/30 bg-primary/5">
+          <img src="" alt="Preview" class="w-10 h-14 object-cover rounded-lg flex-shrink-0">
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-semibold text-primary">{{ __('app.hp_ready_to_upload') }}</p>
+            <p class="text-xs text-slate-400 truncate"></p>
+          </div>
+          <button type="button" onclick="clearImageInput('featured-mobile-img-input','featured-mobile-img-preview','featured-mobile-img-label')" class="text-slate-400 hover:text-rose-500 transition-colors">
+            <span class="material-icons text-lg">close</span>
+          </button>
+        </div>
+      </div>
+
     </div>
 
     <div class="flex justify-end pt-2">

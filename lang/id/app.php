@@ -1129,5 +1129,7 @@ return [
   'optional'                      => 'opsional',
   'clear_filters'                 => 'Hapus filter',
   'btn_search'                    => 'Cari',
+  'coordinators'                  => 'Koordinator',
+  'no_coordinators_available'     => 'Tidak ada koordinator yang tersedia',
 ];
 

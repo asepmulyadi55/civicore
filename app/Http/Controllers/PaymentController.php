@@ -20,12 +20,13 @@ class PaymentController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = auth()->user();
-        $scopeBlockId = $user->isBlockCoordinator() ? $user->block_id : null;
+        $isCoordinator = $user->isBlockCoordinator();
+        $scopeBlockIds = $isCoordinator ? $user->coordinatedBlockIds() : null;
         $canApprove = $user->can('payments.approve');
 
-        // Build base query scoped to coordinator's block if applicable
+        // Build base query scoped to coordinator's blocks if applicable
         $baseQ = PaymentRecord::query()
-            ->when($scopeBlockId, fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId)));
+            ->when($scopeBlockIds, fn($q) => $q->whereHas('householder', fn($r) => $r->whereIn('block_id', $scopeBlockIds)));
 
         // Apply search, block, status, and month filters
         if ($search = $request->get('search')) {
@@ -34,7 +35,7 @@ class PaymentController extends Controller
                     ->orWhereHas('unit', fn($u) => $u->where('unit_number', 'like', "%{$search}%"));
             });
         }
-        if (!$scopeBlockId && $blockId = $request->get('block_id')) {
+        if (!$scopeBlockIds && $blockId = $request->get('block_id')) {
             $baseQ->whereHas('householder', fn($q) => $q->where('block_id', $blockId));
         }
         if ($status = $request->get('status')) {
@@ -52,8 +53,8 @@ class PaymentController extends Controller
         }
 
         $payments = $this->buildBatchedPaginator($baseQ, $request);
-        $stats = $this->buildStats($scopeBlockId);
-        $residentData = $this->buildResidentData($scopeBlockId);
+        $stats = $this->buildStats($scopeBlockIds);
+        $residentData = $this->buildResidentData($scopeBlockIds);
 
         $blocks = Block::active()->orderBy('name')->get();
         $currency = Setting::get('currency_symbol', 'Rp');
@@ -70,11 +71,11 @@ class PaymentController extends Controller
      * Load residents list and their current fee map for the JS payment modal.
      * Returns ['residents' => Collection, 'residentFees' => Collection].
      */
-    private function buildResidentData(?string $scopeBlockId): array
+    private function buildResidentData(?array $scopeBlockIds): array
     {
         $residents = Householder::with(['block', 'feeHistories'])
             ->where('is_active', true)
-            ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
+            ->when($scopeBlockIds, fn($q) => $q->whereIn('block_id', $scopeBlockIds))
             ->orderBy('fullname')
             ->get();
 
@@ -155,11 +156,11 @@ class PaymentController extends Controller
      * Build summary stats (counts / totals) for the payments dashboard header.
      * Returns array suitable for merging into view compact().
      */
-    private function buildStats(?string $scopeBlockId): array
+    private function buildStats(?array $scopeBlockIds): array
     {
         $statBase = PaymentRecord::when(
-            $scopeBlockId,
-            fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId))
+            $scopeBlockIds,
+            fn($q) => $q->whereHas('householder', fn($r) => $r->whereIn('block_id', $scopeBlockIds))
         );
 
         $pendingCount = (clone $statBase)->where('status', 'pending')->count();
@@ -186,7 +187,7 @@ class PaymentController extends Controller
             ->sum('amount');
 
         $unpaidCount = Householder::where('is_active', true)
-            ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
+            ->when($scopeBlockIds, fn($q) => $q->whereIn('block_id', $scopeBlockIds))
             ->whereDoesntHave(
                 'paymentRecords',
                 fn($q) => $q
@@ -201,14 +202,14 @@ class PaymentController extends Controller
             ->values()->all();
 
         $paidMonthsByResident = PaymentRecord::where('status', 'approved')
-            ->when($scopeBlockId, fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId)))
+            ->when($scopeBlockIds, fn($q) => $q->whereHas('householder', fn($r) => $r->whereIn('block_id', $scopeBlockIds)))
             ->get(['householder_id', 'payment_month'])
             ->groupBy('householder_id')
             ->map($mapMonths)
             ->toArray();
 
         $pendingMonthsByResident = PaymentRecord::where('status', 'pending')
-            ->when($scopeBlockId, fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId)))
+            ->when($scopeBlockIds, fn($q) => $q->whereHas('householder', fn($r) => $r->whereIn('block_id', $scopeBlockIds)))
             ->get(['householder_id', 'payment_month'])
             ->groupBy('householder_id')
             ->map($mapMonths)
