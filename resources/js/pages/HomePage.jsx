@@ -37,10 +37,11 @@ export default function HomePage() {
             .catch(() => setLoading(false));
     }, []);
 
+    const isSimpleMode = (data?.featured_event?.type ?? 'full') === 'simple';
     return (
         <div className="font-sans" style={{ backgroundColor: isDark ? '#0D1A17' : '#f8f9fa', color: isDark ? '#F0EDE8' : '#2C2C2C', minHeight: '100vh', transition: 'background-color 0.3s, color 0.3s' }}>
             <Header isDark={isDark} toggleDark={toggleDark} />
-            <main className="pt-20">
+            <main className={isSimpleMode ? '' : 'pt-20'}>
                 <FeaturedEvent featuredEvent={data?.featured_event} loading={loading} isDark={isDark} eyebrow={data?.section_labels?.featured_eyebrow} />
                 <UpcomingEvents events={data?.upcoming_events ?? []} loading={loading} isDark={isDark} eyebrow={data?.section_labels?.events_eyebrow} heading={data?.section_labels?.events_heading} />
                 <MemorableMoments moments={data?.memorable_moments} pastEvents={data?.past_events ?? []} loading={loading} isDark={isDark} />
@@ -48,6 +49,7 @@ export default function HomePage() {
                 <PropertyListings listings={data?.property_listings ?? []} loading={loading} isDark={isDark} />
                 <AboutSection about={data?.about} loading={loading} isDark={isDark} />
             </main>
+
             <Footer footer={data?.footer} isDark={isDark} />
         </div>
     );
