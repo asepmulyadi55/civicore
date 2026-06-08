@@ -26,6 +26,11 @@ class Householder extends Model
         'rent_end',
     ];
 
+    protected $hidden = [
+        // Temporary Data Hardening: completely hide these from UI/forms serialization.
+        'family_card_number', 'phone',
+    ];
+
     protected $casts = [
         'is_active'          => 'boolean',
         'family_card_number' => 'encrypted',

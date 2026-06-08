@@ -23,9 +23,10 @@
         $tabs = [
           ['id' => 'profile',  'icon' => 'person',        'label' => __('app.settings_tab_profile')],
           ['id' => 'password', 'icon' => 'lock',          'label' => __('app.settings_tab_password')],
+          ['id' => 'twofactor','icon' => 'verified_user', 'label' => 'Two-Factor Auth'],
         ];
         if (auth()->user()->isAdmin()) {
-          $tabs[] = ['id' => 'security', 'icon' => 'security',      'label' => __('app.settings_tab_security')];
+          $tabs[] = ['id' => 'security', 'icon' => 'admin_panel_settings', 'label' => __('app.settings_tab_security')];
           $tabs[] = ['id' => 'memo',     'icon' => 'sticky_note_2',    'label' => 'Admin Memo'];
           $tabs[] = ['id' => 'posyandu', 'icon' => 'health_and_safety','label' => 'Posyandu'];
         }
@@ -48,6 +49,7 @@
 
       @include('settings._profile')
       @include('settings._password')
+      @include('settings._twofactor')
       @if(auth()->user()->isAdmin())
         @include('settings._security')
         @include('settings._memo')
@@ -58,7 +60,7 @@
   </div>
 
   <script>
-    const tabIds = ['profile', 'password', 'security', 'memo', 'posyandu'];
+    const tabIds = ['profile', 'password', 'twofactor', 'security', 'memo', 'posyandu'];
 
     function switchTab(active) {
       tabIds.forEach(function(id) {

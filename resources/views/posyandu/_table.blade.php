@@ -87,7 +87,7 @@
 
             {{-- Date of Birth --}}
             <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 hidden md:table-cell">
-              {{ $member->birth_date?->format('d M Y') ?? '—' }}
+              {{ is_string($member->birth_date) ? \Carbon\Carbon::parse($member->birth_date)->format('d M Y') : ($member->birth_date?->format('d M Y') ?? '—') }}
             </td>
 
             {{-- Age --}}
