@@ -14,22 +14,15 @@ class RequireTwoFactorAuthentication
         $user = Auth::user();
 
         if ($user) {
-            // 1. If user doesn't have a 2FA secret, force them to set it up
+            // If user doesn't have a 2FA secret, force them to set it up
             if (empty($user->two_factor_secret)) {
-                // Prevent redirect loop if already on setup page
-                if ($request->routeIs('2fa.setup', '2fa.activate')) {
+                // Prevent redirect loop if already on setup page or logging out
+                if ($request->routeIs('settings.2fa', 'settings.2fa.enable', 'settings.2fa.confirm', 'logout')) {
                     return $next($request);
                 }
-                return redirect()->route('2fa.setup');
-            }
-
-            // 2. If user has secret but hasn't completed OTP challenge for this session
-            if (!$request->session()->has('2fa_verified')) {
-                // Prevent redirect loop
-                if ($request->routeIs('2fa.challenge', '2fa.verify')) {
-                    return $next($request);
-                }
-                return redirect()->route('2fa.challenge');
+                
+                return redirect()->route('settings.2fa')
+                    ->with('error', 'Mandatory Security: You must enable Two-Factor Authentication to access this application.');
             }
         }
 

@@ -333,10 +333,21 @@ Review Modal, and all associated JavaScript.
             </div>
           </div>
 
+          {{-- Rejection Message (if rejected) --}}
+          <div id="em-rejection-wrap" class="col-span-full hidden mb-2">
+            <div class="flex items-start gap-3 px-4 py-3 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-xl">
+              <span class="material-icons text-rose-500 text-xl mt-0.5">error_outline</span>
+              <div>
+                <p class="text-sm font-bold text-rose-700 dark:text-rose-400">Payment Rejected</p>
+                <p id="em-rejection-msg" class="text-sm text-rose-600 dark:text-rose-300 mt-1"></p>
+              </div>
+            </div>
+          </div>
+
           {{-- Status: always resets to pending on save --}}
-          <div class="flex flex-col gap-2">
+          <div class="col-span-full">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.status') }}</label>
-            <div class="flex items-center gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+            <div class="flex items-center gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl mt-2">
               <span class="material-icons text-amber-500 text-xl">restart_alt</span>
               <div>
                 <p class="text-sm font-semibold text-amber-700 dark:text-amber-400">{{ __('app.pending_review') }}</p>
@@ -953,7 +964,16 @@ Review Modal, and all associated JavaScript.
     document.getElementById('em-amount').value = fee;
     updateEmSummary();
     document.getElementById('em-notes').value = notes;
-    // em-rejection and em-status elements were removed — status always resets to pending on save
+    
+    // Show rejection message if present
+    const rejectWrap = document.getElementById('em-rejection-wrap');
+    if (status === 'rejected' && rejection) {
+      document.getElementById('em-rejection-msg').textContent = rejection;
+      rejectWrap.classList.remove('hidden');
+    } else {
+      rejectWrap.classList.add('hidden');
+    }
+
     document.getElementById('em-method').value = methodId ?? '';
     document.getElementById('em-proof-name').textContent = 'Click to upload new file';
 
