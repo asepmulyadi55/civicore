@@ -124,8 +124,8 @@
 
         <div class="border-t border-slate-100 dark:border-slate-800"></div>
 
-        {{-- Family Card Number --}}
-        <div class="flex flex-col gap-2">
+        {{-- Family Card Number (Hidden for Data Privacy) --}}
+        <div class="hidden flex-col gap-2">
           <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
             {{ __('app.no_kk') }} <span class="font-normal normal-case text-slate-400">{{ __('app.optional') }}</span>
           </label>
@@ -231,7 +231,7 @@
         </div>
 
         {{-- Phone --}}
-        <div class="flex flex-col gap-2">
+        <div class="hidden flex-col gap-2">
           <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('app.phone_number') }}</label>
           <div class="relative">
             <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">phone</span>

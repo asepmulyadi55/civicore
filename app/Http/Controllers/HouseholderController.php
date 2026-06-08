@@ -106,9 +106,9 @@ class HouseholderController extends Controller
                 'block_id'           => $unit->block_id,
                 'unit_id'            => $unit->id,
                 'fullname'           => $request->fullname,
-                'phone'              => $request->phone,
+                'phone'              => null, // Hardened: Ignore submissions
                 'email'              => $request->email,
-                'family_card_number' => $request->family_card_number,
+                'family_card_number' => null, // Hardened: Ignore submissions
                 'notes'              => $request->notes,
                 'is_active'          => true,
             ]);
@@ -295,10 +295,8 @@ class HouseholderController extends Controller
                 }
             }
 
-            // Don't clobber an existing encrypted Family Card Number if the user left the field blank.
-            if (!$request->filled('family_card_number')) {
-                unset($data['family_card_number']);
-            }
+            // Hardened: completely ignore nik, no_kk, phone submissions for privacy
+            unset($data['nik'], $data['family_card_number'], $data['phone']);
 
             // Handle optional photo upload
             if ($request->hasFile('photo')) {
