@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\BlockController as ApiBlockController;
 use App\Http\Controllers\Api\HouseholderController as ApiHouseholderController;
 use App\Http\Controllers\Api\HomepageController as ApiHomepageController;
 use App\Http\Controllers\PropertyListingController;
+use App\Http\Controllers\MeetingController;
 
 // ── Public homepage (React SPA) ───────────────────────────────────────────────
 Route::get('/', fn() => view('spa'))->name('home');
@@ -276,6 +277,30 @@ Route::middleware('auth')->group(function () {
     Route::delete('/users/{user}', [UserController::class, 'destroy'])
         ->middleware('permission:users.delete')->name('users.destroy');
 
+
+    // ── Meetings ──────────────────────────────────────────────────────────────
+    // View: any role with meetings.view. Manage: meetings.create/edit/delete (checked in controller)
+    // IMPORTANT: static routes (/search-residents) must come BEFORE {meeting} wildcard routes
+    Route::get('/meetings', [MeetingController::class, 'index'])
+        ->middleware('permission:meetings.view')->name('meetings.index');
+    Route::get('/meetings/search-residents', [MeetingController::class, 'searchResidents'])
+        ->middleware(['permission:meetings.edit', 'throttle:60,1'])->name('meetings.search-residents');
+    Route::post('/meetings', [MeetingController::class, 'store'])
+        ->middleware('permission:meetings.create')->name('meetings.store');
+    Route::put('/meetings/{meeting}', [MeetingController::class, 'update'])
+        ->middleware('permission:meetings.edit')->name('meetings.update');
+    Route::delete('/meetings/{meeting}', [MeetingController::class, 'destroy'])
+        ->middleware('permission:meetings.delete')->name('meetings.destroy');
+    Route::post('/meetings/{meeting}/attendance', [MeetingController::class, 'storeAttendance'])
+        ->middleware('permission:meetings.edit')->name('meetings.attendance.store');
+    Route::get('/meetings/{meeting}/attendance-data', [MeetingController::class, 'attendanceData'])
+        ->middleware(['permission:meetings.edit', 'throttle:60,1'])->name('meetings.attendance.data');
+    Route::get('/meetings/{meeting}/attendance-summary', [MeetingController::class, 'attendanceSummary'])
+        ->middleware(['permission:meetings.view', 'throttle:60,1'])->name('meetings.attendance.summary');
+    Route::post('/meetings/{meeting}/images', [MeetingController::class, 'storeImage'])
+        ->middleware(['permission:meetings.edit', 'throttle:20,1'])->name('meetings.images.store');
+    Route::delete('/meetings/{meeting}/images/{image}', [MeetingController::class, 'deleteImage'])
+        ->middleware('permission:meetings.edit')->name('meetings.images.destroy');
 
     // ── Organization ─────────────────────────────────────────────────────────
     // View: all authenticated users. Manage (create/edit/delete): admin only (checked in controller)

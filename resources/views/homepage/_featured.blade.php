@@ -10,25 +10,6 @@
     </div>
   </div>
 
-  {{-- Display Settings --}}
-  <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/30">
-    <form method="POST" action="{{ route('homepage.section-labels') }}">
-      @csrf
-      <p class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Display Settings</p>
-      <div class="flex items-end gap-3 flex-wrap">
-        <div class="flex-1 min-w-48 space-y-1">
-          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Eyebrow Label</label>
-          <input type="text" name="featured_eyebrow"
-            value="{{ old('featured_eyebrow', $sectionLabels['featured_eyebrow'] ?? 'Featured Event') }}"
-            class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-            placeholder="Featured Event">
-        </div>
-        <button type="submit" class="px-4 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-lg transition-all shadow-sm">
-          Save
-        </button>
-      </div>
-    </form>
-  </div>
 
   <form id="form-hp-featured" method="POST" action="{{ route('homepage.featured-event') }}" class="p-6 space-y-5" enctype="multipart/form-data" novalidate>
     @csrf
@@ -64,8 +45,14 @@
       <p id="err-hp-featured-title" class="hidden mt-1 text-sm text-rose-500"></p>
     </div>
 
-    {{-- Full-type fields: YouTube ID + Date --}}
+    {{-- Full-type fields: YouTube ID + Date + Eyebrow --}}
     <div id="featured-full-fields" class="{{ $featuredType === 'simple' ? 'hidden' : '' }} grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="space-y-1.5 md:col-span-2">
+        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Eyebrow Label</label>
+        <input type="text" name="featured_eyebrow" value="{{ old('featured_eyebrow', $sectionLabels['featured_eyebrow'] ?? 'Featured Event') }}"
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+          placeholder="Featured Event">
+      </div>
       <div class="space-y-1.5">
         <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_youtube_id') }}</label>
         <input type="text" name="youtube_id" value="{{ old('youtube_id', $featuredEvent['youtube_id'] ?? '') }}"

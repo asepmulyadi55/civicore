@@ -178,12 +178,23 @@ class HomepageController extends Controller
     public function updateFeaturedEvent(Request $request)
     {
         $data = $request->validate([
-            'type'       => 'required|string|in:full,simple',
-            'title'      => 'required|string|max:200',
-            'youtube_id' => 'nullable|string|max:20',
-            'date'       => 'nullable|date',
-            'image_file' => 'nullable|image|max:5120',
+            'type'             => 'required|string|in:full,simple',
+            'title'            => 'required|string|max:200',
+            'youtube_id'       => 'nullable|string|max:20',
+            'date'             => 'nullable|date',
+            'image_file'       => 'nullable|image|max:5120',
+            'featured_eyebrow' => 'nullable|string|max:60',
         ]);
+
+        // Save eyebrow label to section labels
+        if (array_key_exists('featured_eyebrow', $data)) {
+            $labels = json_decode(Setting::get('homepage_section_labels', '{}'), true) ?? [];
+            if (!is_null($data['featured_eyebrow'])) {
+                $labels['featured_eyebrow'] = $data['featured_eyebrow'];
+                $this->saveSetting('homepage_section_labels', json_encode($labels), 'Section Labels');
+            }
+            unset($data['featured_eyebrow']);
+        }
 
         $existing = json_decode(Setting::get('homepage_featured_event', '{}'), true) ?? [];
 

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Resident extends Model
 {
@@ -69,4 +70,10 @@ class Resident extends Model
         if (!$this->photo_path) return null;
         return route('private.file', ['path' => $this->photo_path]);
     }
+
+    public function meetingAttendances(): HasMany
+    {
+        return $this->hasMany(MeetingAttendance::class);
+    }
 }
+
