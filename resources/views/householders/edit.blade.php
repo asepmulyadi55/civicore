@@ -73,7 +73,19 @@
           $ie = 'border-rose-400';
         @endphp
 
-        @if($canManageInfo)
+        @if(!$canManageInfo)
+        {{-- Locked notice --}}
+        <div class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/30 rounded-xl p-5 flex items-start gap-3 mb-5">
+          <span class="material-icons text-amber-500 mt-0.5 shrink-0">lock</span>
+          <div>
+            <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">{{ __('app.household_locked_title') }}</p>
+            <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
+              {!! __('app.household_locked_body') !!}
+              {{ __('app.household_locked_you_can') }}
+            </p>
+          </div>
+        </div>
+        @endif
 
         {{-- Read-only unit info banner (resident self-service only) --}}
         @if($isOwnHousehold)
@@ -86,8 +98,9 @@
           </div>
         @endif
 
-        <form method="POST" action="{{ $updateRoute }}" enctype="multipart/form-data" class="space-y-5">
+        <form method="POST" action="{{ $updateRoute }}" enctype="multipart/form-data">
           @csrf @method('PATCH')
+          <fieldset {{ !$canManageInfo ? 'disabled' : '' }} class="space-y-5">
 
           {{-- Household Photo --}}
           <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
@@ -363,6 +376,7 @@
           </div>
           @endif {{-- /!$isOwnHousehold fee management --}}
 
+          @if($canManageInfo)
           {{-- Save Button --}}
           <div class="flex justify-end">
             <button type="submit"
@@ -371,21 +385,9 @@
               {{ __('app.save_household') }}
             </button>
           </div>
+          @endif
+          </fieldset>
         </form>
-
-        @else
-        {{-- Locked notice for tenants --}}
-        <div class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/30 rounded-xl p-5 flex items-start gap-3">
-          <span class="material-icons text-amber-500 mt-0.5 shrink-0">lock</span>
-          <div>
-            <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">{{ __('app.household_locked_title') }}</p>
-            <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
-              {!! __('app.household_locked_body') !!}
-              {{ __('app.household_locked_you_can') }}
-            </p>
-          </div>
-        </div>
-        @endif {{-- /$canManageInfo --}}
 
       </section>
 
