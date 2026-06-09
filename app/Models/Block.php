@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Block extends Model
@@ -32,10 +33,10 @@ class Block extends Model
         return $this->hasMany(Householder::class);
     }
 
-    // Users (block coordinators) assigned to this block
-    public function coordinators(): HasMany
+    // Users (block coordinators) assigned to this block via pivot
+    public function coordinators(): BelongsToMany
     {
-        return $this->hasMany(User::class);
+        return $this->belongsToMany(User::class, 'block_user');
     }
 
     public function scopeActive(Builder $query): Builder

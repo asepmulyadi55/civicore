@@ -146,7 +146,7 @@
                                       {{ json_encode($user->username) }},
                                       {{ json_encode($user->email) }},
                                       {{ $user->role_id ? "'{$user->role_id}'" : 'null' }},
-                                      {{ $user->block_id ? "'{$user->block_id}'" : 'null' }},
+                                      {{ ($user->householder?->block_id) ? "'{$user->householder->block_id}'" : 'null' }},
                                       {{ json_encode($user->resident?->unit_number ?? $user->unit_number) }}
                                     )"
                   class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
@@ -159,7 +159,7 @@
                   {{-- Approve button --}}
                   @if(auth()->user()->can('users.approve'))
                   <button
-                    onclick="openApproveModal('{{ $user->id }}', {{ json_encode($user->name) }}, {{ json_encode($user->email) }}, {{ $user->block_id ? "'{$user->block_id}'" : 'null' }}, {{ json_encode($user->unit_number) }})"
+                    onclick="openApproveModal('{{ $user->id }}', {{ json_encode($user->name) }}, {{ json_encode($user->email) }}, {{ ($user->householder?->block_id) ? "'{$user->householder->block_id}'" : 'null' }}, {{ json_encode($user->unit_number) }})"
                     class="bg-primary text-white text-[10px] px-3 py-1.5 rounded font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors flex items-center gap-1">
                     <span class="material-icons text-xs">verified</span>
                     {{ __('app.btn_approve') }}

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -23,7 +24,6 @@ class User extends Authenticatable
     'is_active',
     'google_id',
     'role_id',
-    'block_id',
     'unit_number',
     'avatar',
     'language',
@@ -56,9 +56,25 @@ class User extends Authenticatable
   }
 
   // The block this user coordinates (only for block_coordinator role)
+  // Legacy single-block accessor — prefer blocks() for multi-block support
   public function block(): BelongsTo
   {
     return $this->belongsTo(Block::class);
+  }
+
+  // All blocks this coordinator is assigned to (many-to-many)
+  public function blocks(): BelongsToMany
+  {
+    return $this->belongsToMany(Block::class, 'block_user');
+  }
+
+  /**
+   * Returns all block IDs this coordinator is responsible for.
+   * Used by PaymentController and ReportController for scoping.
+   */
+  public function coordinatedBlockIds(): array
+  {
+    return $this->blocks()->pluck('blocks.id')->all();
   }
 
   // If this user is also a householder (linked account)
@@ -81,14 +97,6 @@ class User extends Authenticatable
     if (!$householder && $this->email) {
       $householder = Householder::where('email', $this->email)->first();
     }
-
-    if (!$householder && $this->block_id && $this->unit_number) {
-      $householder = Householder::whereHas('unit', fn($q) =>
-          $q->where('block_id', $this->block_id)
-            ->where('unit_number', $this->unit_number)
-      )->first();
-    }
-
     if ($householder && !$householder->user_id) {
       $householder->update(['user_id' => $this->id]);
     }

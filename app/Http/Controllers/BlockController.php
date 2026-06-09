@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Block;
 use App\Models\Unit;
+use App\Models\User;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -20,7 +21,7 @@ class BlockController extends Controller
             'units as vacant_units_count'         => fn($q) => $q->where('house_status', 'vacant'),
         ])
             ->with([
-                'coordinators' => fn($q) => $q->select('id', 'name', 'block_id', 'role_id')
+                'coordinators' => fn($q) => $q->select('users.id', 'users.name')
                     ->whereHas('role', fn($r) => $r->where('name', 'block_coordinator'))
             ])
             ->orderBy('name');
@@ -32,7 +33,12 @@ class BlockController extends Controller
 
         $blocks = $query->get();
 
-        return view('blocks', compact('blocks'));
+        // All block coordinators available for assignment
+        $coordinatorUsers = User::whereHas('role', fn($q) => $q->where('name', 'block_coordinator'))
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return view('blocks', compact('blocks', 'coordinatorUsers'));
     }
 
     public function store(Request $request)
@@ -138,18 +144,24 @@ class BlockController extends Controller
     public function update(Request $request, Block $block)
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:100', "unique:blocks,name,{$block->id}"],
-            'description' => ['nullable', 'string', 'max:255'],
-            'is_active' => ['nullable', 'boolean'],
+            'name'             => ['required', 'string', 'max:100', "unique:blocks,name,{$block->id}"],
+            'description'      => ['nullable', 'string', 'max:255'],
+            'is_active'        => ['nullable', 'boolean'],
+            'coordinator_ids'  => ['nullable', 'array'],
+            'coordinator_ids.*'=> ['exists:users,id'],
         ], [
             'name.required' => 'Please enter a block name.',
-            'name.unique' => 'A block with this name already exists.',
+            'name.unique'   => 'A block with this name already exists.',
         ]);
 
-        // $request->boolean() correctly returns false when checkbox is absent (unchecked)
-        $block->update(array_merge($data, [
-            'is_active' => $request->boolean('is_active'),
-        ]));
+        $block->update([
+            'name'        => $data['name'],
+            'description' => $data['description'] ?? null,
+            'is_active'   => $request->boolean('is_active'),
+        ]);
+
+        // Sync assigned coordinators (empty array = remove all)
+        $block->coordinators()->sync($data['coordinator_ids'] ?? []);
 
         return redirect()->route('blocks.index')->with('success', __('app.flash_block_updated', ['name' => $block->name]));
     }

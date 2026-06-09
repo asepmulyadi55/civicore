@@ -12,7 +12,7 @@
       $flatItems[] = ['key' => 'overview', 'label_raw' => __('app.nav_overview'), 'icon' => 'dashboard', 'route' => 'overview', 'permission' => 'overview.view'];
     }
     if ($user->resolveHouseholder()) {
-      $flatItems[] = ['key' => 'household', 'label_raw' => __('app.nav_household'), 'icon' => 'home', 'route' => 'household.show', 'permission' => null];
+      $flatItems[] = ['key' => 'household', 'label_raw' => __('app.nav_household'), 'icon' => 'home', 'route' => 'household.show', 'permission' => 'household.view'];
     }
     if ($user->can('posyandu.view')) {
       $flatItems[] = ['key' => 'posyandu', 'label_raw' => 'Posyandu', 'icon' => 'health_and_safety', 'route' => 'posyandu.index', 'permission' => 'posyandu.view'];
@@ -88,7 +88,7 @@
           'label' => null,
           'group_icon' => null,
           'items' => [
-            ['key' => 'household', 'label' => __('app.nav_my_household'), 'icon' => 'home_work', 'route' => 'household.show', 'permission' => null],
+            ['key' => 'household', 'label' => __('app.nav_my_household'), 'icon' => 'home_work', 'route' => 'household.show', 'permission' => 'household.view'],
           ],
         ]
       ]);

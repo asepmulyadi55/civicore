@@ -19,8 +19,9 @@ class ReportController extends Controller
         $isCoordinator = $user->isBlockCoordinator();
 
         $year = (int) $request->get('year', now()->year);
-        // Force coordinator to their own block; ignore any request block_id
-        $blockId = $isCoordinator ? $user->block_id : $request->get('block_id');
+        // Force coordinator to their own blocks; ignore any request block_id
+        $scopeBlockIds = $isCoordinator ? $user->coordinatedBlockIds() : null;
+        $blockId = $isCoordinator ? null : $request->get('block_id');
         $search = $request->get('search');
         $currency = Setting::get('currency_symbol', 'Rp');
 
@@ -40,7 +41,9 @@ class ReportController extends Controller
             ->orderByRaw('CAST(units.unit_number AS UNSIGNED)')
             ->select('householders.*');
 
-        if ($blockId) {
+        if ($scopeBlockIds) {
+            $residentQuery->whereIn('householders.block_id', $scopeBlockIds);
+        } elseif ($blockId) {
             $residentQuery->where('householders.block_id', $blockId);
         }
         if ($search) {
@@ -51,13 +54,16 @@ class ReportController extends Controller
         }
 
         $residents = $residentQuery->paginate(25)->withQueryString();
-        $totalResidents = $residents->total(); // paginator already computes total count correctly
+        $totalResidents = $residents->total();
 
-        // Summary stats for the selected year + block
+        // Summary stats for the selected year + block(s)
         $baseQuery = PaymentRecord::whereYear('payment_month', $year);
-        if ($blockId) {
+        if ($scopeBlockIds) {
+            $baseQuery->whereHas('householder', fn($q) => $q->whereIn('block_id', $scopeBlockIds));
+        } elseif ($blockId) {
             $baseQuery->whereHas('householder', fn($q) => $q->where('block_id', $blockId));
         }
+
 
         $paidCount = (clone $baseQuery)->where('status', 'approved')->count();
         $unpaidCount = (clone $baseQuery)->where('status', '!=', 'approved')->count();
@@ -93,13 +99,13 @@ class ReportController extends Controller
     {
         $user = auth()->user();
         $year = (int) $request->get('year', now()->year);
-        $blockId = $user->isBlockCoordinator()
-            ? $user->block_id
-            : $request->get('block_id');
+        $blockIds = $user->isBlockCoordinator()
+            ? $user->coordinatedBlockIds()
+            : ($request->get('block_id') ? [$request->get('block_id')] : null);
 
-        $filename = 'report-' . $year . ($blockId ? '-block' . $blockId : '') . '.xlsx';
+        $filename = 'report-' . $year . ($blockIds ? '-blocks' : '') . '.xlsx';
 
-        return Excel::download(new ReportExport($year, $blockId), $filename);
+        return Excel::download(new ReportExport($year, $blockIds), $filename);
     }
 }
 

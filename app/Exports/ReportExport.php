@@ -31,15 +31,15 @@ class ReportExport implements
   WithEvents
 {
   protected int $year;
-  protected ?int $blockId;
+  protected ?array $blockIds;
   protected string $currency;
   /** @var array<int, string> Month labels Jan–Dec */
   protected array $monthLabels;
 
-  public function __construct(int $year, ?int $blockId)
+  public function __construct(int $year, ?array $blockIds)
   {
     $this->year     = $year;
-    $this->blockId  = $blockId;
+    $this->blockIds = $blockIds;
     $this->currency = Setting::get('currency_symbol', 'Rp');
 
     // Detect active language from session or default app locale
@@ -93,8 +93,8 @@ class ReportExport implements
       ->orderByRaw('CAST(units.unit_number AS UNSIGNED)')
       ->select('householders.*');
 
-    if ($this->blockId) {
-      $query->where('householders.block_id', $this->blockId);
+    if ($this->blockIds) {
+      $query->whereIn('householders.block_id', $this->blockIds);
     }
 
     $rows = collect();

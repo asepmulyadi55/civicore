@@ -85,8 +85,9 @@ class HouseholdController extends Controller
             'feeHistories' => fn($q) => $q->orderByDesc('effective_from'),
         ]);
 
-        $canManageInfo      = $householder->unit?->house_status === 'owner_occupied';
-        $canManageResidents = true;
+        $canEdit = auth()->user()->can('household.edit');
+        $canManageInfo      = $canEdit && ($householder->unit?->house_status === 'owner_occupied');
+        $canManageResidents = $canEdit;
 
         $blocks            = Block::active()->orderBy('name')->get();
         $units             = collect(); // householders cannot change their unit

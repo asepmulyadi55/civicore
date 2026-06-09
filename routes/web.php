@@ -361,17 +361,17 @@ Route::middleware(['auth', '2fa'])->group(function () {
 
     // ── Household (self-service) ───────────────────────────────────────────────
     Route::get('/household', [HouseholdController::class, 'show'])
-        ->name('household.show');
+        ->middleware('permission:household.view')->name('household.show');
     Route::match(['PUT', 'PATCH'], '/household', [HouseholdController::class, 'update'])
-        ->name('household.update');
+        ->middleware('permission:household.edit')->name('household.update');
     Route::post('/household/residents', [HouseholdController::class, 'storeResident'])
-        ->name('household.residents.store');
+        ->middleware('permission:household.edit')->name('household.residents.store');
     Route::match(['PUT', 'PATCH'], '/household/residents/{resident}', [HouseholdController::class, 'updateResident'])
-        ->name('household.residents.update');
+        ->middleware('permission:household.edit')->name('household.residents.update');
     Route::delete('/household/residents/{resident}', [HouseholdController::class, 'destroyResident'])
-        ->name('household.residents.destroy');
+        ->middleware('permission:household.edit')->name('household.residents.destroy');
     Route::patch('/household/residents/{resident}/set-head', [HouseholdController::class, 'setResidentHead'])
-        ->name('household.residents.set-head');
+        ->middleware('permission:household.edit')->name('household.residents.set-head');
 
     // ── Settings (profile — all roles) ────────────────────────────────────────
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
