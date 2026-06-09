@@ -12,6 +12,7 @@ export default function FeaturedEvent({ featuredEvent = {}, loading, isDark = fa
     const type = featuredEvent?.type || 'full';
     const imageUrl = featuredEvent?.image_url || null;
     const mobileImageUrl = featuredEvent?.mobile_image_url || null;
+    const description = featuredEvent?.description || '';
 
     const formattedDate = date
         ? new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })

@@ -67,6 +67,15 @@ class LoginController extends Controller
       return redirect()->route('session.conflict');
     }
 
+    // ── Two-Factor Authentication check ─────────────────────────────────────
+    if ($user->two_factor_secret) {
+        $request->session()->put([
+            '2fa:user:id' => $user->id,
+            '2fa:remember' => $request->boolean('remember'),
+        ]);
+        return redirect()->route('two-factor.challenge');
+    }
+
     // ── Successful login ──────────────────────────────────────────────────
     Auth::login($user, $request->boolean('remember'));
     $request->session()->regenerate();

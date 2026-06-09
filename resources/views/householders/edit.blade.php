@@ -167,8 +167,8 @@
                 @error('fullname') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
               </div>
 
-              {{-- Family Card Number --}}
-              <div>
+              {{-- Family Card Number (Hidden for Data Privacy) --}}
+              <div class="hidden">
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                   {{ __('app.fcn_label') }} <span class="text-xs font-normal text-slate-400">{{ __('app.fcn_abbrev') }}</span>
                 </label>
@@ -205,7 +205,7 @@
               </div>
 
               {{-- Phone --}}
-              <div>
+              <div class="hidden">
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ __('app.phone_number') }}</label>
                 <input type="tel" name="phone"
                   value="{{ old('phone', $householder->phone) }}"
@@ -448,7 +448,7 @@
                     <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.col_name') }}</th>
                     <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">{{ __('app.col_photo') }}</th>
                     <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.col_relationship') }}</th>
-                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">{{ __('app.col_nik') }}</th>
+                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden">{{ __('app.col_nik') }}</th>
                     <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">{{ __('app.col_gender') }}</th>
                     <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider hidden xl:table-cell">{{ __('app.col_education') }}</th>
                     @if($canManageResidents)
@@ -479,7 +479,7 @@
                         @endif
                       </td>
                       <td class="px-5 py-4 text-slate-600 dark:text-slate-400">{{ $member->relationshipLabel() }}</td>
-                      <td class="px-5 py-4 text-slate-500 font-mono text-xs hidden md:table-cell">
+                      <td class="px-5 py-4 text-slate-500 font-mono text-xs hidden">
                         <span id="nik-{{ $member->id }}">{{ $member->maskedNik() }}</span>
                         @if($showRevealButtons && $member->nik)
                           <button type="button"
@@ -497,7 +497,7 @@
                           <div class="flex items-center justify-center gap-1">
                             {{-- Edit --}}
                             <button type="button"
-                              onclick="openMemberModal({{ json_encode(['id' => $member->id, 'fullname' => $member->fullname, 'relationship' => $member->relationship, 'nik_masked' => $member->maskedNik(), 'birth_date' => $member->birth_date?->format('Y-m-d'), 'gender' => $member->gender, 'education' => $member->education, 'occupation' => $member->occupation, 'phone' => $member->phone, 'photo_url' => $member->photoUrl()]) }})"
+                              onclick="openMemberModal({{ json_encode(['id' => $member->id, 'fullname' => $member->fullname, 'relationship' => $member->relationship, 'nik_masked' => $member->maskedNik(), 'birth_date' => is_string($member->birth_date) ? $member->birth_date : $member->birth_date?->format('Y-m-d'), 'gender' => $member->gender, 'education' => $member->education, 'occupation' => $member->occupation, 'phone' => $member->phone, 'photo_url' => $member->photoUrl()]) }})"
                               class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                               title="Edit member">
                               <span class="material-icons text-lg">edit</span>
@@ -584,7 +584,7 @@
           </div>
 
           {{-- Phone Number --}}
-          <div>
+          <div class="hidden">
             <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
               {{ __('app.mf_phone') }} <span class="text-xs font-normal text-slate-400">{{ __('app.optional') }}</span>
             </label>
@@ -631,8 +631,8 @@
               @error('relationship') <p class="text-xs text-rose-500 mt-1">{{ $message }}</p> @enderror
             </div>
 
-            {{-- NIK --}}
-            <div>
+            {{-- NIK (Hidden for Data Privacy) --}}
+            <div class="hidden">
               <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ __('app.mf_nik') }}</label>
               <input type="text" name="nik" id="mf-nik" placeholder="{{ __('app.nik_placeholder') }}" maxlength="20"
                 class="{{ $ib }}">
@@ -1020,7 +1020,12 @@
         method: 'POST',
         body: new FormData(form),
         credentials: 'same-origin',
-      }).then(function (response) {
+      }).then(async function (response) {
+        if (!response.ok) {
+            const html = await response.text();
+            document.open(); document.write(html); document.close();
+            return;
+        }
         // response.url is the final URL after any redirects (success → edit page, error → back to edit page)
         window.location.href = response.url;
       }).catch(function () {

@@ -11,13 +11,25 @@ class Resident extends Model
 {
     use HasUuids;
 
+    protected $hidden = [
+        // Temporary Data Hardening: completely hide these from UI/forms serialization.
+        'nik',
+        'phone',
+        // 'no_kk' (family_card_number is on Householder model, but conceptually noted here)
+    ];
+
     protected $fillable = [
         'householder_id', 'fullname', 'relationship', 'nik',
         'birth_date', 'gender', 'education', 'occupation', 'phone', 'is_head', 'photo_path',
     ];
 
+    /**
+     * SECURITY NOTE: `nik` and `no_kk` MUST be encrypted later when
+     * admins need to read the actual numbers. They should NOT be hashed.
+     * (Note: `nik` is already encrypted below).
+     */
     protected $casts = [
-        'birth_date' => 'date',
+        'birth_date' => 'encrypted', // Encrypted at rest
         'is_head'    => 'boolean',
         'nik'        => 'encrypted',
     ];
@@ -74,6 +86,44 @@ class Resident extends Model
     public function meetingAttendances(): HasMany
     {
         return $this->hasMany(MeetingAttendance::class);
+    }
+
+    /**
+     * Accessor: Calculate Age based on the decrypted birth_date
+     */
+    protected function age(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn (mixed $value, array $attributes) => 
+                isset($attributes['birth_date']) 
+                    ? \Carbon\Carbon::parse($this->birth_date)->age 
+                    : null,
+        );
+    }
+
+    /**
+     * Accessor: Determine Category based on the calculated age
+     */
+    protected function category(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                if (!isset($attributes['birth_date'])) {
+                    return 'Unknown';
+                }
+
+                $age = $this->age;
+
+                return match(true) {
+                    $age < 3  => 'Baby',
+                    $age < 6  => 'Toddler',
+                    $age < 13 => 'Child',
+                    $age < 20 => 'Teenager',
+                    $age < 60 => 'Adult',
+                    default   => 'Elder',
+                };
+            }
+        );
     }
 }
 

@@ -19,6 +19,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SessionConflictController;
+use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\PrivateFileController;
 use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\MediaController;
@@ -75,6 +76,10 @@ Route::post('/session-use-this', [SessionConflictController::class, 'useThisDevi
     ->middleware('throttle:5,1')
     ->name('session.use-this');
 
+// ── Two-Factor Authentication Challenge (public but requires partial session) ────
+Route::get('/2fa/challenge', [TwoFactorChallengeController::class, 'show'])->name('two-factor.challenge');
+Route::post('/2fa/challenge', [TwoFactorChallengeController::class, 'verify'])->middleware('throttle:5,1')->name('two-factor.verify');
+
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:5,1');
 
@@ -90,8 +95,7 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink
 Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update')->middleware('throttle:5,1');
 
-// ── Auth-protected pages ──────────────────────────────────────────────────────
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', '2fa'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('permission:dashboard.view')->name('dashboard');
@@ -374,7 +378,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/profile', [SettingController::class, 'updateProfile'])->name('settings.profile');
     Route::post('/settings/password', [SettingController::class, 'updatePassword'])->name('settings.password');
     Route::post('/settings/reset-link', [SettingController::class, 'sendResetLink'])->name('settings.reset-link');
-    Route::post('/settings/security', [SettingController::class, 'updateSecurity'])->middleware('permission:settings.edit')->name('settings.security');
-    Route::post('/settings/memo', [SettingController::class, 'updateMemo'])->middleware('permission:settings.edit')->name('settings.memo');
-    Route::post('/settings/posyandu', [SettingController::class, 'updatePosyandu'])->middleware('permission:settings.edit')->name('settings.posyandu');
+    Route::post('settings/security', [SettingController::class, 'updateSecurity'])
+        ->middleware('permission:settings.edit')->name('settings.security');
+    Route::post('settings/memo', [SettingController::class, 'updateMemo'])
+        ->middleware('permission:settings.edit')->name('settings.memo');
+    Route::post('settings/posyandu', [SettingController::class, 'updatePosyandu'])
+        ->middleware('permission:settings.edit')->name('settings.posyandu');
+
+    // ── Two-Factor Authentication Management ────────────────────────────────────
+    Route::get('/settings/2fa', [SettingController::class, 'showTwoFactor'])->name('settings.2fa');
+    Route::post('/settings/2fa/confirm', [SettingController::class, 'confirmTwoFactor'])->name('settings.2fa.confirm');
+
+    Route::resource('users', UserController::class)->except(['show']);
 });

@@ -36,12 +36,24 @@ class ResidentController extends Controller
 
     public function store(Request $request, Householder $householder)
     {
-        $data = $request->validate($this->rules());
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $this->rules());
+        
+        if ($validator->fails()) {
+            return redirect()->route('householders.edit', $householder)
+                ->withErrors($validator)
+                ->withInput()
+                ->with('_member_form', 1); // Helper for the UI to reopen the modal
+        }
+        
+        $data = $validator->validated();
         $data['householder_id'] = $householder->id;
         $data['is_head']        = $data['relationship'] === 'head';
         $photoPath = $this->handlePhoto($request);
         if ($photoPath) $data['photo_path'] = $photoPath;
         unset($data['photo']);
+        
+        // Hardened: completely ignore nik, phone submissions for privacy
+        unset($data['nik'], $data['phone']);
 
         DB::transaction(function () use ($data, $householder) {
             if ($data['is_head']) {
@@ -56,14 +68,21 @@ class ResidentController extends Controller
 
     public function update(Request $request, Householder $householder, Resident $resident)
     {
-        $data = $request->validate($this->rules());
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $this->rules());
+        
+        if ($validator->fails()) {
+            return redirect()->route('householders.edit', $householder)
+                ->withErrors($validator)
+                ->withInput()
+                ->with('_member_form', 1);
+        }
+        
+        $data = $validator->validated();
         $becomingHead    = $data['relationship'] === 'head';
         $data['is_head'] = $becomingHead;
 
-        // Don't clobber an existing encrypted NIK if the user left the field blank.
-        if (!$request->filled('nik')) {
-            unset($data['nik']);
-        }
+        // Hardened: completely ignore nik, phone submissions for privacy
+        unset($data['nik'], $data['phone']);
 
         $photoPath = $this->handlePhoto($request, $resident);
         if ($photoPath) $data['photo_path'] = $photoPath;
