@@ -54,12 +54,12 @@
   </div>
 
   {{-- Recorded date filter (month + year) — to cross-validate with finance reports --}}
-  <div class="flex flex-col gap-1">
-    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ __('app.filter_recorded') }}</label>
-    <div class="flex gap-2">
-      <div class="relative overflow-hidden">
+  <div class="flex flex-col gap-1 w-full sm:w-auto">
+    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">{{ __('app.filter_recorded') }}</label>
+    <div class="flex flex-col sm:flex-row gap-3">
+      <div class="relative w-full sm:w-auto">
         <select name="recorded_month"
-          class="appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-sm py-2 pl-3 pr-8 outline-none transition-all text-slate-600 dark:text-slate-300 w-full">
+          class="appearance-none w-full sm:w-auto bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-sm py-2 pl-4 pr-9 outline-none transition-all text-slate-600 dark:text-slate-300">
           <option value="">{{ __('app.all_months') }}</option>
           @foreach(range(1, 12) as $m)
             <option value="{{ $m }}" {{ request('recorded_month') == $m ? 'selected' : '' }}>
@@ -67,17 +67,17 @@
             </option>
           @endforeach
         </select>
-        <span class="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px] bg-slate-50 dark:bg-slate-800">expand_more</span>
+        <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
       </div>
-      <div class="relative overflow-hidden">
+      <div class="relative w-full sm:w-auto">
         <select name="recorded_year"
-          class="appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-sm py-2 pl-3 pr-8 outline-none transition-all text-slate-600 dark:text-slate-300 w-full">
+          class="appearance-none w-full sm:w-auto bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-sm py-2 pl-4 pr-9 outline-none transition-all text-slate-600 dark:text-slate-300">
           <option value="">{{ __('app.all_years') }}</option>
           @foreach(range(now()->year, 2024) as $y)
             <option value="{{ $y }}" {{ request('recorded_year') == $y ? 'selected' : '' }}>{{ $y }}</option>
           @endforeach
         </select>
-        <span class="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px] bg-slate-50 dark:bg-slate-800">expand_more</span>
+        <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
       </div>
     </div>
   </div>

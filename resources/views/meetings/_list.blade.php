@@ -27,97 +27,102 @@
       <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
 
         {{-- Card header row --}}
-        <div class="flex items-start gap-4 p-5">
+        <div class="flex items-start gap-3 sm:gap-4 p-4 sm:p-5">
 
           {{-- Month calendar badge --}}
-          <div class="flex-shrink-0 w-14 text-center">
+          <div class="flex-shrink-0 w-12 sm:w-14 text-center">
             <div class="bg-primary/10 dark:bg-primary/20 rounded-t-lg py-1">
-              <span class="text-[10px] font-bold uppercase tracking-widest text-primary dark:text-secondary">
+              <span class="text-[10px] sm:text-[10px] font-bold uppercase tracking-widest text-primary dark:text-secondary">
                 {{ $meeting->meeting_date->format('M') }}
               </span>
             </div>
-            <div class="bg-primary dark:bg-secondary rounded-b-lg py-1.5">
-              <span class="text-lg font-extrabold text-white dark:text-primary leading-none">
+            <div class="bg-primary dark:bg-secondary rounded-b-lg py-1 sm:py-1.5">
+              <span class="text-base sm:text-lg font-extrabold text-white dark:text-primary leading-none">
                 {{ $meeting->meeting_date->format('d') }}
               </span>
             </div>
           </div>
 
-          {{-- Info --}}
-          <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-slate-900 dark:text-white text-base leading-snug">{{ $meeting->topic }}</h3>
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-sm text-slate-500 dark:text-slate-400">
-              <span class="inline-flex items-center gap-1">
-                <span class="material-icons text-[15px]">schedule</span>
-                {{ substr($meeting->meeting_time, 0, 5) }}
-              </span>
-              <span class="inline-flex items-center gap-1">
-                <span class="material-icons text-[15px]">calendar_today</span>
-                {{ $meeting->meeting_date->format('D, d M Y') }}
-              </span>
-              @if($meeting->location)
-                <span class="inline-flex items-center gap-1">
-                  <span class="material-icons text-[15px]">place</span>
-                  {{ $meeting->location }}
+          {{-- Content wrapper --}}
+          <div class="flex flex-col sm:flex-row flex-1 min-w-0 gap-3 sm:gap-4">
+            
+            {{-- Info --}}
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-slate-900 dark:text-white text-base leading-snug">{{ $meeting->topic }}</h3>
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-1.5 text-sm text-slate-500 dark:text-slate-400">
+                <span class="inline-flex items-center gap-1 whitespace-nowrap">
+                  <span class="material-icons text-[15px]">schedule</span>
+                  {{ substr($meeting->meeting_time, 0, 5) }}
                 </span>
+                <span class="inline-flex items-center gap-1 whitespace-nowrap">
+                  <span class="material-icons text-[15px]">calendar_today</span>
+                  {{ $meeting->meeting_date->format('D, d M Y') }}
+                </span>
+                @if($meeting->location)
+                  <span class="inline-flex items-center gap-1 whitespace-nowrap">
+                    <span class="material-icons text-[15px]">place</span>
+                    {{ $meeting->location }}
+                  </span>
+                @endif
+              </div>
+              {{-- Attendance badge --}}
+              @if(($meeting->attendances_count ?? 0) > 0)
+              <div class="mt-2.5">
+                <span class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold
+                  {{ ($meeting->present_count ?? 0) > 0
+                     ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                     : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }}">
+                  <span class="material-icons text-[13px]">group</span>
+                  {{ $meeting->present_count ?? 0 }} {{ __('app.meeting_present_label') }}
+                </span>
+              </div>
               @endif
             </div>
-            {{-- Attendance badge --}}
-            @if(($meeting->attendances_count ?? 0) > 0)
-            <div class="mt-2">
-              <span class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold
-                {{ ($meeting->present_count ?? 0) > 0
-                   ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                   : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }}">
-                <span class="material-icons text-[13px]">group</span>
-                {{ $meeting->present_count ?? 0 }} {{ __('app.meeting_present_label') }}
-              </span>
+
+            {{-- Actions --}}
+            <div class="flex items-center gap-1 flex-shrink-0 pt-0 sm:pt-0.5 justify-end sm:justify-start border-t border-slate-100 dark:border-slate-800 sm:border-0 mt-1 sm:mt-0 pt-2 sm:pt-0">
+              {{-- Expand toggle --}}
+              <button type="button"
+                onclick="toggleMeetingDetail('detail-{{ $meeting->id }}')"
+                class="p-2 rounded-lg text-slate-400 hover:text-primary dark:hover:text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                title="{{ __('app.meeting_view_details') }}">
+                <span class="material-icons text-[18px]" id="chevron-{{ $meeting->id }}">expand_more</span>
+              </button>
+
+              @if($canManage)
+                {{-- Attendance --}}
+                <button type="button"
+                  onclick="openAttendanceModal({{ json_encode(['id' => $meeting->id, 'topic' => $meeting->topic]) }})"
+                  class="p-2 rounded-lg text-slate-400 hover:text-primary dark:hover:text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  title="{{ __('app.meeting_manage_attendance') }}">
+                  <span class="material-icons text-[18px]">how_to_reg</span>
+                </button>
+
+                {{-- Edit --}}
+                <button type="button"
+                  onclick="openEditModal({{ json_encode([
+                    'id'           => $meeting->id,
+                    'topic'        => $meeting->topic,
+                    'meeting_date' => $meeting->meeting_date->format('Y-m-d'),
+                    'meeting_time' => substr($meeting->meeting_time, 0, 5),
+                    'location'     => $meeting->location,
+                    'notes'        => $meeting->notes,
+                  ]) }})"
+                  class="p-2 rounded-lg text-slate-400 hover:text-primary dark:hover:text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  title="{{ __('app.btn_edit') }}">
+                  <span class="material-icons text-[18px]">edit</span>
+                </button>
+
+                {{-- Delete --}}
+                <button type="button"
+                  onclick="openDeleteModal('{{ $meeting->id }}', {{ json_encode($meeting->topic) }})"
+                  class="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+                  title="{{ __('app.btn_delete') }}">
+                  <span class="material-icons text-[18px]">delete</span>
+                </button>
+              @endif
             </div>
-            @endif
-          </div>
 
-          {{-- Actions --}}
-          <div class="flex items-center gap-1 flex-shrink-0 pt-0.5">
-            {{-- Expand toggle --}}
-            <button type="button"
-              onclick="toggleMeetingDetail('detail-{{ $meeting->id }}')"
-              class="p-2 rounded-lg text-slate-400 hover:text-primary dark:hover:text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-              title="{{ __('app.meeting_view_details') }}">
-              <span class="material-icons text-[18px]" id="chevron-{{ $meeting->id }}">expand_more</span>
-            </button>
-
-            @if($canManage)
-              {{-- Attendance --}}
-              <button type="button"
-                onclick="openAttendanceModal({{ json_encode(['id' => $meeting->id, 'topic' => $meeting->topic]) }})"
-                class="p-2 rounded-lg text-slate-400 hover:text-primary dark:hover:text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                title="{{ __('app.meeting_manage_attendance') }}">
-                <span class="material-icons text-[18px]">how_to_reg</span>
-              </button>
-
-              {{-- Edit --}}
-              <button type="button"
-                onclick="openEditModal({{ json_encode([
-                  'id'           => $meeting->id,
-                  'topic'        => $meeting->topic,
-                  'meeting_date' => $meeting->meeting_date->format('Y-m-d'),
-                  'meeting_time' => substr($meeting->meeting_time, 0, 5),
-                  'location'     => $meeting->location,
-                  'notes'        => $meeting->notes,
-                ]) }})"
-                class="p-2 rounded-lg text-slate-400 hover:text-primary dark:hover:text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                title="{{ __('app.btn_edit') }}">
-                <span class="material-icons text-[18px]">edit</span>
-              </button>
-
-              {{-- Delete --}}
-              <button type="button"
-                onclick="openDeleteModal('{{ $meeting->id }}', {{ json_encode($meeting->topic) }})"
-                class="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
-                title="{{ __('app.btn_delete') }}">
-                <span class="material-icons text-[18px]">delete</span>
-              </button>
-            @endif
           </div>
         </div>
 

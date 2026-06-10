@@ -9,7 +9,7 @@
   <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
 
     {{-- Header --}}
-    <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+    <div class="px-5 sm:px-8 py-5 sm:py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
       <div>
         <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ __('app.meeting_add') }}</h2>
         <p class="text-sm text-slate-400 mt-0.5">{{ __('app.meeting_add_desc') }}</p>
@@ -21,7 +21,7 @@
     </div>
 
     {{-- Body --}}
-    <div class="flex-1 overflow-y-auto px-8 py-6">
+    <div class="flex-1 overflow-y-auto px-5 sm:px-8 py-5 sm:py-6">
       <form id="form-add-meeting" method="POST" action="{{ route('meetings.store') }}" class="space-y-5" novalidate>
         @csrf
 
@@ -125,7 +125,7 @@
   <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
 
     {{-- Header --}}
-    <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+    <div class="px-5 sm:px-8 py-5 sm:py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
       <div>
         <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ __('app.meeting_edit') }}</h2>
         <span id="edit-meeting-badge" class="px-2 py-0.5 bg-primary/10 text-primary rounded-lg text-xs font-bold mt-1 inline-block truncate max-w-xs"></span>
@@ -137,7 +137,7 @@
     </div>
 
     {{-- Body --}}
-    <div class="flex-1 overflow-y-auto px-8 py-6">
+    <div class="flex-1 overflow-y-auto px-5 sm:px-8 py-5 sm:py-6">
       <form id="form-edit-meeting" method="POST" action="" class="space-y-5" novalidate>
         @csrf
         @method('PUT')
@@ -267,7 +267,7 @@
   <div class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
 
     {{-- Header --}}
-    <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center flex-shrink-0">
+    <div class="px-5 sm:px-8 py-5 sm:py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center flex-shrink-0">
       <div class="min-w-0">
         <h2 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ __('app.meeting_attendance_title') }}</h2>
         <p id="modal-attendance-subtitle" class="text-sm text-slate-400 mt-0.5 truncate max-w-xs"></p>
@@ -279,7 +279,7 @@
     </div>
 
     {{-- Search + quick actions --}}
-    <div class="px-8 pt-4 pb-3 flex-shrink-0 space-y-3">
+    <div class="px-5 sm:px-8 pt-4 pb-3 flex-shrink-0 space-y-3">
       <div class="relative">
         <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm z-10">search</span>
         <input type="text" id="attendance-search"
@@ -303,7 +303,7 @@
     </div>
 
     {{-- Resident list --}}
-    <form id="attendance-form" method="POST" action="" class="flex-1 overflow-y-auto px-8 pb-2">
+    <form id="attendance-form" method="POST" action="" class="flex-1 overflow-y-auto px-5 sm:px-8 pb-2">
       @csrf
       <div id="attendance-list" class="divide-y divide-slate-100 dark:divide-slate-800"></div>
       <div id="attendance-loading" class="flex items-center justify-center py-12 text-slate-400 gap-2">
@@ -316,17 +316,18 @@
     </form>
 
     {{-- Footer --}}
-    <div class="px-8 py-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between flex-shrink-0">
-      <span id="attendance-count-label" class="text-sm text-slate-500 dark:text-slate-400 font-medium"></span>
-      <div class="flex gap-3">
+    <div class="px-5 sm:px-8 py-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 flex-shrink-0">
+      <span id="attendance-count-label" class="text-sm text-slate-500 dark:text-slate-400 font-medium self-start sm:self-center"></span>
+      <div class="flex gap-3 w-full sm:w-auto">
         <button type="button" onclick="closeModal('modal-attendance')"
-          class="px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+          class="flex-1 sm:flex-none px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
           {{ __('app.btn_cancel') }}
         </button>
         <button type="button" onclick="submitAttendance()"
-          class="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all flex items-center gap-2 active:scale-95">
+          class="flex-1 sm:flex-none px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 active:scale-95">
           <span class="material-icons text-sm">how_to_reg</span>
-          {{ __('app.meeting_save_attendance') }}
+          <span class="hidden sm:inline">{{ __('app.meeting_save_attendance') }}</span>
+          <span class="sm:hidden">{{ __('app.meeting_save') }}</span>
         </button>
       </div>
     </div>
@@ -535,7 +536,7 @@ function renderHadirList() {
         <p class="text-sm font-semibold text-slate-800 dark:text-white leading-tight">${escHtml(state.name)}</p>
         ${state.location ? `<p class="text-xs text-slate-400 dark:text-slate-500">${escHtml(state.location)}</p>` : ''}
       </div>
-      <span class="text-xs px-2 py-0.5 rounded-full font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+      <span class="hidden sm:inline-block text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
         {{ __('app.meeting_present') }}
       </span>
       <button type="button" onclick="removeFromHadir('${id}')"
