@@ -85,8 +85,9 @@ class HouseholdController extends Controller
             'feeHistories' => fn($q) => $q->orderByDesc('effective_from'),
         ]);
 
-        $canManageInfo      = $householder->unit?->house_status === 'owner_occupied';
-        $canManageResidents = true;
+        $canEdit = auth()->user()->can('household.edit');
+        $canManageInfo      = $canEdit && ($householder->unit?->house_status === 'owner_occupied');
+        $canManageResidents = $canEdit;
 
         $blocks            = Block::active()->orderBy('name')->get();
         $units             = collect(); // householders cannot change their unit
@@ -112,10 +113,8 @@ class HouseholdController extends Controller
         DB::transaction(function () use ($request, $householder) {
             $data = $request->only(['fullname', 'phone', 'email', 'family_card_number', 'notes']);
 
-            // Preserve existing encrypted Family Card Number if left blank
-            if (!$request->filled('family_card_number')) {
-                unset($data['family_card_number']);
-            }
+            // Hardened: completely ignore family_card_number and phone submissions for privacy
+            unset($data['family_card_number'], $data['phone']);
 
             // Handle optional photo upload
             if ($request->hasFile('photo')) {
@@ -140,13 +139,26 @@ class HouseholdController extends Controller
     public function storeResident(Request $request)
     {
         $householder = $this->getOwnHouseholder();
-        $data        = $request->validate($this->residentRules());
+        
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $this->residentRules());
+        
+        if ($validator->fails()) {
+            return redirect()->route('household.show')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('_member_form', 1);
+        }
+        
+        $data = $validator->validated();
 
         $data['householder_id'] = $householder->id;
         $data['is_head']        = $data['relationship'] === 'head';
         $photoPath = $this->handleResidentPhoto($request);
         if ($photoPath) $data['photo_path'] = $photoPath;
         unset($data['photo']);
+        
+        // Hardened: completely ignore nik, phone submissions for privacy
+        unset($data['nik'], $data['phone']);
 
         DB::transaction(function () use ($data, $householder) {
             if ($data['is_head']) {
@@ -164,14 +176,21 @@ class HouseholdController extends Controller
         $householder = $this->getOwnHouseholder();
         $this->authorizeOwnResident($householder, $resident);
 
-        $data         = $request->validate($this->residentRules());
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $this->residentRules());
+        
+        if ($validator->fails()) {
+            return redirect()->route('household.show')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('_member_form', 1);
+        }
+        
+        $data         = $validator->validated();
         $becomingHead = $data['relationship'] === 'head';
         $data['is_head'] = $becomingHead;
 
-        // Preserve existing encrypted NIK if left blank
-        if (!$request->filled('nik')) {
-            unset($data['nik']);
-        }
+        // Hardened: completely ignore nik, phone submissions for privacy
+        unset($data['nik'], $data['phone']);
 
         $photoPath = $this->handleResidentPhoto($request, $resident);
         if ($photoPath) $data['photo_path'] = $photoPath;

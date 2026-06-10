@@ -141,9 +141,10 @@ class PosyanduController extends Controller
         );
     }
 
-    private function resolveCategory(?Carbon $birthDate, array $limits): string
+    private function resolveCategory(string|Carbon|null $birthDate, array $limits): string
     {
         if (!$birthDate) return 'unknown';
+        if (is_string($birthDate)) $birthDate = Carbon::parse($birthDate);
         $months = (int) $birthDate->diffInMonths(now());
         return match(true) {
             $months < $limits['baby_max_months']    => 'baby',
@@ -155,8 +156,9 @@ class PosyanduController extends Controller
         };
     }
 
-    private function ageLabel(Carbon $birthDate): string
+    private function ageLabel(string|Carbon $birthDate): string
     {
+        if (is_string($birthDate)) $birthDate = Carbon::parse($birthDate);
         $now    = now();
         $years  = (int) $birthDate->diffInYears($now);
         $months = (int) $birthDate->copy()->addYears($years)->diffInMonths($now);

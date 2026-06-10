@@ -178,12 +178,13 @@ class HomepageController extends Controller
     public function updateFeaturedEvent(Request $request)
     {
         $data = $request->validate([
-            'type'             => 'required|string|in:full,simple',
-            'title'            => 'required|string|max:200',
-            'youtube_id'       => 'nullable|string|max:20',
-            'date'             => 'nullable|date',
-            'image_file'       => 'nullable|image|max:5120',
-            'featured_eyebrow' => 'nullable|string|max:60',
+            'type'              => 'required|string|in:full,simple',
+            'title'             => 'required|string|max:200',
+            'youtube_id'        => 'nullable|string|max:20',
+            'date'              => 'nullable|date',
+            'image_file'        => 'nullable|image|max:5120',
+            'mobile_image_file' => 'nullable|image|max:5120',
+            'featured_eyebrow'  => 'nullable|string|max:60',
         ]);
 
         // Save eyebrow label to section labels
@@ -226,6 +227,33 @@ class HomepageController extends Controller
             $data['image_path'] = $existing['image_path'] ?? null;
         }
 
+        if ($request->hasFile('mobile_image_file')) {
+            // Delete old stored mobile file if it exists
+            if (!empty($existing['mobile_image_path'])) {
+                Storage::disk('public')->delete($existing['mobile_image_path']);
+                MediaFile::where('path', $existing['mobile_image_path'])->delete();
+            }
+
+            $mFile = $request->file('mobile_image_file');
+            $mPath = $mFile->store('homepage/featured', 'public');
+            $mPublicUrl = Storage::disk('public')->url($mPath);
+
+            MediaFile::create([
+                'disk'          => 'public',
+                'path'          => $mPath,
+                'original_name' => $mFile->getClientOriginalName(),
+                'mime_type'     => $mFile->getMimeType(),
+                'size'          => $mFile->getSize(),
+                'uploaded_by'   => auth()->id(),
+            ]);
+
+            $data['mobile_image_url']  = $mPublicUrl;
+            $data['mobile_image_path'] = $mPath;
+        } else {
+            $data['mobile_image_url']  = $existing['mobile_image_url']  ?? null;
+            $data['mobile_image_path'] = $existing['mobile_image_path'] ?? null;
+        }
+
         // Clear YouTube/date fields when type is simple
         if ($data['type'] === 'simple') {
             $data['youtube_id'] = null;
@@ -233,6 +261,7 @@ class HomepageController extends Controller
         }
 
         unset($data['image_file']);
+        unset($data['mobile_image_file']);
         $this->saveSetting('homepage_featured_event', json_encode($data), 'Featured Event');
 
         return redirect()->route('homepage.index')->with('success', __('app.flash_hp_featured_saved'));

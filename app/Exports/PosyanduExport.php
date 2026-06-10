@@ -71,7 +71,7 @@ class PosyanduExport implements
         $all    = $query->get();
         $limits = PosyanduController::categoryLimits();
 
-        $all->each(function (FamilyMember $m) use ($limits) {
+        $all->each(function (Resident $m) use ($limits) {
             $m->age_category = $this->resolveCategory($m->birth_date, $limits);
             $m->age_label    = $m->birth_date ? $this->ageLabel($m->birth_date) : '—';
         });
@@ -82,7 +82,7 @@ class PosyanduExport implements
 
         $isId = $this->locale === 'id';
 
-        return $all->map(function (FamilyMember $m) use ($isId) {
+        return $all->map(function (Resident $m) use ($isId) {
             $cat      = $this->translatedCats[$m->age_category] ?? $this->translatedCats['unknown'];
             $resident = $m->householder;
 
@@ -100,7 +100,7 @@ class PosyanduExport implements
 
             return [
                 $m->fullname,
-                $m->birth_date?->format('d/m/Y') ?? '—',
+                $m->birth_date ? Carbon::parse($m->birth_date)->format('d/m/Y') : '—',
                 $m->age_label,
                 $cat['label'] . ' (' . $cat['desc'] . ')',
                 $gender,
@@ -225,9 +225,10 @@ class PosyanduExport implements
 
     // ── Helpers (copied from PosyanduController) ─────────────────────────────
 
-    private function resolveCategory(?Carbon $birthDate, array $limits): string
+    private function resolveCategory(string|Carbon|null $birthDate, array $limits): string
     {
         if (!$birthDate) return 'unknown';
+        if (is_string($birthDate)) $birthDate = Carbon::parse($birthDate);
         $months = (int) $birthDate->diffInMonths(now());
         return match(true) {
             $months < $limits['baby_max_months']    => 'baby',
@@ -239,8 +240,9 @@ class PosyanduExport implements
         };
     }
 
-    private function ageLabel(Carbon $birthDate): string
+    private function ageLabel(string|Carbon $birthDate): string
     {
+        if (is_string($birthDate)) $birthDate = Carbon::parse($birthDate);
         $now    = now();
         $years  = (int) $birthDate->diffInYears($now);
         $months = (int) $birthDate->copy()->addYears($years)->diffInMonths($now);

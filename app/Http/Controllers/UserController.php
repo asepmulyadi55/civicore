@@ -142,7 +142,6 @@ class UserController extends Controller
     $user->username = $validated['username'];
     $user->email = $validated['email'];
     $user->role_id = $validated['role_id'] ?? null;
-    $user->block_id = $validated['block_id'] ?? null;
     $user->unit_number = $validated['unit_number'] ?? null;
 
     if (!empty($validated['password'])) {
@@ -152,11 +151,24 @@ class UserController extends Controller
     $user->save();
 
     // Re-link householder matching the (possibly new) email
+    $householderLinked = false;
     if ($user->email) {
       $householder = Householder::where('email', $user->email)->first();
       if ($householder) {
         $householder->update(['user_id' => $user->id]);
+        $householderLinked = true;
       }
+    }
+    
+    // If block and unit were manually provided, use them to link
+    if (!$householderLinked && !empty($validated['block_id']) && !empty($validated['unit_number'])) {
+        $manualHouseholder = Householder::whereHas('unit', function($q) use ($validated) {
+            $q->where('block_id', $validated['block_id'])
+              ->where('unit_number', $validated['unit_number']);
+        })->first();
+        if ($manualHouseholder) {
+            $manualHouseholder->update(['user_id' => $user->id]);
+        }
     }
 
     return redirect()->route('users.index')
@@ -176,24 +188,37 @@ class UserController extends Controller
 
     $blockId = $request->input('block_id');
 
+    $blockId = $request->input('block_id');
+
     $user->update([
       'is_active' => true,
-      'block_id' => $blockId,
       'unit_number' => $request->input('unit_number'),
     ]);
 
     // Link matching householder if email found
+    $householderLinked = false;
     if ($user->email) {
       $householder = Householder::where('email', $user->email)->first();
       if ($householder) {
         $householder->update(['user_id' => $user->id]);
+        $householderLinked = true;
       }
+    }
+    
+    // Fallback: manually provided block and unit
+    if (!$householderLinked && $blockId && $request->input('unit_number')) {
+        $manualHouseholder = Householder::whereHas('unit', function($q) use ($blockId, $request) {
+            $q->where('block_id', $blockId)
+              ->where('unit_number', $request->input('unit_number'));
+        })->first();
+        if ($manualHouseholder) {
+            $manualHouseholder->update(['user_id' => $user->id]);
+        }
     }
 
     Log::info('User approved', [
       'user_id' => $user->id,
       'email' => $user->email,
-      'block_id' => $blockId,
       'approved_by' => auth()->id(),
     ]);
 

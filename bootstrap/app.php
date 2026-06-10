@@ -12,9 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'permission'  => \App\Http\Middleware\RequirePermission::class,
+            'permission'     => \App\Http\Middleware\RequirePermission::class,
             'single.session' => \App\Http\Middleware\CheckSingleSession::class,
-            'api.key'     => \App\Http\Middleware\VerifyApiKey::class,
+            'api.key'        => \App\Http\Middleware\VerifyApiKey::class,
+            'approved'       => \App\Http\Middleware\EnsureUserIsApproved::class,
+            '2fa'            => \App\Http\Middleware\RequireTwoFactorAuthentication::class,
         ]);
 
         $middleware->prependToGroup('web', [

@@ -46,6 +46,7 @@
 
   {{-- API key injected at render-time so it is never in static source files --}}
   <meta name="api-key" content="{{ config('civicore.api_key') }}">
+  <meta name="asset-url" content="{{ asset('') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">

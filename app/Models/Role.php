@@ -32,6 +32,7 @@ class Role extends Model
         'dashboard' => ['view'],
         'homepage'  => ['view', 'create', 'edit', 'delete'],
         'householders' => ['view', 'create', 'edit', 'delete'],
+        'household' => ['view', 'edit'],
         'blocks'    => ['view', 'create', 'edit', 'delete'],
         'payments'  => ['view', 'create', 'edit', 'delete', 'approve'],
         'reports'   => ['view'],

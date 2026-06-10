@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password as PasswordRule;
+use App\Support\Google2FA;
 
 class SettingController extends Controller
 {
@@ -161,5 +162,66 @@ class SettingController extends Controller
     return redirect()->route('settings.index')
       ->with('success', __('app.flash_posyandu_saved'));
   }
+
+  // ── Two-Factor Authentication ───────────────────────────────────────────────
+
+  public function showTwoFactor(Request $request)
+  {
+      $user = Auth::user();
+      
+      // If already enabled, redirect to settings index
+      if ($user->two_factor_secret) {
+          return redirect()->route('settings.index')->with('success', '2FA is already enabled.');
+      }
+
+      // Automatically generate a new secret for setup if they haven't started yet
+      $secret = $request->session()->get('2fa_setup_secret');
+      if (!$secret) {
+          $secret = Google2FA::generateSecretKey();
+          $request->session()->put('2fa_setup_secret', $secret);
+      }
+
+      $appName = config('app.name');
+      $qrCodeUrl = Google2FA::getQRCodeUrl(
+          $appName,
+          $user->email ?? $user->username,
+          $secret
+      );
+
+      $qrCodeImg = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' . urlencode($qrCodeUrl);
+
+      return view('settings.two-factor', [
+          'user' => $user,
+          'secret' => $secret,
+          'qrCodeImg' => $qrCodeImg
+      ]);
+  }
+
+  // enableTwoFactor POST route is no longer needed since showTwoFactor automatically starts the setup.
+
+  public function confirmTwoFactor(Request $request)
+  {
+      $request->validate(['code' => 'required|string|size:6']);
+      
+      $secret = $request->session()->get('2fa_setup_secret');
+      if (!$secret) {
+          return redirect()->route('settings.2fa')->with('error', 'Session expired. Please try again.');
+      }
+
+      $valid = Google2FA::verifyKey($secret, $request->code);
+
+      if ($valid) {
+          $user = Auth::user();
+          $user->two_factor_secret = $secret;
+          $user->save();
+
+          $request->session()->forget('2fa_setup_secret');
+
+          return redirect()->route('settings.index')->with('success', 'Two-Factor Authentication has been enabled successfully.');
+      }
+
+      return back()->with('error', 'Invalid authentication code. Please try again.');
+  }
+
 }
 
