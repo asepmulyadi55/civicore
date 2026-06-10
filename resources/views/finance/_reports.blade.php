@@ -5,31 +5,37 @@
 @endphp
 
 {{-- Year filter --}}
-<form method="GET" action="{{ route('finance.index') }}" class="flex gap-3 items-end">
+<form method="GET" action="{{ route('finance.index') }}"
+  class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 mb-6 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
   <input type="hidden" name="tab" value="reports">
-  <div class="flex flex-col gap-1">
-    <label class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('app.fin_filter_year') }}</label>
-    <div class="relative overflow-hidden">
-      <select name="rpt_year"
-        class="appearance-none text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 pl-3 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 w-full">
-        <option value="">{{ __('app.fin_all_years') }}</option>
-        @foreach(range(now()->year, 2020) as $y)
-          <option value="{{ $y }}" {{ $currentFilterYear == $y ? 'selected' : '' }}>{{ $y }}</option>
-        @endforeach
-      </select>
-      <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px] bg-white dark:bg-slate-700 rounded">expand_more</span>
-    </div>
+  
+  {{-- Year filter --}}
+  <div class="relative w-full sm:w-auto">
+    <select name="rpt_year"
+      class="appearance-none w-full sm:w-auto bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-sm py-2 pl-4 pr-9 outline-none transition-all text-slate-600 dark:text-slate-300">
+      <option value="">{{ __('app.fin_all_years') }}</option>
+      @foreach(range(now()->year, 2020) as $y)
+        <option value="{{ $y }}" {{ $currentFilterYear == $y ? 'selected' : '' }}>{{ $y }}</option>
+      @endforeach
+    </select>
+    <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
   </div>
+  
+  {{-- Apply / Clear --}}
   <button type="submit"
-    class="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:opacity-90 transition-opacity">
-    {{ __('app.btn_search') }}
+    class="flex justify-center items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-semibold transition-all shadow-sm shadow-primary/20 w-full sm:w-auto">
+    <span class="material-icons text-sm">search</span>
+    {{ __('app.btn_apply') }}
   </button>
+  
   @if($currentFilterYear)
     <a href="{{ route('finance.index', ['tab' => 'reports']) }}"
-       class="px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-lg hover:opacity-80">
-      {{ __('app.btn_clear') }}
+      class="flex justify-center items-center gap-1 px-3 py-2 text-sm font-medium text-slate-500 hover:text-primary transition-colors w-full sm:w-auto">
+      <span class="material-icons text-sm">close</span>
+      {{ __('app.clear_filters') }}
     </a>
   @endif
+  
 </form>
 
 {{-- Reports table --}}
@@ -103,7 +109,7 @@
                 </span>
               </td>
               <td class="px-4 py-3 text-right">
-                <div class="flex items-center justify-end gap-1 flex-wrap">
+                <div class="flex items-center justify-end gap-1 flex-nowrap">
 
                   {{-- Refresh (recalculate) — draft / revised / rejected only --}}
                   @if($canManage && in_array($report->status, ['draft', 'revised', 'rejected']))

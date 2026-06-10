@@ -5,46 +5,46 @@
 @endphp
 
 {{-- Period selector --}}
-<div class="flex items-center gap-3">
-  <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ __('app.fin_viewing_period') }}</span>
-  <form method="GET" action="{{ route('finance.index') }}" class="flex items-center gap-2">
+<div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+  <span class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider pl-1 sm:pl-0">{{ __('app.fin_viewing_period') }}</span>
+  <form method="GET" action="{{ route('finance.index') }}" class="flex flex-wrap items-center gap-3">
     <input type="hidden" name="tab" value="dashboard">
-    <div class="relative overflow-hidden">
+    <div class="relative w-full sm:w-auto">
       <select name="dash_month"
-        class="appearance-none pl-3 pr-8 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer w-full">
+        class="appearance-none w-full sm:w-auto bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-sm py-2 pl-4 pr-9 outline-none transition-all text-slate-600 dark:text-slate-300">
         @foreach(range(1,12) as $m)
           <option value="{{ $m }}" {{ $m == $selectedMonth ? 'selected' : '' }}>
             {{ \Carbon\Carbon::create(null, $m)->format('F') }}
           </option>
         @endforeach
       </select>
-      <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px] bg-white dark:bg-slate-800 rounded">expand_more</span>
+      <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
     </div>
-    <div class="relative overflow-hidden">
+    <div class="relative w-full sm:w-auto">
       <select name="dash_year"
-        class="appearance-none pl-3 pr-8 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer w-full">
+        class="appearance-none w-full sm:w-auto bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-sm py-2 pl-4 pr-9 outline-none transition-all text-slate-600 dark:text-slate-300">
         @foreach(range(now()->year + 1, 2020) as $y)
           <option value="{{ $y }}" {{ $y == $selectedYear ? 'selected' : '' }}>{{ $y }}</option>
         @endforeach
       </select>
-      <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 material-icons text-slate-400 text-[15px] bg-white dark:bg-slate-800 rounded">expand_more</span>
+      <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
     </div>
-    <button type="submit" class="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors">
+    <button type="submit" class="flex justify-center items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg bg-primary hover:bg-primary/90 text-white transition-all shadow-sm shadow-primary/20 w-full sm:w-auto">
       <span class="material-icons text-[16px]">filter_alt</span>
       {{ __('app.btn_filter') }}
     </button>
   </form>
   @if($selectedMonth != $currentMonth || $selectedYear != $currentYear)
     <a href="{{ route('finance.index', ['tab' => 'dashboard']) }}"
-      class="text-xs text-primary hover:underline font-medium">{{ __('app.fin_back_to_current') }}</a>
+      class="text-xs text-primary hover:underline font-medium w-full sm:w-auto text-center sm:text-left mt-1 sm:mt-0">{{ __('app.fin_back_to_current') }}</a>
   @endif
 </div>
 
 {{-- Summary cards --}}
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
 
   {{-- Current Balance --}}
-  <div class="col-span-2 lg:col-span-1 bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm">
+  <div class="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm">
     <div class="flex items-center justify-between mb-3">
       <span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">{{ __('app.fin_current_balance') }}</span>
       <span class="material-icons text-emerald-500 text-[20px]">account_balance_wallet</span>
@@ -94,7 +94,7 @@
 </div>
 
 {{-- Chart + Pending Approvals --}}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
   {{-- Monthly trend chart --}}
   <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm">
