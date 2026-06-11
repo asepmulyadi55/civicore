@@ -647,5 +647,11 @@ class HomepageController extends Controller
             ['value' => $value, 'label' => $label, 'group' => 'homepage'],
         );
         Cache::forget("setting:{$key}");
+
+        // Flush all public API caches so the React SPA reflects changes immediately
+        Cache::forget('api:homepage:index');
+        Cache::forget('api:homepage:events');
+        Cache::forget('api:homepage:buletin');
+        Cache::forget('api:homepage:property');
     }
 }

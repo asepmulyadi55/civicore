@@ -10,6 +10,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -20,28 +21,37 @@ class DashboardController extends Controller
     $scopeBlockId = $user->isBlockCoordinator() ? $user->block_id : null;
     $currency = Setting::get('currency_symbol', 'Rp');
 
-    $totalCollected = PaymentRecord::where('status', 'approved')
-      ->whereYear('payment_month', now()->year)
-      ->whereMonth('payment_month', now()->month)
-      ->when($scopeBlockId, fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId)))
-      ->sum('amount');
-
-    $pendingCount = PaymentRecord::where('status', 'pending')
-      ->when($scopeBlockId, fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId)))
-      ->count();
-
-    $unpaidCount = Householder::where('is_active', true)
-      ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
-      ->whereDoesntHave(
-        'paymentRecords',
-        fn($q) => $q->where('status', 'approved')
+    $cacheKey = 'dashboard:stats:' . ($scopeBlockId ?? 'all');
+    [$totalCollected, $pendingCount, $unpaidCount, $activeResidents] = Cache::remember(
+      $cacheKey,
+      now()->addMinutes(10),
+      function () use ($scopeBlockId) {
+        $totalCollected = PaymentRecord::where('status', 'approved')
           ->whereYear('payment_month', now()->year)
           ->whereMonth('payment_month', now()->month)
-      )->count();
+          ->when($scopeBlockId, fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId)))
+          ->sum('amount');
 
-    $activeResidents = Householder::where('is_active', true)
-      ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
-      ->count();
+        $pendingCount = PaymentRecord::where('status', 'pending')
+          ->when($scopeBlockId, fn($q) => $q->whereHas('householder', fn($r) => $r->where('block_id', $scopeBlockId)))
+          ->count();
+
+        $unpaidCount = Householder::where('is_active', true)
+          ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
+          ->whereDoesntHave(
+            'paymentRecords',
+            fn($q) => $q->where('status', 'approved')
+              ->whereYear('payment_month', now()->year)
+              ->whereMonth('payment_month', now()->month)
+          )->count();
+
+        $activeResidents = Householder::where('is_active', true)
+          ->when($scopeBlockId, fn($q) => $q->where('block_id', $scopeBlockId))
+          ->count();
+
+        return [$totalCollected, $pendingCount, $unpaidCount, $activeResidents];
+      }
+    );
 
     // Recent activity: last 7 batches (grouped by batch_id), scoped to block for coordinator
     $rawActivity = PaymentRecord::with(['householder.block'])
