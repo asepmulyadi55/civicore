@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
@@ -100,7 +101,7 @@ class SocialAuthController extends Controller
           'username'          => $this->generateUsername($googleUser->email),
           'email'             => $googleUser->email,
           'google_id'         => $googleUser->id,
-          'password'          => Hash::make(uniqid()), // Random password — Google users sign in via OAuth
+          'password'          => Hash::make(Str::random(32)), // Secure random password — Google users sign in via OAuth
           'role_id'           => $residentRole?->id,   // Default role so views don't break
           'is_active'         => false,                // Require admin approval
           'email_verified_at' => now(),
