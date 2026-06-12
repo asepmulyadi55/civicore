@@ -253,7 +253,7 @@
                   {{ __('app.house_status') }}
                 </label>
                 @php
-                  $hsBadgeColors = ['owner_occupied'=>'bg-primary/10 text-primary','rented'=>'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400','vacant'=>'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'];
+                  $hsBadgeColors = ['owner_occupied'=>'bg-primary/10 text-primary','rented'=>'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400','vacant'=>'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400', 'public_facility'=>'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400'];
                   $hsColor = $hsBadgeColors[$householder->house_status ?? 'owner_occupied'] ?? $hsBadgeColors['owner_occupied'];
                   $hsLabel = __('app.house_status_' . ($householder->house_status ?? 'owner_occupied'));
                 @endphp

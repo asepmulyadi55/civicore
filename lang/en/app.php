@@ -371,6 +371,7 @@ return [
   'house_status_owner_occupied' => 'Owner Occupied',
   'house_status_rented' => 'Rented',
   'house_status_vacant' => 'Vacant',
+  'house_status_public_facility' => 'Public Facility (FasUm)',
   'select_house_status' => 'Select status',
   'all_units' => 'All',
   'filter_occupied' => 'Occupied',
