@@ -120,6 +120,7 @@ Trigger: openModal('modal-create')
             <input class="peer sr-only" name="role_id" type="radio" value="" {{ old('role_id', '') === '' ? 'checked' : '' }} />
             <div class="relative p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700
               hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5
+              dark:peer-checked:border-secondary dark:peer-checked:bg-secondary/10
               transition-all h-full flex items-center gap-3">
               <div class="absolute top-2 right-2 opacity-0 peer-checked:opacity-100 text-primary transition-opacity">
                 <span class="material-icons text-sm">check_circle</span>
@@ -139,6 +140,7 @@ Trigger: openModal('modal-create')
               <input class="peer sr-only" name="role_id" type="radio" value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'checked' : '' }} />
               <div class="relative p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700
                                     hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5
+                                    dark:peer-checked:border-secondary dark:peer-checked:bg-secondary/10
                                     transition-all h-full flex items-center gap-3">
                 <div class="absolute top-2 right-2 opacity-0 peer-checked:opacity-100 text-primary transition-opacity">
                   <span class="material-icons text-sm">check_circle</span>

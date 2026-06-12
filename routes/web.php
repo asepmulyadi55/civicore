@@ -228,6 +228,10 @@ Route::middleware(['auth', '2fa'])->group(function () {
         ->middleware('permission:payments.approve')->name('payments.approve');
     Route::patch('/payments/{payment}/reject', [PaymentController::class, 'reject'])
         ->middleware('permission:payments.approve')->name('payments.reject');
+    Route::post('/payments/import-excel', [PaymentController::class, 'importExcel'])
+        ->middleware('permission:payments.create')->name('payments.import');
+    Route::delete('/payments/bulk-destroy', [PaymentController::class, 'bulkDestroy'])
+        ->middleware('permission:payments.delete')->name('payments.bulk-destroy');
     Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])
         ->middleware('permission:payments.delete')->name('payments.destroy');
     Route::post('/payments/batch/{batchId}/approve', [PaymentController::class, 'approveBatch'])
