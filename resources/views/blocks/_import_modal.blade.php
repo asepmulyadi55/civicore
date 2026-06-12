@@ -71,8 +71,8 @@
               <tr><td class="px-3 py-1.5">Pemilik Kosong</td><td class="px-3 py-1.5 font-medium text-amber-600">Vacant</td></tr>
               <tr><td class="px-3 py-1.5">Pemilik/Kosong</td><td class="px-3 py-1.5 font-medium text-amber-600">Vacant</td></tr>
               <tr><td class="px-3 py-1.5">Kavling</td><td class="px-3 py-1.5 font-medium text-amber-600">Vacant</td></tr>
-              <tr><td class="px-3 py-1.5">Pengontrak</td><td class="px-3 py-1.5 font-medium text-blue-600">Rented</td></tr>
-              <tr><td class="px-3 py-1.5">Developer / Warga</td><td class="px-3 py-1.5 font-medium text-emerald-600">Owner Occupied</td></tr>
+              <tr><td class="px-3 py-1.5">Warga</td><td class="px-3 py-1.5 font-medium text-emerald-600">Owner Occupied</td></tr>
+              <tr><td class="px-3 py-1.5">Developer</td><td class="px-3 py-1.5 font-medium text-indigo-600">Developer</td></tr>
               <tr><td class="px-3 py-1.5">FasUm / Fasilitas Umum</td><td class="px-3 py-1.5 font-medium text-teal-600">Public Facility</td></tr>
               <tr><td class="px-3 py-1.5 italic text-slate-400">(Empty / Unknown)</td><td class="px-3 py-1.5 font-medium text-amber-600">Vacant</td></tr>
             </tbody>

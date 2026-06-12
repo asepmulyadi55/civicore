@@ -133,12 +133,9 @@ class HouseholderController extends Controller
     /**
      * Import householders, fee histories, and payment records from an Excel file.
      *
-     * Column layout (IuranWarga sheet, data from row 4):
-     *   F  = Block letter | G  = Unit number | I  = Full name | J  = Status Warga
-     *   K  = Monthly fee amount
-     *   Per month (3 cols each): fee, payment date, status ('L'=Lunas/'BL'=Belum Lunas)
-     *   Jan→K/L/M  Feb→N/O/P  Mar→Q/R/S  Apr→T/U/V  May→W/X/Y  Jun→Z/AA/AB
-     *   Jul→AC/AD/AE  Aug→AF/AG/AH  Sep→AI/AJ/AK  Oct→AL/AM/AN  Nov→AO/AP/AQ  Dec→AR/AS/AT
+     * Column layout (Data IPL.xlsx sheet, data from row 2):
+     *   A = Block letter | B = Unit number | C = Full name | D = Status Warga
+     *   E = Monthly fee amount
      */
     public function importExcel(Request $request)
     {
@@ -152,36 +149,35 @@ class HouseholderController extends Controller
 
         $year = (int) $request->input('year', 2026);
 
-        // Month column map: month_number => [fee_col, date_col, status_col]
-        $monthCols = [
-            1  => ['K', 'L', 'M'],   2  => ['N', 'O', 'P'],
-            3  => ['Q', 'R', 'S'],   4  => ['T', 'U', 'V'],
-            5  => ['W', 'X', 'Y'],   6  => ['Z', 'AA', 'AB'],
-            7  => ['AC', 'AD', 'AE'], 8 => ['AF', 'AG', 'AH'],
-            9  => ['AI', 'AJ', 'AK'], 10 => ['AL', 'AM', 'AN'],
-            11 => ['AO', 'AP', 'AQ'], 12 => ['AR', 'AS', 'AT'],
-        ];
+        $year = (int) $request->input('year', 2026);
 
         $spreadsheet = IOFactory::load($request->file('excel_file')->getRealPath());
         $sheet       = $spreadsheet->getSheet(0);
         $maxRow      = $sheet->getHighestRow();
 
         $stats = ['householders_created' => 0, 'householders_skipped' => 0,
-                  'fees_created' => 0, 'payments_created' => 0, 'payments_skipped' => 0];
+                  'fees_created' => 0];
 
         $effectiveFrom = Carbon::create($year, 1, 1)->toDateString();
 
-        DB::transaction(function () use ($sheet, $maxRow, $year, $monthCols, $effectiveFrom, &$stats) {
-            for ($row = 4; $row <= $maxRow; $row++) {
-                $blockLetter = strtoupper(trim($sheet->getCell('F' . $row)->getCalculatedValue() ?? ''));
-                $unitNum     = trim($sheet->getCell('G' . $row)->getCalculatedValue() ?? '');
-                $name        = trim($sheet->getCell('I' . $row)->getCalculatedValue() ?? '');
+        DB::transaction(function () use ($sheet, $maxRow, $effectiveFrom, &$stats) {
+            $currentBlock = '';
+            for ($row = 2; $row <= $maxRow; $row++) {
+                $blockLetter = strtoupper(trim($sheet->getCell('A' . $row)->getCalculatedValue() ?? ''));
+                if ($blockLetter !== '') {
+                    $currentBlock = $blockLetter;
+                } else {
+                    $blockLetter = $currentBlock;
+                }
+
+                $unitNum     = trim($sheet->getCell('B' . $row)->getCalculatedValue() ?? '');
+                $name        = trim($sheet->getCell('C' . $row)->getCalculatedValue() ?? '');
                 $rawStatus   = strtolower(trim(preg_replace('/\s+/', ' ',
-                    $sheet->getCell('J' . $row)->getCalculatedValue() ?? '')));
+                    $sheet->getCell('D' . $row)->getCalculatedValue() ?? '')));
 
                 // Skip empty rows, header repeats, common areas, and nameless units
                 if (empty($blockLetter) || empty($unitNum) || empty($name)) continue;
-                if (in_array($rawStatus, ['fasum', 'fasilitasumum'])) continue;
+                if (in_array($rawStatus, ['fasum', 'fasilitasumum', 'developer'])) continue;
                 if (!ctype_alpha($blockLetter)) continue;
 
                 // ── Find Block + Unit (must exist from block import) ───────
@@ -200,8 +196,8 @@ class HouseholderController extends Controller
                     ? $stats['householders_created']++
                     : $stats['householders_skipped']++;
 
-                // ── Monthly fee (column K) ─────────────────────────────────
-                $feeAmount = (float) ($sheet->getCell('K' . $row)->getCalculatedValue() ?? 0);
+                // ── Monthly fee (column E) ─────────────────────────────────
+                $feeAmount = (float) ($sheet->getCell('E' . $row)->getCalculatedValue() ?? 0);
                 if ($feeAmount > 0) {
                     $feeExists = FeeHistory::where('householder_id', $householder->id)
                         ->where('effective_from', $effectiveFrom)->exists();
@@ -215,37 +211,13 @@ class HouseholderController extends Controller
                         $stats['fees_created']++;
                     }
                 }
-
-                // ── Payment records for each paid month ────────────────────
-                foreach ($monthCols as $month => [$feeCol, $dateCol, $statusCol]) {
-                    $monthStatus = strtolower(trim(
-                        $sheet->getCell($statusCol . $row)->getCalculatedValue() ?? ''
-                    ));
-                    if ($monthStatus !== 'l') continue;  // Only import "Lunas"
-
-                    $paymentMonth = Carbon::create($year, $month, 1)->toDateString();
-                    $exists = PaymentRecord::where('householder_id', $householder->id)
-                        ->where('payment_month', $paymentMonth)->exists();
-
-                    if ($exists) { $stats['payments_skipped']++; continue; }
-
-                    PaymentRecord::create([
-                        'householder_id' => $householder->id,
-                        'payment_month'  => $paymentMonth,
-                        'amount'         => $feeAmount > 0 ? $feeAmount : 165000,
-                        'status'         => PaymentStatus::Approved,
-                        'notes'          => 'Imported from Excel',
-                    ]);
-                    $stats['payments_created']++;
-                }
             }
         });
 
         $summary = sprintf(
-            'Import complete — %d householder(s) created, %d already existed | %d fee record(s) created | %d payment(s) imported, %d already existed.',
+            'Import complete — %d householder(s) created, %d already existed | %d fee record(s) created.',
             $stats['householders_created'], $stats['householders_skipped'],
-            $stats['fees_created'],
-            $stats['payments_created'], $stats['payments_skipped']
+            $stats['fees_created']
         );
 
         return redirect()->route('householders.index')->with('success', $summary);
@@ -310,13 +282,18 @@ class HouseholderController extends Controller
 
             // Optional: create a new FeeHistory entry if a new fee is provided
             if ($request->filled('new_monthly_fee')) {
-                FeeHistory::create([
-                    'householder_id' => $householder->id,
-                    'amount' => $request->new_monthly_fee,
-                    'effective_from' => Carbon::createFromFormat('Y-m', $request->new_fee_start ?? now()->format('Y-m'))->startOfMonth(),
-                    'created_by' => auth()->id(),
-                    'notes' => 'Fee updated via householder edit',
-                ]);
+                $effectiveFrom = Carbon::createFromFormat('Y-m', $request->new_fee_start ?? now()->format('Y-01'))->startOfMonth();
+                FeeHistory::updateOrCreate(
+                    [
+                        'householder_id' => $householder->id,
+                        'effective_from' => $effectiveFrom
+                    ],
+                    [
+                        'amount' => $request->new_monthly_fee,
+                        'created_by' => auth()->id(),
+                        'notes' => 'Fee updated via householder edit',
+                    ]
+                );
             }
 
             // Re-link in case email changed or was just filled in
@@ -352,7 +329,6 @@ class HouseholderController extends Controller
         $name = $householder->fullname;
 
         // Unlink from user account so the user isn't orphaned, then delete
-        User::where('email', $householder->email)->update(['block_id' => null]);
         $householder->update(['user_id' => null]);
         $householder->delete();
 
@@ -388,9 +364,35 @@ class HouseholderController extends Controller
             $householder->update(['user_id' => $user->id]);
         }
 
-        // Sync the user's block_id from the householder's block
-        if ($householder->block_id && $user->block_id !== $householder->block_id) {
-            $user->update(['block_id' => $householder->block_id]);
+        // Unused block_id reference removed
+    }
+
+    /**
+     * Bulk delete householders.
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->route('householders.index')->with('error', __('app.no_items_selected'));
         }
+
+        $householders = Householder::whereIn('id', $ids)->get();
+        $deletedCount = 0;
+
+        foreach ($householders as $householder) {
+            // Unlink from user account so the user isn't orphaned, then delete
+            $householder->update(['user_id' => null]);
+            $householder->delete();
+            $deletedCount++;
+        }
+
+        Log::warning('Householders bulk deleted', [
+            'count'      => $deletedCount,
+            'deleted_by' => auth()->id(),
+        ]);
+
+        return redirect()->route('householders.index')
+            ->with('success', __('app.flash_householders_bulk_deleted', ['count' => $deletedCount]));
     }
 }

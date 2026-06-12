@@ -112,4 +112,38 @@ class UnitController extends Controller
 
         return response()->json($units);
     }
+
+    /**
+     * Bulk delete units.
+     */
+    public function bulkDestroy(Request $request, Block $block)
+    {
+        abort_if(auth()->user()->cannot('blocks.edit'), 403);
+
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->route('blocks.units.index', $block)->with('error', __('app.no_items_selected'));
+        }
+
+        $deletedCount = 0;
+        $skippedCount = 0;
+
+        $units = $block->units()->whereIn('id', $ids)->get();
+
+        foreach ($units as $unit) {
+            if ($unit->householder) {
+                $skippedCount++;
+            } else {
+                $unit->delete();
+                $deletedCount++;
+            }
+        }
+
+        $message = __('app.flash_units_bulk_deleted', ['count' => $deletedCount]);
+        if ($skippedCount > 0) {
+            $message .= ' ' . __('app.flash_units_bulk_skipped', ['count' => $skippedCount]);
+        }
+
+        return redirect()->route('blocks.units.index', $block)->with('success', $message);
+    }
 }

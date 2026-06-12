@@ -264,6 +264,71 @@
         resetIdleTimer();
       })();
     </script>
+
+    {{-- Global Bulk Delete Confirmation Modal --}}
+    <div id="modal-bulk-delete" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all duration-200 scale-95 opacity-0" id="bulk-delete-card">
+        <div class="flex flex-col items-center pt-8 pb-5 px-6 text-center">
+          <div class="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mb-4">
+            <span class="material-icons text-rose-600 dark:text-rose-400 text-3xl">delete_sweep</span>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">{{ __('app.delete_title') ?? 'Confirm Deletion' }}</h3>
+          <p id="bulk-delete-message" class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed"></p>
+        </div>
+        <div class="flex gap-3 px-6 pb-6">
+          <button type="button" onclick="closeBulkDeleteModal()"
+            class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+            {{ __('app.btn_cancel') ?? 'Cancel' }}
+          </button>
+          <button type="button" id="bulk-delete-confirm-btn"
+            class="flex-1 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-sm font-bold text-white transition-all">
+            {{ __('app.btn_yes_delete') ?? 'Yes, Delete' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentBulkDeleteFormId = null;
+
+      function confirmBulkDelete(event, formId, message) {
+        event.preventDefault();
+        currentBulkDeleteFormId = formId;
+        document.getElementById('bulk-delete-message').textContent = message;
+
+        const modal = document.getElementById('modal-bulk-delete');
+        const card = document.getElementById('bulk-delete-card');
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        
+        requestAnimationFrame(() => {
+          card.classList.remove('scale-95', 'opacity-0');
+          card.classList.add('scale-100', 'opacity-100');
+        });
+      }
+
+      function closeBulkDeleteModal() {
+        const modal = document.getElementById('modal-bulk-delete');
+        const card = document.getElementById('bulk-delete-card');
+        card.classList.remove('scale-100', 'opacity-100');
+        card.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          document.body.classList.remove('overflow-hidden');
+          currentBulkDeleteFormId = null;
+        }, 150);
+      }
+
+      document.getElementById('bulk-delete-confirm-btn').addEventListener('click', function() {
+        if (currentBulkDeleteFormId) {
+          document.getElementById(currentBulkDeleteFormId).submit();
+        }
+      });
+
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && currentBulkDeleteFormId) closeBulkDeleteModal();
+      });
+    </script>
   @endauth
 </body>
 

@@ -9,7 +9,7 @@
     <div class="px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
       <div>
         <h2 class="text-lg font-bold text-slate-900 dark:text-white">Import Residents from Excel</h2>
-        <p class="text-xs text-slate-500 mt-0.5">Creates residents, fees, and paid payment records in one step.</p>
+        <p class="text-xs text-slate-500 mt-0.5">Creates residents and fees in one step.</p>
       </div>
       <button onclick="document.getElementById('modal-import-residents').classList.add('hidden');document.getElementById('modal-import-residents').classList.remove('flex')"
         class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
@@ -27,10 +27,9 @@
         <div class="text-blue-700 dark:text-blue-300 space-y-1.5 text-xs">
           <p class="font-semibold text-sm">What gets imported</p>
           <ul class="space-y-1 list-disc list-inside text-blue-600 dark:text-blue-400">
-            <li><strong>Col I</strong> → Resident full name</li>
-            <li><strong>Col F + G</strong> → Linked to existing Block + Unit</li>
-            <li><strong>Col K</strong> → Monthly fee (creates Fee History)</li>
-            <li><strong>L/M, O/P, R/S … (12 months)</strong> → Payment records where status = "L" (Lunas)</li>
+            <li><strong>Col C</strong> → Resident full name</li>
+            <li><strong>Col A + B</strong> → Linked to existing Block + Unit</li>
+            <li><strong>Col E</strong> → Monthly fee (creates Fee History)</li>
           </ul>
           <p class="mt-1">⚠️ Run <strong>Block &amp; Unit import</strong> first. Residents with no matching unit are skipped. Re-running is safe — existing records are never overwritten.</p>
         </div>
@@ -49,7 +48,7 @@
           </select>
           <span class="material-icons absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
         </div>
-        <p class="text-[11px] text-slate-400">Sets the <code>effective_from</code> date for fees and maps months for payment records.</p>
+        <p class="text-[11px] text-slate-400">Sets the <code>effective_from</code> date for fees.</p>
       </div>
 
       {{-- File picker --}}
@@ -70,16 +69,7 @@
         @enderror
       </div>
 
-      {{-- Month/column reference --}}
-      <details class="text-xs text-slate-500 cursor-pointer">
-        <summary class="font-semibold hover:text-slate-700 dark:hover:text-slate-300">Month → column mapping</summary>
-        <div class="mt-2 grid grid-cols-2 gap-1 text-[11px]">
-          @foreach(['Jan→K/L/M','Feb→N/O/P','Mar→Q/R/S','Apr→T/U/V','May→W/X/Y','Jun→Z/AA/AB','Jul→AC/AD/AE','Aug→AF/AG/AH','Sep→AI/AJ/AK','Oct→AL/AM/AN','Nov→AO/AP/AQ','Dec→AR/AS/AT'] as $m)
-            <span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 font-mono">{{ $m }}</span>
-          @endforeach
-          <p class="col-span-2 mt-1 text-slate-400">Fee col / Date col / Status col. "L"=Lunas (paid) → imported as Approved.</p>
-        </div>
-      </details>
+
 
       {{-- Actions --}}
       <div class="flex gap-3 pt-1">

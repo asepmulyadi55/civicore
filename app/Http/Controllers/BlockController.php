@@ -19,6 +19,8 @@ class BlockController extends Controller
             'units as owner_occupied_units_count' => fn($q) => $q->where('house_status', 'owner_occupied'),
             'units as rented_units_count'         => fn($q) => $q->where('house_status', 'rented'),
             'units as vacant_units_count'         => fn($q) => $q->where('house_status', 'vacant'),
+            'units as public_facility_units_count'=> fn($q) => $q->where('house_status', 'public_facility'),
+            'units as developer_units_count'      => fn($q) => $q->where('house_status', 'developer'),
         ])
             ->with([
                 'coordinators' => fn($q) => $q->select('users.id', 'users.name')
@@ -81,7 +83,7 @@ class BlockController extends Controller
             'pemilik kosong'    => 'vacant',
             'kavling'           => 'vacant',
             'pengontrak'        => 'rented',
-            'developer'         => 'vacant',
+            'developer'         => 'developer',
             'warga'             => 'owner_occupied',
             'fasum'             => 'public_facility',
             'fasilitasumum'     => 'public_facility',
@@ -197,5 +199,35 @@ class BlockController extends Controller
         $block->delete();
 
         return redirect()->route('blocks.index')->with('success', __('app.flash_block_deleted', ['name' => $name]));
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->route('blocks.index')->with('error', __('app.no_items_selected'));
+        }
+
+        $deletedCount = 0;
+        $skippedCount = 0;
+
+        $blocks = Block::whereIn('id', $ids)->get();
+
+        foreach ($blocks as $block) {
+            $residentCount = $block->householders()->count();
+            if ($residentCount > 0) {
+                $skippedCount++;
+            } else {
+                $block->delete();
+                $deletedCount++;
+            }
+        }
+
+        $message = __('app.flash_blocks_bulk_deleted', ['count' => $deletedCount]);
+        if ($skippedCount > 0) {
+            $message .= ' ' . __('app.flash_blocks_bulk_skipped', ['count' => $skippedCount]);
+        }
+
+        return redirect()->route('blocks.index')->with('success', $message);
     }
 }

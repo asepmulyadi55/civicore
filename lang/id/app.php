@@ -372,6 +372,7 @@ return [
   'house_status_rented' => 'Disewakan',
   'house_status_vacant' => 'Kosong',
   'house_status_public_facility' => 'Fasilitas Umum (FasUm)',
+  'house_status_developer' => 'Developer',
   'select_house_status' => 'Pilih status',
   'all_units' => 'Semua',
   'filter_occupied' => 'Ditempati',

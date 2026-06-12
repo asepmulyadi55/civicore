@@ -95,6 +95,26 @@
           @endif
         </div>
       @else
+        <form id="bulk-delete-units-form" action="{{ route('blocks.units.bulk-destroy', $block) }}" method="POST">
+          @csrf
+          @method('DELETE')
+
+          {{-- Bulk Action Bar --}}
+          <div id="bulk-action-bar-units" class="hidden mb-4 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-between shadow-sm transition-all">
+            <div class="flex items-center gap-3">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="select-all-units" class="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary/30 bg-slate-50 dark:bg-slate-800" onchange="toggleAllUnits(this)">
+                <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.select_all') ?? 'Select All' }}</span>
+              </label>
+              <span class="text-sm text-slate-500 border-l border-slate-200 dark:border-slate-700 pl-3">
+                <span id="selected-count-units">0</span> selected
+              </span>
+            </div>
+            <button type="button" onclick="confirmBulkDelete(event, 'bulk-delete-units-form', 'Are you sure you want to delete the selected units?')" class="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-lg transition-colors">
+              <span class="material-icons text-sm">delete</span> Delete Selected
+            </button>
+          </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           @foreach($units as $unit)
             @php
@@ -107,15 +127,23 @@
                 'rented'         => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
                 'vacant'         => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
                 'public_facility'=> 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
+                'developer'      => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
               ];
               $statusColor = $houseStatusColors[$unit->house_status] ?? 'bg-slate-100 text-slate-500';
               $statusLabel = __('app.house_status_' . $unit->house_status);
             @endphp
               <div
-              class="bg-white dark:bg-slate-900 rounded-xl border {{ $isNotVacant ? 'border-primary/30' : 'border-slate-200 dark:border-slate-800' }} shadow-sm p-4 flex flex-col gap-3 hover:shadow-md transition-all">
+              class="bg-white dark:bg-slate-900 rounded-xl border {{ $isNotVacant ? 'border-primary/30' : 'border-slate-200 dark:border-slate-800' }} shadow-sm p-4 flex flex-col gap-3 hover:shadow-md transition-all relative">
+
+              {{-- Checkbox for bulk delete --}}
+              @if(auth()->user()->can('blocks.edit'))
+              <div class="absolute top-3 right-3 z-10">
+                <input type="checkbox" name="ids[]" value="{{ $unit->id }}" class="unit-checkbox w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary/30 bg-slate-50 dark:bg-slate-800 cursor-pointer" onchange="updateBulkActionBarUnits()">
+              </div>
+              @endif
 
               {{-- Unit number + status badge --}}
-              <div class="flex items-start justify-between gap-2">
+              <div class="flex items-start justify-between gap-2 mr-6">
                 <div class="flex items-center gap-2 min-w-0">
                   <div class="w-9 h-9 rounded-lg {{ $isNotVacant ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-400 dark:bg-slate-800' }} flex items-center justify-center flex-shrink-0">
                     <span class="material-icons text-base">{{ $isNotVacant ? 'person' : 'home' }}</span>
@@ -174,6 +202,34 @@
             </div>
           @endforeach
         </div>
+        </form>
+
+        <script>
+          function toggleAllUnits(source) {
+            const checkboxes = document.querySelectorAll('.unit-checkbox');
+            checkboxes.forEach(cb => { cb.checked = source.checked; });
+            updateBulkActionBarUnits();
+          }
+
+          function updateBulkActionBarUnits() {
+            const checkboxes = document.querySelectorAll('.unit-checkbox');
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const actionBar = document.getElementById('bulk-action-bar-units');
+            const selectAll = document.getElementById('select-all-units');
+            const countLabel = document.getElementById('selected-count-units');
+
+            if (checkedCount > 0) {
+              actionBar.classList.remove('hidden');
+              actionBar.classList.add('flex');
+            } else {
+              actionBar.classList.add('hidden');
+              actionBar.classList.remove('flex');
+            }
+
+            if (countLabel) countLabel.textContent = checkedCount;
+            if (selectAll) selectAll.checked = (checkedCount === checkboxes.length && checkboxes.length > 0);
+          }
+        </script>
       @endif
     </main>
   </div>
@@ -231,6 +287,9 @@
             </option>
             <option value="public_facility" {{ old('house_status')==='public_facility'?'selected':'' }}>
               {{ __('app.house_status_public_facility') }}
+            </option>
+            <option value="developer" {{ old('house_status')==='developer'?'selected':'' }}>
+              {{ __('app.house_status_developer') }}
             </option>
           </select>
         </div>
@@ -302,6 +361,7 @@
             <option value="rented">{{ __('app.house_status_rented') }}</option>
             <option value="vacant">{{ __('app.house_status_vacant') }}</option>
             <option value="public_facility">{{ __('app.house_status_public_facility') }}</option>
+            <option value="developer">{{ __('app.house_status_developer') }}</option>
           </select>
         </div>
         <div>

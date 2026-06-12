@@ -11,12 +11,33 @@
 
 
 
+<form id="bulk-delete-householders-form" action="{{ route('householders.bulk-destroy') }}" method="POST">
+  @csrf
+  @method('DELETE')
+
+  {{-- Bulk Action Bar --}}
+  <div id="bulk-action-bar-householders" class="hidden mb-4 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-between shadow-sm transition-all">
+    <div class="flex items-center gap-3">
+      <span class="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-2">
+        <span id="selected-count-householders">0</span> {{ __('app.select_all') ?? 'selected' }}
+      </span>
+    </div>
+    <button type="button" onclick="confirmBulkDelete(event, 'bulk-delete-householders-form', 'Are you sure you want to delete the selected householders?')" class="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-lg transition-colors">
+      <span class="material-icons text-sm">delete</span> Delete Selected
+    </button>
+  </div>
+
 <div
   class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
   <div class="overflow-x-auto">
     <table class="w-full text-left">
       <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
         <tr>
+          @if(auth()->user()->can('householders.delete'))
+          <th class="w-12 px-6 py-4 text-center">
+            <input type="checkbox" id="select-all-householders" class="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary/30 bg-white dark:bg-slate-800 cursor-pointer" onchange="toggleAllHouseholders(this)">
+          </th>
+          @endif
           <x-ui.sort-th column="fullname" :label="__('app.table_household')" />
           <x-ui.sort-th column="house_status" :label="__('app.table_house_status')" class="hidden sm:table-cell" />
           <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
@@ -38,11 +59,17 @@
             $initials   = collect(explode(' ', $displayName))->map(fn($w) => strtoupper($w[0] ?? ''))->take(2)->implode('');
             $blockLabel = $householder->block?->name . ' · ' . $householder->unit_number;
             $isBlockA   = $householder->block?->name === 'Block A';
-            $houseStatusMap = ['owner_occupied' => ['label' => __('app.house_owner_occupied'), 'class' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'], 'vacant' => ['label' => __('app.house_vacant'), 'class' => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'], 'rented' => ['label' => __('app.house_rented'), 'class' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'], 'public_facility' => ['label' => __('app.house_status_public_facility'), 'class' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400']];
+            $houseStatusMap = ['owner_occupied' => ['label' => __('app.house_owner_occupied'), 'class' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'], 'vacant' => ['label' => __('app.house_vacant'), 'class' => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'], 'rented' => ['label' => __('app.house_rented'), 'class' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'], 'public_facility' => ['label' => __('app.house_status_public_facility'), 'class' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400'], 'developer' => ['label' => __('app.house_status_developer'), 'class' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400']];
             $houseStatus = $houseStatusMap[$householder->house_status ?? 'owner_occupied'] ?? $houseStatusMap['owner_occupied'];
           @endphp
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group"
             id="resident-row-{{ $householder->id }}">
+
+            @if(auth()->user()->can('householders.delete'))
+            <td class="w-12 px-6 py-4 text-center">
+              <input type="checkbox" name="ids[]" value="{{ $householder->id }}" class="householder-checkbox w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary/30 bg-white dark:bg-slate-800 cursor-pointer" onchange="updateBulkActionBarHouseholders()">
+            </td>
+            @endif
 
             {{-- Household: head name + block/unit + member count --}}
             <td class="px-6 py-4">
@@ -163,6 +190,32 @@
     </table>
   </div>
   {{-- end overflow-x-auto --}}
+<script>
+  function toggleAllHouseholders(source) {
+    const checkboxes = document.querySelectorAll('.householder-checkbox');
+    checkboxes.forEach(cb => { cb.checked = source.checked; });
+    updateBulkActionBarHouseholders();
+  }
+
+  function updateBulkActionBarHouseholders() {
+    const checkboxes = document.querySelectorAll('.householder-checkbox');
+    const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+    const actionBar = document.getElementById('bulk-action-bar-householders');
+    const selectAll = document.getElementById('select-all-householders');
+    const countLabel = document.getElementById('selected-count-householders');
+
+    if (checkedCount > 0) {
+      actionBar.classList.remove('hidden');
+      actionBar.classList.add('flex');
+    } else {
+      actionBar.classList.add('hidden');
+      actionBar.classList.remove('flex');
+    }
+
+    if (countLabel) countLabel.textContent = checkedCount;
+    if (selectAll) selectAll.checked = (checkedCount === checkboxes.length && checkboxes.length > 0);
+  }
+</script>
 
   {{-- Pagination --}}
   @if($householders->hasPages())
@@ -230,6 +283,7 @@
     </div>
   @endif
 </div>
+</form>
 
 
 
