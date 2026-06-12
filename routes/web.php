@@ -160,6 +160,8 @@ Route::middleware(['auth', '2fa'])->group(function () {
         ->middleware('permission:householders.create')->name('householders.store');
     Route::post('/householders/import-excel', [HouseholderController::class, 'importExcel'])
         ->middleware('permission:householders.create')->name('householders.import');
+    Route::delete('/householders/bulk-destroy', [HouseholderController::class, 'bulkDestroy'])
+        ->middleware('permission:householders.delete')->name('householders.bulk-destroy');
     Route::get('/householders/{householder}/edit', [HouseholderController::class, 'edit'])
         ->middleware('permission:householders.edit')->name('householders.edit');
     Route::match(['PUT', 'PATCH'], '/householders/{householder}', [HouseholderController::class, 'update'])
@@ -192,6 +194,8 @@ Route::middleware(['auth', '2fa'])->group(function () {
         ->middleware('permission:blocks.create')->name('blocks.store');
     Route::post('/blocks/import-excel', [BlockController::class, 'importExcel'])
         ->middleware('permission:blocks.create')->name('blocks.import');
+    Route::delete('/blocks/bulk-destroy', [BlockController::class, 'bulkDestroy'])
+        ->middleware('permission:blocks.delete')->name('blocks.bulk-destroy');
     Route::match(['PUT', 'PATCH'], '/blocks/{block}', [BlockController::class, 'update'])
         ->middleware('permission:blocks.edit')->name('blocks.update');
     Route::delete('/blocks/{block}', [BlockController::class, 'destroy'])
@@ -202,6 +206,8 @@ Route::middleware(['auth', '2fa'])->group(function () {
         ->middleware('permission:blocks.view')->name('blocks.units.index');
     Route::post('/blocks/{block}/units', [UnitController::class, 'store'])
         ->middleware('permission:blocks.edit')->name('blocks.units.store');
+    Route::delete('/blocks/{block}/units/bulk-destroy', [UnitController::class, 'bulkDestroy'])
+        ->middleware('permission:blocks.edit')->name('blocks.units.bulk-destroy');
     Route::match(['PUT', 'PATCH'], '/blocks/{block}/units/{unit}', [UnitController::class, 'update'])
         ->middleware('permission:blocks.edit')->name('blocks.units.update');
     Route::delete('/blocks/{block}/units/{unit}', [UnitController::class, 'destroy'])

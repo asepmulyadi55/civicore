@@ -94,6 +94,13 @@ return [
   'flash_unit_added'                 => 'Unit ":unit" added to :block.',
   'flash_unit_updated'               => 'Unit ":unit" updated.',
   'flash_unit_deleted'               => 'Unit ":unit" deleted.',
+  // Bulk Delete
+  'no_items_selected'                => 'No items selected for deletion.',
+  'flash_blocks_bulk_deleted'        => ':count block(s) deleted.',
+  'flash_blocks_bulk_skipped'        => '(:count skipped because they have residents).',
+  'flash_units_bulk_deleted'         => ':count unit(s) deleted.',
+  'flash_units_bulk_skipped'         => '(:count skipped because they are occupied).',
+  'flash_householders_bulk_deleted'  => ':count householder(s) permanently deleted.',
   // User
   'flash_user_created'               => '":name" has been created successfully.',
   'flash_user_updated'               => '":name" has been updated successfully.',
@@ -372,6 +379,7 @@ return [
   'house_status_rented' => 'Rented',
   'house_status_vacant' => 'Vacant',
   'house_status_public_facility' => 'Public Facility (FasUm)',
+  'house_status_developer' => 'Developer',
   'select_house_status' => 'Select status',
   'all_units' => 'All',
   'filter_occupied' => 'Occupied',
