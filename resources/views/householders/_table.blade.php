@@ -38,7 +38,7 @@
             $initials   = collect(explode(' ', $displayName))->map(fn($w) => strtoupper($w[0] ?? ''))->take(2)->implode('');
             $blockLabel = $householder->block?->name . ' · ' . $householder->unit_number;
             $isBlockA   = $householder->block?->name === 'Block A';
-            $houseStatusMap = ['owner_occupied' => ['label' => __('app.house_owner_occupied'), 'class' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'], 'vacant' => ['label' => __('app.house_vacant'), 'class' => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'], 'rented' => ['label' => __('app.house_rented'), 'class' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400']];
+            $houseStatusMap = ['owner_occupied' => ['label' => __('app.house_owner_occupied'), 'class' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'], 'vacant' => ['label' => __('app.house_vacant'), 'class' => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'], 'rented' => ['label' => __('app.house_rented'), 'class' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'], 'public_facility' => ['label' => __('app.house_status_public_facility'), 'class' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400']];
             $houseStatus = $houseStatusMap[$householder->house_status ?? 'owner_occupied'] ?? $houseStatusMap['owner_occupied'];
           @endphp
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group"

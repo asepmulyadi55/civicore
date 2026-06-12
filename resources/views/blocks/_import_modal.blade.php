@@ -27,12 +27,12 @@
         <div class="text-blue-700 dark:text-blue-300 space-y-1">
           <p class="font-semibold">Expected format (IuranWarga sheet)</p>
           <ul class="text-xs space-y-0.5 list-disc list-inside text-blue-600 dark:text-blue-400">
-            <li>Column <strong>F</strong> — Block letter (A, B, C…)</li>
-            <li>Column <strong>G</strong> — Unit number (1, 3, 5…)</li>
-            <li>Column <strong>J</strong> — Status Warga (optional)</li>
-            <li>Data starts at <strong>row 4</strong></li>
+            <li>Column <strong>A</strong> — Block letter (A, B, C…)</li>
+            <li>Column <strong>B</strong> — Unit number (1, 3, 5…)</li>
+            <li>Column <strong>D</strong> — Status Warga (optional)</li>
+            <li>Data starts at <strong>row 2</strong></li>
           </ul>
-          <p class="text-xs mt-1">Existing blocks/units are <strong>skipped</strong>, not overwritten.</p>
+          <p class="text-xs mt-1">Existing blocks/units are <strong>updated</strong> to become active.</p>
         </div>
       </div>
 
@@ -69,10 +69,12 @@
             <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
               <tr><td class="px-3 py-1.5">Pemilik</td><td class="px-3 py-1.5 font-medium text-emerald-600">Owner Occupied</td></tr>
               <tr><td class="px-3 py-1.5">Pemilik Kosong</td><td class="px-3 py-1.5 font-medium text-amber-600">Vacant</td></tr>
+              <tr><td class="px-3 py-1.5">Pemilik/Kosong</td><td class="px-3 py-1.5 font-medium text-amber-600">Vacant</td></tr>
               <tr><td class="px-3 py-1.5">Kavling</td><td class="px-3 py-1.5 font-medium text-amber-600">Vacant</td></tr>
               <tr><td class="px-3 py-1.5">Pengontrak</td><td class="px-3 py-1.5 font-medium text-blue-600">Rented</td></tr>
               <tr><td class="px-3 py-1.5">Developer / Warga</td><td class="px-3 py-1.5 font-medium text-emerald-600">Owner Occupied</td></tr>
-              <tr><td class="px-3 py-1.5">FasUm</td><td class="px-3 py-1.5 italic text-slate-400">Skipped</td></tr>
+              <tr><td class="px-3 py-1.5">FasUm / Fasilitas Umum</td><td class="px-3 py-1.5 font-medium text-teal-600">Public Facility</td></tr>
+              <tr><td class="px-3 py-1.5 italic text-slate-400">(Empty / Unknown)</td><td class="px-3 py-1.5 font-medium text-amber-600">Vacant</td></tr>
             </tbody>
           </table>
         </div>

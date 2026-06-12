@@ -59,12 +59,11 @@ class BlockController extends Controller
     /**
      * Import blocks and units from an Excel file.
      *
-     * Expected Excel layout (IuranWarga sheet):
-     *   Col F = Block letter (e.g. A, B, C …)
-     *   Col G = Unit number  (e.g. 1, 3, 5 …)
-     *   Col J = Status (Pemilik / Pemilik Kosong / Pengontrak / Kavling …)
-     * Data starts at row 4. Merged-cell issues are avoided by reading col F & G
-     * (raw per-row values) instead of the merged C & D columns.
+     * Expected Excel layout:
+     *   Col A = Block letter (e.g. A, B, C …) - Can be blank, will use previous row's block
+     *   Col B = Unit number  (e.g. 1, 3, 5 …)
+     *   Col D = Status (Pemilik / Pemilik Kosong / Pengontrak / Kavling …)
+     * Data starts at row 2.
      */
     public function importExcel(Request $request)
     {
@@ -78,11 +77,15 @@ class BlockController extends Controller
         // ── Map STATUS WARGA → house_status enum ──────────────────────────
         $statusMap = [
             'pemilik'           => 'owner_occupied',
+            'pemilik/kosong'    => 'vacant',
             'pemilik kosong'    => 'vacant',
             'kavling'           => 'vacant',
             'pengontrak'        => 'rented',
             'developer'         => 'vacant',
             'warga'             => 'owner_occupied',
+            'fasum'             => 'public_facility',
+            'fasilitasumum'     => 'public_facility',
+            ''                  => 'vacant',
         ];
 
         $spreadsheet = IOFactory::load($request->file('excel_file')->getRealPath());
@@ -95,27 +98,35 @@ class BlockController extends Controller
         $unitsSkipped   = 0;
         $blockCache     = [];   // letter => Block model
 
-        for ($row = 4; $row <= $maxRow; $row++) {
-            $blockLetter = strtoupper(trim($sheet->getCell('F' . $row)->getCalculatedValue() ?? ''));
-            $unitNum     = trim($sheet->getCell('G' . $row)->getCalculatedValue() ?? '');
+        $lastBlockLetter = '';
+
+        for ($row = 2; $row <= $maxRow; $row++) {
+            $blockLetter = strtoupper(trim($sheet->getCell('A' . $row)->getCalculatedValue() ?? ''));
+            if ($blockLetter !== '') {
+                $lastBlockLetter = $blockLetter;
+            } else {
+                $blockLetter = $lastBlockLetter;
+            }
+
+            $unitNum     = trim($sheet->getCell('B' . $row)->getCalculatedValue() ?? '');
             $rawStatus   = strtolower(trim(preg_replace('/\s+/', ' ',
-                $sheet->getCell('J' . $row)->getCalculatedValue() ?? ''
+                $sheet->getCell('D' . $row)->getCalculatedValue() ?? ''
             )));
 
-            // Skip blanks, header repeats, and common-area rows
+            // Skip blanks, header repeats
             if ($blockLetter === '' || $unitNum === '') continue;
-            if (in_array($rawStatus, ['fasum', 'fasilitasumum'])) continue;
-            if (!ctype_alpha($blockLetter)) continue;  // guard against stray text
 
             // ── Block ──────────────────────────────────────────────────
             if (!isset($blockCache[$blockLetter])) {
-                [$block, $created] = [
-                    Block::firstOrCreate(
-                        ['name' => $blockLetter],
-                        ['is_active' => true]
-                    ),
-                    false,
-                ];
+                $block = Block::firstOrCreate(
+                    ['name' => $blockLetter],
+                    ['is_active' => true]
+                );
+                
+                if (!$block->wasRecentlyCreated && !$block->is_active) {
+                    $block->update(['is_active' => true]);
+                }
+
                 $created = $block->wasRecentlyCreated;
                 $blockCache[$blockLetter] = $block;
                 $created ? $blocksCreated++ : $blocksSkipped++;
@@ -124,14 +135,22 @@ class BlockController extends Controller
             $block = $blockCache[$blockLetter];
 
             // ── Unit ───────────────────────────────────────────────────
-            $houseStatus = $statusMap[$rawStatus] ?? 'owner_occupied';
+            $houseStatus = $statusMap[$rawStatus] ?? 'vacant';
 
             $unit = Unit::firstOrCreate(
                 ['block_id' => $block->id, 'unit_number' => $unitNum],
                 ['house_status' => $houseStatus, 'is_active' => true]
             );
 
-            $unit->wasRecentlyCreated ? $unitsCreated++ : $unitsSkipped++;
+            if (!$unit->wasRecentlyCreated) {
+                $unit->update([
+                    'house_status' => $houseStatus,
+                    'is_active'    => true,
+                ]);
+                $unitsSkipped++;
+            } else {
+                $unitsCreated++;
+            }
         }
 
         $summary = "Import complete — "

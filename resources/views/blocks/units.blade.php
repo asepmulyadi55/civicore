@@ -106,6 +106,7 @@
                 'owner_occupied' => 'bg-primary/10 text-primary',
                 'rented'         => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
                 'vacant'         => 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+                'public_facility'=> 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
               ];
               $statusColor = $houseStatusColors[$unit->house_status] ?? 'bg-slate-100 text-slate-500';
               $statusLabel = __('app.house_status_' . $unit->house_status);
@@ -126,7 +127,11 @@
                     </span>
                   </div>
                 </div>
-                @if(!$unit->is_active)
+                @if($unit->is_active)
+                  <span class="flex-shrink-0 text-[9px] font-bold uppercase bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 px-1.5 py-0.5 rounded">
+                    {{ __('app.status_active') }}
+                  </span>
+                @else
                   <span class="flex-shrink-0 text-[9px] font-bold uppercase bg-slate-200 dark:bg-slate-700 text-slate-500 px-1.5 py-0.5 rounded">
                     {{ __('app.status_inactive') }}
                   </span>
@@ -224,6 +229,9 @@
             <option value="vacant" {{ old('house_status')==='vacant'?'selected':'' }}>
               {{ __('app.house_status_vacant') }}
             </option>
+            <option value="public_facility" {{ old('house_status')==='public_facility'?'selected':'' }}>
+              {{ __('app.house_status_public_facility') }}
+            </option>
           </select>
         </div>
         {{-- Notes --}}
@@ -293,6 +301,7 @@
             <option value="owner_occupied">{{ __('app.house_status_owner_occupied') }}</option>
             <option value="rented">{{ __('app.house_status_rented') }}</option>
             <option value="vacant">{{ __('app.house_status_vacant') }}</option>
+            <option value="public_facility">{{ __('app.house_status_public_facility') }}</option>
           </select>
         </div>
         <div>
