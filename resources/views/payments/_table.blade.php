@@ -40,7 +40,11 @@
             $initials = collect(preg_split('/\s+/', trim($payment->householder->fullname ?? '')))->filter()->map(fn($w) => strtoupper($w[0]))->take(2)->implode('') ?: '?';
             $isMulti  = ($payment->month_count ?? 1) > 1;
             $allMonths = $payment->all_months ?? collect([$payment->payment_month]);
-            $monthLabels = $allMonths->map(fn($m) => \Carbon\Carbon::parse($m)->format('F Y'))->implode(', ');
+            $allMonthLabels = $allMonths->map(fn($m) => \Carbon\Carbon::parse($m)->format('F Y'));
+            $monthLabels = $allMonthLabels->take(2)->implode(', ');
+            if ($allMonthLabels->count() > 2) {
+                $monthLabels .= ', etc';
+            }
             // CSV of YYYY-MM for JS (without -01 day suffix)
             $monthsForJs = $allMonths->map(fn($m) => \Carbon\Carbon::parse($m)->format('Y-m'))->implode(',');
             // first month YYYY-MM for backward compat
@@ -97,7 +101,7 @@
 
                 {{-- View Proof --}}
                 @if($payment->proof_path)
-                  <button
+                  <button type="button"
                     onclick="openProofModal('{{ route('private.file', ['path' => $payment->proof_path]) }}')"
                     title="View payment proof"
                     class="p-1.5 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
@@ -111,7 +115,7 @@
 
                 {{-- Edit button: hidden for block coordinators on approved payments --}}
                 @if($canEditApproved || $statusValue !== 'approved')
-                  <button
+                  <button type="button"
                     onclick="openEditModal(
                       '{{ $payment->id }}',
                       '{{ $payment->householder_id }}',
@@ -138,7 +142,7 @@
                 {{-- Review / Approve / Reject --}}
                 @if($canApprove)
                   @if($statusValue === 'pending')
-                    <button onclick="openReviewModal(
+                    <button type="button" onclick="openReviewModal(
                         '{{ $payment->id }}',
                         '{{ addslashes($payment->householder->fullname) }}',
                         '{{ $payment->householder->unit_number }}',

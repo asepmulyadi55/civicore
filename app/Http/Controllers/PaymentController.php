@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Models\Unit;
 
 class PaymentController extends Controller
 {
@@ -303,6 +305,113 @@ class PaymentController extends Controller
         return redirect()->route('payments.index')->with('success', $msg);
     }
 
+    public function importExcel(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            return redirect()->route('payments.index')
+                ->with('error', __('app.flash_payment_admin_only') ?? 'Only administrators can import payments.');
+        }
+
+        $request->validate([
+            'excel_file' => ['required', 'file', 'mimes:xlsx,xls', 'max:10240'],
+            'year'       => ['required', 'integer', 'min:2020', 'max:2035'],
+        ], [
+            'excel_file.required' => 'Please choose an Excel file.',
+            'excel_file.mimes'    => 'Only .xlsx and .xls files are accepted.',
+        ]);
+
+        $year = (int) $request->input('year');
+        $spreadsheet = IOFactory::load($request->file('excel_file')->getRealPath());
+        $sheet       = $spreadsheet->getSheet(0);
+        $maxRow      = $sheet->getHighestRow();
+
+        $stats = ['created' => 0, 'skipped' => 0];
+
+        DB::transaction(function () use ($sheet, $maxRow, $year, &$stats) {
+            $currentBlock = '';
+            for ($row = 2; $row <= $maxRow; $row++) {
+                $blockLetter = strtoupper(trim($sheet->getCell('A' . $row)->getCalculatedValue() ?? ''));
+                if ($blockLetter !== '') {
+                    $currentBlock = $blockLetter;
+                } else {
+                    $blockLetter = $currentBlock;
+                }
+
+                $unitNum   = trim($sheet->getCell('B' . $row)->getCalculatedValue() ?? '');
+                $name      = trim($sheet->getCell('C' . $row)->getCalculatedValue() ?? '');
+                $rawStatus = strtolower(trim(preg_replace('/\s+/', ' ', $sheet->getCell('D' . $row)->getCalculatedValue() ?? '')));
+
+                // Skip empty rows, header repeats, common areas
+                if (empty($blockLetter) || empty($unitNum) || empty($name)) continue;
+                if (in_array($rawStatus, ['fasum', 'fasilitasumum', 'developer'])) continue;
+                if (!ctype_alpha($blockLetter)) continue;
+
+                // Find Block + Unit
+                $block = Block::where('name', $blockLetter)->first();
+                if (!$block) continue;
+
+                $unit = Unit::where('block_id', $block->id)->where('unit_number', $unitNum)->first();
+                if (!$unit) continue;
+
+                // Find active householder
+                $householder = Householder::where('unit_id', $unit->id)->where('is_active', true)->first();
+                if (!$householder) continue;
+
+                // Amount per month
+                $amount = (float) ($sheet->getCell('E' . $row)->getCalculatedValue() ?? 0);
+                if ($amount <= 0) continue;
+
+                $batchId = (string) Str::uuid(); // Unique batch ID for this householder's imported payments
+
+                // Loop through columns F (Jan) to Q (Dec)
+                // Col 6 = F (Jan), Col 7 = G (Feb) ... Col 17 = Q (Dec)
+                // In PhpSpreadsheet, getCellByColumnAndRow(1, 1) means A1.
+                // Col 1=A, 2=B, 3=C, 4=D, 5=E, 6=F (Jan) ... 17=Q (Dec)
+                for ($col = 6; $col <= 17; $col++) {
+                    $monthNum = $col - 5; // 1 to 12
+                    $cellValue = strtoupper(trim($sheet->getCell([$col, $row])->getCalculatedValue() ?? ''));
+                    
+                    if ($cellValue === 'L') {
+                        $paymentMonth = Carbon::create($year, $monthNum, 1)->format('Y-m-d');
+                        
+                        $exists = PaymentRecord::where('householder_id', $householder->id)
+                            ->where('payment_month', $paymentMonth)
+                            ->exists();
+
+                        if ($exists) {
+                            $stats['skipped']++;
+                            continue;
+                        }
+
+                        PaymentRecord::create([
+                            'householder_id' => $householder->id,
+                            'payment_month'  => $paymentMonth,
+                            'amount'         => $amount,
+                            'status'         => 'approved',
+                            'approved_by'    => auth()->id(),
+                            'approved_at'    => now(),
+                            'submitted_by'   => auth()->id(),
+                            'notes'          => "Imported from Excel ({$year})",
+                            'batch_id'       => $batchId,
+                        ]);
+                        $stats['created']++;
+                    }
+                }
+            }
+        });
+
+        $msg = __('app.flash_payments_imported', [
+            'count' => $stats['created'],
+            'skipped' => $stats['skipped']
+        ]);
+        if (!trans()->has('app.flash_payments_imported')) {
+            $msg = "Import complete! Created {$stats['created']} payments. Skipped {$stats['skipped']} (already exists).";
+        }
+
+        return redirect()->route('payments.index')->with('success', $msg);
+    }
+
+
     public function update(Request $request, PaymentRecord $payment)
     {
         $request->validate([
@@ -514,6 +623,11 @@ class PaymentController extends Controller
      */
     private function canDeletePayment(PaymentRecord $payment): ?string
     {
+        // Admin users can override and delete anything, even approved records
+        if (auth()->user()->isAdmin()) {
+            return null;
+        }
+
         if ($payment->isApproved()) {
             return 'Approved payments cannot be deleted. They are part of the financial record.';
         }

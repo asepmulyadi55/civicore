@@ -145,14 +145,14 @@
                 {{-- Deactivate / Reactivate --}}
                 @if(auth()->user()->can('householders.edit'))
                 @if($householder->is_active)
-                  <button
+                  <button type="button"
                     onclick="openResidentConfirmModal('deactivate', '{{ $householder->id }}', '{{ addslashes($householder->fullname) }}')"
                     class="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
                     title="{{ __('app.title_deactivate_resident') }}">
                     <span class="material-icons text-lg">person_off</span>
                   </button>
                 @else
-                  <button disabled class="p-1.5 text-slate-200 dark:text-slate-700 rounded-lg cursor-not-allowed"
+                  <button type="button" disabled class="p-1.5 text-slate-200 dark:text-slate-700 rounded-lg cursor-not-allowed"
                     title="{{ __('app.title_already_inactive') }}">
                     <span class="material-icons text-lg">person_off</span>
                   </button>
@@ -161,7 +161,7 @@
 
                 {{-- Delete permanently --}}
                 @if(auth()->user()->can('householders.delete'))
-                <button
+                <button type="button"
                   onclick="openResidentConfirmModal('delete', '{{ $householder->id }}', '{{ addslashes($householder->fullname) }}')"
                   class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                   title="{{ __('app.title_delete_permanently') }}">

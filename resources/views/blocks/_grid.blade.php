@@ -128,7 +128,7 @@
               </a>
             @endif
             @if(auth()->user()->can('blocks.edit'))
-              <button
+              <button type="button"
                 onclick="openEditBlockDrawer('{{ $block->id }}', '{{ addslashes($block->name) }}', '{{ addslashes($block->description ?? '') }}', {{ $block->is_active ? 'true' : 'false' }}, {{ $coordIds }})"
                 class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                 title="{{ __('app.title_edit_block') }}">

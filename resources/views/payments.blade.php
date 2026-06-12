@@ -37,4 +37,6 @@
     </div>
   </main>
 
+  @include('payments._import_modal')
+
 </x-layouts.app>

@@ -187,12 +187,12 @@
               {{-- Actions --}}
               @if(auth()->user()->can('blocks.edit'))
               <div class="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                <button
+                <button type="button"
                   onclick="openEditUnitModal('{{ $unit->id }}','{{ addslashes($unit->unit_number) }}','{{ $unit->house_status }}',{{ $unit->is_active ? 'true' : 'false' }},'{{ addslashes($unit->notes ?? '') }}')"
                   class="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary rounded-lg transition-colors border border-slate-200 dark:border-slate-700">
                   <span class="material-icons text-sm">edit</span>{{ __('app.btn_edit') }}
                 </button>
-                <button
+                <button type="button"
                   onclick="openDeleteUnitModal('{{ $unit->id }}','{{ addslashes($unit->unit_number) }}',{{ $hasResident ? 'true' : 'false' }})"
                   class="flex items-center justify-center p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors border border-slate-200 dark:border-slate-700">
                   <span class="material-icons text-sm">delete_outline</span>
