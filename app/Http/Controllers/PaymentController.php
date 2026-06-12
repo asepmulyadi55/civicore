@@ -565,5 +565,58 @@ class PaymentController extends Controller
         return redirect()->route('payments.index')
             ->with('success', __('app.flash_payments_deleted', ['count' => $count, 'name' => $name]));
     }
+
+    public function bulkDestroy(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            return redirect()->route('payments.index')
+                ->with('error', __('app.flash_payment_admin_only'));
+        }
+
+        $request->validate([
+            'ids'   => 'required|array',
+            'ids.*' => 'exists:payment_records,id',
+        ]);
+
+        $deletedCount = 0;
+        $skippedCount = 0;
+
+        $payments = PaymentRecord::whereIn('id', $request->input('ids', []))->get();
+        $processedBatchIds = [];
+
+        foreach ($payments as $payment) {
+            if ($payment->batch_id) {
+                if (in_array($payment->batch_id, $processedBatchIds)) {
+                    continue;
+                }
+                
+                $errorMessage = $this->canDeletePayment($payment);
+                if ($errorMessage !== null) {
+                    $skippedCount++; // Count as 1 UI item skipped
+                    $processedBatchIds[] = $payment->batch_id;
+                    continue;
+                }
+
+                PaymentRecord::where('batch_id', $payment->batch_id)->delete();
+                $deletedCount++; // Count as 1 UI item deleted
+                $processedBatchIds[] = $payment->batch_id;
+            } else {
+                $errorMessage = $this->canDeletePayment($payment);
+                if ($errorMessage !== null) {
+                    $skippedCount++;
+                    continue;
+                }
+                $payment->delete();
+                $deletedCount++;
+            }
+        }
+
+        $msg = __('app.flash_payments_deleted', ['count' => $deletedCount, 'name' => 'records']);
+        if ($skippedCount > 0) {
+            $msg .= " ($skippedCount skipped because they contain approved records).";
+        }
+
+        return redirect()->route('payments.index')->with('success', $msg);
+    }
 }
 

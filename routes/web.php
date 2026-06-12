@@ -230,6 +230,8 @@ Route::middleware(['auth', '2fa'])->group(function () {
         ->middleware('permission:payments.approve')->name('payments.reject');
     Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])
         ->middleware('permission:payments.delete')->name('payments.destroy');
+    Route::delete('/payments/bulk-destroy', [PaymentController::class, 'bulkDestroy'])
+        ->middleware('permission:payments.delete')->name('payments.bulk-destroy');
     Route::post('/payments/batch/{batchId}/approve', [PaymentController::class, 'approveBatch'])
         ->middleware('permission:payments.approve')->name('payments.batch.approve');
     Route::post('/payments/batch/{batchId}/reject', [PaymentController::class, 'rejectBatch'])
