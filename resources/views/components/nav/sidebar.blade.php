@@ -11,7 +11,7 @@
     if ($user->can('overview.view')) {
       $flatItems[] = ['key' => 'overview', 'label_raw' => __('app.nav_overview'), 'icon' => 'dashboard', 'route' => 'overview', 'permission' => 'overview.view'];
     }
-    if ($user->resolveHouseholder()) {
+    if ($user->resolveHouseholder() && $user->can('household.view')) {
       $flatItems[] = ['key' => 'household', 'label_raw' => __('app.nav_household'), 'icon' => 'home', 'route' => 'household.show', 'permission' => 'household.view'];
     }
     if ($user->can('posyandu.view')) {

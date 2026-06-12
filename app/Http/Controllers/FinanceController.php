@@ -10,6 +10,7 @@ use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -411,12 +412,14 @@ class FinanceController extends Controller
         if (!auth()->user()->can('finance.create')) abort(403);
 
         $q = $request->get('q', '');
-        $categories = FinanceTransaction::whereNotNull('category')
-            ->when($q, fn($query) => $query->where('category', 'like', "%{$q}%"))
-            ->distinct()
-            ->orderBy('category')
-            ->limit(20)
-            ->pluck('category');
+        $categories = Cache::remember('finance:categories', now()->addMinutes(10), function () use ($q) {
+            return FinanceTransaction::whereNotNull('category')
+                ->when($q, fn($query) => $query->where('category', 'like', "%{$q}%"))
+                ->distinct()
+                ->orderBy('category')
+                ->limit(20)
+                ->pluck('category');
+        });
 
         return response()->json($categories);
     }
@@ -425,77 +428,79 @@ class FinanceController extends Controller
 
     private function buildDashboardData(int $month, int $year): array
     {
-        // Current balance: closing balance of last approved report
-        $latestApproved = FinanceReport::where('status', 'approved')
-            ->orderByDesc('year')->orderByDesc('month')->first();
-        $currentBalance = (float) ($latestApproved?->closing_balance ?? 0);
+        $cacheKey = "finance:dashboard:{$month}:{$year}";
 
-        // Current month income/expense
-        $manualIncome = (float) FinanceTransaction::where('type', 'income')
-            ->where('report_month', $month)->where('report_year', $year)->sum('amount');
+        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($month, $year) {
+            // Current balance: closing balance of last approved report
+            $latestApproved = FinanceReport::where('status', 'approved')
+                ->orderByDesc('year')->orderByDesc('month')->first();
+            $currentBalance = (float) ($latestApproved?->closing_balance ?? 0);
 
-        $paymentIncome = (float) PaymentRecord::where('status', 'approved')
-            ->where(function ($q) use ($month, $year) {
-                $periodStart = Carbon::create($year, $month, 1)->startOfDay();
-                $periodEnd   = Carbon::create($year, $month, 1)->endOfMonth()->endOfDay();
-                // Case A: for this month, approved by end of this month
-                $q->where(function ($q2) use ($year, $month, $periodEnd) {
-                    $q2->whereYear('payment_month', $year)
-                       ->whereMonth('payment_month', $month)
-                       ->where('updated_at', '<=', $periodEnd);
+            // Current month income/expense
+            $manualIncome = (float) FinanceTransaction::where('type', 'income')
+                ->where('report_month', $month)->where('report_year', $year)->sum('amount');
+
+            $paymentIncome = (float) PaymentRecord::where('status', 'approved')
+                ->where(function ($q) use ($month, $year) {
+                    $periodStart = Carbon::create($year, $month, 1)->startOfDay();
+                    $periodEnd   = Carbon::create($year, $month, 1)->endOfMonth()->endOfDay();
+                    $q->where(function ($q2) use ($year, $month, $periodEnd) {
+                        $q2->whereYear('payment_month', $year)
+                           ->whereMonth('payment_month', $month)
+                           ->where('updated_at', '<=', $periodEnd);
+                    })
+                    ->orWhere(function ($q2) use ($periodStart, $periodEnd) {
+                        $q2->where('payment_month', '<', $periodStart)
+                           ->where('updated_at', '>=', $periodStart)
+                           ->where('updated_at', '<=', $periodEnd);
+                    });
                 })
-                // Case B: for a past month, but approved this month (backdated)
-                ->orWhere(function ($q2) use ($periodStart, $periodEnd) {
-                    $q2->where('payment_month', '<', $periodStart)
-                       ->where('updated_at', '>=', $periodStart)
-                       ->where('updated_at', '<=', $periodEnd);
-                });
-            })
-            ->sum('amount');
+                ->sum('amount');
 
-        $monthIncome = $manualIncome + $paymentIncome;
-        $monthExpense = (float) FinanceTransaction::where('type', 'expense')
-            ->where('report_month', $month)->where('report_year', $year)->sum('amount');
+            $monthIncome  = $manualIncome + $paymentIncome;
+            $monthExpense = (float) FinanceTransaction::where('type', 'expense')
+                ->where('report_month', $month)->where('report_year', $year)->sum('amount');
 
-        $pendingPaymentsCount = PaymentRecord::where('status', 'pending')->count();
-        $pendingPaymentsTotal = (float) PaymentRecord::where('status', 'pending')->sum('amount');
+            $pendingPaymentsCount = PaymentRecord::where('status', 'pending')->count();
+            $pendingPaymentsTotal = (float) PaymentRecord::where('status', 'pending')->sum('amount');
 
-        // Monthly trend (last 6 months) — 2 queries
-        $sixMonthsAgo = Carbon::now()->startOfMonth()->subMonths(5);
+            // Monthly trend (last 6 months) — 2 queries
+            $sixMonthsAgo = Carbon::now()->startOfMonth()->subMonths(5);
 
-        $txTrend = FinanceTransaction::where(
-            DB::raw("CONCAT(report_year, '-', LPAD(report_month, 2, '0'))"),
-            '>=',
-            $sixMonthsAgo->format('Y-m')
-        )->select('type', 'report_month', 'report_year', DB::raw('SUM(amount) as total'))
-            ->groupBy('type', 'report_month', 'report_year')
-            ->get()
-            ->groupBy(fn($r) => $r->report_year . '-' . str_pad($r->report_month, 2, '0', STR_PAD_LEFT));
+            $txTrend = FinanceTransaction::where(
+                DB::raw("CONCAT(report_year, '-', LPAD(report_month, 2, '0'))"),
+                '>=',
+                $sixMonthsAgo->format('Y-m')
+            )->select('type', 'report_month', 'report_year', DB::raw('SUM(amount) as total'))
+                ->groupBy('type', 'report_month', 'report_year')
+                ->get()
+                ->groupBy(fn($r) => $r->report_year . '-' . str_pad($r->report_month, 2, '0', STR_PAD_LEFT));
 
-        $trend    = [];
-        $maxTrend = 1; // avoid division by zero
-        for ($i = 5; $i >= 0; $i--) {
-            $d   = Carbon::now()->startOfMonth()->subMonths($i);
-            $key = $d->format('Y-m');
+            $trend    = [];
+            $maxTrend = 1;
+            for ($i = 5; $i >= 0; $i--) {
+                $d   = Carbon::now()->startOfMonth()->subMonths($i);
+                $key = $d->format('Y-m');
 
-            $inc = (float) ($txTrend->get($key, collect())->where('type', 'income')->sum('total'));
-            $exp = (float) ($txTrend->get($key, collect())->where('type', 'expense')->sum('total'));
+                $inc = (float) ($txTrend->get($key, collect())->where('type', 'income')->sum('total'));
+                $exp = (float) ($txTrend->get($key, collect())->where('type', 'expense')->sum('total'));
 
-            $trend[]  = ['label' => $d->format('M'), 'month' => (int)$d->month, 'year' => (int)$d->year, 'income' => $inc, 'expense' => $exp];
-            $maxTrend = max($maxTrend, $inc, $exp);
-        }
+                $trend[]  = ['label' => $d->format('M'), 'month' => (int)$d->month, 'year' => (int)$d->year, 'income' => $inc, 'expense' => $exp];
+                $maxTrend = max($maxTrend, $inc, $exp);
+            }
 
-        $recentTransactions = FinanceTransaction::with('createdBy')
-            ->orderByDesc('transaction_date')->orderByDesc('created_at')->limit(8)->get();
+            $recentTransactions = FinanceTransaction::with('createdBy')
+                ->orderByDesc('transaction_date')->orderByDesc('created_at')->limit(8)->get();
 
-        $pendingReports = FinanceReport::where('status', 'submitted')
-            ->orderByDesc('year')->orderByDesc('month')->get();
+            $pendingReports = FinanceReport::where('status', 'submitted')
+                ->orderByDesc('year')->orderByDesc('month')->get();
 
-        return compact(
-            'currentBalance', 'monthIncome', 'monthExpense',
-            'pendingPaymentsCount', 'pendingPaymentsTotal',
-            'trend', 'maxTrend', 'recentTransactions', 'pendingReports'
-        );
+            return compact(
+                'currentBalance', 'monthIncome', 'monthExpense',
+                'pendingPaymentsCount', 'pendingPaymentsTotal',
+                'trend', 'maxTrend', 'recentTransactions', 'pendingReports'
+            );
+        });
     }
 
     private function buildTransactionData(Request $request): array

@@ -9,6 +9,7 @@ use App\Models\Householder;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
@@ -56,21 +57,27 @@ class ReportController extends Controller
         $residents = $residentQuery->paginate(25)->withQueryString();
         $totalResidents = $residents->total();
 
-        // Summary stats for the selected year + block(s)
-        $baseQuery = PaymentRecord::whereYear('payment_month', $year);
-        if ($scopeBlockIds) {
-            $baseQuery->whereHas('householder', fn($q) => $q->whereIn('block_id', $scopeBlockIds));
-        } elseif ($blockId) {
-            $baseQuery->whereHas('householder', fn($q) => $q->where('block_id', $blockId));
-        }
+        // Summary stats — cached per year + blockId
+        $cacheBlockId = $scopeBlockIds ? implode(',', $scopeBlockIds) : ($blockId ?? 'all');
+        $cacheKey     = "reports:summary:{$year}:{$cacheBlockId}";
 
+        [$paidCount, $unpaidCount, $collectionRate] = Cache::remember($cacheKey, now()->addMinutes(15), function () use ($year, $scopeBlockIds, $blockId) {
+            $baseQuery = PaymentRecord::whereYear('payment_month', $year);
+            if ($scopeBlockIds) {
+                $baseQuery->whereHas('householder', fn($q) => $q->whereIn('block_id', $scopeBlockIds));
+            } elseif ($blockId) {
+                $baseQuery->whereHas('householder', fn($q) => $q->where('block_id', $blockId));
+            }
 
-        $paidCount = (clone $baseQuery)->where('status', 'approved')->count();
-        $unpaidCount = (clone $baseQuery)->where('status', '!=', 'approved')->count();
+            $paidCount   = (clone $baseQuery)->where('status', 'approved')->count();
+            $unpaidCount = (clone $baseQuery)->where('status', '!=', 'approved')->count();
 
-        $collectionRate = ($paidCount + $unpaidCount) > 0
-            ? round($paidCount / ($paidCount + $unpaidCount) * 100)
-            : 0;
+            $collectionRate = ($paidCount + $unpaidCount) > 0
+                ? round($paidCount / ($paidCount + $unpaidCount) * 100)
+                : 0;
+
+            return [$paidCount, $unpaidCount, $collectionRate];
+        });
 
         $months = collect(range(1, 12))->map(fn($m) => [
             'num' => $m,
