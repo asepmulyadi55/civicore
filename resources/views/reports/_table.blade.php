@@ -27,12 +27,11 @@
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
             <td
               class="sticky left-0 z-10 bg-white dark:bg-slate-900 px-6 py-4 border-r border-slate-200 dark:border-slate-800">
-              <div class="flex flex-col">
-                <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $resident->unit_number }}</span>
-                <span class="text-[11px] text-slate-400 font-medium truncate">{{ $resident->fullname }}</span>
-                @if($resident->block)
-                  <span class="text-[10px] text-primary/70 font-medium mt-0.5 dark:text-white">{{ $resident->block->name }}</span>
-                @endif
+              <div class="flex flex-col min-w-[120px]">
+                <span class="text-sm font-bold text-slate-900 dark:text-white">
+                  {{ $resident->block?->name ?? '—' }} <span class="text-slate-400 font-normal mx-1">·</span> {{ $resident->unit_number }}
+                </span>
+                <span class="text-xs text-slate-500 font-medium truncate mt-0.5" title="{{ $resident->fullname }}">{{ $resident->fullname }}</span>
               </div>
             </td>
             @foreach($months as $m)
