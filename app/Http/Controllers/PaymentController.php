@@ -28,17 +28,21 @@ class PaymentController extends Controller
 
         // Build base query scoped to coordinator's blocks if applicable
         $baseQ = PaymentRecord::query()
-            ->when($scopeBlockIds, fn($q) => $q->whereHas('householder', fn($r) => $r->whereIn('block_id', $scopeBlockIds)));
+            ->when($scopeBlockIds, fn($q) => $q->whereIn('block_id', $scopeBlockIds));
 
         // Apply search, block, status, and month filters
         if ($search = $request->get('search')) {
-            $baseQ->whereHas('householder', function ($q) use ($search) {
-                $q->where('fullname', 'like', "%{$search}%")
-                    ->orWhereHas('unit', fn($u) => $u->where('unit_number', 'like', "%{$search}%"));
+            $baseQ->where(function ($q) use ($search) {
+                $q->where('householder_name', 'like', "%{$search}%")
+                  ->orWhere('unit_number', 'like', "%{$search}%")
+                  ->orWhereHas('householder', function ($hq) use ($search) {
+                      $hq->where('fullname', 'like', "%{$search}%")
+                         ->orWhereHas('unit', fn($u) => $u->where('unit_number', 'like', "%{$search}%"));
+                  });
             });
         }
         if (!$scopeBlockIds && $blockId = $request->get('block_id')) {
-            $baseQ->whereHas('householder', fn($q) => $q->where('block_id', $blockId));
+            $baseQ->where('block_id', $blockId);
         }
         if ($status = $request->get('status')) {
             $baseQ->where('status', $status);
@@ -162,7 +166,7 @@ class PaymentController extends Controller
     {
         $statBase = PaymentRecord::when(
             $scopeBlockIds,
-            fn($q) => $q->whereHas('householder', fn($r) => $r->whereIn('block_id', $scopeBlockIds))
+            fn($q) => $q->whereIn('block_id', $scopeBlockIds)
         );
 
         $pendingCount = (clone $statBase)->where('status', 'pending')->count();
@@ -204,14 +208,16 @@ class PaymentController extends Controller
             ->values()->all();
 
         $paidMonthsByResident = PaymentRecord::where('status', 'approved')
-            ->when($scopeBlockIds, fn($q) => $q->whereHas('householder', fn($r) => $r->whereIn('block_id', $scopeBlockIds)))
+            ->when($scopeBlockIds, fn($q) => $q->whereIn('block_id', $scopeBlockIds))
+            ->whereNotNull('householder_id')
             ->get(['householder_id', 'payment_month'])
             ->groupBy('householder_id')
             ->map($mapMonths)
             ->toArray();
 
         $pendingMonthsByResident = PaymentRecord::where('status', 'pending')
-            ->when($scopeBlockIds, fn($q) => $q->whereHas('householder', fn($r) => $r->whereIn('block_id', $scopeBlockIds)))
+            ->when($scopeBlockIds, fn($q) => $q->whereIn('block_id', $scopeBlockIds))
+            ->whereNotNull('householder_id')
             ->get(['householder_id', 'payment_month'])
             ->groupBy('householder_id')
             ->map($mapMonths)
@@ -254,8 +260,13 @@ class PaymentController extends Controller
             ]);
         }
 
+        $householder = Householder::find($request->resident_id);
+
         $baseData = [
             'householder_id' => $request->resident_id,
+            'householder_name' => $householder->fullname ?? null,
+            'block_id' => $householder->block_id ?? null,
+            'unit_number' => $householder->unit_number ?? null,
             'amount' => $request->amount,
             'payment_method_id' => $request->payment_method_id ?: null,
             'status' => $request->status,
@@ -384,15 +395,18 @@ class PaymentController extends Controller
                         }
 
                         PaymentRecord::create([
-                            'householder_id' => $householder->id,
-                            'payment_month'  => $paymentMonth,
-                            'amount'         => $amount,
-                            'status'         => 'approved',
-                            'approved_by'    => auth()->id(),
-                            'approved_at'    => now(),
-                            'submitted_by'   => auth()->id(),
-                            'notes'          => "Imported from Excel ({$year})",
-                            'batch_id'       => $batchId,
+                            'householder_id'   => $householder->id,
+                            'householder_name' => $householder->fullname,
+                            'block_id'         => $householder->block_id,
+                            'unit_number'      => $householder->unit_number,
+                            'payment_month'    => $paymentMonth,
+                            'amount'           => $amount,
+                            'status'           => 'approved',
+                            'approved_by'      => auth()->id(),
+                            'approved_at'      => now(),
+                            'submitted_by'     => auth()->id(),
+                            'notes'            => "Imported from Excel ({$year})",
+                            'batch_id'         => $batchId,
                         ]);
                         $stats['created']++;
                     }
@@ -443,7 +457,11 @@ class PaymentController extends Controller
         }
 
         // Editing a payment always resets it to pending so it gets re-reviewed.
+        $householder = $payment->householder; // May be null if householder was deleted, but edit is rare then
         $baseData = [
+            'householder_name'  => $householder ? $householder->fullname : $payment->householder_name,
+            'block_id'          => $householder ? $householder->block_id : $payment->block_id,
+            'unit_number'       => $householder ? $householder->unit_number : $payment->unit_number,
             'amount'            => $request->amount,
             'payment_method_id' => $request->payment_method_id ?: null,
             'status'            => 'pending',

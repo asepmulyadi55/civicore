@@ -26,7 +26,7 @@
           </th>
           @endif
           <x-ui.sort-th column="resident" :label="__('app.table_resident')" />
-          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_block') }}</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('app.table_block') }} / Unit</th>
           <x-ui.sort-th column="month" :label="__('app.table_months')" />
           <x-ui.sort-th column="amount" :label="__('app.table_amount')" />
           <x-ui.sort-th column="status" :label="__('app.table_status')" />
@@ -68,11 +68,14 @@
                       <span class="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded">Deleted</span>
                     @endif
                   </div>
-                  <p class="text-xs text-slate-500">{{ $isDeleted ? '—' : 'Unit ' . $payment->householder->unit_number }}</p>
+                  <p class="text-xs text-slate-500">Unit {{ $payment->unit_number ?? '—' }}</p>
                 </div>
               </div>
             </td>
-            <td class="px-6 py-4 text-sm font-medium">{{ $payment->blockDisplayName() }}</td>
+            <td class="px-6 py-4 text-sm font-medium">
+              {{ $payment->blockDisplayName() }} 
+              <span class="text-slate-400 font-normal ml-1">· {{ $payment->unit_number ?? '—' }}</span>
+            </td>
             <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
               {{ $monthLabels }}
               @if($isMulti)
@@ -126,8 +129,8 @@
                     onclick="openEditModal(
                       '{{ $payment->id }}',
                       '{{ $payment->householder_id }}',
-                      '{{ addslashes($payment->householder->fullname) }}',
-                      '{{ $payment->householder->unit_number }}',
+                      '{{ addslashes($residentName) }}',
+                      '{{ $payment->unit_number ?? '' }}',
                       '{{ $monthsForJs }}',
                       {{ $payment->amount }},
                       {{ $payment->payment_method_id ? "'{$payment->payment_method_id}'" : 'null' }},
@@ -151,8 +154,8 @@
                   @if($statusValue === 'pending')
                     <button type="button" onclick="openReviewModal(
                         '{{ $payment->id }}',
-                        '{{ addslashes($payment->householder->fullname) }}',
-                        '{{ $payment->householder->unit_number }}',
+                        '{{ addslashes($residentName) }}',
+                        '{{ $payment->unit_number ?? '' }}',
                         '{{ $currency }} {{ number_format($payment->total_amount ?? $payment->amount) }}',
                         '{{ $monthLabels }}',
                         '{{ addslashes($payment->notes ?? '') }}',
@@ -179,7 +182,7 @@
                 @if(auth()->user()->isAdmin())
                   @if($statusValue !== 'approved')
                     <button type="button"
-                      onclick="openPaymentDeleteModal('{{ $payment->id }}', '{{ addslashes($payment->householder->fullname) }}')"
+                      onclick="openPaymentDeleteModal('{{ $payment->id }}', '{{ addslashes($residentName) }}')"
                       title="Delete payment"
                       class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors">
                       <span class="material-icons text-lg">delete_outline</span>

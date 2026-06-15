@@ -13,6 +13,8 @@ class PaymentRecord extends Model
     protected $fillable = [
         'householder_id',
         'householder_name',
+        'block_id',
+        'unit_number',
         'batch_id',
         'payment_month',
         'amount',
@@ -43,6 +45,11 @@ class PaymentRecord extends Model
         return $this->belongsTo(Householder::class, 'householder_id');
     }
 
+    public function block(): BelongsTo
+    {
+        return $this->belongsTo(Block::class, 'block_id');
+    }
+
     /**
      * Returns the householder's display name.
      * Falls back to the stored snapshot name if the householder has been deleted.
@@ -55,11 +62,11 @@ class PaymentRecord extends Model
     }
 
     /**
-     * Returns the block name, gracefully handling a deleted householder.
+     * Returns the block name using the snapshotted block_id.
      */
     public function blockDisplayName(): string
     {
-        return $this->householder?->block?->name ?? '—';
+        return $this->block?->name ?? '—';
     }
 
     public function paymentMethod(): BelongsTo
