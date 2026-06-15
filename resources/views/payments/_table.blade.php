@@ -37,7 +37,9 @@
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
         @forelse($payments as $payment)
           @php
-            $initials = collect(preg_split('/\s+/', trim($payment->householder->fullname ?? '')))->filter()->map(fn($w) => strtoupper($w[0]))->take(2)->implode('') ?: '?';
+            $residentName = $payment->residentDisplayName();
+            $isDeleted    = is_null($payment->householder_id);
+            $initials = collect(preg_split('/\s+/', trim($residentName)))->filter()->map(fn($w) => strtoupper($w[0]))->take(2)->implode('') ?: '?';
             $isMulti  = ($payment->month_count ?? 1) > 1;
             $allMonths = $payment->all_months ?? collect([$payment->payment_month]);
             $allMonthLabels = $allMonths->map(fn($m) => \Carbon\Carbon::parse($m)->format('F Y'));
@@ -58,14 +60,19 @@
             @endif
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">{{ $initials }}</div>
+                <div class="w-10 h-10 rounded-full {{ $isDeleted ? 'bg-slate-200 dark:bg-slate-700' : 'bg-primary/10' }} flex items-center justify-center {{ $isDeleted ? 'text-slate-400' : 'text-primary' }} font-bold text-sm">{{ $initials }}</div>
                 <div>
-                  <p class="font-semibold text-sm">{{ $payment->householder->fullname }}</p>
-                  <p class="text-xs text-slate-500">Unit {{ $payment->householder->unit_number }}</p>
+                  <div class="flex items-center gap-1.5">
+                    <p class="font-semibold text-sm {{ $isDeleted ? 'text-slate-400 italic' : '' }}">{{ $residentName }}</p>
+                    @if($isDeleted)
+                      <span class="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded">Deleted</span>
+                    @endif
+                  </div>
+                  <p class="text-xs text-slate-500">{{ $isDeleted ? '—' : 'Unit ' . $payment->householder->unit_number }}</p>
                 </div>
               </div>
             </td>
-            <td class="px-6 py-4 text-sm font-medium">{{ $payment->householder->block?->name ?? '—' }}</td>
+            <td class="px-6 py-4 text-sm font-medium">{{ $payment->blockDisplayName() }}</td>
             <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
               {{ $monthLabels }}
               @if($isMulti)
