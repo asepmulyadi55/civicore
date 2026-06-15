@@ -328,6 +328,11 @@ class HouseholderController extends Controller
     {
         $name = $householder->fullname;
 
+        // Snapshot name into payment_records and fee_histories before delete
+        // (the migration backfills existing rows; this covers any that slipped through)
+        $householder->paymentRecords()->whereNull('householder_name')->update(['householder_name' => $name]);
+        $householder->feeHistories()->whereNull('householder_name')->update(['householder_name' => $name]);
+
         // Unlink from user account so the user isn't orphaned, then delete
         $householder->update(['user_id' => null]);
         $householder->delete();
@@ -381,6 +386,10 @@ class HouseholderController extends Controller
         $deletedCount = 0;
 
         foreach ($householders as $householder) {
+            // Snapshot name before delete so historical records retain it
+            $householder->paymentRecords()->whereNull('householder_name')->update(['householder_name' => $householder->fullname]);
+            $householder->feeHistories()->whereNull('householder_name')->update(['householder_name' => $householder->fullname]);
+
             // Unlink from user account so the user isn't orphaned, then delete
             $householder->update(['user_id' => null]);
             $householder->delete();
