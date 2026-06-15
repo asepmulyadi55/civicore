@@ -1,11 +1,10 @@
 import React from 'react';
 
 const DEFAULTS = {
-    title: 'Dwipapuri Community Events',
-    subtitle: 'Bringing neighbors together through curated gatherings, cultural \
-celebrations, and digital experiences. Stay connected with your community.',
-    cta_text: 'Watch Event',
-    bg_image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&q=80&auto=format',
+    title: '',
+    subtitle: '',
+    cta_text: '',
+    bg_image: '',
 };
 
 export default function HeroSection({ hero = {}, loading }) {
@@ -14,12 +13,12 @@ export default function HeroSection({ hero = {}, loading }) {
     const ctaText  = hero?.cta_text || DEFAULTS.cta_text;
     const bgImage  = hero?.bg_image || DEFAULTS.bg_image;
 
-    const heroStyle = {
+    const heroStyle = bgImage ? {
         backgroundImage: `linear-gradient(to bottom, rgba(15,18,33,0.65), rgba(15,18,33,0.45)), url('${bgImage}')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-    };
+    } : { backgroundColor: '#1C2D27' };
 
     return (
         <section

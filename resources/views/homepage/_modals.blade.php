@@ -149,7 +149,10 @@
     });
     var formFeatured = document.getElementById('form-hp-featured');
     if (formFeatured) formFeatured.addEventListener('submit', function(e) {
-      if (!validateHpRequired('hp-featured-title', 'err-hp-featured-title', 'Event title')) e.preventDefault();
+      var typeChecked = document.querySelector('#form-hp-featured input[name="type"]:checked');
+      if (typeChecked && typeChecked.value === 'full') {
+        if (!validateHpRequired('hp-featured-title', 'err-hp-featured-title', 'Event title')) e.preventDefault();
+      }
     });
     var formEventAdd = document.getElementById('form-hp-event-add');
     if (formEventAdd) formEventAdd.addEventListener('submit', function(e) {
