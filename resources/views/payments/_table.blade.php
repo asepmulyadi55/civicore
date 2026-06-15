@@ -68,13 +68,13 @@
                       <span class="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded">Deleted</span>
                     @endif
                   </div>
-                  <p class="text-xs text-slate-500">Unit {{ $payment->unit_number ?? '—' }}</p>
+                  <p class="text-xs text-slate-500">Unit {{ $payment->unitDisplayNumber() }}</p>
                 </div>
               </div>
             </td>
             <td class="px-6 py-4 text-sm font-medium">
               {{ $payment->blockDisplayName() }} 
-              <span class="text-slate-400 font-normal ml-1">· {{ $payment->unit_number ?? '—' }}</span>
+              <span class="text-slate-400 font-normal ml-1">· {{ $payment->unitDisplayNumber() }}</span>
             </td>
             <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
               {{ $monthLabels }}
@@ -130,7 +130,7 @@
                       '{{ $payment->id }}',
                       '{{ $payment->householder_id }}',
                       '{{ addslashes($residentName) }}',
-                      '{{ $payment->unit_number ?? '' }}',
+                      '{{ addslashes($payment->unitDisplayNumber()) }}',
                       '{{ $monthsForJs }}',
                       {{ $payment->amount }},
                       {{ $payment->payment_method_id ? "'{$payment->payment_method_id}'" : 'null' }},
@@ -155,7 +155,7 @@
                     <button type="button" onclick="openReviewModal(
                         '{{ $payment->id }}',
                         '{{ addslashes($residentName) }}',
-                        '{{ $payment->unit_number ?? '' }}',
+                        '{{ addslashes($payment->unitDisplayNumber()) }}',
                         '{{ $currency }} {{ number_format($payment->total_amount ?? $payment->amount) }}',
                         '{{ $monthLabels }}',
                         '{{ addslashes($payment->notes ?? '') }}',
