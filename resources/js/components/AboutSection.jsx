@@ -1,13 +1,7 @@
 import React from 'react';
 
-const DEFAULT_CONTENT = `Dwipapuri isn't just a location; it's a curated ecosystem where modern technology meets soulful living. We prioritize seamless experiences, professional management, and a vibrant community spirit that turns neighbors into lifelong friends.`;
-
-const DEFAULT_STATS = [
-    { value: '500+', label: 'Residents' },
-    { value: '24/7', label: 'Security' },
-    { value: '12', label: 'Parks' },
-    { value: 'Monthly', label: 'Events' },
-];
+const DEFAULT_CONTENT = ``;
+const DEFAULT_STATS = [];
 
 // Matches v2: top-left navy, top-right grey (offset), bottom-left grey, bottom-right violet (offset)
 const STAT_CARD_STYLES = [
@@ -24,13 +18,13 @@ export default function AboutSection({ about = {}, loading, isDark = false }) {
     const bodyColor    = isDark ? '#9E9C97' : '#454652';
     const skBg         = isDark ? '#1C2D27' : '#f1f5f9';
 
-    const rawContent = about?.content || DEFAULT_CONTENT;
-    const stats     = (about?.stats?.length > 0) ? about.stats : DEFAULT_STATS;
-    const badge     = about?.badge      || 'Our Identity';
-    const heading   = about?.heading    || 'Elevating Residential Living at Dwipapuri';
-    const btn1Label = about?.btn1_label || 'Explore Amenities';
+    const rawContent = about?.content || '';
+    const stats     = (about?.stats?.length > 0) ? about.stats : [];
+    const badge     = about?.badge      || '';
+    const heading   = about?.heading    || '';
+    const btn1Label = about?.btn1_label || '';
     const btn1Url   = about?.btn1_url   || null;
-    const btn2Label = about?.btn2_label || 'Our History';
+    const btn2Label = about?.btn2_label || '';
     const btn2Url   = about?.btn2_url   || null;
     const paragraphs = rawContent.split(/\n\n+/).filter(Boolean);
 
@@ -77,29 +71,33 @@ export default function AboutSection({ about = {}, loading, isDark = false }) {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
-                        {btn1Url ? (
-                            <a href={btn1Url} className={btn1Class} style={btn1Style} {...linkProps}>
-                                {btn1Label}
-                            </a>
-                        ) : (
-                            <button className={btn1Class} style={btn1Style}>
-                                {btn1Label}
-                            </button>
+                        {btn1Label && (
+                            btn1Url ? (
+                                <a href={btn1Url} className={btn1Class} style={btn1Style} {...linkProps}>
+                                    {btn1Label}
+                                </a>
+                            ) : (
+                                <button className={btn1Class} style={btn1Style}>
+                                    {btn1Label}
+                                </button>
+                            )
                         )}
-                        {btn2Url ? (
-                            <a href={btn2Url} className={btn2Class} style={btn2Style} {...linkProps}
-                                onMouseEnter={e => { e.currentTarget.style.background = '#1C2D27'; e.currentTarget.style.color = '#FAF9F6'; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#1C2D27'; }}
-                            >
-                                {btn2Label}
-                            </a>
-                        ) : (
-                            <button className={btn2Class} style={btn2Style}
-                                onMouseEnter={e => { e.currentTarget.style.background = '#1C2D27'; e.currentTarget.style.color = '#FAF9F6'; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#1C2D27'; }}
-                            >
-                                {btn2Label}
-                            </button>
+                        {btn2Label && (
+                            btn2Url ? (
+                                <a href={btn2Url} className={btn2Class} style={btn2Style} {...linkProps}
+                                    onMouseEnter={e => { e.currentTarget.style.background = '#1C2D27'; e.currentTarget.style.color = '#FAF9F6'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#1C2D27'; }}
+                                >
+                                    {btn2Label}
+                                </a>
+                            ) : (
+                                <button className={btn2Class} style={btn2Style}
+                                    onMouseEnter={e => { e.currentTarget.style.background = '#1C2D27'; e.currentTarget.style.color = '#FAF9F6'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#1C2D27'; }}
+                                >
+                                    {btn2Label}
+                                </button>
+                            )
                         )}
                     </div>
                 </div>

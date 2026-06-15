@@ -177,9 +177,10 @@ class HomepageController extends Controller
 
     public function updateFeaturedEvent(Request $request)
     {
+        $type = $request->input('type');
         $data = $request->validate([
             'type'              => 'required|string|in:full,simple',
-            'title'             => 'required|string|max:200',
+            'title'             => $type === 'simple' ? 'nullable|string|max:200' : 'required|string|max:200',
             'youtube_id'        => 'nullable|string|max:20',
             'date'              => 'nullable|date',
             'image_file'        => 'nullable|image|max:5120',

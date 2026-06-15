@@ -36,9 +36,12 @@
       </div>
     </div>
 
-    {{-- Title (always shown) --}}
+    {{-- Title --}}
     <div class="space-y-1.5">
-      <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('app.hp_event_title_label') }} <span class="text-rose-500">*</span></label>
+      <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+        {{ __('app.hp_event_title_label') }} 
+        <span id="hp-featured-title-asterisk" class="text-rose-500 {{ $featuredType === 'simple' ? 'hidden' : '' }}">*</span>
+      </label>
       <input type="text" id="hp-featured-title" name="title" value="{{ old('title', $featuredEvent['title'] ?? '') }}"
         class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
         placeholder="e.g. Dwipapuri Anniversary Gala" oninput="clearHpErr('err-hp-featured-title')">
@@ -146,12 +149,15 @@
   function toggleFeaturedType(type) {
     var fullFields   = document.getElementById('featured-full-fields');
     var simpleFields = document.getElementById('featured-simple-fields');
+    var asterisk     = document.getElementById('hp-featured-title-asterisk');
     if (type === 'simple') {
       fullFields.classList.add('hidden');
       simpleFields.classList.remove('hidden');
+      asterisk.classList.add('hidden');
     } else {
       fullFields.classList.remove('hidden');
       simpleFields.classList.add('hidden');
+      asterisk.classList.remove('hidden');
     }
     // Update label styles
     document.querySelectorAll('#form-hp-featured input[name="type"]').forEach(function(radio) {

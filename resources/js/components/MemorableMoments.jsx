@@ -12,19 +12,25 @@ export default function MemorableMoments({ moments = {}, pastEvents = [], loadin
     const bodyColor    = isDark ? '#9E9C97' : '#595959';
     const sectionBg    = isDark ? '#0A1510' : '#F4F3EF';
     const skBg         = isDark ? '#1C2D27' : '#e2e8f0';
+    const cardBg       = isDark ? '#142920' : '#ffffff';
+    const cardBorder   = isDark ? '#1C2D27' : 'rgba(198,197,212,0.10)';
 
-    const title      = moments?.title       || 'Memorable Moments';
-    const eyebrow    = moments?.eyebrow     || 'The Gallery';
-    const subtitle   = moments?.subtitle    || 'A look back at the experiences that define our community.';
+    const title      = moments?.title       || '';
+    const eyebrow    = moments?.eyebrow     || '';
+    const subtitle   = moments?.subtitle    || '';
     const archiveUrl = moments?.archive_url || null;
     const images     = moments?.images      || [];
 
-    // Build 4 display images: prefer curated moments images, fall back to past events, then placeholders
+    // Build 4 display images: prefer curated moments images, fall back to past events
     const displayImages = Array.from({ length: 4 }, (_, i) => {
         if (images[i]?.url) return { url: images[i].url, alt: images[i].caption || 'Memorable Moment' };
-        if (pastEvents[i])  return { url: pastEvents[i].image_url || PLACEHOLDER_IMAGES[i % PLACEHOLDER_IMAGES.length], alt: pastEvents[i].title || 'Memorable Moment' };
-        return { url: PLACEHOLDER_IMAGES[i % PLACEHOLDER_IMAGES.length], alt: 'Memorable Moment' };
+        if (pastEvents[i]?.image_url) return { url: pastEvents[i].image_url, alt: pastEvents[i].title || 'Memorable Moment' };
+        return null;
     });
+
+    const hasAnyUploadedImage = images.some(img => img?.url);
+    const hasAnyPastEventImage = pastEvents.some(event => event?.image_url);
+    const hasData = hasAnyUploadedImage || hasAnyPastEventImage;
 
     if (loading) {
         return (
@@ -86,46 +92,64 @@ export default function MemorableMoments({ moments = {}, pastEvents = [], loadin
                 )}
 
                 {/* Bento Grid */}
-                <div
-                    className="memorable-bento grid grid-cols-1 md:grid-cols-4 gap-4"
-                    style={{ gridAutoRows: '250px' }}
-                >
-                    {/* Large image — col-span-2 row-span-2 on md+ */}
-                    <div className="memorable-bento__large rounded-2xl overflow-hidden group">
-                        <img
-                            src={displayImages[0].url}
-                            alt={displayImages[0].alt}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
+                {!hasData ? (
+                    <div className="text-center py-16 rounded-2xl shadow-sm" style={{ background: cardBg, border: `1px solid ${cardBorder}` }}>
+                        <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: isDark ? '#1C2D27' : '#e2e8f0' }}>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="font-semibold" style={{ color: bodyColor }}>No Memorable Moments</p>
                     </div>
+                ) : (
+                    <div
+                        className="memorable-bento grid grid-cols-1 md:grid-cols-4 gap-4"
+                        style={{ gridAutoRows: '250px' }}
+                    >
+                        {/* Large image — col-span-2 row-span-2 on md+ */}
+                        <div className={`memorable-bento__large rounded-2xl overflow-hidden group ${!displayImages[0] ? 'bg-black/5 dark:bg-white/5' : ''}`}>
+                            {displayImages[0] && (
+                                <img
+                                    src={displayImages[0].url}
+                                    alt={displayImages[0].alt}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                />
+                            )}
+                        </div>
 
-                    {/* Top-right — col-span-2 on md+ */}
-                    <div className="memorable-bento__wide rounded-2xl overflow-hidden group">
-                        <img
-                            src={displayImages[1].url}
-                            alt={displayImages[1].alt}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                    </div>
+                        {/* Top-right — col-span-2 on md+ */}
+                        <div className={`memorable-bento__wide rounded-2xl overflow-hidden group ${!displayImages[1] ? 'bg-black/5 dark:bg-white/5' : ''}`}>
+                            {displayImages[1] && (
+                                <img
+                                    src={displayImages[1].url}
+                                    alt={displayImages[1].alt}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                />
+                            )}
+                        </div>
 
-                    {/* Bottom-right small #1 */}
-                    <div className="rounded-2xl overflow-hidden group">
-                        <img
-                            src={displayImages[2].url}
-                            alt={displayImages[2].alt}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                    </div>
+                        {/* Bottom-right small #1 */}
+                        <div className={`rounded-2xl overflow-hidden group ${!displayImages[2] ? 'bg-black/5 dark:bg-white/5' : ''}`}>
+                            {displayImages[2] && (
+                                <img
+                                    src={displayImages[2].url}
+                                    alt={displayImages[2].alt}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                />
+                            )}
+                        </div>
 
-                    {/* Bottom-right small #2 */}
-                    <div className="rounded-2xl overflow-hidden group">
-                        <img
-                            src={displayImages[3].url}
-                            alt={displayImages[3].alt}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
+                        {/* Bottom-right small #2 */}
+                        <div className={`rounded-2xl overflow-hidden group ${!displayImages[3] ? 'bg-black/5 dark:bg-white/5' : ''}`}>
+                            {displayImages[3] && (
+                                <img
+                                    src={displayImages[3].url}
+                                    alt={displayImages[3].alt}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                />
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </section>
     );

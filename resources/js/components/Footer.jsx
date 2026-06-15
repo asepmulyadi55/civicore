@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const C = {
   primary:  '#1C2D27',
@@ -7,21 +7,27 @@ const C = {
 };
 
 export default function Footer({ footer = {}, isDark = false }) {
-  const brandName   = footer.brand_name    || 'Dwipapuri.';
-  const tagline     = footer.tagline       || 'Defining the gold standard of modern residential living through curation, privacy, and community.';
-  const quickLinks  = (footer.links?.length ? footer.links : [
-    { label: 'Resident Portal',     url: '#' },
-    { label: 'Amenities Map',       url: '#' },
-    { label: 'Community Rules',     url: '#' },
-    { label: 'Maintenance Request', url: '#' },
-  ]);
-  const contactEmail   = footer.contact_email  || 'concierge@dwipapuri.res';
-  const contactPhone   = footer.contact_phone  || '+62 123 4567 890';
-  const location       = footer.location       || '101 Dwipapuri Blvd, Serene Valley';
+  const brandName   = footer.brand_name    || '';
+  const tagline     = footer.tagline       || '';
+  const quickLinks  = (footer.links?.length ? footer.links : []);
+  const contactEmail   = footer.contact_email  || '';
+  const contactPhone   = footer.contact_phone  || '';
+  const location       = footer.location       || '';
   const facebookUrl    = footer.facebook_url   || null;
   const instagramUrl   = footer.instagram_url  || null;
-  const copyright      = footer.copyright      || '© 2026 Dwipapuri Residential. All rights reserved.';
+  const copyright      = footer.copyright      || '';
   const bottomNote     = footer.bottom_note    || null;
+
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+
+  const handleFeedbackSubmit = (e) => {
+    e.preventDefault();
+    if (!subject.trim() || !message.trim()) return;
+    const mailtoLink = `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+    window.location.href = mailtoLink;
+  };
+
   return (
     <footer id="contact" style={{ backgroundColor: C.primary, color: C.surface }}>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-12 max-w-7xl mx-auto px-6 md:px-8 py-12 md:py-20">
@@ -87,73 +93,49 @@ export default function Footer({ footer = {}, isDark = false }) {
           </ul>
         </div>
 
-        {/* Newsletter */}
+        {/* Submit Feedback */}
         <div>
           <h4
             className="font-medium mb-4 md:mb-6 tracking-wide text-sm md:text-base"
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           >
-            Newsletter
+            Submit Feedback
           </h4>
-          <div className="flex gap-2 border-b pb-2" style={{ borderColor: `${C.surface}33` }}>
-            <input
-              type="email"
-              placeholder="Email address"
-              className="bg-transparent border-none px-0 py-1 md:py-2 text-xs md:text-sm w-full focus:ring-0 font-light placeholder:opacity-40"
-              style={{ color: C.surface, fontFamily: "'Inter', sans-serif" }}
-            />
-            <button
-              className="transition-colors p-1 md:p-2"
-              style={{ color: C.secondary }}
-              onMouseEnter={e => e.currentTarget.style.color = C.surface}
-              onMouseLeave={e => e.currentTarget.style.color = C.secondary}
-            >
-              <span className="material-symbols-outlined text-lg">arrow_forward</span>
-            </button>
-          </div>
-          <div className="mt-6 md:mt-8 flex gap-4 md:gap-5" style={{ color: `${C.surface}66` }}>
-            {facebookUrl ? (
-              <a
-                href={facebookUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="material-symbols-outlined cursor-pointer transition-colors"
-                style={{ color: `${C.surface}66` }}
+          <form onSubmit={handleFeedbackSubmit} className="space-y-4">
+            <div className="border-b pb-1" style={{ borderColor: `${C.surface}33` }}>
+              <input
+                type="text"
+                placeholder="Subject"
+                value={subject}
+                onChange={e => setSubject(e.target.value)}
+                required
+                className="bg-transparent border-none px-0 py-1 text-xs md:text-sm w-full focus:ring-0 font-light placeholder:opacity-40"
+                style={{ color: C.surface, fontFamily: "'Inter', sans-serif" }}
+              />
+            </div>
+            <div className="border-b pb-1" style={{ borderColor: `${C.surface}33` }}>
+              <textarea
+                placeholder="Your message..."
+                rows="2"
+                value={message}
+                onChange={e => setMessage(e.target.value)}
+                required
+                className="bg-transparent border-none px-0 py-1 text-xs md:text-sm w-full focus:ring-0 font-light placeholder:opacity-40 resize-none"
+                style={{ color: C.surface, fontFamily: "'Inter', sans-serif" }}
+              ></textarea>
+            </div>
+            <div className="flex justify-end items-end pt-2">
+              <button
+                type="submit"
+                className="transition-colors p-1 md:p-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wider"
+                style={{ color: C.secondary }}
                 onMouseEnter={e => e.currentTarget.style.color = C.surface}
-                onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
-              >brand_awareness</a>
-            ) : (
-              <span
-                className="material-symbols-outlined cursor-pointer transition-colors"
-                onMouseEnter={e => e.currentTarget.style.color = C.surface}
-                onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
-              >brand_awareness</span>
-            )}
-            {instagramUrl ? (
-              <a
-                href={instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="material-symbols-outlined cursor-pointer transition-colors"
-                style={{ color: `${C.surface}66` }}
-                onMouseEnter={e => e.currentTarget.style.color = C.surface}
-                onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
-              >groups</a>
-            ) : (
-              <span
-                className="material-symbols-outlined cursor-pointer transition-colors"
-                onMouseEnter={e => e.currentTarget.style.color = C.surface}
-                onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
-              >groups</span>
-            )}
-            <span
-              className="material-symbols-outlined cursor-pointer transition-colors"
-              onMouseEnter={e => e.currentTarget.style.color = C.surface}
-              onMouseLeave={e => e.currentTarget.style.color = `${C.surface}66`}
-            >
-              public
-            </span>
-          </div>
+                onMouseLeave={e => e.currentTarget.style.color = C.secondary}
+              >
+                Send <span className="material-symbols-outlined text-lg">arrow_forward</span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
