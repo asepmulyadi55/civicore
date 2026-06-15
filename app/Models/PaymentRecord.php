@@ -62,11 +62,25 @@ class PaymentRecord extends Model
     }
 
     /**
-     * Returns the block name using the snapshotted block_id.
+     * Returns the block name. Prioritizes the live householder's block, 
+     * falling back to the snapshotted block if the householder is deleted.
      */
     public function blockDisplayName(): string
     {
-        return $this->block?->name ?? '—';
+        return $this->householder?->block?->name
+            ?? $this->block?->name
+            ?? '—';
+    }
+
+    /**
+     * Returns the unit number. Prioritizes the live householder's unit,
+     * falling back to the snapshotted unit if the householder is deleted.
+     */
+    public function unitDisplayNumber(): string
+    {
+        return $this->householder?->unit_number
+            ?? $this->unit_number
+            ?? '—';
     }
 
     public function paymentMethod(): BelongsTo
